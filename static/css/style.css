@@ -1,0 +1,141 @@
+/* Estilos básicos */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("/static/images/Tela_Cadastros.jpg");
+    background-size: cover; /* Faz com que a imagem cubra toda a tela */
+    background-position: center; /* Centraliza a imagem */
+    background-attachment: fixed; /* Fixa a imagem no fundo */
+    background-repeat: no-repeat; /* Evita repetição da imagem */
+    color: #ffffff; /* Cor do texto padrão */
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #000000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+}
+
+/* Ícone do menu superior */
+.menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+.menu-icon:hover {
+    color: #1EB2C1;
+}
+
+/* Menu lateral */
+.side-bar {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 60px;
+    height: calc(100% - 50px);
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    z-index: 1000;
+    transition: width 0.3s;
+}
+
+.side-bar.expanded {
+    width: 250px; /* Largura do menu lateral expandido */
+}
+
+.side-bar ul {
+    list-style-type: none;
+    width: 100%;
+}
+
+.side-bar ul li {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.side-bar ul li a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.side-bar ul li a:hover {
+    background-color: #333;
+}
+
+.side-bar ul li a img {
+    width: 30px;
+    transition: all 0.3s;
+}
+
+.menu-label {
+    margin-left: 15px;
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s, visibility 0.3s;
+    visibility: hidden;
+}
+
+/* Quando o menu estiver expandido */
+.side-bar.expanded ul li a img {
+    margin-left: 20px;
+}
+
+.side-bar.expanded .menu-label {
+    opacity: 1;
+    visibility: visible;
+}
+
+.profile-icon {
+    display: flex;
+    align-items: center;
+}
+
+.profile-icon img {
+    width: 40px;
+    border-radius: 50%;
+}
+
+.dropdown {
+    margin-left: 10px;
+}
+
+/* Container de conteúdo */
+.main-content {
+    margin-left: 60px;
+    padding-top: 50px;
+    min-height: 100vh;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+}
+
+.side-bar.expanded ~ .main-content {
+    margin-left: 250px;
+}
+
+.icon {
+    font-size: 24px;
+    cursor: pointer;
+}

@@ -1,0 +1,104 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    background-color: rgba(17, 16, 16, 44%);
+    padding: 20px;
+    border-radius: 80px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
+    width: 600px;
+    max-width: 70%;
+    text-align: center;
+    margin: 50px auto;
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    font-size: 14px;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 0px;
+    font-size: 18px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+button {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+button[type="submit"] {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+button[type="button"] {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+button[type="submit"]:hover, button[type="button"]:hover {
+    background-color: #1EB2C1;
+    box-shadow:  0px 0px 15px #2EC2D6;
+}
+
+button:hover {
+    color: #ffffff;
+}
+
+.form-buttons {
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* Estilização para exibir as mensagens de erro */
+.form-errors {
+    color: #ff5555; /* Cor vermelha para chamar atenção */
+    background-color: rgba(255, 85, 85, 0.1); /* Fundo semi-transparente */
+    border: 1px solid #ff5555;
+    box-shadow: inset 0px 0px 5px rgba(243, 2, 2, 0.63);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.error-message {
+    color: #ff5555; /* Cor vermelha para chamar atenção */
+    background-color: rgba(255, 85, 85, 0.1); /* Fundo semi-transparente */
+    border: 1px solid #ff5555;
+    box-shadow: inset 0px 0px 5px rgba(243, 2, 2, 0.63);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
