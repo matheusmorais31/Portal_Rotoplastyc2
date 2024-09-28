@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Buscar Usuários no AD</h1>
+  
+  <form method="POST">
+    {% csrf_token %}
+    <input type="text" name="nome_usuario" placeholder="Nome de usuário no AD" required>
+    <button type="submit">Buscar</button>
+  </form>
+
+  {% for message in messages %}
+    <p>{{ message }}</p>
+  {% endfor %}
+{% endblock %}

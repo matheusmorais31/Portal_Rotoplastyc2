@@ -4,6 +4,7 @@ from .models import Usuario
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm  # Importando o AuthenticationForm
 from django.contrib import messages
+from ldap3 import Server, Connection, ALL
 
 def registrar_usuario(request):
     if request.method == 'POST':
@@ -58,3 +59,33 @@ def editar_usuario(request, usuario_id):
 # Função para renderizar a página home
 def home(request):
     return render(request, 'home.html')
+
+# Função para buscar usuários no Active Directory
+def buscar_usuarios_ad(request):
+    if request.method == "POST":
+        nome_usuario = request.POST.get("nome_usuario", "")
+        
+        # Configurações de conexão com o servidor LDAP
+        ldap_server = "ldap://tcc1.net"  # IP ou URL do seu servidor AD
+        ldap_user = "CN=Administrator,CN=Users,DC=tcc1,DC=net"  # DN do usuário administrador do AD
+        ldap_password = "Admin@ti"  # Senha do administrador do AD
+
+        # Conectando ao servidor LDAP
+        server = Server(ldap_server, get_info=ALL)
+        conn = Connection(server, user=ldap_user, password=ldap_password, auto_bind=True)
+
+        # Fazendo a busca no AD
+        search_base = "CN=Users,DC=tcc1,DC=net"
+        search_filter = f"(sAMAccountName={nome_usuario})"  # Filtrando por nome de usuário
+        conn.search(search_base, search_filter, attributes=['cn', 'givenName', 'sn', 'mail'])
+
+        # Verifica se o usuário foi encontrado
+        if conn.entries:
+            for entry in conn.entries:
+                messages.success(request, f"Usuário encontrado: {entry.cn}")
+        else:
+            messages.error(request, "Usuário não encontrado no AD.")
+        
+        conn.unbind()  # Fechar a conexão
+    
+    return render(request, 'usuarios/buscar_usuarios_ad.html')
