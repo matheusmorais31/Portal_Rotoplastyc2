@@ -32,11 +32,17 @@
                 </a>
             </li>
             <li>
-                <a href="{% url 'lista_usuarios' %}">
+                <a href="#" onclick="toggleSubmenu(event)">
                     <img src="{% static 'images/administracao.png' %}" alt="Administração">
                     <span class="menu-label">Administração</span>
                 </a>
+                <ul class="submenu">
+                    <li><a href="{% url 'lista_usuarios' %}">Usuários</a></li>
+                    <li><a href="#">Permissões</a></li>
+                    
+                </ul>
             </li>
+            <!-- Adicione mais itens de menu conforme necessário -->
         </ul>
     </nav>
 
@@ -45,22 +51,58 @@
         {% block content %}
         {% endblock %}
     </div>
+
     <!-- Script para abrir e fechar o menu lateral -->
     <script>
         function toggleMenu() {
             var sideBar = document.getElementById("side-bar");
-            if (sideBar.style.width === "250px") {
-                sideBar.style.width = "0";  // Fecha o menu
-            } else {
-                sideBar.style.width = "250px";  // Abre o menu
+            sideBar.classList.toggle("expanded");
+
+            // Fecha todos os submenus ao fechar o menu
+            if (!sideBar.classList.contains("expanded")) {
+                var submenus = document.querySelectorAll('.submenu');
+                submenus.forEach(function(submenu) {
+                    submenu.classList.remove('open');
+                });
             }
         }
+
+        function toggleSubmenu(event) {
+            event.preventDefault(); // Evita que o link navegue
+            var submenu = event.currentTarget.nextElementSibling; // O próximo elemento é o submenu
+
+            // Verifica se o submenu existe e a barra lateral está expandida
+            if (submenu && document.getElementById("side-bar").classList.contains("expanded")) {
+                submenu.classList.toggle('open'); // Alterna a classe 'open' para mostrar ou esconder o submenu
+            }
+
+            // Fecha todos os outros submenus
+            var allSubmenus = document.querySelectorAll('.submenu');
+            allSubmenus.forEach(function(s) {
+                if (s !== submenu) {
+                    s.classList.remove('open'); // Fecha os outros submenus
+                }
+            });
+        }
+
+        // Eventos de mouse para exibir o submenu quando a barra lateral está fechada
+        document.querySelectorAll('.side-bar ul li').forEach(function(item) {
+            item.addEventListener('mouseenter', function() {
+                if (!document.getElementById("side-bar").classList.contains("expanded")) {
+                    var submenu = this.querySelector('.submenu');
+                    if (submenu) {
+                        submenu.classList.add('open'); // Abre o submenu ao passar o mouse
+                    }
+                }
+            });
+
+            item.addEventListener('mouseleave', function() {
+                var submenu = this.querySelector('.submenu');
+                if (submenu) {
+                    submenu.classList.remove('open'); // Fecha o submenu ao sair
+                }
+            });
+        });
     </script>
 </body>
 </html>
-<script>
-    function toggleMenu() {
-        var sideBar = document.getElementById("side-bar");
-        sideBar.classList.toggle("expanded");
-    }
-</script>

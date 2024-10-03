@@ -1,4 +1,4 @@
-import os
+import os, logging
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -91,3 +91,32 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'WARNING',  # Alterar para WARNING ou ERROR
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'level': 'DEBUG',  # Mantenha DEBUG se quiser registrar no arquivo
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',  # Alterar para WARNING ou ERROR
+            'propagate': True,
+        },
+    },
+}
+
+
+AUTHENTICATION_BACKENDS = [
+    'usuarios.auth_backends.ActiveDirectoryBackend',  # Certifique-se de que o caminho está correto
+    'django.contrib.auth.backends.ModelBackend',
+]

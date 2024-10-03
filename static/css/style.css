@@ -7,14 +7,16 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-image: url("/static/images/Tela_Cadastros.jpg");
-    background-size: cover; /* Faz com que a imagem cubra toda a tela */
-    background-position: center; /* Centraliza a imagem */
-    background-attachment: fixed; /* Fixa a imagem no fundo */
-    background-repeat: no-repeat; /* Evita repetição da imagem */
-    color: #ffffff; /* Cor do texto padrão */
+    background-image: url("/static/images/Tela_Cadastros.jpgg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-color: #38393F;
+    color: #ffffff;
 }
 
+/* Barra superior */
 .top-bar {
     position: fixed;
     top: 0;
@@ -26,6 +28,8 @@ body {
     align-items: center;
     padding: 0 20px;
     z-index: 1000;
+    border-bottom: 2px solid #7c7c7c;
+    border-radius: 5px;
 }
 
 /* Ícone do menu superior */
@@ -44,19 +48,20 @@ body {
     position: fixed;
     top: 50px;
     left: 0;
-    width: 60px;
+    width: 60px; /* Largura inicial da barra lateral */
     height: calc(100% - 50px);
     background-color: #000;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding-top: 20px;
+    align-items: center; /* Centraliza os itens horizontalmente */
+    padding-top: 10px; /* Ajuste de padding superior */
     z-index: 1000;
     transition: width 0.3s;
+    border-right: 2px solid #7c7c7c;
 }
 
 .side-bar.expanded {
-    width: 250px; /* Largura do menu lateral expandido */
+    width: 250px; /* Largura da barra lateral expandida */
 }
 
 .side-bar ul {
@@ -65,20 +70,20 @@ body {
 }
 
 .side-bar ul li {
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin: 10px 0; /* Ajuste para menos margem */
+    position: relative; /* Para posicionar o submenu */
 }
 
+/* Ícone e rótulo */
 .side-bar ul li a {
     color: white;
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    padding: 10px;
+    display: flex; /* Manter flex para alinhamento */
+    align-items: center; /* Alinhar verticalmente */
+    padding: 10px 10px; /* Ajusta padding para manter o espaçamento */
     width: 100%;
     transition: background 0.3s;
+    height: 40px; /* Definindo altura fixa para alinhar */
 }
 
 .side-bar ul li a:hover {
@@ -87,11 +92,11 @@ body {
 
 .side-bar ul li a img {
     width: 30px;
-    transition: all 0.3s;
+    margin-right: 10px; /* Espaço entre ícone e texto */
 }
 
 .menu-label {
-    margin-left: 15px;
+    margin-left: 5px; /* Espaçamento entre o texto e o ícone */
     opacity: 0;
     white-space: nowrap;
     transition: opacity 0.3s, visibility 0.3s;
@@ -108,6 +113,76 @@ body {
     visibility: visible;
 }
 
+/* Submenu escondido por padrão */
+.submenu {
+    display: none;
+    position: absolute;
+    background-color: #141414;
+    border: 1px solid #141313;
+    padding: 0;
+    z-index: 1001;
+    min-width: 220px;
+    transition: all 0.3s ease;
+}
+
+/* Estilos do submenu quando a barra lateral está fechada */
+.side-bar:not(.expanded) .submenu {
+    top: 0;
+    left: 100%;
+}
+
+/* Estilos do submenu quando a barra lateral está expandida */
+.side-bar.expanded .submenu {
+    top: 100%;
+    left: 0;
+}
+
+/* Submenu visível quando tem a classe 'open' */
+.submenu.open {
+    display: block;
+}
+
+/* Estilos dos itens do submenu */
+.submenu li {
+    padding: 0;
+}
+
+.submenu li a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    padding: 10px 20px;
+    white-space: nowrap;
+}
+
+.submenu li a:hover {
+    background-color: #333;
+}
+
+/* Exibe o submenu ao passar o mouse quando a barra lateral está fechada */
+.side-bar:not(.expanded) ul li:hover .submenu {
+    display: block; 
+}
+
+/* Container de conteúdo */
+.main-content {
+    margin-left: 60px; /* Ajusta a margem quando o menu não está expandido */
+    padding-top: 50px;
+    min-height: 100vh;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+}
+
+.side-bar.expanded ~ .main-content {
+    margin-left: 250px; /* Ajusta a margem quando o menu está expandido */
+}
+
+.icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Estilos para o ícone do perfil */
 .profile-icon {
     display: flex;
     align-items: center;
@@ -120,22 +195,5 @@ body {
 
 .dropdown {
     margin-left: 10px;
-}
-
-/* Container de conteúdo */
-.main-content {
-    margin-left: 60px;
-    padding-top: 50px;
-    min-height: 100vh;
-    padding: 20px;
-    transition: margin-left 0.3s ease;
-}
-
-.side-bar.expanded ~ .main-content {
-    margin-left: 250px;
-}
-
-.icon {
-    font-size: 24px;
-    cursor: pointer;
+    color: #fff;
 }

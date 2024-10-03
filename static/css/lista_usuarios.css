@@ -1,7 +1,7 @@
 /* Estilos Gerais */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #1d1d1d;
+    background-color: #38393F;
     color: #fff;
     margin: 0;
     padding: 0;
@@ -15,34 +15,29 @@ h1 {
     font-size: 28px;
     margin-bottom: 20px;
     color: #fff;
-    margin-top: 2%;
+    margin-top: 3%;
 }
 
 /* Filtro de Busca */
 .search-container {
-    display: flex;
     margin-bottom: 20px;
 }
 
-.search-field, .search-input {
+#searchInput {
+    width: 100%;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
-    margin-right: 10px;
     background-color: #ddd;
     color: #333;
-}
-
-.search-input {
-    flex: 1;
+    font-size: 16px;
 }
 
 /* Estilos da Lista de Usuários */
 .user-container {
-    background-color: #fffdfd00;
+    background-color: #21202000;
     margin-bottom: 20px;
     padding: 5px;
-    border-radius: 5px;
     border-top: 2px solid #bdbcbc;
     border-bottom: 2px solid #bdbcbc;
 }
@@ -82,7 +77,7 @@ h1 {
 }
 
 .edit-icon img:hover {
-    transform: scale(1.1);
+    transform: scale(1.5);
 }
 
 /* Responsividade */
@@ -101,6 +96,7 @@ h1 {
         margin-top: 10px;
     }
 }
+
 /* Barra de ícones para adicionar e atualizar usuários */
 .icons-bar {
     display: flex;
@@ -120,5 +116,5 @@ h1 {
 }
 
 .icon:hover {
-    transform: scale(1.1);
+    transform: scale(1.5);
 }

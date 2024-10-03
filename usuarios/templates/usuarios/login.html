@@ -15,20 +15,18 @@
         <div class="logo">
             <img src="{% static 'images/titulo_logo.png' %}" alt="Portal Rotoplastyc">
         </div>
-        
+
         <!-- Exibir mensagens de erro -->
-        {% if form.errors %}
+        {% if form.errors or form.non_field_errors %}
             <div class="error-messages">
                 <ul>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
                     {% for field in form %}
                         {% for error in field.errors %}
                             <li>{{ error }}</li>
                         {% endfor %}
-                    {% endfor %}
-                </ul>
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -37,10 +35,14 @@
         <!-- Formulário de login -->
         <form method="post">
             {% csrf_token %}
-            {{ form.username.label_tag }}
-            {{ form.username }}
-            {{ form.password.label_tag }}
-            {{ form.password }}
+            <div class="input-group">
+                {{ form.username.label_tag }} 
+                {{ form.username }}
+            </div>
+            <div class="input-group">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+            </div>
             <button type="submit">Entrar</button>
         </form>
     </div>

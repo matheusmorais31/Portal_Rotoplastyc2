@@ -13,7 +13,7 @@ html, body {
     padding: 20px 20px; /* Diminui o padding para reduzir a altura */
     border-radius: 80px;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
-    width: 400px; /* Diminuir a largura do contêiner */
+    width: 600px; /* Diminuir a largura do contêiner */
     max-width: 70%; /* Limita a largura máxima a 70% da tela */
     text-align: center; /* Centraliza o texto no contêiner */
     margin: 50px auto; /* Adiciona 50px de margem em cima e centraliza o contêiner */
@@ -27,7 +27,7 @@ input[type="text"], input[type="password"], input[type="email"] {
     border: none;
     border-radius: 10px;
     background-color: #d3d3d3;
-    font-size: 11px;
+    font-size: 14px;
     box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
 }
 

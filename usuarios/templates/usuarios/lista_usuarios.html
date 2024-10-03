@@ -9,6 +9,11 @@
 <div class="container">
     <h1>Usuários</h1>
 
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar usuários...">
+    </div>
+
     <div class="icons-bar">
         <!-- Ícone de adicionar usuário -->
         <a href="{% url 'registrar' %}" class="icon-link">
@@ -21,7 +26,7 @@
         </a>
     </div>
 
-    <div class="user-list">
+    <div class="user-list" id="userList">
         {% for usuario in usuarios %}
         <div class="user-container">
             <div class="user-item">
@@ -36,8 +41,9 @@
                     <div class="user-grid">
                         <div><strong>ID:</strong> {{ usuario.id }}</div>
                         <div><strong>Nome:</strong> {{ usuario.first_name }} {{ usuario.last_name }}</div>
-                        <div><strong>Setor:</strong> {{ usuario.setor }}</div>
-                        <div><strong>Usuário:</strong> {{ usuario.username }}</div>                    
+                        <div><strong>Gerente:</strong> {% if usuario.gerente %}Sim{% else %}Não{% endif %}</div>
+
+                        <div><strong>Usuário:</strong> {{ usuario.username }}</div>
                         <div><strong>Email:</strong> {{ usuario.email }}</div>
                     </div>
                 </div>
@@ -51,4 +57,45 @@
         {% endfor %}
     </div>
 </div>
+
+<!-- Script para o filtro de busca -->
+<script>
+    // Função para filtrar os usuários conforme o termo digitado
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var userContainers = document.querySelectorAll('.user-container');
+        var hasResults = false;
+
+        userContainers.forEach(function(container) {
+            var userName = container.querySelector('.user-grid div:nth-child(2)').innerText.toLowerCase();
+            var userEmail = container.querySelector('.user-grid div:nth-child(5)').innerText.toLowerCase();
+
+            if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Exibe ou esconde a mensagem de "Nenhum usuário encontrado"
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhum usuário encontrado.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('userList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+</script>
 {% endblock %}
