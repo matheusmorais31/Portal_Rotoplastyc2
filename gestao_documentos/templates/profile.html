@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Perfil de {{ user.username }}</h2>
+
+    <div class="profile-details">
+        <p><strong>Nome de Usuário:</strong> {{ user.username }}</p>
+        <p><strong>Nome Completo:</strong> {{ user.get_full_name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+    </div>
+
+    <div class="profile-actions">
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+{% endblock %}

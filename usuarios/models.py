@@ -1,5 +1,8 @@
+# usuarios/models.py
+
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
+from django.conf import settings  # Importar settings para acessar AUTH_USER_MODEL
 
 class Usuario(AbstractUser):
     # Campos adicionais, se houver
@@ -25,3 +28,15 @@ class Usuario(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    # Verifica se o usuário tem permissão para aprovar documentos
+    def has_approval_permission(self):
+        return self.has_perm('documentos.can_approve')
+
+
+class Grupo(models.Model):
+    nome = models.CharField(max_length=255)
+    participantes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='grupos')
+
+    def __str__(self):
+        return self.nome

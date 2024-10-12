@@ -1,0 +1,44 @@
+<!-- documentos/templates/documentos/editar_categoria.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Categoria{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/registrar.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Editar Categoria</h2>
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Exibe mensagens de erro gerais apenas quando houver -->
+            {% if form.non_field_errors %}
+                <div class="error-message" style="color: red;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- Campos do formulário -->
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error-message" style="color: red;">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="form-buttons">
+                <a href="{% url 'documentos:listar_categorias' %}">
+                    <button type="button">Cancelar</button>
+                </a>
+                <button type="submit">OK</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

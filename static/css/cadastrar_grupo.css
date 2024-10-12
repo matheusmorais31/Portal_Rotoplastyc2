@@ -1,0 +1,195 @@
+/* Reset básico para garantir consistência entre navegadores */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    font-family: Arial, sans-serif;
+    color: #333; /* Texto em cor escura para legibilidade */
+}
+
+/* Estilizar o contêiner do formulário */
+.container {
+    background-color: rgba(17, 16, 16, 44%); /* Fundo semi-transparente */
+    padding: 20px 20px; /* Diminui o padding para reduzir a altura */
+    border-radius: 80px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
+    width: 600px; /* Diminuir a largura do contêiner */
+    max-width: 70%; /* Limita a largura máxima a 70% da tela */
+    text-align: center; /* Centraliza o texto no contêiner */
+    margin: 50px auto; /* Adiciona 50px de margem em cima e centraliza o contêiner */
+}
+
+/* Estilizar os campos de texto */
+input[type="text"], input[type="password"], input[type="email"], input[type="search"] {
+    width: 90%; /* Ajusta a largura dos campos */
+    padding: 8px; /* Mantém um espaçamento interno confortável */
+    margin: 8px 0; /* Reduz a margem entre os campos */
+    border: none; /* Remove a borda */
+    border-radius: 10px; /* Bordas arredondadas */
+    background-color: #d3d3d3; /* Cor de fundo dos campos */
+    font-size: 14px; /* Tamanho da fonte */
+    box-shadow: none; /* Remove a sombra */
+    outline: none; /* Remove o contorno ao focar no campo */
+}
+
+/* Para remover a linha de foco padrão (em alguns navegadores) */
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+    box-shadow: none; /* Remove a sombra ao focar */
+    background-color: #d3d3d3; /* Mantenha a cor de fundo */
+}
+
+/* Estilizar o título do formulário */
+h2 {
+    color: #ffffff; /* Cor do título */
+    margin-bottom: 15px; /* Reduz o espaçamento abaixo do título */
+}
+
+/* Estilizar os rótulos (labels) */
+label {
+    display: block; /* Garante que os rótulos ocupem uma linha inteira */
+    margin-bottom: 0px; /* Reduz o espaçamento entre o rótulo e o campo de entrada */
+    font-size: 18px;
+    color: #ffffff; /* Cor do texto dos rótulos */
+    text-align: center; /* Centraliza os rótulos */
+}
+
+/* Estilizar o grupo de formulários */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Estilizar os botões */
+button {
+    width: 100px; /* Diminui um pouco a largura dos botões */
+    padding: 6px; /* Reduz o padding para ajustar o tamanho do botão */
+    margin: 10px 5px; /* Reduz a margem entre os botões */
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+button[type="submit"] {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+/* Botão Cancelar */
+button[type="button"] {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+button[type="submit"]:hover, button[type="button"]:hover {
+    background-color: #1EB2C1;
+    box-shadow:  0px 0px 15px #2EC2D6;
+}
+
+button:hover {
+    color: #ffffff;
+}
+
+/* Ajuste para que os botões fiquem centralizados */
+.form-buttons {
+    text-align: center;
+    margin-top: 30px;
+}
+
+/* Estilização para exibir as mensagens de erro */
+.form-errors, .error-message {
+    color: #ff5555; /* Cor vermelha para chamar atenção */
+    background-color: rgba(255, 85, 85, 0.1); /* Fundo semi-transparente */
+    border: 1px solid #ff5555;
+    box-shadow: inset 0px 0px 5px rgba(255, 85, 85, 0.2);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: left;
+}
+
+/* Estilo para a tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+    color: #fff;
+}
+
+th {
+    background-color: #4e4a4a;
+}
+
+tr:nth-child(even) {
+    background-color: rgb(59, 56, 56);
+}
+
+tr:hover {
+    background-color: rgb(70, 65, 65);
+}
+
+/* Estilizar a lista de resultados de busca */
+#resultados_pesquisa {
+    list-style-type: none;
+    margin-top: 5px;
+    padding: 0;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+#resultados_pesquisa li {
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #333;
+}
+
+#resultados_pesquisa li:hover {
+    background-color: #f0f2f5;
+}
+
+/* Estilos para dispositivos móveis */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    label {
+        font-size: 16px;
+    }
+
+    input[type="text"], input[type="password"], input[type="email"] {
+        font-size: 14px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    th, td {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+}

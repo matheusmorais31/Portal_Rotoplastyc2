@@ -1,0 +1,19 @@
+<!-- usuarios/templates/usuarios/excluir_grupo.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Excluir Grupo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Excluir Grupo</h1>
+    <p>Tem certeza de que deseja excluir o grupo <strong>{{ grupo.nome }}</strong>?</p>
+    <p>Esta ação não poderá ser desfeita.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="{% url 'usuarios:lista_grupos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

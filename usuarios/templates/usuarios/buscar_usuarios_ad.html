@@ -18,7 +18,7 @@
   <!-- Exibição de usuários encontrados -->
   {% if usuarios_ad %}
     <h2>Usuários encontrados:</h2>
-    <form method="POST" action="{% url 'importar_usuarios_ad' %}">
+    <form method="POST" action="{% url 'usuarios:importar_usuarios_ad' %}">
       {% csrf_token %}
       <table>
         <thead>

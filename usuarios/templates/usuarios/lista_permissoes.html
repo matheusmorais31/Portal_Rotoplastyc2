@@ -1,0 +1,67 @@
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <label for="pesquisa">Usuário ou Grupo de Usuário:</label>
+        <input type="text" name="pesquisa" placeholder="Digite o nome do usuário ou grupo" id="pesquisa" required onkeyup="buscarSugestoes(this.value)">
+        <select name="tipo">
+            <option value="usuario">Usuário</option>
+            <option value="grupo">Grupo</option>
+        </select>
+        <button type="submit">Buscar</button>
+    </div>
+
+    <div id="sugestoes"></div> <!-- Sugestões de usuários/grupos -->
+
+    {% if usuario_grupo %}
+        <h3>Permissões de 
+            {% if tipo == 'usuario' %}
+                {{ usuario_grupo.username }}
+            {% else %}
+                {{ usuario_grupo.nome }}
+            {% endif %}
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Permissão</th>
+                    <th>Selecionar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for permissao in permissoes %}
+                    <tr>
+                        <td>{{ permissao.name }}</td>
+                        <td>
+                            <input type="checkbox" name="permissoes" value="{{ permissao.id }}" 
+                            {% if permissao in permissoes_usuario %} checked {% endif %}>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Salvar Permissões</button>
+    {% endif %}
+</form>
+
+<script>
+    function buscarSugestoes(query) {
+        if (query.length > 2) {
+            fetch(`/usuarios/sugestoes/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    let sugestoesDiv = document.getElementById('sugestoes');
+                    sugestoesDiv.innerHTML = "";
+                    data.forEach(item => {
+                        sugestoesDiv.innerHTML += `<p onclick="selecionarSugestao('${item.tipo}', '${item.nome}', ${item.id})">${item.nome}</p>`;
+                    });
+                });
+        }
+    }
+
+    function selecionarSugestao(tipo, nome, id) {
+        document.querySelector("input[name='pesquisa']").value = nome;
+        document.querySelector("select[name='tipo']").value = tipo;
+        document.querySelector("input[name='usuario_id']").value = id;
+        document.getElementById('sugestoes').innerHTML = "";
+    }
+</script>

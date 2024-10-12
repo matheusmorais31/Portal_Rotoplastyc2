@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Liberação de Permissões{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/liberar_permissoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Liberação de Permissões</h2>
+
+    <form id="form-permissoes" method="POST" action="{% url 'usuarios:liberar_permissoes' %}">
+        {% csrf_token %}
+        
+        <!-- Campo para buscar usuários ou grupos -->
+        <div class="form-group">
+            <label for="buscar_usuario_grupo">Buscar Usuário ou Grupo:</label>
+            <input type="text" id="buscar_usuario_grupo" placeholder="Digite o nome do usuário ou grupo..." autocomplete="off">
+            <ul id="resultados_pesquisa" class="resultados-pesquisa"></ul>
+        </div>
+
+        <!-- Lista de Permissões Disponíveis -->
+        <div class="form-group">
+            <h3>Permissões para <span id="nome_usuario_grupo"></span></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Permissão</th>
+                        <th>Selecionar</th>
+                    </tr>
+                </thead>
+                <tbody id="lista_permissoes">
+                    <!-- As permissões serão carregadas dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botões do Formulário -->
+        <div class="form-buttons">
+            <button type="button" onclick="window.location.href='{% url 'usuarios:lista_usuarios' %}'">Cancelar</button>
+            <button type="submit">Salvar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        var usuarioGrupoSelecionadoId = null;
+
+        // Função para buscar usuários ou grupos conforme o usuário digita
+        $('#buscar_usuario_grupo').on('input', function () {
+            var query = $(this).val();
+            var buscarUrl = "{% url 'usuarios:sugestoes' %}";
+            
+            if (query.length > 0) {
+                $.ajax({
+                    url: buscarUrl,
+                    data: {
+                        'q': query
+                    },
+                    success: function (data) {
+                        $('#resultados_pesquisa').empty();
+                        data.forEach(function (item) {
+                            var li = $('<li></li>')
+                                        .text(item.nome + ' (' + item.tipo + ')')
+                                        .attr('data-id', item.id)
+                                        .attr('data-tipo', item.tipo);
+                            $('#resultados_pesquisa').append(li);
+                        });
+                    }
+                });
+            } else {
+                $('#resultados_pesquisa').empty();
+            }
+        });
+
+        // Selecionar usuário ou grupo e carregar permissões
+        $('#resultados_pesquisa').on('click', 'li', function () {
+            var nome = $(this).text();
+            var id = $(this).attr('data-id');
+            var tipo = $(this).attr('data-tipo');
+            usuarioGrupoSelecionadoId = id;
+
+            // Atualizar o nome na interface
+            $('#nome_usuario_grupo').text(nome);
+            
+            // Limpar resultados de pesquisa e campo de busca
+            $('#resultados_pesquisa').empty();
+            $('#buscar_usuario_grupo').val('');
+
+            // Buscar permissões do usuário/grupo
+            var buscarPermissoesUrl = "{% url 'usuarios:liberar_permissoes' %}";
+            $.ajax({
+                url: buscarPermissoesUrl,
+                data: {
+                    'id': id,
+                    'tipo': tipo
+                },
+                success: function (data) {
+                    $('#lista_permissoes').empty();
+                    data.permissoes.forEach(function (permissao) {
+                        var isChecked = data.permissoes_selecionadas.includes(permissao.id) ? 'checked' : '';
+                        var row = '<tr>' +
+                                    '<td>' + permissao.name + '</td>' +
+                                    '<td><input type="checkbox" name="permissoes" value="' + permissao.id + '" ' + isChecked + '></td>' +
+                                  '</tr>';
+                        $('#lista_permissoes').append(row);
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

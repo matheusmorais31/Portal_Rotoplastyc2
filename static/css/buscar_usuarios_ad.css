@@ -60,7 +60,8 @@ button {
 }
 
 button:hover {
-    background-color: #25a7c1; /* Mudança de cor ao passar o mouse */
+    background-color: #1EB2C1;
+    box-shadow:  0px 0px 15px #2EC2D6;
 }
 
 /* Estilos da Tabela de Usuários */

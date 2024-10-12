@@ -16,12 +16,13 @@
 
     <div class="icons-bar">
         <!-- Ícone de adicionar usuário -->
-        <a href="{% url 'registrar' %}" class="icon-link">
+        <a href="{% url 'usuarios:registrar' %}" class="icon-link">
+
             <img src="{% static 'images/add-user-icon.png' %}" alt="Adicionar Usuário" class="icon">
         </a>
 
         <!-- Ícone de atualizar ou qualquer outro ícone adicional -->
-        <a href="{% url 'buscar_usuarios_ad' %}" class="icon-link">
+        <a href="{% url 'usuarios:buscar_usuarios_ad' %}" class="icon-link">
             <img src="{% static 'images/import-user-icon.png' %}" alt="Atualizar Lista" class="icon">
         </a>
     </div>
@@ -48,7 +49,7 @@
                     </div>
                 </div>
                 <div class="user-actions">
-                    <a href="{% url 'editar_usuario' usuario.id %}" class="edit-icon">
+                    <a href="{% url 'usuarios:editar_usuario' usuario.id %}" class="edit-icon">
                         <img src="{% static 'images/edit-icon.png' %}" alt="Editar" class="edit-icon">
                     </a>
                 </div>
