@@ -2,19 +2,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
-<<<<<<< HEAD
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/lista_documentos.css' %}">
-=======
-{% block title %}Documentos{% endblock %}
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/listar_documentos.css' %}">
->>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 {% endblock %}
 
 {% block content %}
 <div class="container">
-<<<<<<< HEAD
     <h1>{{ titulo }}</h1>
 
     <!-- Campo de busca -->
@@ -25,18 +18,11 @@
     <!-- Barra de ícones -->
     <div class="icons-bar">
         <!-- Ícone de adicionar documento -->
-=======
-    <h1>Documentos</h1>
-
-    <!-- Botão para criar novo documento -->
-    <div class="icons-bar">
->>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
         <a href="{% url 'documentos:criar_documento' %}" class="icon-link">
             <img src="{% static 'images/add-document-icon.png' %}" alt="Adicionar Documento" class="icon">
         </a>
     </div>
 
-<<<<<<< HEAD
     <div class="document-list" id="documentList">
         {% for documento in documentos %}
         <div class="document-container">
@@ -75,37 +61,6 @@
                     <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
                         <img src="{% static 'images/revision-icon.png' %}" alt="Nova Revisão" class="revision-icon">
                     </a>
-=======
-    <div class="document-list">
-        {% for documento in documentos %}
-        <div class="document-container">
-            <div class="document-item">
-                <div class="document-info">
-                    <strong>Nome:</strong> {{ documento.nome }}<br>
-                    <strong>Revisão:</strong> {{ documento.revisao }}<br>
-                    <strong>Categoria:</strong> {{ documento.categoria.nome }}<br>
-                    <strong>Aprovado por Aprovador 1:</strong> {{ documento.aprovado_por_aprovador1|yesno:"Sim,Não" }}<br>
-                    <strong>Aprovado por Aprovador 2:</strong> {{ documento.aprovado_por_aprovador2|yesno:"Sim,Não" }}<br>
-                </div>
-                <div class="document-actions">
-                    <!-- Botão para visualizar o documento -->
-                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar">
-                    </a>
-
-                    <!-- Botões de aprovação -->
-                    {% if perms.documentos.can_approve %}
-                    {% if user == documento.aprovador1 and not documento.aprovado_por_aprovador1 %}
-                            <a href="{% url 'documentos:aprovar_documento' documento.id %}" class="action-icon">
-                                <img src="{% static 'images/approve-icon.png' %}" alt="Aprovar">
-                            </a>
-                        {% elif user == documento.aprovador2 and documento.aprovado_por_aprovador1 and not documento.aprovado_por_aprovador2 %}
-                            <a href="{% url 'documentos:aprovar_documento' documento.id %}" class="action-icon">
-                                <img src="{% static 'images/approve-icon.png' %}" alt="Aprovar">
-                            </a>
-                        {% endif %}
-                    {% endif %}
->>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
                 </div>
             </div>
         </div>
@@ -115,7 +70,6 @@
     </div>
 </div>
 
-<<<<<<< HEAD
 <!-- Script para o filtro de busca -->
 <script>
     document.getElementById('searchInput').addEventListener('keyup', function() {
@@ -153,7 +107,4 @@
         }
     });
 </script>
-=======
-<!-- Inclua o arquivo JavaScript, se houver -->
->>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 {% endblock %}

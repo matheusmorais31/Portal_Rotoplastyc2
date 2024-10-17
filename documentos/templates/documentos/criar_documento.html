@@ -3,18 +3,13 @@
 {% load static %}
 
 {% block title %}Criar Documento{% endblock %}
-<<<<<<< HEAD
 
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-=======
-{% block extra_css %}
->>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 <link rel="stylesheet" type="text/css" href="{% static 'css/registrar.css' %}">
 {% endblock %}
 
 {% block content %}
-<<<<<<< HEAD
 <div class="container">
     <h2>Criar Documento</h2>
     <form method="post" enctype="multipart/form-data">
@@ -66,39 +61,4 @@
         });
     });
 </script>
-=======
-    <div class="container">
-        <h2>Criar Documento</h2>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            <!-- Exibe mensagens de erro gerais apenas quando houver -->
-            {% if form.non_field_errors %}
-                <div class="error-message" style="color: red;">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <!-- Campos do formulário -->
-            {% for field in form %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="error-message" style="color: red;">
-                            {{ field.errors }}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <div class="form-buttons">
-                <a href="{% url 'documentos:listar_documentos' %}">
-                    <button type="button">Cancelar</button>
-                </a>
-                <button type="submit">OK</button>
-            </div>
-        </form>
-    </div>
->>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 {% endblock %}

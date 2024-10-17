@@ -10,7 +10,6 @@ urlpatterns = [
     path('categorias/criar/', views.criar_categoria, name='criar_categoria'),
     path('categorias/editar/<int:pk>/', views.editar_categoria, name='editar_categoria'),
     path('categorias/excluir/<int:pk>/', views.excluir_categoria, name='excluir_categoria'),
-<<<<<<< HEAD
 
     # Rotas de documentos
     path('listar_documentos/', views.listar_documentos_aprovados, name='listar_documentos_aprovados'),
@@ -21,11 +20,3 @@ urlpatterns = [
     path('reprovar/<int:documento_id>/', views.reprovar_documento, name='reprovar_documento'),
     path('documentos/nova_revisao/<int:documento_id>/', views.nova_revisao, name='nova_revisao'),
 ]
-=======
-    # Rotas de documentos
-    
-    path('listar_documentos/', views.listar_documentos, name='listar_documentos'),
-    path('documentos/criar/', views.criar_documento, name='criar_documento'),
-    # Adicione rotas para editar, excluir, visualizar documentos conforme necessário
-]
->>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
