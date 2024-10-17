@@ -64,13 +64,19 @@ def login_usuario(request):
         return render(request, 'usuarios/login.html', {'form': form})
 
 # Função para listar os usuários
+<<<<<<< HEAD
 @login_required
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def lista_usuarios(request):
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/lista_usuarios.html', {'usuarios': usuarios})
 
 # Função para editar o usuário
+<<<<<<< HEAD
 @login_required
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def editar_usuario(request, usuario_id):
     usuario = get_object_or_404(Usuario, id=usuario_id)
 
@@ -85,7 +91,10 @@ def editar_usuario(request, usuario_id):
     return render(request, 'usuarios/editar_usuario.html', {'form': form})
 
 # Função para buscar e importar usuários do Active Directory
+<<<<<<< HEAD
 @login_required
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def buscar_usuarios_ad(request):
     usuarios_ad = []
     conn = None
@@ -130,7 +139,10 @@ def buscar_usuarios_ad(request):
     return render(request, 'usuarios/buscar_usuarios_ad.html', {'usuarios_ad': usuarios_ad})
 
 # Função para importar usuários do AD para o Django
+<<<<<<< HEAD
 @login_required
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def importar_usuarios_ad(request):
     conn = None
     if request.method == "POST":
@@ -190,14 +202,21 @@ def importar_usuarios_ad(request):
 
     return redirect('usuarios:buscar_usuarios_ad')
 
+<<<<<<< HEAD
 # Funções relacionadas a grupos
 
 @login_required
+=======
+# Gerenciamento de grupos
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def lista_grupos(request):
     grupos = Grupo.objects.all()
     return render(request, 'usuarios/lista_grupos.html', {'grupos': grupos})
 
+<<<<<<< HEAD
 @login_required
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def cadastrar_grupo(request):
     if request.method == 'POST':
         nome_grupo = request.POST.get('nome_grupo')
@@ -225,8 +244,12 @@ def cadastrar_grupo(request):
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/cadastrar_grupo.html', {'usuarios': usuarios})
 
+<<<<<<< HEAD
 # Função para buscar participantes (usuários) via AJAX
 @login_required
+=======
+# Função para buscar participantes
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def buscar_participantes(request):
     query = request.GET.get('q', '')  # Pega o termo da query string
     if query:
@@ -237,7 +260,11 @@ def buscar_participantes(request):
 
     return JsonResponse(resultados, safe=False)
 
+<<<<<<< HEAD
 @login_required
+=======
+# Função para editar grupo
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def editar_grupo(request, grupo_id):
     grupo = get_object_or_404(Grupo, id=grupo_id)
     if request.method == 'POST':
@@ -261,7 +288,11 @@ def editar_grupo(request, grupo_id):
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/editar_grupo.html', {'grupo': grupo, 'usuarios': usuarios})
 
+<<<<<<< HEAD
 @login_required
+=======
+# Função para excluir grupo
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def excluir_grupo(request, grupo_id):
     grupo = get_object_or_404(Grupo, id=grupo_id)
     if request.method == 'POST':
@@ -270,6 +301,7 @@ def excluir_grupo(request, grupo_id):
         return redirect('usuarios:lista_grupos')
     return render(request, 'usuarios/excluir_grupo.html', {'grupo': grupo})
 
+<<<<<<< HEAD
 # Função para sugerir usuários ou grupos conforme a busca
 @login_required
 def sugestoes(request):
@@ -289,6 +321,8 @@ def sugestoes(request):
 
     return JsonResponse(sugestoes, safe=False)
 
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 # Função para liberar permissões
 @login_required
 @permission_required('auth.change_permission', raise_exception=True)
@@ -318,13 +352,18 @@ def liberar_permissoes(request):
         else:
             return render(request, 'usuarios/liberar_permissoes.html')
 
+<<<<<<< HEAD
     elif request.method == 'POST':
+=======
+    if request.method == 'POST':
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
         usuario_grupo_id = request.POST.get('usuario_grupo_id')
         tipo = request.POST.get('tipo')
         permissoes_selecionadas = request.POST.getlist('permissoes')
 
         if tipo == 'Usuário':
             usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
+<<<<<<< HEAD
             usuario.user_permissions.clear()  # Remove todas as permissões atuais
             if permissoes_selecionadas:
                 usuario.user_permissions.set(permissoes_selecionadas)  # Adiciona novas permissões
@@ -339,10 +378,46 @@ def liberar_permissoes(request):
             grupo.save()
             messages.success(request, "Permissões atualizadas com sucesso para o grupo.")
 
+=======
+            usuario.user_permissions.clear()
+            if permissoes_selecionadas:
+                usuario.user_permissions.add(*permissoes_selecionadas)
+            usuario.save()
+
+        elif tipo == 'Grupo':
+            grupo = get_object_or_404(Group, id=usuario_grupo_id)
+            grupo.permissions.clear()
+            if permissoes_selecionadas:
+                grupo.permissions.add(*permissoes_selecionadas)
+            grupo.save()
+
+        messages.success(request, "Permissões atualizadas com sucesso.")
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
         return redirect('usuarios:liberar_permissoes')
 
     return render(request, 'usuarios/liberar_permissoes.html')
 
+<<<<<<< HEAD
+=======
+# Função para sugerir usuários ou grupos conforme a busca
+def sugestoes(request):
+    query = request.GET.get('q', '')
+    sugestoes = []
+
+    if query:
+        # Buscar usuários
+        usuarios = Usuario.objects.filter(username__icontains=query)[:5]
+        for usuario in usuarios:
+            sugestoes.append({'id': usuario.id, 'nome': usuario.username, 'tipo': 'Usuário'})
+
+        # Buscar grupos
+        grupos = Group.objects.filter(name__icontains=query)[:5]
+        for grupo in grupos:
+            sugestoes.append({'id': grupo.id, 'nome': grupo.name, 'tipo': 'Grupo'})
+
+    return JsonResponse(sugestoes, safe=False)
+
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 # Página de perfil
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'profile.html'
@@ -357,7 +432,10 @@ class CustomLogoutView(LogoutView):
     next_page = 'login'  # Após logout, redireciona para a página de login
 
 # Função para listar permissões
+<<<<<<< HEAD
 @login_required
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 def lista_permissoes(request):
     permissoes = Permission.objects.all()
     return render(request, 'usuarios/lista_permissoes.html', {'permissoes': permissoes})

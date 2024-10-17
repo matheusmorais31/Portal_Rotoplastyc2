@@ -1,5 +1,6 @@
 /* Estilo básico para o corpo da página */
 html, body {
+<<<<<<< HEAD
     height: 100%;
     margin: 0;
     padding: 0;
@@ -85,27 +86,82 @@ select,
 h2 {
     color: #ffffff;
     margin-bottom: 15px;
+=======
+    height: 100%; /* Garante que o corpo ocupe 100% da altura da janela */
+    margin: 0; /* Remove a margem padrão do body */
+    padding: 0; /* Remove o padding padrão do body */
+ /*   overflow: hidden; /* Remove a barra de rolagem */
+}
+
+
+/* Estilizar o contêiner do formulário */
+.container {
+    background-color: rgba(17, 16, 16, 44%); /* Fundo semi-transparente */
+    padding: 20px 20px; /* Diminui o padding para reduzir a altura */
+    border-radius: 80px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
+    width: 600px; /* Diminuir a largura do contêiner */
+    max-width: 70%; /* Limita a largura máxima a 70% da tela */
+    text-align: center; /* Centraliza o texto no contêiner */
+    margin: 50px auto; /* Adiciona 50px de margem em cima e centraliza o contêiner */
+}
+
+/* Estilizar os campos de texto */
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 90%; /* Ajusta a largura dos campos */
+    padding: 8px; /* Mantém um espaçamento interno confortável */
+    margin: 8px 0; /* Reduz a margem entre os campos */
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    font-size: 14px;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilizar o título do formulário */
+h2 {
+    color: #ffffff; /* Cor do título */
+    margin-bottom: 15px; /* Reduz o espaçamento abaixo do título */
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 }
 
 /* Estilizar os rótulos (labels) */
 label {
+<<<<<<< HEAD
     display: block;
     margin-bottom: 0px;
     font-size: 18px;
     color: #ffffff;
     text-align: center;
+=======
+    display: block; /* Garante que os rótulos ocupem uma linha inteira */
+    margin-bottom: 0px; /* Reduz o espaçamento entre o rótulo e o campo de entrada */
+    font-size: 18px;
+    color: #ffffff; /* Cor do texto dos rótulos */
+    text-align: center; /* Centraliza os rótulos */
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 }
 
 /* Estilizar o grupo de formulários */
 .form-group {
+<<<<<<< HEAD
     margin-bottom: 15px;
+=======
+    margin-bottom: 15px; /* Reduz o espaçamento entre os grupos de campo de texto */
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 }
 
 /* Estilizar os botões */
 button {
+<<<<<<< HEAD
     width: 100px;
     padding: 6px;
     margin: 10px 5px;
+=======
+    width: 100px; /* Diminui um pouco a largura dos botões */
+    padding: 6px; /* Reduz o padding para ajustar o tamanho do botão */
+    margin: 10px 5px; /* Reduz a margem entre os botões */
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
     border: none;
     border-radius: 10px;
     font-size: 16px;
@@ -116,13 +172,19 @@ button {
 
 /* Botão OK */
 button[type="submit"] {
+<<<<<<< HEAD
     background-color: #2EC2D6;
     color: white;
+=======
+    background-color: #2EC2D6; /* Cor personalizada para o botão */
+    color: white; /* Cor da fonte do botão */
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 }
 
 /* Botão Cancelar */
 button[type="button"] {
     background-color: #2EC2D6;
+<<<<<<< HEAD
     color: white;
 }
 
@@ -131,10 +193,30 @@ button[type="submit"]:hover,
 button[type="button"]:hover {
     background-color: #1EB2C1;
     box-shadow: 0px 0px 15px #2EC2D6;
+=======
+    color: white; /* Cor da fonte do botão */
+}
+
+
+/* Efeito hover nos botões */
+button[type="submit"]:hover, button[type="button"]:hover {
+    background-color: #1EB2C1; /* Mudança de cor ao passar o mouse */
+    box-shadow:  0px 0px 15px #2EC2D6;
+}
+
+/* Cor personalizada do texto em hover nos botões */
+button:hover {
+    color: #ffffff;
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 }
 
 /* Ajuste para que os botões fiquem centralizados */
 .form-buttons {
+<<<<<<< HEAD
     text-align: center;
     margin-top: 15px;
+=======
+    text-align: center; /* Garante que os botões fiquem centralizados */
+    margin-top: 15px; /* Reduz o espaçamento superior da área de botões */
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 }

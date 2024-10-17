@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 # usuarios/urls.py
 
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 from django.urls import path
 from . import views
 
@@ -18,5 +21,10 @@ urlpatterns = [
     path('grupos/editar_grupo/<int:grupo_id>/', views.editar_grupo, name='editar_grupo'),
     path('grupos/excluir_grupo/<int:grupo_id>/', views.excluir_grupo, name='excluir_grupo'),
     path('liberar_permissoes/', views.liberar_permissoes, name='liberar_permissoes'),
+<<<<<<< HEAD
     path('sugestoes/', views.sugestoes, name='sugestoes'),
+=======
+    path('sugestoes/', views.sugestoes, name='sugestoes'),  
+
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 ]

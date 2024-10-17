@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Categoria, Documento
+<<<<<<< HEAD
 from .forms import CategoriaForm, DocumentoForm, NovaRevisaoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
@@ -10,6 +11,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max, F, Subquery, OuterRef
+=======
+from .forms import CategoriaForm, DocumentoForm
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth import get_user_model
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 
 User = get_user_model()
 
@@ -19,6 +26,10 @@ def listar_categorias(request):
     categorias = Categoria.objects.all()
     return render(request, 'documentos/listar_categorias.html', {'categorias': categorias})
 
+<<<<<<< HEAD
+=======
+# View para criar nova categoria
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 @login_required
 @permission_required('documentos.add_categoria', raise_exception=True)
 def criar_categoria(request):
@@ -32,6 +43,10 @@ def criar_categoria(request):
         form = CategoriaForm()
     return render(request, 'documentos/criar_categoria.html', {'form': form})
 
+<<<<<<< HEAD
+=======
+# View para editar categoria
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 @login_required
 @permission_required('documentos.change_categoria', raise_exception=True)
 def editar_categoria(request, pk):
@@ -46,6 +61,10 @@ def editar_categoria(request, pk):
         form = CategoriaForm(instance=categoria)
     return render(request, 'documentos/editar_categoria.html', {'form': form})
 
+<<<<<<< HEAD
+=======
+# View para excluir categoria
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 @login_required
 @permission_required('documentos.delete_categoria', raise_exception=True)
 def excluir_categoria(request, pk):
@@ -56,9 +75,17 @@ def excluir_categoria(request, pk):
         return redirect('documentos:listar_categorias')
     return render(request, 'documentos/excluir_categoria.html', {'categoria': categoria})
 
+<<<<<<< HEAD
 def has_approval_permission(user):
     return user.has_perm('documentos.can_approve')
 
+=======
+# Função auxiliar para verificar se o usuário tem permissão para aprovar documentos
+def has_approval_permission(user):
+    return user.has_perm('documentos.can_approve')
+
+# View para criar novo documento
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 @login_required
 @permission_required('documentos.add_documento', raise_exception=True)
 def criar_documento(request):
@@ -67,11 +94,16 @@ def criar_documento(request):
         if form.is_valid():
             documento = form.save()
             messages.success(request, 'Documento criado com sucesso!')
+<<<<<<< HEAD
             return redirect('documentos:listar_documentos_aprovados')
+=======
+            return redirect('documentos:listar_documentos')
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
     else:
         form = DocumentoForm()
     return render(request, 'documentos/criar_documento.html', {'form': form})
 
+<<<<<<< HEAD
 @login_required
 def listar_documentos_aprovados(request):
     """Exibe apenas a última revisão aprovada de cada documento."""
@@ -137,6 +169,15 @@ def reprovar_documento(request, documento_id):
     
     return JsonResponse({'status': 'error', 'message': 'Método não permitido.'})
 
+=======
+# View para listar documentos
+@login_required
+def listar_documentos(request):
+    documentos = Documento.objects.all()
+    return render(request, 'documentos/listar_documentos.html', {'documentos': documentos})
+
+# View para aprovar documento
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 @login_required
 @user_passes_test(has_approval_permission)
 def aprovar_documento(request, documento_id):
@@ -154,6 +195,7 @@ def aprovar_documento(request, documento_id):
     else:
         messages.error(request, 'Você não tem permissão para aprovar este documento no momento.')
 
+<<<<<<< HEAD
     return redirect('documentos:listar_aprovacoes_pendentes')
 
 def visualizar_documento(request, id):
@@ -187,3 +229,6 @@ def nova_revisao(request, documento_id):
     else:
         form = NovaRevisaoForm(documento_atual=documento_atual)
     return render(request, 'documentos/nova_revisao.html', {'form': form, 'documento': documento_atual})
+=======
+    return redirect('documentos:listar_documentos')
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22

@@ -656,6 +656,7 @@ Not Found: /favicon.ico
 "GET /static/images/user-profile.jpg HTTP/1.1" 404 1883
 Not Found: /favicon.ico
 "GET /favicon.ico HTTP/1.1" 404 3013
+<<<<<<< HEAD
 "GET /static/images/user-profile.jpg HTTP/1.1" 404 1883
 Not Found: /favicon.ico
 "GET /favicon.ico HTTP/1.1" 404 3013
@@ -4189,3 +4190,5 @@ django.core.exceptions.PermissionDenied
 "GET /static/css/liberar_permissoes.css HTTP/1.1" 404 1892
 "GET /static/images/user-profile.jpg HTTP/1.1" 404 1883
 "GET /static/images/user-profile.jpg HTTP/1.1" 404 1883
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
