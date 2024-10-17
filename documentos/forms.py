@@ -5,7 +5,10 @@ from .models import Categoria, Documento
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.db.models import Q
+<<<<<<< HEAD
 from django.contrib.contenttypes.models import ContentType
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 
 User = get_user_model()
 
@@ -34,21 +37,35 @@ class DocumentoForm(forms.ModelForm):
         }
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
+<<<<<<< HEAD
             'revisao': forms.Select(attrs={'class': 'form-control select2'}),
             'categoria': forms.Select(attrs={'class': 'form-control select2'}),
             'aprovador1': forms.Select(attrs={'class': 'form-control select2'}),
             'aprovador2': forms.Select(attrs={'class': 'form-control select2'}),
+=======
+            'revisao': forms.Select(attrs={'class': 'form-control'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'aprovador1': forms.Select(attrs={'class': 'form-control'}),
+            'aprovador2': forms.Select(attrs={'class': 'form-control'}),
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
             'documento': forms.FileInput(attrs={'class': 'form-control-file'}),
         }
 
     def __init__(self, *args, **kwargs):
         super(DocumentoForm, self).__init__(*args, **kwargs)
+<<<<<<< HEAD
         content_type = ContentType.objects.get_for_model(Documento)
         permission = Permission.objects.get(content_type=content_type, codename='can_approve')
+=======
+        # Obter a permissão 'can_approve' do app 'documentos'
+        permission = Permission.objects.get(codename='can_approve', content_type__app_label='documentos')
+        # Filtrar usuários que possuem a permissão diretamente ou via grupos
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
         aprovadores = User.objects.filter(
             Q(user_permissions=permission) | Q(groups__permissions=permission)
         ).distinct()
         self.fields['aprovador1'].queryset = aprovadores
+<<<<<<< HEAD
         self.fields['aprovador2'].queryset = aprovadores
 
 class NovaRevisaoForm(forms.ModelForm):
@@ -89,3 +106,6 @@ class NovaRevisaoForm(forms.ModelForm):
         ).distinct()
         self.fields['aprovador1'].queryset = aprovadores
         self.fields['aprovador2'].queryset = aprovadores
+=======
+        self.fields['aprovador2'].queryset = aprovadores
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22

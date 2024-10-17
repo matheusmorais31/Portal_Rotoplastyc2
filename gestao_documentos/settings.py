@@ -19,7 +19,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'documentos.apps.DocumentosConfig',
     'usuarios.apps.UsuariosConfig',
+<<<<<<< HEAD
     'django.contrib.humanize',
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 ]
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
@@ -91,9 +94,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+<<<<<<< HEAD
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+=======
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

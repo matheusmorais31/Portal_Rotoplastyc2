@@ -7,6 +7,10 @@ from django.core.exceptions import ValidationError
 from .models import Usuario, Grupo
 from django.contrib.auth.models import Permission
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 # Formulário de Cadastro de Usuário
 class UsuarioCadastroForm(UserCreationForm):
     gerente = forms.BooleanField(
@@ -28,6 +32,10 @@ class UsuarioCadastroForm(UserCreationForm):
             user.save()  # Salva o usuário no banco de dados
         return user
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 # Formulário de Login de Usuário
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={
@@ -39,6 +47,10 @@ class LoginForm(AuthenticationForm):
         'placeholder': 'Senha'
     }), label="Senha")
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 # Formulário para editar o usuário
 class UsuarioChangeForm(UserChangeForm):
     password1 = forms.CharField(
@@ -64,7 +76,11 @@ class UsuarioChangeForm(UserChangeForm):
 
     class Meta:
         model = Usuario
+<<<<<<< HEAD
         fields = ['first_name', 'last_name', 'username', 'email', 'ativo', 'gerente']
+=======
+        fields = ['first_name', 'last_name', 'username', 'email', 'ativo', 'gerente']  # Removido 'is_approver'
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
 
     def __init__(self, *args, **kwargs):
         super(UsuarioChangeForm, self).__init__(*args, **kwargs)
@@ -101,6 +117,7 @@ class UsuarioChangeForm(UserChangeForm):
             user.save()
         return user
 
+<<<<<<< HEAD
 # Formulário para gerenciar permissões de usuário
 class UsuarioPermissaoForm(forms.ModelForm):
     user_permissions = forms.ModelMultipleChoiceField(
@@ -116,6 +133,11 @@ class UsuarioPermissaoForm(forms.ModelForm):
 
 # Formulário de Grupo
 class GrupoForm(forms.ModelForm):
+=======
+
+# Formulário para gerenciar permissões de usuário
+class UsuarioPermissaoForm(forms.ModelForm):
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
     permissions = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.all(),
         widget=forms.CheckboxSelectMultiple,
@@ -124,8 +146,20 @@ class GrupoForm(forms.ModelForm):
     )
 
     class Meta:
+<<<<<<< HEAD
         model = Grupo
         fields = ['nome', 'participantes', 'permissions']
+=======
+        model = Usuario
+        fields = ['permissions']
+
+
+# Formulário de Grupo
+class GrupoForm(forms.ModelForm):
+    class Meta:
+        model = Grupo
+        fields = ['nome', 'participantes']
+>>>>>>> 1b655a619311fa616be6d4c7b58a164c69f90e22
         widgets = {
             'participantes': forms.CheckboxSelectMultiple(),
         }
