@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Liberação de Permissões{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/liberar_permissoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Liberação de Permissões</h2>
+
+    <!-- Formulário para liberar permissões -->
+    <form id="form-permissoes" method="POST" action="{% url 'usuarios:liberar_permissoes' %}">
+        {% csrf_token %}
+        
+        <!-- Campo de busca de usuário ou grupo -->
+        <div class="form-group">
+            <label for="buscar_usuario_grupo">Buscar Usuário ou Grupo:</label>
+            <input type="text" id="buscar_usuario_grupo" class="form-control" placeholder="Digite o nome do usuário ou grupo..." autocomplete="off">
+            <ul id="resultados_pesquisa" class="list-group resultados-pesquisa"></ul>
+        </div>
+
+        <!-- Exibição das permissões -->
+        <div class="form-group">
+            <h3>Permissões para <span id="nome_usuario_grupo"></span></h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Permissão</th>
+                        <th>Selecionar</th>
+                    </tr>
+                </thead>
+                <tbody id="lista_permissoes">
+                    <!-- As permissões serão carregadas dinamicamente aqui -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="form-buttons">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'usuarios:lista_usuarios' %}'">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+
+        <!-- Campos ocultos para enviar o ID do usuário/grupo e o tipo -->
+        <input type="hidden" name="usuario_grupo_id" id="usuario_grupo_id">
+        <input type="hidden" name="tipo" id="tipo">
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        var usuarioGrupoSelecionadoId = null;
+
+        // Função para buscar usuários ou grupos conforme o texto digitado
+        $('#buscar_usuario_grupo').on('input', function () {
+            var query = $(this).val();
+            var buscarUrl = "{% url 'usuarios:sugestoes' %}";
+
+            if (query.length > 0) {
+                $.ajax({
+                    url: buscarUrl,
+                    data: {
+                        'q': query
+                    },
+                    success: function (data) {
+                        $('#resultados_pesquisa').empty();
+                        data.forEach(function (item) {
+                            var li = $('<li></li>')
+                                .text(item.nome + ' (' + item.tipo + ')')
+                                .addClass('list-group-item list-group-item-action')
+                                .attr('data-id', item.id)
+                                .attr('data-tipo', item.tipo);
+                            $('#resultados_pesquisa').append(li);
+                        });
+                    }
+                });
+            } else {
+                $('#resultados_pesquisa').empty();
+            }
+        });
+
+        // Seleciona um usuário ou grupo da lista e carrega as permissões
+        $('#resultados_pesquisa').on('click', 'li', function () {
+            var nome = $(this).text();
+            var id = $(this).attr('data-id');
+            var tipo = $(this).attr('data-tipo');
+            usuarioGrupoSelecionadoId = id;
+
+            // Atualiza o nome do usuário ou grupo selecionado
+            $('#nome_usuario_grupo').text(nome);
+            $('#usuario_grupo_id').val(id);  // Preenche o campo oculto com o ID
+            $('#tipo').val(tipo);  // Preenche o campo oculto com o tipo (Usuário ou Grupo)
+
+            // Limpa a lista de resultados e o campo de busca
+            $('#resultados_pesquisa').empty();
+            $('#buscar_usuario_grupo').val('');
+
+            // Busca permissões do usuário/grupo selecionado
+            var buscarPermissoesUrl = "{% url 'usuarios:liberar_permissoes' %}";
+            $.ajax({
+                url: buscarPermissoesUrl,
+                data: {
+                    'id': id,
+                    'tipo': tipo
+                },
+                success: function (data) {
+                    $('#lista_permissoes').empty();
+                    data.permissoes.forEach(function (permissao) {
+                        var isChecked = data.permissoes_selecionadas.includes(permissao.id) ? 'checked' : '';
+                        var row = '<tr>' +
+                                    '<td>' + permissao.name + '</td>' +
+                                    '<td><input type="checkbox" name="permissoes" value="' + permissao.id + '" ' + isChecked + '></td>' +
+                                  '</tr>';
+                        $('#lista_permissoes').append(row);
+                    });
+                },
+                error: function (xhr) {
+                    console.error("Erro ao buscar permissões:", xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

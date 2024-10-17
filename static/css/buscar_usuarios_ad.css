@@ -1,0 +1,108 @@
+/* Estilos Gerais */
+body {
+    font-family: 'Inter', sans-serif;
+    
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    padding: 5px;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #fff;
+    margin-top: 3%;
+}
+
+h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #fff;
+    margin-top: 3%;
+}
+
+
+/* Filtro de Busca */
+form input[type="text"] {
+    padding: 8px;
+    width: 300px;
+    border: none;
+    border-radius: 10px;
+    margin-right: 10px;
+    font-size: 14px;
+    background-color: #f0f0f0;
+    color: #333;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+    outline: none;
+    transition: border 0.3s ease;
+}
+
+form input[type="text"]:focus {
+    border: 1px solid #2a2b2b; /* Mudança na borda ao focar */
+}
+
+/* Estilizando o botão de buscar */
+button {
+    background-color: #2EC2D6;
+    color: white;
+    width: 120px; 
+    padding: 6px;
+    border: none;
+    border-radius: 20px; /* Bordas arredondadas para o botão */
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #1EB2C1;
+    box-shadow:  0px 0px 15px #2EC2D6;
+}
+
+/* Estilos da Tabela de Usuários */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #222121;
+    border-radius: 10px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    
+}
+
+td {
+    color: #ddd;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    
+}
+
+tr:nth-child(even) {
+    background-color: #222121;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-grid {
+        grid-template-columns: 1fr;
+    }
+}

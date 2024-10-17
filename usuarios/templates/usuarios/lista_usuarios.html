@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lista_usuarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Usuários</h1>
+
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar usuários...">
+    </div>
+
+    <div class="icons-bar">
+        <!-- Ícone de adicionar usuário -->
+        <a href="{% url 'usuarios:registrar' %}" class="icon-link">
+
+            <img src="{% static 'images/add-user-icon.png' %}" alt="Adicionar Usuário" class="icon">
+        </a>
+
+        <!-- Ícone de atualizar ou qualquer outro ícone adicional -->
+        <a href="{% url 'usuarios:buscar_usuarios_ad' %}" class="icon-link">
+            <img src="{% static 'images/import-user-icon.png' %}" alt="Atualizar Lista" class="icon">
+        </a>
+    </div>
+
+    <div class="user-list" id="userList">
+        {% for usuario in usuarios %}
+        <div class="user-container">
+            <div class="user-item">
+                <div class="user-status">
+                    {% if usuario.ativo %}
+                        <img src="{% static 'images/green-user-icon.png' %}" alt="Ativo" class="status-icon">
+                    {% else %}
+                        <img src="{% static 'images/red-user-icon.png' %}" alt="Inativo" class="status-icon">
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <div class="user-grid">
+                        <div><strong>ID:</strong> {{ usuario.id }}</div>
+                        <div><strong>Nome:</strong> {{ usuario.first_name }} {{ usuario.last_name }}</div>
+                        <div><strong>Gerente:</strong> {% if usuario.gerente %}Sim{% else %}Não{% endif %}</div>
+
+                        <div><strong>Usuário:</strong> {{ usuario.username }}</div>
+                        <div><strong>Email:</strong> {{ usuario.email }}</div>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <a href="{% url 'usuarios:editar_usuario' usuario.id %}" class="edit-icon">
+                        <img src="{% static 'images/edit-icon.png' %}" alt="Editar" class="edit-icon">
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script para o filtro de busca -->
+<script>
+    // Função para filtrar os usuários conforme o termo digitado
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var userContainers = document.querySelectorAll('.user-container');
+        var hasResults = false;
+
+        userContainers.forEach(function(container) {
+            var userName = container.querySelector('.user-grid div:nth-child(2)').innerText.toLowerCase();
+            var userEmail = container.querySelector('.user-grid div:nth-child(5)').innerText.toLowerCase();
+
+            if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Exibe ou esconde a mensagem de "Nenhum usuário encontrado"
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhum usuário encontrado.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('userList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}

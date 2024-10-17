@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/editar_usuario.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Editar Usuário</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Exibe mensagens de erro gerais -->
+        {% if form.errors %}
+            <div class="error-message" style="color: red;">
+                <ul>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Campos do formulário -->
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if form.is_bound and field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+                <div class="error-message" style="color: red;">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    
+
+        <!-- Botões Salvar e Cancelar -->
+        <div class="form-buttons">
+            <button type="button" onclick="window.history.back()">Cancelar</button>
+            <button type="submit">Salvar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

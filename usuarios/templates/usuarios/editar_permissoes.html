@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Editar Permissões - {{ usuario.username }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Salvar Permissões</button>
+    </form>
+
+    <a href="{% url 'usuarios:lista_usuarios' %}">Voltar</a>
+</div>
+{% endblock %}

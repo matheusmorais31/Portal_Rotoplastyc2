@@ -1,0 +1,126 @@
+/* Estilos Gerais */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #38393F;
+    color: #fff;
+    margin: 0;
+    padding: 5;
+}
+
+.container {
+    padding: 5px;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #fff;
+    margin-top: 3%;
+}
+
+/* Filtro de Busca */
+.search-container {
+    margin-bottom: 20px;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+    color: #333;
+    font-size: 16px;
+}
+
+/* Estilos da Lista de Categorias */
+.category-container {
+    background-color: #21202000;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-top: 2px solid #bdbcbc;
+    border-bottom: 2px solid #bdbcbc;
+}
+
+.category-item {
+    display: grid;
+    grid-template-columns: 50px 2.5fr 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.category-status {
+    text-align: center;
+    padding: 0;
+    margin: 0;
+}
+
+.category-status img {
+    width: 50px;
+    height: 50px;
+}
+
+.category-info {
+    flex-grow: 1;
+    margin-left: 0px;
+}
+
+.category-info div {
+    margin: 5px 0;
+}
+
+.category-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.edit-icon img {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.edit-icon img:hover {
+    transform: scale(1.5);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .category-item {
+        grid-template-columns: 1fr;
+    }
+
+    .category-actions {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+/* Barra de ícones para adicionar categorias */
+.icons-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.icon-link {
+    margin-right: 10px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.icon:hover {
+    transform: scale(1.5);
+}
+
+/* Remover âncoras vazias */
+a:empty {
+    display: none;
+}

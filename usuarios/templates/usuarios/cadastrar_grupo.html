@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cadastro - Grupos de Usuários{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cadastrar_grupo.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Cadastro - Grupos de Usuários</h2>
+
+    <form id="form-grupo" method="POST" action="{% url 'usuarios:cadastrar_grupo' %}">
+        {% csrf_token %}
+        
+        <!-- Nome do Grupo -->
+        <div class="form-group">
+            <label for="nome_grupo">Nome do Grupo:</label>
+            <input type="text" id="nome_grupo" name="nome" required>
+        </div>
+
+        <!-- Buscar Participante -->
+        <div class="form-group">
+            <label for="buscar_participante">Adicionar Participante:</label>
+            <input type="text" id="buscar_participante" placeholder="Buscar participante..." autocomplete="off">
+            <ul id="resultados_pesquisa" class="resultados-pesquisa"></ul>
+        </div>
+
+        <!-- Participantes Adicionados -->
+        <div class="form-group">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="participantes_adicionados"></tbody>
+            </table>
+        </div>
+
+        <!-- Botões do Formulário -->
+        <div class="form-buttons">
+            <!-- Botão Cancelar -->
+            <button type="button" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
+            <!-- Botão Salvar -->
+            <button type="submit">Salvar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Inclua o jQuery localmente -->
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+
+<!-- Seu código JavaScript -->
+<script>
+    $(document).ready(function () {
+        console.log("JavaScript carregado.");
+        
+        // Array para rastrear participantes adicionados
+        var participantesAdicionados = [];
+        
+        // URL para buscar participantes via AJAX
+        var buscarParticipantesUrl = "{% url 'usuarios:buscar_participantes' %}";
+        console.log("URL para buscar participantes:", buscarParticipantesUrl);
+
+        // Função para buscar participantes conforme o usuário digita
+        $('#buscar_participante').on('input', function () {
+            var query = $(this).val();
+            console.log("Usuário digitou:", query);
+
+            if (query.length > 0) {
+                $.ajax({
+                    url: buscarParticipantesUrl,
+                    data: {
+                        'q': query
+                    },
+                    success: function (data) {
+                        console.log("Dados recebidos:", data);
+                        $('#resultados_pesquisa').empty();
+
+                        data.forEach(function (usuario) {
+                            var li = $('<li></li>')
+                                        .text(usuario.username)
+                                        .attr('data-id', usuario.id);
+                            $('#resultados_pesquisa').append(li);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Erro na requisição AJAX:", error);
+                    }
+                });
+            } else {
+                $('#resultados_pesquisa').empty();
+            }
+        });
+
+        // Adicionar participante ao clicar no nome da lista de resultados
+        $('#resultados_pesquisa').on('click', 'li', function () {
+            var usuarioId = $(this).attr('data-id');
+            var usuarioNome = $(this).text();
+
+            // Verificar se o participante já foi adicionado
+            if (participantesAdicionados.indexOf(usuarioId) === -1) {
+                participantesAdicionados.push(usuarioId);
+
+                // Criar nova linha na tabela de participantes adicionados
+                var row = '<tr>' +
+                            '<td>' + usuarioId + '</td>' +
+                            '<td>' + usuarioNome + '</td>' +
+                            '<td><button type="button" class="remover-participante">Remover</button></td>' +
+                          '</tr>';
+
+                $('#participantes_adicionados').append(row);
+
+                // Adicionar um campo oculto para enviar o ID do participante no formulário
+                $('#form-grupo').append('<input type="hidden" name="participantes" value="' + usuarioId + '">');
+            }
+
+            // Limpar os resultados de busca após adicionar o participante
+            $('#resultados_pesquisa').empty();
+            $('#buscar_participante').val('');
+        });
+
+        // Remover participante ao clicar no botão "Remover"
+        $('#participantes_adicionados').on('click', '.remover-participante', function () {
+            var row = $(this).closest('tr');
+            var usuarioId = row.find('td:first').text();
+
+            // Remover da tabela e do array de IDs
+            row.remove();
+            participantesAdicionados = participantesAdicionados.filter(function(id) {
+                return id !== usuarioId;
+            });
+
+            // Remover o campo oculto correspondente
+            $('input[name="participantes"][value="' + usuarioId + '"]').remove();
+        });
+    });
+</script>
+{% endblock %}

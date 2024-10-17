@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portal Rotoplastyc{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Menu Superior -->
+    <header class="top-bar">
+        <div class="menu-icon" onclick="toggleMenu()">
+            <span class="icon">&#9776;</span>
+        </div>
+        <div class="profile-dropdown">
+            <div class="profile-icon" onclick="toggleProfileMenu()">
+                <img src="{% static 'images/user-profile.jpg' %}" alt="Usuário">
+                <span class="dropdown">&#9660;</span>
+            </div>
+            <div id="profile-menu" class="profile-menu">
+                <div class="profile-info">
+                    <p>Minha Conta ({{ user.username }})</p>
+                    <p>{{ user.email }}</p>
+                </div>
+                <ul>
+                    <li><a href="{% url 'logout' %}">Sair</a></li>
+                    <li>
+                        <label for="upload-photo" class="upload-label">Upload de Foto</label>
+                        <input type="file" id="upload-photo" name="profile_photo" class="upload-input" onchange="uploadPhoto(this)" style="display: none;">
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu Lateral -->
+    <nav class="side-bar" id="side-bar">
+        <ul>
+            <li>
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'images/home-icon.png' %}" alt="Home">
+                    <span class="menu-label">Home</span>
+                </a>
+            </li>
+            <li>
+                <!-- Nova categoria Documentos -->
+                <a href="#" onclick="toggleSubmenu(event, this)">
+                    <img src="{% static 'images/documento.png' %}" alt="Documentos">
+                    <span class="menu-label">Documentos</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="{% url 'documentos:listar_documentos_aprovados' %}">Listar Documentos</a></li>
+                    <li><a href="{% url 'documentos:listar_aprovacoes_pendentes' %}">Aprovações Pendentes</a></li>
+                    <li><a href="{% url 'documentos:listar_categorias' %}">Categorias</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" onclick="toggleSubmenu(event, this)">
+                    <img src="{% static 'images/administracao.png' %}" alt="Administração">
+                    <span class="menu-label">Administração</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="{% url 'usuarios:lista_usuarios' %}">Usuários</a></li>
+                    <li><a href="{% url 'usuarios:lista_grupos' %}">Grupos de Usuários</a></li>
+                    <li><a href="{% url 'usuarios:liberar_permissoes' %}">Permissões</a></li>
+                </ul>
+            </li>
+            
+            
+        </ul>
+    </nav>
+
+    <!-- Conteúdo da página -->
+    <div class="main-content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Scripts globais -->
+    <script>
+        // Função para abrir/fechar o menu lateral
+        function toggleMenu() {
+            var sideBar = document.getElementById("side-bar");
+            sideBar.classList.toggle("expanded");
+
+            // Fecha todos os submenus ao fechar o menu
+            if (!sideBar.classList.contains("expanded")) {
+                var submenus = document.querySelectorAll('.submenu');
+                submenus.forEach(function(submenu) {
+                    submenu.classList.remove('open');
+                });
+            }
+        }
+
+        // Função para abrir/fechar o menu suspenso do perfil
+        function toggleProfileMenu() {
+            var profileMenu = document.getElementById("profile-menu");
+            profileMenu.classList.toggle("open");
+        }
+
+        // Função para abrir/fechar os submenus ao clicar no item da categoria
+        function toggleSubmenu(event, element) {
+            event.preventDefault(); // Evita que o link navegue
+
+            // Verifica se a barra lateral está expandida
+            if (document.getElementById("side-bar").classList.contains("expanded")) {
+                var submenu = element.nextElementSibling; // O próximo elemento é o submenu
+                submenu.classList.toggle('open'); // Alterna a classe 'open' para mostrar ou esconder o submenu
+
+                // Fecha todos os outros submenus
+                var allSubmenus = document.querySelectorAll('.submenu');
+                allSubmenus.forEach(function(s) {
+                    if (s !== submenu) {
+                        s.classList.remove('open'); // Fecha os outros submenus
+                    }
+                });
+            }
+        }
+
+        // Função para fazer o upload da foto de perfil
+        function uploadPhoto(input) {
+            if (input.files && input.files[0]) {
+                var formData = new FormData();
+                formData.append('profile_photo', input.files[0]);
+
+                fetch("{% url 'profile' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Foto de perfil atualizada com sucesso!");
+                        location.reload(); // Recarregar a página para exibir a nova foto
+                    } else {
+                        alert("Erro ao atualizar a foto de perfil.");
+                    }
+                })
+                .catch(error => console.error("Erro:", error));
+            }
+        }
+
+        // Fechar o menu suspenso ao clicar fora dele
+        document.addEventListener('click', function(event) {
+            var profileMenu = document.getElementById("profile-menu");
+            if (!profileMenu.contains(event.target) && !event.target.closest('.profile-icon')) {
+                profileMenu.classList.remove('open');
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

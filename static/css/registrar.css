@@ -1,0 +1,140 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #38393F;
+    color: #fff;
+}
+
+/* Estilizar o contêiner do formulário */
+.container {
+    background-color: rgba(17, 16, 16, 0.44);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
+    width: 600px;
+    max-width: 70%;
+    text-align: center;
+    margin: 50px auto;
+}
+
+/* Estilizar os campos de texto e seleção */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+.select2-container--default .select2-selection--single {
+    width: 90%;
+    height: 38px;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    color: #333;
+    font-size: 14px;
+    box-sizing: border-box;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Ajuste específico para o Select2 */
+.select2-container {
+    width: 90% !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background-color: #d3d3d3 !important;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 8px !important;
+    box-sizing: border-box !important;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+    color: #333 !important;
+    font-size: 14px !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.select2-container .select2-selection--single .select2-selection__arrow {
+    height: 38px !important;
+    right: 8px !important;
+    width: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: absolute !important;
+}
+
+.select2-dropdown {
+    background-color: #d3d3d3;
+    color: #333;
+}
+
+.select2-results__option {
+    color: #333;
+}
+
+/* Estilizar o título do formulário */
+h2 {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+/* Estilizar os rótulos (labels) */
+label {
+    display: block;
+    margin-bottom: 0px;
+    font-size: 18px;
+    color: #ffffff;
+    text-align: center;
+}
+
+/* Estilizar o grupo de formulários */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Estilizar os botões */
+button {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+/* Botão OK */
+button[type="submit"] {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+/* Botão Cancelar */
+button[type="button"] {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+/* Efeito hover nos botões */
+button[type="submit"]:hover,
+button[type="button"]:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 15px #2EC2D6;
+}
+
+/* Ajuste para que os botões fiquem centralizados */
+.form-buttons {
+    text-align: center;
+    margin-top: 15px;
+}

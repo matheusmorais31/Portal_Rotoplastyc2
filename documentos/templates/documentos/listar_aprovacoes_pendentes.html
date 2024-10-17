@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lista_documentos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Aprovações Pendentes</h1>
+
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos pendentes...">
+    </div>
+
+    <div class="document-list" id="documentList">
+        {% for documento in documentos %}
+        <div class="document-container">
+            <div class="document-item">
+                <div class="document-status">
+                    <img src="{% static 'images/document-icon.png' %}" alt="Documento" class="status-icon">
+                </div>
+                <div class="document-info">
+                    <div class="document-grid">
+                        <div><strong>Nome:</strong> {{ documento.nome }}</div>
+                        <div><strong>Revisão:</strong> {{ documento.revisao }}</div>
+                        <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
+
+                        <div><strong>Aprovações Realizadas:</strong>
+                            <ul>
+                                {% if documento.aprovado_por_aprovador1 %}
+                                    <li>Aprovado por: {{ documento.aprovador1.get_full_name }}</li>
+                                {% endif %}
+                                {% if documento.aprovado_por_aprovador2 %}
+                                    <li>Aprovado por: {{ documento.aprovador2.get_full_name }}</li>
+                                {% endif %}
+                                {% if not documento.aprovado_por_aprovador1 and not documento.aprovado_por_aprovador2 %}
+                                    <li>Nenhuma aprovação realizada.</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <div><strong>Aprovações Pendentes:</strong>
+                            <ul>
+                                {% if not documento.aprovado_por_aprovador1 %}
+                                    <li>{{ documento.aprovador1.get_full_name }}</li>
+                                {% endif %}
+                                {% if documento.aprovado_por_aprovador1 and not documento.aprovado_por_aprovador2 %}
+                                    <li>{{ documento.aprovador2.get_full_name }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="document-actions">
+                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
+                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                    </a>
+                    <a href="{% url 'documentos:aprovar_documento' documento.id %}" class="action-icon">
+                        <img src="{% static 'images/approve-icon.png' %}" alt="Aprovar" class="approve-icon">
+                    </a>
+                    <button class="action-icon" data-id="{{ documento.id }}" onclick="showRejectionModal({{ documento.id }})">
+                        <img src="{% static 'images/reject-icon.png' %}" alt="Reprovar">
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Nenhum documento encontrado.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Modal para inserção do motivo de reprovação -->
+    <div id="rejectionModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRejectionModal()">&times;</span>
+            <h2>Motivo da Reprovação</h2>
+            <textarea id="rejectionReason" rows="5" placeholder="Digite o motivo da reprovação"></textarea>
+            <button id="submitRejection" onclick="submitRejection()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let documentoId = null;
+
+    // Abre o modal ao clicar no botão "Reprovar"
+    function showRejectionModal(id) {
+        documentoId = id;
+        document.getElementById("rejectionModal").style.display = "flex"; // Mostra o modal de forma flexível e centralizada
+    }
+
+    // Fecha o modal ao clicar no botão de fechamento
+    function closeRejectionModal() {
+        document.getElementById("rejectionModal").style.display = "none"; // Esconde o modal
+    }
+
+    // Envia o motivo da reprovação
+    function submitRejection() {
+        const motivo = document.getElementById("rejectionReason").value;
+        if (motivo.trim() === "") {
+            alert("Por favor, insira o motivo da reprovação.");
+            return;
+        }
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch(`/documentos/reprovar/${documentoId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `motivo=${encodeURIComponent(motivo)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert("Documento reprovado com sucesso!");
+                window.location.reload();
+            } else {
+                alert("Erro ao reprovar documento: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Erro:", error);
+        });
+
+        closeRejectionModal();  // Fecha o modal após enviar
+    }
+
+    // Função para buscar documentos
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var documentContainers = document.querySelectorAll('.document-container');
+        var hasResults = false;
+
+        documentContainers.forEach(function(container) {
+            var documentName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
+            if (documentName.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhum documento encontrado.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('documentList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+
+    // Garante que o modal esteja fechado ao carregar a página
+    window.onload = function() {
+        closeRejectionModal();
+    };
+</script>
+
+{% endblock %}

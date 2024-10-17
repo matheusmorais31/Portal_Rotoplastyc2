@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/buscar_usuarios_ad.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <h1>Buscar e Importar Usuários do AD</h1>
+  
+  <!-- Formulário de busca -->
+  <form method="POST">
+    {% csrf_token %}
+    <input type="text" name="nome_usuario" placeholder="Nome de usuário no AD" required>
+    <button type="submit">Buscar</button>
+  </form>
+
+  <!-- Exibição de usuários encontrados -->
+  {% if usuarios_ad %}
+    <h2>Usuários encontrados:</h2>
+    <form method="POST" action="{% url 'usuarios:importar_usuarios_ad' %}">
+      {% csrf_token %}
+      <table>
+        <thead>
+          <tr>
+            <th>Selecionar</th>
+            <th>Usuário</th>
+            <th>Nome</th>
+            <th>Sobrenome</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for usuario in usuarios_ad %}
+          <tr>
+            <td><input type="checkbox" name="usuarios" value="{{ usuario.sAMAccountName }}"></td>
+            <td>{{ usuario.sAMAccountName }}</td>
+            <td>{{ usuario.givenName }}</td>
+            <td>{{ usuario.sn }}</td>
+            <td>{{ usuario.mail }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <button type="submit">Importar Selecionados</button>
+    </form>
+  {% else %}
+    <p>Nenhum usuário encontrado.</p>
+  {% endif %}
+
+  <!-- Exibição de mensagens de sucesso/erro -->
+  {% for message in messages %}
+    <p>{{ message }}</p>
+  {% endfor %}
+
+{% endblock %}

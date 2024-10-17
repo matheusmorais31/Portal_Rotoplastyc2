@@ -1,0 +1,99 @@
+<!-- documentos/templates/documentos/listar_categorias.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/listar_categorias.css' %}">
+{% endblock %}
+
+{% block title %}Categorias{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Categorias</h1>
+
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar categorias...">
+    </div>
+
+    <div class="icons-bar">
+        <!-- Ícone de adicionar categoria -->
+        <a href="{% url 'documentos:criar_categoria' %}" class="icon-link">
+            <img src="{% static 'images/nova-categoria-icon.png' %}" alt="Adicionar Categoria" class="icon">
+        </a>
+    </div>
+
+    <div class="category-list" id="categoryList">
+        <!-- Para cada categoria, exibir um container individual -->
+        {% for categoria in categorias %}
+        <div class="category-container">
+            <div class="category-item">
+                <div class="category-status">
+                    <img src="{% static 'images/categoria.png' %}" alt="Categoria" class="status-icon">
+                </div>
+                <div class="category-info">
+                    <div class="category-grid">
+                        <div><strong>ID:</strong> {{ categoria.id }}</div>
+                        <div><strong>Nome:</strong> {{ categoria.nome }}</div>
+                    </div>
+                </div>
+                <div class="category-actions">
+                    <a href="{% url 'documentos:editar_categoria' categoria.id %}" class="edit-icon">
+                        <img src="{% static 'images/edit-icon.png' %}" alt="Editar">
+                    </a>
+                    <a href="{% url 'documentos:excluir_categoria' categoria.id %}" class="edit-icon">
+                        <img src="{% static 'images/delete-icon.png' %}" alt="Excluir">
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-categories">
+            <p>Nenhuma categoria encontrada.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script para o filtro de busca -->
+<script>
+    // Função para filtrar as categorias conforme o termo digitado
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var categoryContainers = document.querySelectorAll('.category-container');
+        var hasResults = false;
+
+        categoryContainers.forEach(function(container) {
+            var categoryName = container.querySelector('.category-grid div:nth-child(2)').innerText.toLowerCase();
+            
+            if (categoryName.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Exibe ou esconde a mensagem de "Nenhuma categoria encontrada"
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhuma categoria encontrada.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('categoryList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}

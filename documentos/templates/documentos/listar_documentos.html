@@ -1,0 +1,110 @@
+<!-- documentos/templates/documentos/listar_documentos.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lista_documentos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ titulo }}</h1>
+
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos...">
+    </div>
+
+    <!-- Barra de ícones -->
+    <div class="icons-bar">
+        <!-- Ícone de adicionar documento -->
+        <a href="{% url 'documentos:criar_documento' %}" class="icon-link">
+            <img src="{% static 'images/add-document-icon.png' %}" alt="Adicionar Documento" class="icon">
+        </a>
+    </div>
+
+    <div class="document-list" id="documentList">
+        {% for documento in documentos %}
+        <div class="document-container">
+            <div class="document-item">
+                <!-- Ícone do documento -->
+                <div class="document-status">
+                    <img src="{% static 'images/document-icon.png' %}" alt="Documento" class="status-icon">
+                </div>
+
+                <!-- Informações do documento -->
+                <div class="document-info">
+                    <div class="document-grid">
+                        <div><strong>Nome:</strong> {{ documento.nome }}</div>
+                        <div><strong>Última Revisão:</strong> {{ documento.revisao }}</div>
+                        <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
+
+                        <div><strong>Aprovações Realizadas:</strong>
+                            Aprovado por:
+                            {% if documento.aprovado_por_aprovador1 %}
+                                {{ documento.aprovador1.get_full_name }}
+                            {% endif %}
+                            {% if documento.aprovado_por_aprovador2 %}
+                                {% if documento.aprovado_por_aprovador1 %}, {% endif %}
+                                {{ documento.aprovador2.get_full_name }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="document-actions">
+                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
+                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                    </a>
+                    <!-- Botão de nova revisão -->
+                    <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
+                        <img src="{% static 'images/revision-icon.png' %}" alt="Nova Revisão" class="revision-icon">
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Nenhum documento encontrado.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script para o filtro de busca -->
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var documentContainers = document.querySelectorAll('.document-container');
+        var hasResults = false;
+
+        documentContainers.forEach(function(container) {
+            var documentName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
+            if (documentName.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Exibe ou esconde a mensagem de "Nenhum documento encontrado"
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhum documento encontrado.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('documentList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}

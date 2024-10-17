@@ -1,0 +1,64 @@
+<!-- documentos/templates/documentos/nova_revisao.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nova Revisão{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/registrar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Nova Revisão - {{ documento.nome }}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Exibe mensagens de erro gerais apenas quando houver -->
+        {% if form.non_field_errors %}
+            <div class="error-message" style="color: red;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- Campos do formulário -->
+        {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                    <div class="error-message" style="color: red;">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="form-buttons">
+            <a href="{% url 'documentos:listar_documentos_aprovados' %}">
+                <button type="button">Cancelar</button>
+            </a>
+            <button type="submit">OK</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- Incluindo o arquivo de idioma para português -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: 'resolve',
+            language: 'pt-BR'
+        });
+    });
+</script>
+{% endblock %}

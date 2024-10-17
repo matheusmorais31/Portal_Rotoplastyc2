@@ -1,0 +1,120 @@
+/* Estilos Gerais */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #38393F;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    padding: 5px;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #fff;
+    margin-top: 3%;
+}
+
+/* Filtro de Busca */
+.search-container {
+    margin-bottom: 20px;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+    color: #333;
+    font-size: 16px;
+}
+
+/* Estilos da Lista de Usuários */
+.user-container {
+    background-color: #21202000;
+    margin-bottom: 20px;
+    padding: 5px;
+    border-top: 2px solid #bdbcbc;
+    border-bottom: 2px solid #bdbcbc;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+}
+
+.user-status {
+    margin-right: 20px;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    grid-gap: 10px;
+}
+
+.user-info div {
+    margin: 5px 0;
+}
+
+.user-actions {
+    margin-left: auto;
+}
+
+.edit-icon img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.edit-icon img:hover {
+    transform: scale(1.5);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-grid {
+        grid-template-columns: 1fr; /* Uma coluna em telas pequenas */
+    }
+
+    .user-actions {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+/* Barra de ícones para adicionar e atualizar usuários */
+.icons-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.icon-link {
+    margin-right: 10px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.icon:hover {
+    transform: scale(1.5);
+}

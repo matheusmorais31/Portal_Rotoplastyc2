@@ -1,0 +1,105 @@
+<!-- usuarios/templates/usuarios/lista_grupos.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lista_grupos.css' %}">
+{% endblock %}
+
+{% block title %}Grupos de Usuários{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Grupos de Usuários</h1>
+
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar grupos...">
+    </div>
+
+    <div class="icons-bar">
+        <!-- Ícone de adicionar grupo -->
+        <a href="{% url 'usuarios:cadastrar_grupo' %}" class="icon-link">
+            <img src="{% static 'images/add-group-icon.png' %}" alt="Adicionar Grupo" class="icon">
+        </a>
+    </div>
+
+    <div class="group-list" id="groupList">
+        <!-- Para cada grupo, exibir um container individual -->
+        {% for grupo in grupos %}
+        <div class="group-container">
+            <div class="group-item">
+                <div class="group-status">
+                    <img src="{% static 'images/group-icon.png' %}" alt="Grupo" class="status-icon">
+                </div>
+                <div class="group-info">
+                    <div class="group-grid">
+                        <div><strong>ID:</strong> {{ grupo.id }}</div>
+                        <div><strong>Nome:</strong> {{ grupo.nome }}
+                        </div>
+                        <div><strong>Participantes:</strong>
+                            {% for participante in grupo.participantes.all %}
+                                {{ participante.username }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="group-actions">
+                    <a href="{% url 'usuarios:editar_grupo' grupo.id %}" class="edit-icon">
+                        <img src="{% static 'images/edit-icon.png' %}" alt="Editar">
+                    </a>
+                    <a href="{% url 'usuarios:excluir_grupo' grupo.id %}" class="edit-icon">
+                        <img src="{% static 'images/delete-icon.png' %}" alt="Excluir">
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-groups">
+            <p>Nenhum grupo encontrado.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script para o filtro de busca -->
+<script>
+    // Função para filtrar os grupos conforme o termo digitado
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var groupContainers = document.querySelectorAll('.group-container');
+        var hasResults = false;
+
+        groupContainers.forEach(function(container) {
+            var groupName = container.querySelector('.group-grid div:nth-child(2)').innerText.toLowerCase();
+            
+            if (groupName.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Exibe ou esconde a mensagem de "Nenhum grupo encontrado"
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhum grupo encontrado.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('groupList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}

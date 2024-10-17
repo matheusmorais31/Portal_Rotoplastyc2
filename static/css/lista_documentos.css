@@ -1,0 +1,204 @@
+/* Remove os marcadores (bolinhas) das listas */
+ul {
+    list-style-type: none; /* Remove as bolinhas */
+    padding-left: 0; /* Remove o espaçamento à esquerda */
+}
+
+/* Estilo básico */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #38393F;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    padding: 2px;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #fff;
+    margin-top: 3%;
+}
+
+/* Campo de Busca */
+.search-container {
+    margin-bottom: 20px;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+    color: #333;
+    font-size: 16px;
+}
+
+/* Lista de Documentos */
+.document-container {
+    background-color: #21202000;
+    margin-bottom: 20px;
+    padding: 5px;
+    border-top: 2px solid #bdbcbc;
+    border-bottom: 2px solid #bdbcbc;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.document-status {
+    margin-right: 20px;
+}
+
+.document-info {
+    flex-grow: 1;
+}
+
+.document-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    grid-gap: 5px;
+    grid-row-gap: 1px;
+}
+
+.document-info div {
+    margin: 5px 0;
+}
+
+/* Botões de ação */
+.document-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.action-icon {
+    margin-left: 10px;
+    background: none; /* Remove fundo do botão */
+    border: none; /* Remove borda */
+    padding: 0; /* Remove padding */
+    cursor: pointer;
+}
+
+.action-icon img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.action-icon img:hover {
+    transform: scale(1.5);
+}
+
+/* Ícone do Documento */
+.status-icon {
+    width: 40px; /* Ajustado para 40x40 */
+    height: 40px;
+}
+
+/* Modal */
+.modal {
+    display: none; /* O modal está oculto por padrão */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    /* Removido o display: flex; para evitar conflitos */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: rgba(7, 7, 7, 0.678);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.16);
+    width: 600px;
+    max-width: 70%;
+    text-align: center;
+}
+
+/* Estilizar o título do modal */
+.modal-content h2 {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+/* Estilizar o campo de textarea para motivo */
+.modal-content textarea {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    font-size: 14px;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+    resize: none; /* Impede o redimensionamento */
+}
+
+/* Estilizar os botões do modal */
+.modal-content button {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+.modal-content button#submitRejection {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+.form-buttons {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.close {
+    background: none;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+}
+
+.close:hover, .close:focus {
+    color: #ccc;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .document-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .document-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .document-actions {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
