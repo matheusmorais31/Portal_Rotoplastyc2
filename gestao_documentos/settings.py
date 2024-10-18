@@ -34,6 +34,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'gestao_documentos.urls'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -91,37 +92,50 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Logging configuration with log rotation
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': False,  # Desativar loggers existentes
     'handlers': {
         'console': {
+            'level': 'WARNING',  # Muda o nível de log para WARNING (vai ignorar INFO e DEBUG)
             'class': 'logging.StreamHandler',
-            'level': 'WARNING',  # Alterar para WARNING ou ERROR
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',
-            'level': 'DEBUG',  # Mantenha DEBUG se quiser registrar no arquivo
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
-            'level': 'WARNING',  # Alterar para WARNING ou ERROR
+            'handlers': ['console'],
+            'level': 'WARNING',  # Ajuste o nível para WARNING, ERROR ou CRITICAL
             'propagate': True,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # Apenas erros de banco de dados serão mostrados
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # Apenas erros de requisição serão exibidos
+            'propagate': False,
+        },
+        'myapp': {  # Substitua 'myapp' pelo nome do seu app
+            'handlers': ['console'],
+            'level': 'ERROR',  # Apenas erros da sua aplicação serão exibidos
         },
     },
 }
-
-
+# Authentication backends
 AUTHENTICATION_BACKENDS = [
     'usuarios.auth_backends.ActiveDirectoryBackend',  # Certifique-se de que o caminho está correto
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+# Security settings
+X_FRAME_OPTIONS = 'SAMEORIGIN'

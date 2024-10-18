@@ -1,0 +1,27 @@
+<!-- documentos/templates/documentos/visualizar_documento.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ documento.nome }} - Revisão {{ documento.revisao|default:"N/A" }}</h1>
+    <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
+    <p><strong>Aprovador 1:</strong> {{ documento.aprovador1.get_full_name }}</p>
+    <p><strong>Aprovador 2:</strong> {{ documento.aprovador2.get_full_name }}</p>
+    <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y H:i" }}</p>
+
+    <!-- Exibir o PDF embutido -->
+    {% if documento.documento_pdf %}
+        <div style="margin-top: 20px;">
+            <iframe src="{{ documento.documento_pdf.url }}" width="100%" height="800px" style="border: none;"></iframe>
+        </div>
+    {% else %}
+        <p>Documento PDF não disponível.</p>
+    {% endif %}
+
+    <!-- Botão para baixar o PDF -->
+    {% if documento.documento_pdf %}
+        <a href="{{ documento.documento_pdf.url }}" class="btn btn-primary" download>Baixar PDF</a>
+    {% endif %}
+</div>
+{% endblock %}

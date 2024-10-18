@@ -99,6 +99,27 @@ h1 {
     transform: scale(1.5);
 }
 
+.icons-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.icon-link {
+    margin-right: 10px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.icon:hover {
+    transform: scale(1.5);
+}
+
 /* Ícone do Documento */
 .status-icon {
     width: 40px; /* Ajustado para 40x40 */

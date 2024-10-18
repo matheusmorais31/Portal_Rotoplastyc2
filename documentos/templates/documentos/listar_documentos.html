@@ -29,7 +29,7 @@
             <div class="document-item">
                 <!-- Ícone do documento -->
                 <div class="document-status">
-                    <img src="{% static 'images/document-icon.png' %}" alt="Documento" class="status-icon">
+                    <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
                 </div>
 
                 <!-- Informações do documento -->
@@ -40,7 +40,7 @@
                         <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
 
                         <div><strong>Aprovações Realizadas:</strong>
-                            Aprovado por:
+                            
                             {% if documento.aprovado_por_aprovador1 %}
                                 {{ documento.aprovador1.get_full_name }}
                             {% endif %}

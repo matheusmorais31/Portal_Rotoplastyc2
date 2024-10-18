@@ -1,5 +1,3 @@
-# documentos/forms.py
-
 from django import forms
 from .models import Categoria, Documento
 from django.contrib.auth import get_user_model
@@ -41,8 +39,14 @@ class DocumentoForm(forms.ModelForm):
             'documento': forms.FileInput(attrs={'class': 'form-control-file'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super(DocumentoForm, self).__init__(*args, **kwargs)
+    def save(self, commit=True):
+        # Adiciona uma verificação extra para evitar múltiplas chamadas de save
+        if not self.instance.pk and Documento.objects.filter(nome=self.instance.nome, revisao=self.instance.revisao).exists():
+            raise forms.ValidationError("Já existe um documento com este nome e revisão.")
+        return super(DocumentoForm, self).save(commit=commit)
+
+    def _set_aprovadores(self):
+        """Define a queryset dos aprovadores baseada nas permissões de aprovação."""
         content_type = ContentType.objects.get_for_model(Documento)
         permission = Permission.objects.get(content_type=content_type, codename='can_approve')
         aprovadores = User.objects.filter(
@@ -74,14 +78,19 @@ class NovaRevisaoForm(forms.ModelForm):
         documento_atual = kwargs.pop('documento_atual', None)
         super(NovaRevisaoForm, self).__init__(*args, **kwargs)
 
-        # Campo nome é somente leitura
-        self.fields['nome'].initial = documento_atual.nome if documento_atual else ''
+        if documento_atual:
+            # Define o campo 'nome' como somente leitura e inicializa as revisões
+            self.fields['nome'].initial = documento_atual.nome
+            self._set_revisoes_disponiveis(documento_atual.revisao)
 
-        # Filtra as revisões maiores que a atual
-        revisao_atual = documento_atual.revisao if documento_atual else 0
+        self._set_aprovadores()
+
+    def _set_revisoes_disponiveis(self, revisao_atual):
+        """Define as revisões disponíveis no formulário com base na revisão atual."""
         self.fields['revisao'].choices = [(i, f"{i:02d}") for i in range(revisao_atual + 1, 101)]
 
-        # Aprovadores
+    def _set_aprovadores(self):
+        """Define a queryset dos aprovadores baseada nas permissões de aprovação."""
         content_type = ContentType.objects.get_for_model(Documento)
         permission = Permission.objects.get(content_type=content_type, codename='can_approve')
         aprovadores = User.objects.filter(

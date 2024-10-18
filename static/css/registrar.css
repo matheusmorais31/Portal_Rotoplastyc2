@@ -23,8 +23,7 @@ html, body {
 input[type="text"],
 input[type="password"],
 input[type="email"],
-select,
-.select2-container--default .select2-selection--single {
+select {
     width: 90%;
     height: 38px;
     padding: 8px;
