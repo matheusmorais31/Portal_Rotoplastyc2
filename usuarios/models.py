@@ -5,6 +5,9 @@ from django.contrib.auth import get_user_model
 class Usuario(AbstractUser):
     is_ad_user = models.BooleanField(default=False)
     ativo = models.BooleanField(default=True)
+    profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True, default='default_user.png')
+
+
 
     class Meta:
         permissions = [

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/editar_perfil.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Editar Perfil</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="profile_photo">Foto de Perfil Atual:</label><br>
+            {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" alt="Foto de Perfil" class="profile-photo">
+            {% else %}
+                <p>Nenhuma foto de perfil encontrada.</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="profile_photo">Alterar Foto de Perfil:</label>
+            {{ form.profile_photo }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Atualizar Foto</button>
+    </form>
+</div>
+{% endblock %}

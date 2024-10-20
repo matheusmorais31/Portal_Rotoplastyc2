@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="notification-dropdown">
+        <ul>
+            {% for notificacao in notificacoes %}
+                <li id="notificacao-{{ notificacao.id }}">
+                    <div class="notification-message">
+                        <img src="{% if notificacao.solicitante.profile_photo %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
+                        <p>{{ notificacao.mensagem }}</p>
+                        <a href="{% url 'documentos:listar_aprovacoes_pendentes' %}" class="notification-action">Ir para aprovações</a>
+                        <button class="close-notification" data-id="{{ notificacao.id }}">✖</button>
+                    </div>
+                </li>
+            {% empty %}
+                <li>Nenhuma notificação pendente.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        // Função para marcar notificação como lida via AJAX
+        $('.close-notification').click(function() {
+            var notificacaoId = $(this).data('id');
+            var notificacaoElement = $('#notificacao-' + notificacaoId);
+
+            $.ajax({
+                url: "{% url 'notificacoes:marcar_notificacao_como_lida' notificacao_id=0 %}".replace('0', notificacaoId),
+                method: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        notificacaoElement.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Erro ao marcar notificação como lida.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

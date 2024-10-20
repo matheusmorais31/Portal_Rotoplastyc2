@@ -1,0 +1,102 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%; /* Garante que o corpo ocupe 100% da altura da janela */
+    margin: 0; /* Remove a margem padrão do body */
+    padding: 0; /* Remove o padding padrão do body */
+ /*   overflow: hidden; /* Remove a barra de rolagem */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("images/Tela_Cadastros.jpg"); /* Caminho para a imagem de fundo */
+    background-size: cover; /* Faz com que a imagem cubra toda a tela */
+    background-position: center; /* Centraliza a imagem */
+    background-attachment: fixed; /* Fixa a imagem no fundo */
+    background-repeat: no-repeat; /* Evita repetição da imagem */
+    color: #ffffff; /* Cor do texto padrão */
+}
+
+/* Estilizar o contêiner do formulário */
+.container {
+    background-color: rgba(17, 16, 16, 44%); /* Fundo semi-transparente */
+    padding: 20px 20px; /* Diminui o padding para reduzir a altura */
+    border-radius: 80px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
+    width: 400px; /* Diminuir a largura do contêiner */
+    max-width: 70%; /* Limita a largura máxima a 70% da tela */
+    text-align: center; /* Centraliza o texto no contêiner */
+    margin: 50px auto; /* Adiciona 50px de margem em cima e centraliza o contêiner */
+}
+
+/* Estilizar os campos de texto */
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 90%; /* Ajusta a largura dos campos */
+    padding: 8px; /* Mantém um espaçamento interno confortável */
+    margin: 8px 0; /* Reduz a margem entre os campos */
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    font-size: 11px;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilizar o título do formulário */
+h2 {
+    color: #ffffff; /* Cor do título */
+    margin-bottom: 15px; /* Reduz o espaçamento abaixo do título */
+}
+
+/* Estilizar os rótulos (labels) */
+label {
+    display: block; /* Garante que os rótulos ocupem uma linha inteira */
+    margin-bottom: 0px; /* Reduz o espaçamento entre o rótulo e o campo de entrada */
+    font-size: 18px;
+    color: #ffffff; /* Cor do texto dos rótulos */
+    text-align: center; /* Centraliza os rótulos */
+}
+
+/* Estilizar o grupo de formulários */
+.form-group {
+    margin-bottom: 15px; /* Reduz o espaçamento entre os grupos de campo de texto */
+}
+
+/* Estilizar os botões */
+button {
+    width: 100px; /* Diminui um pouco a largura dos botões */
+    padding: 6px; /* Reduz o padding para ajustar o tamanho do botão */
+    margin: 10px 5px; /* Reduz a margem entre os botões */
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+/* Botão OK */
+button[type="submit"] {
+    background-color: #2EC2D6; /* Cor personalizada para o botão */
+    color: white; /* Cor da fonte do botão */
+}
+
+/* Botão Cancelar */
+button[type="button"] {
+    background-color: #2EC2D6;
+    color: white; /* Cor da fonte do botão */
+}
+
+/* Efeito hover nos botões */
+button[type="submit"]:hover, button[type="button"]:hover {
+    background-color: #1EB2C1; /* Mudança de cor ao passar o mouse */
+}
+
+/* Cor personalizada do texto em hover nos botões */
+button:hover {
+    color: #ffffff;
+}
+
+/* Ajuste para que os botões fiquem centralizados */
+.form-buttons {
+    text-align: center; /* Garante que os botões fiquem centralizados */
+    margin-top: 15px; /* Reduz o espaçamento superior da área de botões */
+}

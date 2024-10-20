@@ -1,0 +1,160 @@
+/* Estilos Gerais */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #38393F;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    padding: 10px;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #fff;
+    text-align: center;
+}
+
+/* Detalhes do Documento */
+.document-detail {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.document-info {
+    flex: 1;
+    background-color: #21202000;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #bdbcbc;
+}
+
+.document-info h2 {
+    margin-top: 0;
+    color: #fff;
+}
+
+.document-info ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.document-info li {
+    margin-bottom: 5px;
+}
+
+/* Visualização do Documento */
+.document-preview {
+    flex: 1;
+}
+
+iframe {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Botões de Ação */
+.document-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    margin: 10px;
+    color: #fff;
+    background-color: #2EC2D6;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.action-btn:hover {
+    background-color: #1EB2C1;
+}
+
+.reprovar-btn {
+    background-color: #e74c3c;
+}
+
+.reprovar-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Modal */
+.modal {
+    display: none; /* Escondido por padrão */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.16);
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+}
+
+.modal-content h2 {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.modal-content textarea {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    font-size: 14px;
+    resize: none;
+}
+
+.modal-content button {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-content button#submitRejection {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+.close {
+    background: none;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+}
+
+.close:hover, .close:focus {
+    color: #ccc;
+    text-decoration: none;
+    cursor: pointer;
+}

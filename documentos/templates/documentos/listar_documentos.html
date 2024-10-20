@@ -1,4 +1,3 @@
-<!-- documentos/templates/documentos/listar_documentos.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -23,6 +22,7 @@
         </a>
     </div>
 
+    <!-- Lista de documentos -->
     <div class="document-list" id="documentList">
         {% for documento in documentos %}
         <div class="document-container">
@@ -38,9 +38,14 @@
                         <div><strong>Nome:</strong> {{ documento.nome }}</div>
                         <div><strong>Última Revisão:</strong> {{ documento.revisao }}</div>
                         <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
-
+                        <div><strong>Elaborador:</strong> 
+                            {% if documento.elaborador %}
+                                {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+                            {% else %}
+                                Não disponível
+                            {% endif %}
+                        </div>
                         <div><strong>Aprovações Realizadas:</strong>
-                            
                             {% if documento.aprovado_por_aprovador1 %}
                                 {{ documento.aprovador1.get_full_name }}
                             {% endif %}
@@ -57,9 +62,12 @@
                     <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
                         <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
                     </a>
-                    <!-- Botão de nova revisão -->
                     <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
                         <img src="{% static 'images/revision-icon.png' %}" alt="Nova Revisão" class="revision-icon">
+                    </a>
+                    <!-- Botão para visualizar acessos -->
+                    <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon">
+                        <img src="{% static 'images/acessou.png' %}" alt="Visualizar Acessos" class="view-access-icon">
                     </a>
                 </div>
             </div>

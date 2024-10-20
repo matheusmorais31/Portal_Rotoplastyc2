@@ -27,6 +27,15 @@
                         <div><strong>Revisão:</strong> {{ documento.revisao }}</div>
                         <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
 
+                        <!-- Adicionando o Elaborador -->
+                        <div><strong>Elaborador:</strong> 
+                            {% if documento.elaborador %}
+                                {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+                            {% else %}
+                                Não disponível
+                            {% endif %}
+                        </div>
+
                         <div><strong>Aprovações Realizadas:</strong>
                             <ul>
                                 {% if documento.aprovado_por_aprovador1 %}

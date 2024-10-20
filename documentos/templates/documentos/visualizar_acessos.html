@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-4">Acessos ao Documento: {{ documento.nome }}</h1>
+        
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Data de Acesso</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acesso in acessos %}
+                <tr>
+                    <td>{{ acesso.usuario.username }}</td>
+                    <td>{{ acesso.data_acesso }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2">Nenhum acesso registrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

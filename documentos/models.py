@@ -13,31 +13,22 @@ logger = logging.getLogger('django')
 
 User = get_user_model()
 
+# Definir caminhos de upload para arquivos
 def documento_upload_path(instance, filename):
-    """
-    Função para definir o caminho de upload dos documentos editáveis.
-    """
     return os.path.join('documentos', 'editaveis', filename)
 
 def pdf_upload_path(instance, filename):
-    """
-    Função para definir o caminho de upload dos documentos PDF gerados.
-    """
     return os.path.join('documentos', 'pdf', filename)
 
+# Modelo de Categorias para documentos
 class Categoria(models.Model):
-    """
-    Modelo para definir a categoria de um documento.
-    """
     nome = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.nome
 
+# Modelo principal de Documento
 class Documento(models.Model):
-    """
-    Modelo para representar os documentos do sistema.
-    """
     nome = models.CharField(max_length=200)
     revisao = models.IntegerField(choices=[(i, f"{i:02d}") for i in range(0, 101)])
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
@@ -50,6 +41,9 @@ class Documento(models.Model):
     aprovado_por_aprovador2 = models.BooleanField(default=False)
     reprovado = models.BooleanField(default=False)
     motivo_reprovacao = models.TextField(null=True, blank=True)
+    elaborador = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='documentos_criados')
+    solicitante = models.ForeignKey(User, on_delete=models.CASCADE, default=38)  # ID do usuário padrão
+
 
     class Meta:
         permissions = [
@@ -60,78 +54,49 @@ class Documento(models.Model):
     def __str__(self):
         return f"{self.nome} - Revisão {self.revisao}"
 
+    # Caminho para salvar o PDF gerado
     def gerar_pdf_path(self):
-        """
-        Função para definir o caminho do PDF baseado no nome e revisão do documento.
-        """
         return os.path.join('documentos', 'pdf', f"{self.nome}_v{self.revisao}.pdf")
 
+    # Remove o PDF anterior ao salvar uma nova versão
     def remover_pdf_antigo(self):
-        """
-        Função para remover o arquivo PDF antigo, caso já exista no sistema de arquivos.
-        """
         pdf_path = self.gerar_pdf_path()
         fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'documentos', 'pdf'))
         
-        # Verifica se o arquivo PDF existe e o remove
         if fs.exists(os.path.basename(pdf_path)):
             fs.delete(os.path.basename(pdf_path))
             logger.debug(f"[PDF] Arquivo PDF antigo removido diretamente: {pdf_path}")
 
+    # Função para gerar o PDF a partir do arquivo editável
     def gerar_pdf(self):
-        """
-        Gera o PDF a partir do documento original (Word ou outro formato).
-        """
         try:
             documento_path = self.documento.path
             doc = aw.Document(documento_path)
-
-            # Definir o caminho do PDF
             pdf_path = self.gerar_pdf_path()
-
-            # Gera e salva o PDF no caminho definido
             doc.save(pdf_path)
             logger.debug(f"[PDF] PDF gerado e salvo em: {pdf_path}")
-
             return pdf_path
         except Exception as e:
             logger.error(f"[PDF] Erro ao gerar ou salvar o PDF: {e}")
             raise
 
-# Sinal para gerar o PDF após a criação ou modificação de um documento
+# Sinal para gerar o PDF automaticamente após salvar o documento
 @receiver(post_save, sender=Documento)
 def gerar_pdf_documento(sender, instance, created, **kwargs):
-    logger.debug(f"[PDF] Entrou no sinal post_save para Documento: {instance.nome}, Criado: {created}")
-
-    # Verificar se o arquivo de documento original existe
     if not instance.documento:
-        logger.warning(f"[PDF] Documento {instance.nome} - Revisão {instance.revisao} não possui arquivo original anexado.")
         return
-
-    logger.debug(f"[PDF] Documento: {instance.nome} - Revisão: {instance.revisao}, Caminho do documento: {instance.documento.path}")
-
-    # Gera o PDF apenas se o documento foi criado ou se o arquivo foi modificado
     if created or 'documento' in instance.get_dirty_fields():
-        logger.debug(f"[PDF] Gerando PDF para o documento: {instance.nome} - Revisão {instance.revisao}")
+        instance.remover_pdf_antigo()
+        pdf_path = instance.gerar_pdf()
+        with open(pdf_path, 'rb') as pdf_file:
+            instance.documento_pdf.save(os.path.basename(pdf_path), File(pdf_file), save=False)
+        Documento.objects.filter(pk=instance.pk).update(documento_pdf=instance.documento_pdf.name)
 
-        try:
-            # Remove o PDF antigo, se existir
-            instance.remover_pdf_antigo()
+# Modelo de Acesso aos documentos, para registrar acessos
+class Acesso(models.Model):
+    documento = models.ForeignKey(Documento, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    data_acesso = models.DateTimeField(auto_now_add=True)
 
-            # Gera o novo PDF
-            pdf_path = instance.gerar_pdf()
-
-            # Salvar o campo documento_pdf sem chamar save() novamente
-            with open(pdf_path, 'rb') as pdf_file:
-                instance.documento_pdf.save(os.path.basename(pdf_path), File(pdf_file), save=False)
-                logger.debug(f"[PDF] Campo documento_pdf atualizado no objeto em memória: {instance.documento_pdf.name}")
-
-            # Atualizar o campo documento_pdf diretamente no banco de dados
-            Documento.objects.filter(pk=instance.pk).update(documento_pdf=instance.documento_pdf.name)
-            logger.debug(f"[PDF] Campo documento_pdf persistido no banco: {instance.documento_pdf.name}")
-
-        except Exception as e:
-            logger.error(f"[PDF] Erro ao gerar ou salvar o PDF: {e}")
-
-    else:
-        logger.debug(f"[PDF] Nenhuma alteração no campo 'documento', PDF não gerado.")
+    def __str__(self):
+        return f"{self.usuario.username} - {self.documento.nome}"

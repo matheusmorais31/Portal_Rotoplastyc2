@@ -19,5 +19,7 @@ urlpatterns = [
     path('aprovar/<int:documento_id>/', views.aprovar_documento, name='aprovar_documento'),
     path('reprovar/<int:documento_id>/', views.reprovar_documento, name='reprovar_documento'),
     path('nova-revisao/<int:documento_id>/', views.nova_revisao, name='nova_revisao'),
+    path('visualizar_acessos/<int:id>/', views.visualizar_acessos_documento, name='visualizar_acessos_documento'),
+    # outras rotas...
 
 ]

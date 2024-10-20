@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Categoria, Documento
+from .models import Categoria, Documento, Acesso
 from .forms import CategoriaForm, DocumentoForm, NovaRevisaoForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
@@ -57,30 +57,36 @@ def excluir_categoria(request, pk):
         return redirect('documentos:listar_categorias')
     return render(request, 'documentos/excluir_categoria.html', {'categoria': categoria})
 
-def has_approval_permission(user):
-    return user.has_perm('documentos.can_approve')
-
 @login_required
 @permission_required('documentos.add_documento', raise_exception=True)
 def criar_documento(request):
+    logger.debug(f"[criar_documento] Iniciando processo de criação de documento para o usuário: {request.user.username}")
+    
     if request.method == 'POST':
+        logger.debug("[criar_documento] Recebendo dados do formulário POST")
         form = DocumentoForm(request.POST, request.FILES)
+        
         if form.is_valid():
+            logger.debug("[criar_documento] Formulário válido. Tentando salvar o documento.")
             try:
                 with transaction.atomic():
-                    documento = form.save()
-                    logger.debug(f"Documento criado com sucesso: {documento.nome} - Revisão {documento.revisao}")
+                    documento = form.save(commit=False)  # Não salvar imediatamente
+                    documento.elaborador = request.user  # Atribuir o elaborador manualmente
+                    documento.save()  # Agora salva o documento com o elaborador atribuído
+                    logger.info(f"[criar_documento] Documento criado com sucesso: {documento.nome} - Revisão {documento.revisao}")
                     messages.success(request, 'Documento criado com sucesso!')
                     return redirect('documentos:listar_documentos_aprovados')
             except Exception as e:
-                logger.error(f"Erro ao salvar documento: {e}")
-                messages.error(request, 'Ocorreu um erro ao criar o documento.')
+                logger.error(f"[criar_documento] Erro ao salvar documento: {e}", exc_info=True)
+                messages.error(request, f'Ocorreu um erro ao criar o documento: {e}')
         else:
-            logger.debug("Formulário inválido ao tentar criar documento.")
+            logger.warning(f"[criar_documento] Formulário inválido. Erros: {form.errors}")
     else:
+        logger.debug("[criar_documento] Requisição GET recebida. Renderizando formulário vazio.")
         form = DocumentoForm()
 
     return render(request, 'documentos/criar_documento.html', {'form': form})
+
 
 @login_required
 def listar_documentos_aprovados(request):
@@ -99,7 +105,10 @@ def listar_documentos_aprovados(request):
         revisao=F('ultima_revisao')
     ).order_by('nome')
 
-    return render(request, 'documentos/listar_documentos.html', {'documentos': documentos, 'titulo': 'Documentos Aprovados'})
+    return render(request, 'documentos/listar_documentos.html', {
+        'documentos': documentos,
+        'titulo': 'Documentos Aprovados'
+    })
 
 @login_required
 def listar_aprovacoes_pendentes(request):
@@ -108,7 +117,10 @@ def listar_aprovacoes_pendentes(request):
     documentos_pendentes_aprovador2 = Documento.objects.filter(aprovador2=user, aprovado_por_aprovador1=True, aprovado_por_aprovador2=False)
     documentos_pendentes = documentos_pendentes_aprovador1.union(documentos_pendentes_aprovador2)
 
-    return render(request, 'documentos/listar_aprovacoes_pendentes.html', {'documentos': documentos_pendentes, 'titulo': 'Aprovações Pendentes'})
+    return render(request, 'documentos/listar_aprovacoes_pendentes.html', {
+        'documentos': documentos_pendentes,
+        'titulo': 'Aprovações Pendentes'
+    })
 
 @login_required
 @csrf_exempt
@@ -131,7 +143,7 @@ def reprovar_documento(request, documento_id):
     return JsonResponse({'status': 'error', 'message': 'Método não permitido.'})
 
 @login_required
-@user_passes_test(has_approval_permission)
+@user_passes_test(lambda user: user.has_perm('documentos.can_approve'))
 def aprovar_documento(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
     user = request.user
@@ -177,6 +189,17 @@ def nova_revisao(request, documento_id):
         form = NovaRevisaoForm(documento_atual=documento_atual)
     return render(request, 'documentos/nova_revisao.html', {'form': form, 'documento': documento_atual})
 
+@login_required
 def visualizar_documento(request, id):
     documento = get_object_or_404(Documento, id=id)
+    # Registrar o acesso
+    if request.user.is_authenticated:
+        Acesso.objects.create(documento=documento, usuario=request.user)
+    # Renderizar a visualização do documento
     return render(request, 'documentos/visualizar_documento.html', {'documento': documento})
+
+@login_required
+def visualizar_acessos_documento(request, id):
+    documento = get_object_or_404(Documento, id=id)
+    acessos = Acesso.objects.filter(documento=documento)
+    return render(request, 'documentos/visualizar_acessos.html', {'documento': documento, 'acessos': acessos})

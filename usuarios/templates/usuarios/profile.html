@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h1>Perfil de {{ user.username }}</h1>
+    
+    <div class="profile-info">
+        <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" alt="Foto de Perfil" class="profile-photo">
+        <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+    </div>
+    
+    <div class="profile-actions">
+        <a href="{% url 'usuarios:editar_perfil' %}" class="btn">Editar Perfil</a>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
+    </div>
+</div>
+{% endblock %}

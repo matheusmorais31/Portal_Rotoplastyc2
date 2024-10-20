@@ -1,0 +1,89 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #38393F;
+    color: #fff;
+}
+
+/* Estilizar o contêiner do formulário */
+.container {
+    background-color: rgba(17, 16, 16, 0.8);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    max-width: 100%;
+    text-align: center;
+    margin: 50px auto;
+}
+
+/* Estilizar a foto de perfil */
+.profile-photo {
+    border-radius: 50%;
+    object-fit: cover;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilizar o título */
+h1 {
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+/* Estilizar os rótulos (labels) */
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+/* Estilizar o campo de seleção de arquivos */
+input[type="file"] {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #d3d3d3;
+    color: #333;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilizar o botão de enviar */
+button[type="submit"] {
+    background-color: #2EC2D6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+/* Efeito hover nos botões */
+button[type="submit"]:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+/* Centralizar o link de imagem existente */
+a {
+    color: #2EC2D6;
+    text-decoration: none;
+    display: block;
+    margin-top: 10px;
+}
+
+a:hover {
+    text-decoration: underline;
+}

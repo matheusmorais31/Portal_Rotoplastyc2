@@ -4,20 +4,22 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
+import logging
+
+# Definir o logger
+logger = logging.getLogger('django')
 
 User = get_user_model()
 
+# Formulário para a categoria
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
         fields = ['nome']
-        labels = {
-            'nome': 'Nome da Categoria',
-        }
-        widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control'}),
-        }
+        labels = {'nome': 'Nome da Categoria'}
+        widgets = {'nome': forms.TextInput(attrs={'class': 'form-control'})}
 
+# Formulário para o documento
 class DocumentoForm(forms.ModelForm):
     class Meta:
         model = Documento
@@ -39,11 +41,9 @@ class DocumentoForm(forms.ModelForm):
             'documento': forms.FileInput(attrs={'class': 'form-control-file'}),
         }
 
-    def save(self, commit=True):
-        # Adiciona uma verificação extra para evitar múltiplas chamadas de save
-        if not self.instance.pk and Documento.objects.filter(nome=self.instance.nome, revisao=self.instance.revisao).exists():
-            raise forms.ValidationError("Já existe um documento com este nome e revisão.")
-        return super(DocumentoForm, self).save(commit=commit)
+    def __init__(self, *args, **kwargs):
+        super(DocumentoForm, self).__init__(*args, **kwargs)
+        self._set_aprovadores()
 
     def _set_aprovadores(self):
         """Define a queryset dos aprovadores baseada nas permissões de aprovação."""
@@ -55,6 +55,11 @@ class DocumentoForm(forms.ModelForm):
         self.fields['aprovador1'].queryset = aprovadores
         self.fields['aprovador2'].queryset = aprovadores
 
+    def save(self, commit=True):
+        logger.debug(f"[DocumentoForm] Tentando salvar o documento {self.instance.nome}. Campos: {self.cleaned_data}")
+        return super().save(commit=commit)
+
+# Formulário para criar uma nova revisão de documento
 class NovaRevisaoForm(forms.ModelForm):
     class Meta:
         model = Documento

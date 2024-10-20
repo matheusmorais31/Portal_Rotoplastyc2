@@ -12,6 +12,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.models import Permission, Group
+from .forms import ProfileForm
+
 
 # Configuração do logger
 logger = logging.getLogger(__name__)
@@ -168,7 +170,7 @@ def importar_usuarios_ad(request):
                         username=entry.sAMAccountName.value,
                         first_name=entry.givenName.value,
                         last_name=entry.sn.value,
-                        email=entry.mail.value if entry.mail.value else None,
+                        email=entry.mail.value if entry.mail else None,
                         is_ad_user=True,
                         ativo=True
                     )
@@ -344,12 +346,12 @@ def liberar_permissoes(request):
     return render(request, 'usuarios/liberar_permissoes.html')
 
 # Página de perfil
-class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = 'profile.html'
+class ProfileView(TemplateView):
+    template_name = 'usuarios/profile.html'  # Defina o caminho correto para o template do perfil do usuário
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
+        context['user'] = self.request.user  # Passa o objeto do usuário autenticado para o contexto do template
         return context
 
 # Função para logout
@@ -361,3 +363,17 @@ class CustomLogoutView(LogoutView):
 def lista_permissoes(request):
     permissoes = Permission.objects.all()
     return render(request, 'usuarios/lista_permissoes.html', {'permissoes': permissoes})
+
+@login_required
+def editar_perfil(request):
+    usuario = request.user  # Pega o usuário logado
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=usuario)  # Inclui arquivos de imagem
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Perfil atualizado com sucesso!")
+            return redirect('usuarios:editar_perfil')  # Redireciona para a página de perfil
+    else:
+        form = ProfileForm(instance=usuario)
+    
+    return render(request, 'usuarios/editar_perfil.html', {'form': form})

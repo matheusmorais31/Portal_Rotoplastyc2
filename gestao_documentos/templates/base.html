@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Portal Rotoplastyc{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -15,23 +14,53 @@
         <div class="menu-icon" onclick="toggleMenu()">
             <span class="icon">&#9776;</span>
         </div>
-        <div class="profile-dropdown">
-            <div class="profile-icon" onclick="toggleProfileMenu()">
-                <img src="{% static 'images/user-profile.jpg' %}" alt="Usuário">
-                <span class="dropdown">&#9660;</span>
-            </div>
-            <div id="profile-menu" class="profile-menu">
-                <div class="profile-info">
-                    <p>Minha Conta ({{ user.username }})</p>
-                    <p>{{ user.email }}</p>
+
+        <!-- Notificações e Perfil agrupados -->
+        <div class="top-bar-right">
+            <!-- Notificações -->
+            <div class="notification-bell">
+                <a href="#" onclick="toggleNotificationDropdown()" class="notification-link">
+                    <img src="{% static 'images/notificacao.png' %}" alt="Notificações" class="bell-icon">
+                    {% if notificacoes_nao_lidas|length > 0 %}
+                        <span class="notification-count" id="notification-count">{{ notificacoes_nao_lidas|length }}</span>
+                    {% endif %}
+                </a>
+                <div id="notification-dropdown" class="notification-dropdown">
+                    <ul id="notification-list">
+                        {% for notificacao in notificacoes_nao_lidas %}
+                            <li id="notification-{{ notificacao.id }}">
+                                <div class="notification-message">
+                                    <img src="{% if notificacao.documento.solicitante.profile_photo %}{{ notificacao.documento.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
+                                    <p>{{ notificacao.mensagem }}</p>
+                                    <div class="notification-controls">
+                                        <a href="{% url 'documentos:listar_aprovacoes_pendentes' %}" class="notification-action">Ir para aprovações</a>
+                                    </div>
+                                </div>
+                                <button class="close-notification" data-id="{{ notificacao.id }}">✖</button>
+                            </li>
+                        {% empty %}
+                            <li>Nenhuma notificação pendente.</li>
+                        {% endfor %}
+                    </ul>
                 </div>
-                <ul>
-                    <li><a href="{% url 'logout' %}">Sair</a></li>
-                    <li>
-                        <label for="upload-photo" class="upload-label">Upload de Foto</label>
-                        <input type="file" id="upload-photo" name="profile_photo" class="upload-input" onchange="uploadPhoto(this)" style="display: none;">
-                    </li>
-                </ul>
+            </div>
+
+            <!-- Menu de perfil -->
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()">
+                    <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Usuário" class="profile-photo">
+                    <span class="dropdown">&#9660;</span>
+                </div>
+                <div id="profile-menu" class="profile-menu">
+                    <div class="profile-info">
+                        <p>Minha Conta ({{ user.username }})</p>
+                        <p>{{ user.email }}</p>
+                    </div>
+                    <ul>
+                        <li><a href="{% url 'usuarios:perfil_usuario' %}">Perfil do Usuário</a></li>
+                        <li><a href="{% url 'logout' %}">Sair</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </header>
@@ -46,7 +75,6 @@
                 </a>
             </li>
             <li>
-                <!-- Nova categoria Documentos -->
                 <a href="#" onclick="toggleSubmenu(event, this)">
                     <img src="{% static 'images/documento.png' %}" alt="Documentos">
                     <span class="menu-label">Documentos</span>
@@ -68,8 +96,6 @@
                     <li><a href="{% url 'usuarios:liberar_permissoes' %}">Permissões</a></li>
                 </ul>
             </li>
-            
-            
         </ul>
     </nav>
 
@@ -81,12 +107,27 @@
 
     <!-- Scripts globais -->
     <script>
-        // Função para abrir/fechar o menu lateral
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
         function toggleMenu() {
             var sideBar = document.getElementById("side-bar");
             sideBar.classList.toggle("expanded");
 
-            // Fecha todos os submenus ao fechar o menu
             if (!sideBar.classList.contains("expanded")) {
                 var submenus = document.querySelectorAll('.submenu');
                 submenus.forEach(function(submenu) {
@@ -95,63 +136,80 @@
             }
         }
 
-        // Função para abrir/fechar o menu suspenso do perfil
+        function toggleNotificationDropdown() {
+            var notificationDropdown = document.getElementById("notification-dropdown");
+            notificationDropdown.classList.toggle("open");
+        }
+
         function toggleProfileMenu() {
             var profileMenu = document.getElementById("profile-menu");
             profileMenu.classList.toggle("open");
         }
 
-        // Função para abrir/fechar os submenus ao clicar no item da categoria
         function toggleSubmenu(event, element) {
-            event.preventDefault(); // Evita que o link navegue
+            event.preventDefault();
 
-            // Verifica se a barra lateral está expandida
             if (document.getElementById("side-bar").classList.contains("expanded")) {
-                var submenu = element.nextElementSibling; // O próximo elemento é o submenu
-                submenu.classList.toggle('open'); // Alterna a classe 'open' para mostrar ou esconder o submenu
-
-                // Fecha todos os outros submenus
+                var submenu = element.nextElementSibling;
+                submenu.classList.toggle('open');
                 var allSubmenus = document.querySelectorAll('.submenu');
                 allSubmenus.forEach(function(s) {
                     if (s !== submenu) {
-                        s.classList.remove('open'); // Fecha os outros submenus
+                        s.classList.remove('open');
                     }
                 });
             }
         }
 
-        // Função para fazer o upload da foto de perfil
-        function uploadPhoto(input) {
-            if (input.files && input.files[0]) {
-                var formData = new FormData();
-                formData.append('profile_photo', input.files[0]);
-
-                fetch("{% url 'profile' %}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("Foto de perfil atualizada com sucesso!");
-                        location.reload(); // Recarregar a página para exibir a nova foto
-                    } else {
-                        alert("Erro ao atualizar a foto de perfil.");
-                    }
-                })
-                .catch(error => console.error("Erro:", error));
-            }
-        }
-
-        // Fechar o menu suspenso ao clicar fora dele
         document.addEventListener('click', function(event) {
             var profileMenu = document.getElementById("profile-menu");
+            var notificationDropdown = document.getElementById("notification-dropdown");
+
             if (!profileMenu.contains(event.target) && !event.target.closest('.profile-icon')) {
                 profileMenu.classList.remove('open');
             }
+
+            if (!notificationDropdown.contains(event.target) && !event.target.closest('.notification-bell')) {
+                notificationDropdown.classList.remove('open');
+            }
+        });
+
+        // Atualiza o contador de notificações na bolinha
+        function updateNotificationCount() {
+            const notificationCountElement = document.getElementById('notification-count');
+            let currentCount = parseInt(notificationCountElement.textContent);
+            currentCount = currentCount - 1;
+            if (currentCount > 0) {
+                notificationCountElement.textContent = currentCount;
+            } else {
+                notificationCountElement.style.display = 'none';
+            }
+        }
+
+        // Enviar a requisição para marcar a notificação como lida
+        document.querySelectorAll('.close-notification').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var notificacaoId = this.getAttribute('data-id');
+                console.log('Clicado para fechar notificação com ID:', notificacaoId);
+
+                fetch(`/notificacoes/marcar-notificacao-como-lida/${notificacaoId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Notificação marcada como lida.');
+                        this.closest('li').style.display = 'none';
+                        updateNotificationCount();  // Atualizar o contador
+                    } else {
+                        console.error('Erro ao marcar a notificação como lida.');
+                    }
+                })
+                .catch(error => console.error('Erro:', error));
+            });
         });
     </script>
 

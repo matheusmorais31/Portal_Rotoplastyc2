@@ -7,11 +7,6 @@
 
 body {
     font-family: Arial, sans-serif;
-    /*background-image: url("/static/images/Tela_Cadastros.jpgg");*/
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
     background-color: #38393F;
     color: #ffffff;
 }
@@ -32,6 +27,13 @@ body {
     border-radius: 5px;
 }
 
+/* Agrupando notificações e perfil à direita */
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Espaço entre as notificações e o perfil */
+}
+
 /* Ícone do menu superior */
 .menu-icon {
     font-size: 24px;
@@ -43,12 +45,12 @@ body {
     color: #1EB2C1;
 }
 
-/* Menu lateral */
+/* Barra lateral */
 .side-bar {
     position: fixed;
     top: 50px;
     left: 0;
-    width: 60px; /* Largura inicial da barra lateral */
+    width: 60px;
     height: calc(100% - 50px);
     background-color: #000;
     display: flex;
@@ -61,7 +63,7 @@ body {
 }
 
 .side-bar.expanded {
-    width: 250px; /* Largura da barra lateral expandida */
+    width: 250px;
 }
 
 .side-bar ul {
@@ -156,6 +158,7 @@ body {
     display: block; 
 }
 
+/* Ajuste de margem para o conteúdo principal quando o menu lateral está expandido */
 .main-content {
     margin-left: 60px;
     padding-top: 50px;
@@ -176,15 +179,18 @@ body {
 
 .profile-icon img {
     width: 40px;
+    height: 40px;
     border-radius: 50%;
+    object-fit: cover; /* Garante que a imagem seja proporcional */
+    aspect-ratio: 1 / 1; /* Mantém a imagem sempre quadrada */
 }
 
-.dropdown {
+/* Ajustando a posição da foto dentro da barra superior */
+.top-bar-right .profile-icon {
     margin-left: 10px;
-    color: #fff;
 }
 
-/* Estilos para o menu de perfil suspenso */
+/* Estilos para o dropdown do perfil */
 .profile-dropdown {
     position: relative;
     display: inline-block;
@@ -222,7 +228,6 @@ body {
     display: block;
 }
 
-
 .profile-info {
     padding: 10px;
     background-color: #000000;
@@ -234,18 +239,125 @@ body {
     font-size: 14px;
 }
 
-.upload-label {
+
+/* Estilos para a campainha de notificações */
+.notification-bell {
+    position: relative;
+    display: inline-block;
+    margin-right: -5px;
+}
+
+.bell-icon {
+    width: 30px;
     cursor: pointer;
-    color: #ffffff;
 }
 
-.upload-input {
+.notification-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #2EC2D6;
+    box-shadow: 0px 0px 15px #2EC2D6;
+    color: white;
+    border-radius: 50%;
+    padding: 5px 7px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Ajustando a altura máxima para o dropdown de notificações */
+.notification-dropdown {
     display: none;
+    position: absolute;
+    top: 25px;
+    right: 0;
+    background-color: #333;
+    color: white;
+    width: 500px;
+    border-radius: 20px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border: 2px solid rgb(184, 180, 180);
+    max-height: 400px;
+    overflow-y: auto;
 }
 
+.notification-dropdown.open {
+    display: block;
+}
 
+.notification-dropdown ul {
+    list-style-type: none;
+    padding: 10px;
+    margin: 0;
+}
 
-/* Ajustes para os itens do menu do perfil */
-.profile-menu ul li:hover {
-    background-color: #444; /* Hover effect for the profile menu items */
+/* Ajuste para a lista de notificações */
+.notification-dropdown ul li {
+    padding: 10px; /* Mantém um espaçamento confortável */
+    background-color: #202020;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    position: relative; /* Para poder posicionar o botão de fechar */
+    border: 0.5px solid rgb(145, 142, 142);
+    display: flex;
+    flex-direction: column; /* Alinha o conteúdo verticalmente */
+    align-items: flex-start;
+}
+
+/* Ajuste da mensagem da notificação */
+.notification-message {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%; /* Garante que o conteúdo ocupe a largura completa */
+    margin-bottom: 10px; /* Espaço entre o texto e o link */
+}
+
+/* Ajuste da imagem do solicitante */
+.notification-message img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    aspect-ratio: 1 / 1;
+    margin-right: 10px;
+    border: 0.5px solid rgb(145, 142, 142);
+}
+
+/* Ajuste do texto da notificação */
+.notification-message p {
+    margin: 0;
+    font-size: 14px;
+    color: white;
+    flex-grow: 1;
+}
+
+/* Ajuste para o link de aprovação */
+.notification-action {
+    color: #1EB2C1;
+    font-size: 12px;
+    text-decoration: none;
+    margin-top: 10px; /* Espaço acima do link */
+    align-self: center; /* Centraliza o link na parte inferior */
+}
+
+.notification-action:hover {
+    text-decoration: underline;
+}
+
+/* Ajuste do botão de fechar */
+.close-notification {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.close-notification:hover {
+    color: red;
 }
