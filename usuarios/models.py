@@ -9,6 +9,7 @@ class Usuario(AbstractUser):
 
 
 
+
     class Meta:
         permissions = [
             ('can_approve_documents', 'Pode aprovar documentos'),

@@ -1,0 +1,89 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #38393F;
+    color: #fff;
+}
+
+/* Contêiner principal */
+.container {
+    background-color: rgba(17, 16, 16, 0.44);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
+    width: 80%;
+    max-width: 900px;
+    margin: 50px auto;
+    color: #ffffff;
+    text-align: left;
+    position: relative; /* Necessário para posicionar o botão de voltar */
+}
+
+/* Botão de Voltar no canto superior direito dentro do container */
+.back-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #2EC2D6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+/* Título da página */
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+/* Informações do documento */
+p {
+    font-size: 18px;
+    margin: 10px 0;
+    color: #ffffff;
+}
+
+p strong {
+    color: #ffffff;
+}
+
+/* Exibir o PDF */
+iframe {
+    margin-top: 20px;
+    border: 2px solid #2EC2D6;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Botão para baixar o PDF */
+.btn {
+    display: inline-block;
+    background-color: #2EC2D6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 15px #2EC2D6;
+}

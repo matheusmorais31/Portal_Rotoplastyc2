@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="weather-card">
+    <!-- Previsão -->
+    <div class="forecast-container">
+        <h2>Previsão do dia</h2>
+        <div class="forecast-content">
+            <button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
+            <div id="previsao-dia">
+                <div class="temp-container">
+                    {% if previsao.condicao_icone %}
+                        <img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
+                    {% endif %}
+                    <h1>{{ previsao.temperatura_max }}°C</h1>
+                </div>
+                <p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
+                <div class="temp-container">
+                    <img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon">
+                    <p>{{ previsao.probabilidade_chuva }}%</p>
+                </div>
+                <p>{{ previsao.condicao }}</p>
+            </div>
+            <button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function mudarDia(dia) {
+        const queryString = new URLSearchParams(window.location.search);
+        queryString.set('dia', dia);
+        window.location.search = queryString.toString();
+    }
+</script>
+{% endblock %}

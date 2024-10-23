@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Previsão de 15 Dias</title>
+</head>
+<body>
+    <h1>Previsão de 15 dias</h1>
+    {% if previsao %}
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Temperatura Mínima</th>
+                <th>Temperatura Máxima</th>
+                <th>Condição</th>
+                <th>Chuva (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dia in previsao %}
+            <tr>
+                <td>{{ dia.data }}</td>
+                <td>{{ dia.temperatura_min }} °C</td>
+                <td>{{ dia.temperatura_max }} °C</td>
+                <td>{{ dia.condicao }}</td>
+                <td>{{ dia.probabilidade_chuva }} %</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>{{ erro }}</p>
+    {% endif %}
+</body>
+</html>

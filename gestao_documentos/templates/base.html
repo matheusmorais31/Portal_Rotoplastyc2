@@ -30,7 +30,8 @@
                         {% for notificacao in notificacoes_nao_lidas %}
                             <li id="notification-{{ notificacao.id }}">
                                 <div class="notification-message">
-                                    <img src="{% if notificacao.documento.solicitante.profile_photo %}{{ notificacao.documento.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
+                                    <!-- Exibindo a foto do solicitante -->
+                                    <img src="{% if notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
                                     <p>{{ notificacao.mensagem }}</p>
                                     <div class="notification-controls">
                                         <a href="{% url 'documentos:listar_aprovacoes_pendentes' %}" class="notification-action">Ir para aprovações</a>
@@ -48,7 +49,7 @@
             <!-- Menu de perfil -->
             <div class="profile-dropdown">
                 <div class="profile-icon" onclick="toggleProfileMenu()">
-                    <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Usuário" class="profile-photo">
+                    <img src="{% if user.profile_photo and user.profile_photo.url != '' %}{{ user.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Usuário" class="profile-photo">
                     <span class="dropdown">&#9660;</span>
                 </div>
                 <div id="profile-menu" class="profile-menu">
@@ -82,6 +83,7 @@
                 <ul class="submenu">
                     <li><a href="{% url 'documentos:listar_documentos_aprovados' %}">Listar Documentos</a></li>
                     <li><a href="{% url 'documentos:listar_aprovacoes_pendentes' %}">Aprovações Pendentes</a></li>
+                    <li><a href="{% url 'documentos:listar_documentos_reprovados' %}">Reprovações</a></li>
                     <li><a href="{% url 'documentos:listar_categorias' %}">Categorias</a></li>
                 </ul>
             </li>

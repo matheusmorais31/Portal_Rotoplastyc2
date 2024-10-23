@@ -5,6 +5,7 @@ from django.contrib.auth.models import Permission
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 import logging
+from django.core.exceptions import ValidationError
 
 # Definir o logger
 logger = logging.getLogger('django')
@@ -55,10 +56,21 @@ class DocumentoForm(forms.ModelForm):
         self.fields['aprovador1'].queryset = aprovadores
         self.fields['aprovador2'].queryset = aprovadores
 
+    def clean(self):
+        cleaned_data = super().clean()
+        nome = cleaned_data.get("nome")
+        revisao = cleaned_data.get("revisao")
+        
+        # Verificar se já existe um documento com o mesmo nome e revisão
+        if Documento.objects.filter(nome=nome, revisao=revisao).exists():
+            raise ValidationError(f"Já existe um documento com o nome '{nome}' e a revisão '{revisao}'.")
+
+        return cleaned_data
+
     def save(self, commit=True):
         logger.debug(f"[DocumentoForm] Tentando salvar o documento {self.instance.nome}. Campos: {self.cleaned_data}")
         return super().save(commit=commit)
-
+    
 # Formulário para criar uma nova revisão de documento
 class NovaRevisaoForm(forms.ModelForm):
     class Meta:

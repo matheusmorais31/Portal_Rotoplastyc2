@@ -44,6 +44,15 @@ class Documento(models.Model):
     elaborador = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='documentos_criados')
     solicitante = models.ForeignKey(User, on_delete=models.CASCADE, default=38)  # ID do usuário padrão
 
+    def get_dirty_fields(self):
+        dirty_fields = {}
+        if self.pk is not None:
+            old_instance = self.__class__.objects.get(pk=self.pk)
+            for field in self._meta.fields:
+                field_name = field.name
+                if getattr(self, field_name) != getattr(old_instance, field_name):
+                    dirty_fields[field_name] = getattr(self, field_name)
+        return dirty_fields
 
     class Meta:
         permissions = [
@@ -54,11 +63,9 @@ class Documento(models.Model):
     def __str__(self):
         return f"{self.nome} - Revisão {self.revisao}"
 
-    # Caminho para salvar o PDF gerado
     def gerar_pdf_path(self):
         return os.path.join('documentos', 'pdf', f"{self.nome}_v{self.revisao}.pdf")
 
-    # Remove o PDF anterior ao salvar uma nova versão
     def remover_pdf_antigo(self):
         pdf_path = self.gerar_pdf_path()
         fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'documentos', 'pdf'))
@@ -67,7 +74,6 @@ class Documento(models.Model):
             fs.delete(os.path.basename(pdf_path))
             logger.debug(f"[PDF] Arquivo PDF antigo removido diretamente: {pdf_path}")
 
-    # Função para gerar o PDF a partir do arquivo editável
     def gerar_pdf(self):
         try:
             documento_path = self.documento.path

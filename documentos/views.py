@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 from django.db.models import F, Subquery, OuterRef
 from django.db import transaction
-import logging
+import logging, json
 
 logger = logging.getLogger('django')
 
@@ -113,8 +113,11 @@ def listar_documentos_aprovados(request):
 @login_required
 def listar_aprovacoes_pendentes(request):
     user = request.user
-    documentos_pendentes_aprovador1 = Documento.objects.filter(aprovador1=user, aprovado_por_aprovador1=False)
-    documentos_pendentes_aprovador2 = Documento.objects.filter(aprovador2=user, aprovado_por_aprovador1=True, aprovado_por_aprovador2=False)
+    # Filtrar apenas os documentos que não foram reprovados e que estão pendentes de aprovação
+    documentos_pendentes_aprovador1 = Documento.objects.filter(aprovador1=user, aprovado_por_aprovador1=False, reprovado=False)
+    documentos_pendentes_aprovador2 = Documento.objects.filter(aprovador2=user, aprovado_por_aprovador1=True, aprovado_por_aprovador2=False, reprovado=False)
+    
+    # Combina os documentos pendentes de ambos os aprovadores
     documentos_pendentes = documentos_pendentes_aprovador1.union(documentos_pendentes_aprovador2)
 
     return render(request, 'documentos/listar_aprovacoes_pendentes.html', {
@@ -128,15 +131,26 @@ def reprovar_documento(request, documento_id):
     if request.method == 'POST':
         documento = get_object_or_404(Documento, id=documento_id)
         user = request.user
+
         if not user.has_perm('documentos.can_reject'):
-            raise PermissionDenied("Você não tem permissão para reprovar este documento.")
+            return JsonResponse({'status': 'error', 'message': 'Você não tem permissão para reprovar este documento.'})
 
         if user == documento.aprovador1 or user == documento.aprovador2:
-            motivo = request.POST.get('motivo')
-            documento.reprovado = True
-            documento.motivo_reprovacao = motivo
-            documento.save()
-            return JsonResponse({'status': 'success'})
+            try:
+                data = json.loads(request.body)
+                motivo = data.get('motivo', '')
+
+                if not motivo:
+                    return JsonResponse({'status': 'error', 'message': 'Motivo de reprovação não pode estar vazio.'})
+
+                # Marcar o documento como reprovado
+                documento.reprovado = True
+                documento.motivo_reprovacao = motivo
+                documento.save()
+
+                return JsonResponse({'status': 'success', 'message': 'Documento reprovado com sucesso.'})
+            except json.JSONDecodeError:
+                return JsonResponse({'status': 'error', 'message': 'Erro ao processar o JSON enviado.'})
         else:
             return JsonResponse({'status': 'error', 'message': 'Você não pode reprovar este documento.'})
     
@@ -167,26 +181,35 @@ def aprovar_documento(request, documento_id):
 @permission_required('documentos.add_documento', raise_exception=True)
 def nova_revisao(request, documento_id):
     documento_atual = get_object_or_404(Documento, id=documento_id)
+    
     revisoes_pendentes = Documento.objects.filter(
         nome=documento_atual.nome,
         aprovado_por_aprovador1=False,
         aprovado_por_aprovador2=False
     ).exclude(id=documento_atual.id)
 
+    # Verificar se há revisões pendentes
     if revisoes_pendentes.exists():
+        # Renderiza o template com uma mensagem de erro ao invés de redirecionar
         messages.error(request, 'Não é possível criar uma nova revisão enquanto houver revisões pendentes de aprovação.')
-        return redirect('documentos:listar_documentos_aprovados')
+        return render(request, 'documentos/nova_revisao.html', {
+            'form': None,
+            'documento': documento_atual,
+            'erro_revisao_pendente': True,
+        })
 
     if request.method == 'POST':
         form = NovaRevisaoForm(request.POST, request.FILES, documento_atual=documento_atual)
         if form.is_valid():
             nova_revisao = form.save(commit=False)
             nova_revisao.categoria = documento_atual.categoria
+            nova_revisao.elaborador = request.user
             nova_revisao.save()
             messages.success(request, 'Nova revisão criada com sucesso!')
             return redirect('documentos:listar_aprovacoes_pendentes')
     else:
         form = NovaRevisaoForm(documento_atual=documento_atual)
+
     return render(request, 'documentos/nova_revisao.html', {'form': form, 'documento': documento_atual})
 
 @login_required
@@ -203,3 +226,13 @@ def visualizar_acessos_documento(request, id):
     documento = get_object_or_404(Documento, id=id)
     acessos = Acesso.objects.filter(documento=documento)
     return render(request, 'documentos/visualizar_acessos.html', {'documento': documento, 'acessos': acessos})
+
+@login_required
+def listar_documentos_reprovados(request):
+    # Filtrar apenas documentos reprovados onde o usuário logado é o elaborador
+    documentos_reprovados = Documento.objects.filter(elaborador=request.user, reprovado=True)
+
+    return render(request, 'documentos/lista_reprovados.html', {
+        'documentos': documentos_reprovados,
+        'titulo': 'Documentos Reprovados'
+    })

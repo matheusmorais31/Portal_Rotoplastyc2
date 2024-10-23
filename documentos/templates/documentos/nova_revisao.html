@@ -1,4 +1,3 @@
-<!-- documentos/templates/documentos/nova_revisao.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -12,39 +11,47 @@
 {% block content %}
 <div class="container">
     <h2>Nova Revisão - {{ documento.nome }}</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
 
-        <!-- Exibe mensagens de erro gerais apenas quando houver -->
-        {% if form.non_field_errors %}
-            <div class="error-message" style="color: red;">
-                {{ form.non_field_errors }}
-            </div>
-        {% endif %}
-
-        <!-- Campos do formulário -->
-        {% for field in form %}
-            <div class="form-group">
-                <label>{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                {% endif %}
-                {% if field.errors %}
-                    <div class="error-message" style="color: red;">
-                        {{ field.errors }}
-                    </div>
-                {% endif %}
-            </div>
-        {% endfor %}
-
-        <div class="form-buttons">
-            <a href="{% url 'documentos:listar_documentos_aprovados' %}">
-                <button type="button">Cancelar</button>
-            </a>
-            <button type="submit">OK</button>
+    {% if erro_revisao_pendente %}
+        <!-- Exibe uma mensagem de aviso se há uma revisão pendente -->
+        <div class="alert alert-warning">
+            <strong>Atenção!</strong> Não é possível criar uma nova revisão enquanto houver revisões pendentes de aprovação.
         </div>
-    </form>
+    {% else %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Exibe mensagens de erro gerais apenas quando houver -->
+            {% if form.non_field_errors %}
+                <div class="error-message" style="color: red;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- Campos do formulário -->
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="error-message" style="color: red;">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="form-buttons">
+                <a href="{% url 'documentos:listar_documentos_aprovados' %}">
+                    <button type="button">Cancelar</button>
+                </a>
+                <button type="submit">OK</button>
+            </div>
+        </form>
+    {% endif %}
 </div>
 {% endblock %}
 

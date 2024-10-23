@@ -105,32 +105,34 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Logging configuration with log rotation
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,  # Desativar loggers existentes
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
-        'console': {
-            'level': 'WARNING',  # Muda o nível de log para WARNING (vai ignorar INFO e DEBUG)
-            'class': 'logging.StreamHandler',
+        'file': {
+            'level': 'DEBUG',  # Altere para DEBUG para registrar tudo
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'),
+            'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'WARNING',  # Ajuste o nível para WARNING, ERROR ou CRITICAL
+            'handlers': ['file'],
+            'level': 'DEBUG',  # Altere para DEBUG
             'propagate': True,
         },
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'ERROR',  # Apenas erros de banco de dados serão mostrados
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'ERROR',  # Apenas erros de requisição serão exibidos
-            'propagate': False,
-        },
-        'myapp': {  # Substitua 'myapp' pelo nome do seu app
-            'handlers': ['console'],
-            'level': 'ERROR',  # Apenas erros da sua aplicação serão exibidos
+        'myapp': {
+            'handlers': ['file'],
+            'level': 'DEBUG',  # Altere para DEBUG
         },
     },
 }

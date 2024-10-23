@@ -82,6 +82,11 @@
         {% endfor %}
     </div>
 
+    <!-- Formulário invisível para CSRF token -->
+    <form id="csrf-form" style="display:none;">
+        {% csrf_token %}
+    </form>
+
     <!-- Modal para inserção do motivo de reprovação -->
     <div id="rejectionModal" class="modal">
         <div class="modal-content">
@@ -109,26 +114,30 @@
 
     // Envia o motivo da reprovação
     function submitRejection() {
-        const motivo = document.getElementById("rejectionReason").value;
-        if (motivo.trim() === "") {
+        const motivo = document.getElementById("rejectionReason").value.trim(); // Pega o valor do textarea e remove espaços
+
+        if (!motivo) {
             alert("Por favor, insira o motivo da reprovação.");
             return;
         }
 
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        // Captura o CSRF token do form invisível
+        const csrftoken = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]').value;
+
+        // Enviar requisição com fetch
         fetch(`/documentos/reprovar/${documentoId}/`, {
             method: "POST",
             headers: {
                 "X-CSRFToken": csrftoken,
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `motivo=${encodeURIComponent(motivo)}`
+            body: JSON.stringify({ motivo: motivo }) // Envia o motivo como JSON
         })
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
                 alert("Documento reprovado com sucesso!");
-                window.location.reload();
+                window.location.reload();  // Recarrega a página para refletir as mudanças
             } else {
                 alert("Erro ao reprovar documento: " + data.message);
             }

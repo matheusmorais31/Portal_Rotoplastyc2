@@ -1,0 +1,53 @@
+.weather-card {
+    width: 500px;
+    background-color: #1717187c;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px #2EC2D6;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    position: fixed;  /* Faz o card ficar fixo na tela */
+    bottom: 20px;     /* Ajusta a distância do rodapé */
+    right: 10px;      /* Ajusta a distância da lateral direita */
+}
+
+.current-weather-container,
+.forecast-container {
+    width: 100%;
+}
+
+.weather-icon {
+    width: 48px;  /* Diminui o ícone das condições */
+    height: auto;
+    margin-right: 10px;  /* Espaçamento entre o ícone e o texto */
+}
+
+.forecast-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;  /* Espaçamento entre os elementos */
+}
+
+.temp-container {
+    display: flex;
+    align-items: center;
+}
+
+.rain-icon {
+    width: 24px;  /* Diminui o ícone de probabilidade de chuva */
+    height: auto;
+    margin-left: 10px;
+    margin-right: 5px;
+    margin-top: 10px;  /* Aumenta a margem superior */
+    margin-bottom: 10px;  /* Aumenta a margem inferior */
+}
+
+
+
+
+
+.prev-day, .next-day {
+    font-size: 36px;
+}

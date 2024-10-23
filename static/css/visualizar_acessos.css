@@ -1,0 +1,85 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #38393F;
+    color: #fff;
+}
+
+/* Contêiner principal */
+.container {
+    background-color: rgba(17, 16, 16, 0.44);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
+    width: 80%;
+    max-width: 900px;
+    margin: 50px auto;
+    text-align: center;
+    color: #ffffff;
+}
+
+/* Título da página */
+h1 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #ffffff;
+}
+
+/* Estilo para a tabela */
+.table {
+    width: 100%;
+    margin-top: 20px;
+    color: #ffffff;
+    background-color: rgba(17, 16, 16, 0.44);
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+}
+
+.table thead {
+    background-color: #2EC2D6;
+}
+
+.table thead th {
+    padding: 10px;
+    font-size: 18px;
+    text-align: left;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #555;
+}
+
+.table tbody td {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.table tbody tr:hover {
+    background-color: #2EC2D6;
+    color: #000;
+}
+
+/* Estilo para mensagens vazias */
+.table tbody tr td[colspan="2"] {
+    text-align: center;
+    font-style: italic;
+    color: #ffcccc;
+    font-size: 16px;
+}
+
+/* Margens entre os elementos */
+.mt-4 {
+    margin-top: 40px;
+}
+
+.mt-3 {
+    margin-top: 30px;
+}

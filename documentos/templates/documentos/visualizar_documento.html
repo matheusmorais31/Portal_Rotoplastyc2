@@ -1,11 +1,18 @@
-<!-- documentos/templates/documentos/visualizar_documento.html -->
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/visualizar_documento.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container">
+    <!-- Botão de Voltar posicionado no canto superior direito -->
+    <a href="javascript:history.back()" class="back-button">Voltar</a>
+
     <h1>{{ documento.nome }} - Revisão {{ documento.revisao|default:"N/A" }}</h1>
     <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
+    <p><strong>Elaborador:</strong> {{ documento.elaborador.get_full_name }}</p>
     <p><strong>Aprovador 1:</strong> {{ documento.aprovador1.get_full_name }}</p>
     <p><strong>Aprovador 2:</strong> {{ documento.aprovador2.get_full_name }}</p>
     <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y H:i" }}</p>
