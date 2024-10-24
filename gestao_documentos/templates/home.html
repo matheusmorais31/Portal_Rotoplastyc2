@@ -1,3 +1,5 @@
+<!-- home.html -->
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -6,40 +8,60 @@
 {% endblock %}
 
 {% block content %}
-<div class="weather-card" style="position: fixed; bottom: 20px; right: 20px;">
-    <!-- Clima Atual -->
-    <div class="current-weather-container">
-        <h2>Clima Atual</h2>
-        <p>{{ clima_atual.data }}</p>
-        {% if clima_atual.icone %}
-            <img src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="Ícone do tempo" class="weather-icon">
-        {% endif %}
-        <h1>{{ clima_atual.temperatura_atual }}°C</h1>
-        <p>Sensação: {{ clima_atual.sensacao }}°C</p>
-        <p>Humidade: {{ clima_atual.humidade }}%</p>
-        <p>{{ clima_atual.condicao }}</p>
-    </div>
-
-    <!-- Previsão -->
-    <div class="forecast-container">
-        <h2>Previsão do dia</h2>
-        <div class="forecast-content">
-            <button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
-            <div id="previsao-dia">
-                <p>{{ previsao.data_br }}</p>
-                {% if previsao.condicao_icone %}
-                    <img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
-                {% else %}
-                    <p>Sem ícone para a condição: {{ previsao.condicao }}</p>
+<div class="weather-card">
+    {% if erro %}
+        <p>{{ erro }}</p>
+    {% else %}
+        <!-- Clima Atual -->
+        {% if clima_atual %}
+            <div class="current-weather-container">
+                <h2>Clima Atual</h2>
+                <p>{{ clima_atual.data }}</p>
+                {% if clima_atual.icone %}
+                    <img src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="Ícone do tempo" class="weather-icon">
                 {% endif %}
-                <h1>{{ previsao.temperatura_max }}°C</h1>
-                <p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
-                <p><img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon"> {{ previsao.probabilidade_chuva }}%</p>
-                <p>{{ previsao.condicao }}</p>
+                <h1>{{ clima_atual.temperatura_atual }}°C</h1>
+                <p>Sensação: {{ clima_atual.sensacao }}°C</p>
+                <p>Humidade: {{ clima_atual.humidade }}%</p>
+                <p>{{ clima_atual.condicao }}</p>
             </div>
-            <button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
-        </div>
-    </div>
+        {% else %}
+            <p>Dados do clima atual não disponíveis.</p>
+        {% endif %}
+
+        <!-- Linha de separação -->
+        <div class="separator-line"></div>
+
+        <!-- Previsão -->
+        {% if previsao %}
+            <div class="forecast-container">
+                <h2>Previsão do Dia</h2>
+                <div class="forecast-content">
+                    <button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
+                    <div id="previsao-dia">
+                        <p>{{ previsao.data_br }}</p>
+                        {% if previsao.condicao_icone %}
+                            <img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
+                        {% else %}
+                            <p>Sem ícone para a condição: {{ previsao.condicao }}</p>
+                        {% endif %}
+                        <div class="temp-container">
+                            <h1>{{ previsao.temperatura_max }}°C</h1>
+                            <p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
+                        </div>
+                        <p>
+                            <img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon">
+                            {{ previsao.probabilidade_chuva }}%
+                        </p>
+                        <p>{{ previsao.condicao }}</p>
+                    </div>
+                    <button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
+                </div>
+            </div>
+        {% else %}
+            <p>Dados de previsão não disponíveis.</p>
+        {% endif %}
+    {% endif %}
 </div>
 
 <script>

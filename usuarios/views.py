@@ -1,6 +1,6 @@
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import UsuarioCadastroForm, UsuarioChangeForm, GrupoForm, UsuarioPermissaoForm
+from .forms import UsuarioCadastroForm, UsuarioChangeForm, GrupoForm, UsuarioPermissaoForm, ProfileForm
 from .models import Usuario, Grupo
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
@@ -12,15 +12,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.models import Permission, Group
-from .forms import ProfileForm
+from django.utils.translation import gettext as _
 
 
 # Configuração do logger
 logger = logging.getLogger(__name__)
 
 # Função para renderizar a página home
-def home(request):
-    return render(request, 'home.html')
 
 # Registrar usuários locais no banco de dados
 def registrar_usuario(request):
@@ -302,11 +300,16 @@ def liberar_permissoes(request):
         if usuario_grupo_id and tipo:
             permissoes = Permission.objects.all()
 
+            permissoes_list = []
+            for p in permissoes:
+                display_name = get_permission_display_name(p)
+                permissoes_list.append({'id': p.id, 'name': display_name})
+
             if tipo == 'Usuário':
                 usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
                 permissoes_selecionadas = usuario.user_permissions.values_list('id', flat=True)
                 return JsonResponse({
-                    'permissoes': list(permissoes.values('id', 'name')),
+                    'permissoes': permissoes_list,
                     'permissoes_selecionadas': list(permissoes_selecionadas)
                 })
 
@@ -314,36 +317,30 @@ def liberar_permissoes(request):
                 grupo = get_object_or_404(Group, id=usuario_grupo_id)
                 permissoes_selecionadas = grupo.permissions.values_list('id', flat=True)
                 return JsonResponse({
-                    'permissoes': list(permissoes.values('id', 'name')),
+                    'permissoes': permissoes_list,
                     'permissoes_selecionadas': list(permissoes_selecionadas)
                 })
         else:
             return render(request, 'usuarios/liberar_permissoes.html')
 
-    elif request.method == 'POST':
-        usuario_grupo_id = request.POST.get('usuario_grupo_id')
-        tipo = request.POST.get('tipo')
-        permissoes_selecionadas = request.POST.getlist('permissoes')
+def get_permission_display_name(permission):
+    codename = permission.codename
+    model = permission.content_type.model_class()
+    model_name = model._meta.verbose_name
 
-        if tipo == 'Usuário':
-            usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
-            usuario.user_permissions.clear()  # Remove todas as permissões atuais
-            if permissoes_selecionadas:
-                usuario.user_permissions.set(permissoes_selecionadas)  # Adiciona novas permissões
-            usuario.save()
-            messages.success(request, "Permissões atualizadas com sucesso para o usuário.")
+    if codename.startswith('add_'):
+        action = _('Pode adicionar')
+    elif codename.startswith('change_'):
+        action = _('Pode alterar')
+    elif codename.startswith('delete_'):
+        action = _('Pode excluir')
+    elif codename.startswith('view_'):
+        action = _('Pode visualizar')
+    else:
+        # Para permissões personalizadas, usamos o nome diretamente
+        return _(permission.name)
 
-        elif tipo == 'Grupo':
-            grupo = get_object_or_404(Group, id=usuario_grupo_id)
-            grupo.permissions.clear()  # Remove todas as permissões atuais
-            if permissoes_selecionadas:
-                grupo.permissions.set(permissoes_selecionadas)  # Adiciona novas permissões
-            grupo.save()
-            messages.success(request, "Permissões atualizadas com sucesso para o grupo.")
-
-        return redirect('usuarios:liberar_permissoes')
-
-    return render(request, 'usuarios/liberar_permissoes.html')
+    return f'{action} {model_name}'
 
 # Página de perfil
 class ProfileView(TemplateView):

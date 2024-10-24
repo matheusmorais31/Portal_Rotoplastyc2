@@ -5,15 +5,17 @@ from gestao_documentos import views as gestao_documentos_views  # Importa as vie
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from gestao_documentos.views import home  # Importa a view home corrigida
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', usuarios_views.home, name='home'),  # Página inicial (home)
+    path('', home, name='home'),
     path('usuarios/', include(('usuarios.urls', 'usuarios'), namespace='usuarios')),  # Inclui as URLs do app 'usuarios'
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('perfil/', usuarios_views.ProfileView.as_view(), name='perfil_usuario'),
     path('documentos/', include('documentos.urls', namespace='documentos')),  # URLs relacionadas a documentos
     path('notificacoes/', include('notificacoes.urls')),  # URLs relacionadas a notificações
+     
     
 ]
 

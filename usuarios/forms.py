@@ -1,5 +1,3 @@
-# usuarios/forms.py
-
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.contrib.auth.password_validation import validate_password
@@ -130,6 +128,7 @@ class GrupoForm(forms.ModelForm):
             'participantes': forms.CheckboxSelectMultiple(),
         }
 
+# Formulário de Perfil
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Usuario

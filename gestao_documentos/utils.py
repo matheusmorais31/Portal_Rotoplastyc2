@@ -1,6 +1,6 @@
 import requests
 
-def obter_previsao_completa(cidade_id='5585', api_key='0e757fa29362163506c6cb24d14f10cf'):
+def obter_previsao_completa(cidade_id='5585', api_key='5f713c18b31aee4d7a93df6a3220cfb8'):
     url_previsao = f"https://apiadvisor.climatempo.com.br/api/v1/forecast/locale/{cidade_id}/days/15?token={api_key}"
     
     try:

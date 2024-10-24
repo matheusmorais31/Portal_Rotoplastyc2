@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Permission
 from django.contrib.auth import get_user_model
 
 class Usuario(AbstractUser):
@@ -7,10 +7,9 @@ class Usuario(AbstractUser):
     ativo = models.BooleanField(default=True)
     profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True, default='default_user.png')
 
-
-
-
     class Meta:
+        verbose_name = 'Usuário'
+        verbose_name_plural = 'Usuários'
         permissions = [
             ('can_approve_documents', 'Pode aprovar documentos'),
         ]
