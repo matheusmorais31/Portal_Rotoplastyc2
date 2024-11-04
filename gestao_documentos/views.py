@@ -33,7 +33,11 @@ def selecionar_icone(condicao):
         'neve': '8',
         'nevoeiro': '9',
         'pancadas de chuva': '4',
-        'muitas nuvens': '3'
+        'muitas nuvens': '3',
+        'céu limpo': '1',
+        'algumas nuvens': 'nublado',
+
+
 
 
     }

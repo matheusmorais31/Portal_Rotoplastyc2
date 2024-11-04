@@ -161,21 +161,20 @@ def reprovar_documento(request, documento_id):
 def aprovar_documento(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
     user = request.user
-    logger.debug(f"Tentando aprovar o documento: {documento.nome} por {user.get_full_name()}")
 
     if user == documento.aprovador1 and not documento.aprovado_por_aprovador1:
-        Documento.objects.filter(pk=documento.pk).update(aprovado_por_aprovador1=True)
-        logger.debug(f"Documento {documento.nome} aprovado por Aprovador 1.")
+        documento.aprovado_por_aprovador1 = True
+        documento.save()
         messages.success(request, 'Documento aprovado por Aprovador 1.')
     elif user == documento.aprovador2 and documento.aprovado_por_aprovador1 and not documento.aprovado_por_aprovador2:
-        Documento.objects.filter(pk=documento.pk).update(aprovado_por_aprovador2=True)
-        logger.debug(f"Documento {documento.nome} aprovado por Aprovador 2.")
+        documento.aprovado_por_aprovador2 = True
+        documento.save()
         messages.success(request, 'Documento aprovado por Aprovador 2.')
     else:
-        logger.debug(f"Erro ao tentar aprovar o documento {documento.nome} pelo usuário {user.get_full_name()}")
         messages.error(request, 'Você não tem permissão para aprovar este documento no momento.')
 
     return redirect('documentos:listar_aprovacoes_pendentes')
+
 
 @login_required
 @permission_required('documentos.add_documento', raise_exception=True)

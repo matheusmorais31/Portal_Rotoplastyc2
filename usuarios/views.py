@@ -6,13 +6,14 @@ from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from ldap3 import Server, Connection, ALL
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.models import Permission, Group
 from django.utils.translation import gettext as _
+from django.urls import reverse_lazy
 
 
 # Configuração do logger
@@ -323,6 +324,33 @@ def liberar_permissoes(request):
         else:
             return render(request, 'usuarios/liberar_permissoes.html')
 
+    elif request.method == 'POST':
+        # Novo código para tratar o método POST
+        usuario_grupo_id = request.POST.get('usuario_grupo_id')
+        tipo = request.POST.get('tipo')
+        permissoes_ids = request.POST.getlist('permissoes')
+
+        if usuario_grupo_id and tipo:
+            if tipo == 'Usuário':
+                usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
+                permissoes = Permission.objects.filter(id__in=permissoes_ids)
+                usuario.user_permissions.set(permissoes)
+                messages.success(request, f"Permissões atualizadas para o usuário {usuario.username}")
+            elif tipo == 'Grupo':
+                grupo = get_object_or_404(Group, id=usuario_grupo_id)
+                permissoes = Permission.objects.filter(id__in=permissoes_ids)
+                grupo.permissions.set(permissoes)
+                messages.success(request, f"Permissões atualizadas para o grupo {grupo.name}")
+            return redirect('usuarios:liberar_permissoes')
+        else:
+            messages.error(request, "Por favor, selecione um usuário ou grupo e permissões.")
+            return redirect('usuarios:liberar_permissoes')
+
+    else:
+        # Se o método não for GET ou POST, retorna um erro adequado
+        return HttpResponseNotAllowed(['GET', 'POST'])
+
+
 def get_permission_display_name(permission):
     codename = permission.codename
     model = permission.content_type.model_class()
@@ -351,9 +379,9 @@ class ProfileView(TemplateView):
         context['user'] = self.request.user  # Passa o objeto do usuário autenticado para o contexto do template
         return context
 
-# Função para logout
 class CustomLogoutView(LogoutView):
-    next_page = 'login'  # Após logout, redireciona para a página de login
+    next_page = reverse_lazy('usuarios:login_usuario')
+
 
 # Função para listar permissões
 @login_required
@@ -374,3 +402,6 @@ def editar_perfil(request):
         form = ProfileForm(instance=usuario)
     
     return render(request, 'usuarios/editar_perfil.html', {'form': form})
+
+def error_403_view(request, exception):
+    return render(request, 'usuarios/403.html', status=403)
