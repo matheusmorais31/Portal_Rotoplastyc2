@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = 'django-insecure-1hy@(6*s2-g(gw)gh800lp_&&+0pm5-*kyl0zqetl%*^5-=8ig'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
 # Application definition
 INSTALLED_APPS = [
@@ -145,3 +145,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Security settings
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+from django.urls import reverse_lazy
+
+LOGOUT_REDIRECT_URL = reverse_lazy('usuarios:login_usuario')

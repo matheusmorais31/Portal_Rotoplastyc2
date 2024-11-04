@@ -34,8 +34,8 @@
                                     <img src="{% if notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
                                     <p>{{ notificacao.mensagem }}</p>
                                     <div class="notification-controls">
-                                        <a href="{% url 'documentos:listar_aprovacoes_pendentes' %}" class="notification-action">Ir para aprovações</a>
-                                    </div>
+                                        <a href="{{ notificacao.link }}" class="notification-action">Ir para</a>
+                                    </div>                                    
                                 </div>
                                 <button class="close-notification" data-id="{{ notificacao.id }}">✖</button>
                             </li>
@@ -59,7 +59,13 @@
                     </div>
                     <ul>
                         <li><a href="{% url 'usuarios:perfil_usuario' %}">Perfil do Usuário</a></li>
-                        <li><a href="{% url 'logout' %}">Sair</a></li>
+                        <li>
+                            <form id="logout-form" action="{% url 'usuarios:logout' %}" method="POST" style="display: none;">
+                                {% csrf_token %}
+                                <button type="submit">Sair</button>
+                            </form>
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sair</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -176,7 +182,6 @@
             }
         });
 
-        // Atualiza o contador de notificações na bolinha
         function updateNotificationCount() {
             const notificationCountElement = document.getElementById('notification-count');
             let currentCount = parseInt(notificationCountElement.textContent);
@@ -188,12 +193,9 @@
             }
         }
 
-        // Enviar a requisição para marcar a notificação como lida
         document.querySelectorAll('.close-notification').forEach(function(button) {
             button.addEventListener('click', function() {
                 var notificacaoId = this.getAttribute('data-id');
-                console.log('Clicado para fechar notificação com ID:', notificacaoId);
-
                 fetch(`/notificacoes/marcar-notificacao-como-lida/${notificacaoId}/`, {
                     method: 'POST',
                     headers: {
@@ -203,9 +205,8 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        console.log('Notificação marcada como lida.');
                         this.closest('li').style.display = 'none';
-                        updateNotificationCount();  // Atualizar o contador
+                        updateNotificationCount();
                     } else {
                         console.error('Erro ao marcar a notificação como lida.');
                     }

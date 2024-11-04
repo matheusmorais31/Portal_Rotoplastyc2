@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-import logging
 from django.core.exceptions import ValidationError
+import logging
 
 # Definir o logger
 logger = logging.getLogger('django')
@@ -47,30 +47,28 @@ class DocumentoForm(forms.ModelForm):
         self._set_aprovadores()
 
     def _set_aprovadores(self):
-        """Define a queryset dos aprovadores baseada nas permissões de aprovação."""
+        """Define a queryset dos aprovadores com permissão e que estão ativos."""
         content_type = ContentType.objects.get_for_model(Documento)
         permission = Permission.objects.get(content_type=content_type, codename='can_approve')
         aprovadores = User.objects.filter(
-            Q(user_permissions=permission) | Q(groups__permissions=permission)
+            Q(user_permissions=permission) | Q(groups__permissions=permission),
+            ativo=True  # Filtra apenas usuários ativos
         ).distinct()
-        self.fields['aprovador1'].queryset = aprovadores
-        self.fields['aprovador2'].queryset = aprovadores
+        self.fields['aprovador1'].queryset = aprovadores.filter(ativo=True)
+        self.fields['aprovador2'].queryset = aprovadores.filter(ativo=True)
 
     def clean(self):
         cleaned_data = super().clean()
-        nome = cleaned_data.get("nome")
-        revisao = cleaned_data.get("revisao")
+        nome = cleaned_data.get('nome')
         
-        # Verificar se já existe um documento com o mesmo nome e revisão
-        if Documento.objects.filter(nome=nome, revisao=revisao).exists():
-            raise ValidationError(f"Já existe um documento com o nome '{nome}' e a revisão '{revisao}'.")
+        # Verificar se já existe um documento com o mesmo nome que não foi reprovado
+        documentos_existentes = Documento.objects.filter(nome=nome, reprovado=False)
+        
+        if documentos_existentes.exists():
+            raise ValidationError('Já existe um documento aprovado ou pendente com este nome. Escolha outro nome.')
 
         return cleaned_data
 
-    def save(self, commit=True):
-        logger.debug(f"[DocumentoForm] Tentando salvar o documento {self.instance.nome}. Campos: {self.cleaned_data}")
-        return super().save(commit=commit)
-    
 # Formulário para criar uma nova revisão de documento
 class NovaRevisaoForm(forms.ModelForm):
     class Meta:
@@ -96,22 +94,20 @@ class NovaRevisaoForm(forms.ModelForm):
         super(NovaRevisaoForm, self).__init__(*args, **kwargs)
 
         if documento_atual:
-            # Define o campo 'nome' como somente leitura e inicializa as revisões
             self.fields['nome'].initial = documento_atual.nome
             self._set_revisoes_disponiveis(documento_atual.revisao)
 
         self._set_aprovadores()
 
     def _set_revisoes_disponiveis(self, revisao_atual):
-        """Define as revisões disponíveis no formulário com base na revisão atual."""
         self.fields['revisao'].choices = [(i, f"{i:02d}") for i in range(revisao_atual + 1, 101)]
 
     def _set_aprovadores(self):
-        """Define a queryset dos aprovadores baseada nas permissões de aprovação."""
         content_type = ContentType.objects.get_for_model(Documento)
         permission = Permission.objects.get(content_type=content_type, codename='can_approve')
         aprovadores = User.objects.filter(
-            Q(user_permissions=permission) | Q(groups__permissions=permission)
+            Q(user_permissions=permission) | Q(groups__permissions=permission),
+            ativo=True  # Filtra apenas usuários ativos
         ).distinct()
-        self.fields['aprovador1'].queryset = aprovadores
-        self.fields['aprovador2'].queryset = aprovadores
+        self.fields['aprovador1'].queryset = aprovadores.filter(ativo=True)
+        self.fields['aprovador2'].queryset = aprovadores.filter(ativo=True)

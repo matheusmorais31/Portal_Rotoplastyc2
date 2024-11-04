@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Acesso Negado{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/403.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="error-container">
+        <div class="sirene"></div> <!-- Sirene giratória -->
+        <h1>Acesso Negado</h1>
+        <p>Você não tem permissão para acessar esta página.</p>
+        <p>Por favor abrir um chamado via GLPI.</p>
+        <a href="{% url 'home' %}">Voltar para a Página Inicial</a>
+    </div>
+</div>
+{% endblock %}

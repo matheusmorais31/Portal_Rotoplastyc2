@@ -1,0 +1,122 @@
+/* Estilo para a página 403 */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #38393F;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 100px); /* Ajuste para descontar o cabeçalho */
+    width: 100%;
+}
+
+/* Contêiner da mensagem de erro */
+.error-container {
+    background-color: rgba(17, 16, 16, 0.8);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
+    width: 500px;
+    max-width: 90%;
+    text-align: center;
+}
+
+/* Título da mensagem de erro */
+.error-container h1 {
+    font-size: 36px;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+/* Mensagem de descrição */
+.error-container p {
+    font-size: 18px;
+    color: #d3d3d3;
+    margin-bottom: 20px;
+}
+
+/* Estilo para o botão de link */
+.error-container a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #2EC2D6;
+    color: white;
+    border-radius: 10px;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* Efeito hover no botão */
+.error-container a:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 15px #2EC2D6;
+}
+
+/* Efeito de sombra nos textos */
+h1, p, a {
+    text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
+}
+
+/* Estilos para a sirene giratória */
+.sirene {
+    width: 60px;
+    height: 60px;
+    background-color: #FF4C4C;
+    border-radius: 50%;
+    position: relative;
+    margin: 0 auto 20px auto;
+    box-shadow: 0 0 15px rgba(255, 76, 76, 0.8);
+    animation: girar 1.5s linear infinite;
+}
+
+.sirene::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 10px;
+    background-color: #FF4C4C;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 76, 76, 0.8);
+    opacity: 0.6;
+}
+
+.sirene::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 10px;
+    background-color: #FF4C4C;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 76, 76, 0.8);
+    opacity: 0.6;
+}
+
+@keyframes girar {
+    0% {
+        transform: rotate(0deg);
+        box-shadow: 0 0 20px rgba(255, 76, 76, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 0, 0, 1);
+    }
+    100% {
+        transform: rotate(360deg);
+        box-shadow: 0 0 20px rgba(255, 76, 76, 0.8);
+    }
+}

@@ -11,6 +11,7 @@ class Notificacao(models.Model):
     mensagem = models.TextField()
     lida = models.BooleanField(default=False)
     data_criacao = models.DateTimeField(auto_now_add=True)
+    link = models.CharField(max_length=255, blank=True, null=True)  # Novo campo de link
 
     def __str__(self):
         return f"Notificação para {self.destinatario.username}"
