@@ -132,4 +132,4 @@ class GrupoForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ['first_name', 'last_name', 'email', 'profile_photo']  # Inclua os campos desejados
+        fields = ['first_name', 'last_name', 'email', 'profile_photo']  

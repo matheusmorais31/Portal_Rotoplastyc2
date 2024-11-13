@@ -1,3 +1,4 @@
+<!-- nova_revisao.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -12,12 +13,24 @@
 <div class="container">
     <h2>Nova Revisão - {{ documento.nome }}</h2>
 
-    {% if erro_revisao_pendente %}
-        <!-- Exibe uma mensagem de aviso se há uma revisão pendente -->
+    {% if mensagem %}
         <div class="alert alert-warning">
-            <strong>Atenção!</strong> Não é possível criar uma nova revisão enquanto houver revisões pendentes de aprovação.
+            {{ mensagem }}
         </div>
+    {% endif %}
+
+    {% if revisao_pendente %}
+        <!-- Exibe detalhes da revisão pendente -->
+        <p><strong>Revisão Pendente</strong></p>
+           <ul> 
+            <li class="lista-revisao"><strong>Revisão Número:</strong> {{ revisao_pendente.revisao }}</li>
+            <li class="lista-revisao"><strong>Status:</strong> {{ revisao_pendente.get_status_display }}</li>
+            <li class="lista-revisao"><strong>Data de Criação:</strong> {{ revisao_pendente.data_criacao|date:"d/m/Y H:i" }}</li></ul>
+            <!-- Você pode adicionar mais detalhes se necessário -->
+        
+        <a href="javascript:history.back()" class="btn btn-primary">Voltar</a>
     {% else %}
+        <!-- Exibe o formulário normalmente -->
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 

@@ -1,3 +1,4 @@
+<!-- documentos/templates/documentos/visualizar_documento.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -7,28 +8,121 @@
 
 {% block content %}
 <div class="container">
-    <!-- Botão de Voltar posicionado no canto superior direito -->
+    <!-- Botão de Voltar -->
     <a href="javascript:history.back()" class="back-button">Voltar</a>
 
     <h1>{{ documento.nome }} - Revisão {{ documento.revisao|default:"N/A" }}</h1>
     <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
-    <p><strong>Elaborador:</strong> {{ documento.elaborador.get_full_name }}</p>
-    <p><strong>Aprovador 1:</strong> {{ documento.aprovador1.get_full_name }}</p>
-    <p><strong>Aprovador 2:</strong> {{ documento.aprovador2.get_full_name }}</p>
+
+    <!-- Detalhes do documento -->
+    <p><strong>Elaborador:</strong> {{ documento.elaborador.get_full_name|default:documento.elaborador.username|default:"Não definido" }}</p>
+    <p><strong>Aprovador:</strong> {{ documento.aprovador1.get_full_name|default:documento.aprovador1.username|default:"Não definido" }}</p>
     <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y H:i" }}</p>
 
-    <!-- Exibir o PDF embutido -->
-    {% if documento.documento_pdf %}
-        <div style="margin-top: 20px;">
-            <iframe src="{{ documento.documento_pdf.url }}" width="100%" height="800px" style="border: none;"></iframe>
-        </div>
-    {% else %}
-        <p>Documento PDF não disponível.</p>
-    {% endif %}
+    <!-- Botões para ações -->
+    <div class="button-container">
+        {% if documento.documento_pdf and not documento.categoria.bloqueada %}
+            <a href="{% url 'documentos:baixar_pdf' documento.id %}" class="btn">Baixar PDF</a>
+            <button id="print-button" class="btn">Imprimir</button>
+        {% elif documento.documento_pdf and documento.categoria.bloqueada %}
+            <p><em>Download e impressão estão desabilitados para este documento.</em></p>
+        {% endif %}
+    </div>
 
-    <!-- Botão para baixar o PDF -->
-    {% if documento.documento_pdf %}
-        <a href="{{ documento.documento_pdf.url }}" class="btn btn-primary" download>Baixar PDF</a>
-    {% endif %}
+    <!-- Contêiner para o PDF renderizado -->
+    <div id="pdf-container" class="pdf-container">
+        <p>Carregando PDF...</p>
+    </div>
 </div>
+
+{% if documento.categoria.bloqueada %}
+<!-- Bloqueio de impressão e interações -->
+<script>
+    // Bloqueia Ctrl+P ou Cmd+P
+    document.addEventListener("keydown", function (e) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+            e.preventDefault();
+            alert("Impressão desabilitada para este documento.");
+        }
+    });
+
+    // Bloqueia o menu de contexto (botão direito do mouse)
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        alert("Ação desabilitada neste documento.");
+    });
+</script>
+{% endif %}
+
+<!-- Script para carregar e renderizar o PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const url = "{% url 'documentos:visualizar_pdf' documento.id %}";
+        const pdfContainer = document.getElementById("pdf-container");
+        const printButton = document.getElementById("print-button");
+
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        // Função para renderizar o PDF
+        const renderPDF = (pdf) => {
+            pdfContainer.innerHTML = ''; // Limpa a mensagem de carregamento
+
+            const pagePromises = [];
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const pagePromise = pdf.getPage(pageNum).then((page) => {
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    pdfContainer.appendChild(canvas);
+
+                    return page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                        return new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => resolve(img.src);
+                            img.src = canvas.toDataURL(); // Converte o canvas para imagem
+                        });
+                    });
+                });
+
+                pagePromises.push(pagePromise);
+            }
+
+            return Promise.all(pagePromises); // Aguarda todas as páginas serem renderizadas
+        };
+
+        // Carregar o PDF e renderizar
+        pdfjsLib.getDocument(url).promise.then((pdf) => {
+            renderPDF(pdf).then((pageImages) => {
+                // Adicionar evento de impressão após carregar as imagens
+                printButton.onclick = () => printPDF(pageImages);
+            });
+        }).catch((error) => {
+            pdfContainer.innerHTML = `<p>Erro ao carregar PDF: ${error.message}</p>`;
+        });
+    });
+
+    // Função para imprimir o PDF
+    const printPDF = (pageImages) => {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write('<html><head><title>Imprimir PDF</title></head><body>');
+        pageImages.forEach((imgSrc) => {
+            printWindow.document.write(`<img src="${imgSrc}" style="width: 100%; margin-bottom: 20px;">`);
+        });
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+
+        // Adicionar evento para fechar a aba após imprimir ou cancelar
+        printWindow.onafterprint = function () {
+            printWindow.close();
+        };
+
+        // Acionar a impressão
+        printWindow.print();
+    };
+</script>
 {% endblock %}

@@ -1,3 +1,5 @@
+/* documentos/static/css/visualizar_documento.css */
+
 /* Estilo básico para o corpo da página */
 html, body {
     height: 100%;
@@ -5,6 +7,7 @@ html, body {
     padding: 0;
     background-color: #38393F;
     color: #fff;
+    font-family: Arial, sans-serif;
 }
 
 /* Contêiner principal */
@@ -13,12 +16,12 @@ html, body {
     padding: 20px;
     border-radius: 20px;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
-    width: 80%;
-    max-width: 900px;
+    width: 100%;
+    max-width: 1200px;
     margin: 50px auto;
     color: #ffffff;
     text-align: left;
-    position: relative; /* Necessário para posicionar o botão de voltar */
+    position: relative;
 }
 
 /* Botão de Voltar no canto superior direito dentro do container */
@@ -49,26 +52,13 @@ h1 {
     color: #ffffff;
 }
 
-/* Informações do documento */
-p {
-    font-size: 18px;
-    margin: 10px 0;
-    color: #ffffff;
+/* Contêiner dos botões */
+.button-container {
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-p strong {
-    color: #ffffff;
-}
-
-/* Exibir o PDF */
-iframe {
-    margin-top: 20px;
-    border: 2px solid #2EC2D6;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Botão para baixar o PDF */
+/* Estilo geral dos botões */
 .btn {
     display: inline-block;
     background-color: #2EC2D6;
@@ -78,12 +68,30 @@ iframe {
     border-radius: 5px;
     text-decoration: none;
     font-size: 16px;
-    transition: background-color 0.3s ease;
-    margin-top: 20px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
 }
 
 .btn:hover {
     background-color: #1EB2C1;
     box-shadow: 0px 0px 15px #2EC2D6;
+}
+
+/* Contêiner do PDF renderizado */
+.pdf-container {
+    width: 100%;
+    background-color: #fff;
+    border: 2px solid #2EC2D6;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+}
+
+/* Canvas para cada página do PDF */
+canvas {
+    display: block;
+    margin: 10px auto;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }

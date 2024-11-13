@@ -1,0 +1,102 @@
+<!-- templates/documentos/listar_documentos_editaveis.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lista_documentos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ titulo }}</h1>
+
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos...">
+    </div>
+
+    <!-- Lista de documentos separados por categoria -->
+    {% for categoria, documentos in documentos_por_categoria.items %}
+    <h2>{{ categoria.nome }}</h2>
+    <div class="document-list" id="documentList">
+        {% for documento in documentos %}
+        <div class="document-container">
+            <div class="document-item">
+                <!-- Ícone do documento -->
+                <div class="document-status">
+                    <img src="{% static 'images/doc_icon.png' %}" alt="Documento" class="status-icon">
+                </div>
+
+                <!-- Informações do documento -->
+                <div class="document-info">
+                    <div class="document-grid">
+                        <div><strong>Nome:</strong> {{ documento.nome }}</div>
+                        <div><strong>Última Revisão:</strong> {{ documento.revisao }}</div>
+                        <div><strong>Elaborador:</strong> 
+                            {% if documento.elaborador %}
+                                {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+                            {% else %}
+                                Não disponível
+                            {% endif %}
+                        </div>
+                        <div><strong>Aprovações Realizadas:</strong>
+                            {% if documento.aprovado_por_aprovador1 %}
+                                {{ documento.aprovador1.get_full_name }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="document-actions">
+                    <!-- Botão para baixar o arquivo editável -->
+                    <a href="{{ documento.documento.url }}" download class="action-icon">
+                        <img src="{% static 'images/download-icon.png' %}" alt="Baixar Editável" class="download-icon">
+                        <span class="tooltip-text">Baixar Editável</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Script para o filtro de busca -->
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var documentContainers = document.querySelectorAll('.document-container');
+        var hasResults = false;
+
+        documentContainers.forEach(function(container) {
+            var documentName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
+            if (documentName.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Exibe ou esconde a mensagem de "Nenhum documento encontrado"
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhum documento encontrado.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('documentList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}

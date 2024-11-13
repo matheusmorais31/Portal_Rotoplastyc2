@@ -1,7 +1,7 @@
 /* Remove os marcadores (bolinhas) das listas */
 ul {
-    list-style-type: none; /* Remove as bolinhas */
-    padding-left: 0; /* Remove o espaçamento à esquerda */
+    list-style-type: none;
+    padding-left: 0;
 }
 
 /* Estilo básico */
@@ -21,7 +21,7 @@ h1 {
     font-size: 24px;
     margin-bottom: 20px;
     color: #fff;
-    margin-top: 3%;
+    margin-top: 5%;
 }
 
 /* Campo de Busca */
@@ -80,12 +80,19 @@ h1 {
     align-items: center;
 }
 
-.action-icon {
+.action-icon, .icon-link {
     margin-left: 10px;
-    background: none; /* Remove fundo do botão */
-    border: none; /* Remove borda */
-    padding: 0; /* Remove padding */
+    background: none;
+    border: none;
+    padding: 0;
     cursor: pointer;
+    position: relative;
+}
+.icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
 }
 
 .action-icon img {
@@ -95,7 +102,7 @@ h1 {
     transition: transform 0.2s;
 }
 
-.action-icon img:hover {
+.action-icon img:hover, .icon:hover {
     transform: scale(1.5);
 }
 
@@ -109,42 +116,31 @@ h1 {
     margin-right: 10px;
 }
 
-.icon {
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
-}
-
-.icon:hover {
-    transform: scale(1.5);
-}
-
 /* Ícone do Documento */
 .status-icon {
-    width: 40px; /* Ajustado para 40x40 */
+    width: 40px;
     height: 40px;
 }
 
 /* Modal */
 .modal {
-    display: none; /* O modal está oculto por padrão */
+    display: none;
     position: fixed;
     z-index: 1;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    /* Removido o display: flex; para evitar conflitos */
     justify-content: center;
     align-items: center;
+    background-color: rgba(0, 0, 0, 0.6);
 }
 
 .modal-content {
-    background-color: rgba(7, 7, 7, 0.678);
+    background-color: rgb(7, 7, 7);
     padding: 20px;
     border-radius: 20px;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.16);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.16);
     width: 600px;
     max-width: 70%;
     text-align: center;
@@ -166,7 +162,7 @@ h1 {
     background-color: #d3d3d3;
     font-size: 14px;
     box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
-    resize: none; /* Impede o redimensionamento */
+    resize: none;
 }
 
 /* Estilizar os botões do modal */
@@ -204,7 +200,42 @@ h1 {
 .close:hover, .close:focus {
     color: #ccc;
     text-decoration: none;
-    cursor: pointer;
+}
+
+/* Tooltip personalizado para action-icon e icon-link */
+.tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.action-icon:hover .tooltip-text,
+.icon-link:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
 
 /* Responsividade */
@@ -222,4 +253,17 @@ h1 {
         margin-left: 0;
         margin-top: 10px;
     }
+}
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #555555;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

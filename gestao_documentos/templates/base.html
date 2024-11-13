@@ -1,3 +1,5 @@
+<!-- templates/base.html -->
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -28,14 +30,16 @@
                 <div id="notification-dropdown" class="notification-dropdown">
                     <ul id="notification-list">
                         {% for notificacao in notificacoes_nao_lidas %}
-                            <li id="notification-{{ notificacao.id }}">
+                            <li id="notificacao-{{ notificacao.id }}">
                                 <div class="notification-message">
                                     <!-- Exibindo a foto do solicitante -->
-                                    <img src="{% if notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
+                                    <img src="{% if notificacao.solicitante and notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
                                     <p>{{ notificacao.mensagem }}</p>
                                     <div class="notification-controls">
-                                        <a href="{{ notificacao.link }}" class="notification-action">Ir para</a>
-                                    </div>                                    
+                                        {% if notificacao.link %}
+                                            <a href="{{ notificacao.link }}" class="notification-action">Ir para</a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <button class="close-notification" data-id="{{ notificacao.id }}">✖</button>
                             </li>
@@ -89,6 +93,8 @@
                 <ul class="submenu">
                     <li><a href="{% url 'documentos:listar_documentos_aprovados' %}">Listar Documentos</a></li>
                     <li><a href="{% url 'documentos:listar_aprovacoes_pendentes' %}">Aprovações Pendentes</a></li>
+                    <li><a href="{% url 'documentos:listar_documentos_para_analise' %}">Análise de Documento SGQ</a></li>
+                    <li><a href="{% url 'documentos:listar_documentos_editaveis' %}">Editáveis</a></li>
                     <li><a href="{% url 'documentos:listar_documentos_reprovados' %}">Reprovações</a></li>
                     <li><a href="{% url 'documentos:listar_categorias' %}">Categorias</a></li>
                 </ul>
@@ -193,15 +199,17 @@
             }
         }
 
+        // Adicionando eventos para marcar notificações como lidas
         document.querySelectorAll('.close-notification').forEach(function(button) {
             button.addEventListener('click', function() {
                 var notificacaoId = this.getAttribute('data-id');
-                fetch(`/notificacoes/marcar-notificacao-como-lida/${notificacaoId}/`, {
+                fetch("{% url 'notificacoes:marcar_notificacao_como_lida' notificacao_id=0 %}".replace('0', notificacaoId), {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': csrftoken,
                         'Content-Type': 'application/json',
-                    }
+                    },
+                    body: JSON.stringify({})
                 })
                 .then(response => {
                     if (response.ok) {
