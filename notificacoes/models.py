@@ -1,3 +1,5 @@
+# notificacoes/models.py
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from documentos.models import Documento
@@ -5,13 +7,28 @@ from documentos.models import Documento
 User = get_user_model()
 
 class Notificacao(models.Model):
-    destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificacoes_recebidas')
-    solicitante = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificacoes_enviadas', null=True, blank=True)
-    documento = models.ForeignKey(Documento, on_delete=models.CASCADE, null=True, blank=True)
+    destinatario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notificacoes_recebidas'
+    )
+    solicitante = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notificacoes_enviadas',
+        null=True,
+        blank=True
+    )
+    documento = models.ForeignKey(
+        Documento,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     mensagem = models.TextField()
     lida = models.BooleanField(default=False)
     data_criacao = models.DateTimeField(auto_now_add=True)
-    link = models.CharField(max_length=255, blank=True, null=True)  # Novo campo de link
-
+    link = models.CharField(max_length=255, blank=True, null=True)  # Campo para link
+    
     def __str__(self):
-        return f"Notificação para {self.destinatario.username}"
+        return f"Notificação para {self.destinatario.username} - {self.mensagem[:20]}..."

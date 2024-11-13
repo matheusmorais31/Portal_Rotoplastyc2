@@ -15,13 +15,10 @@ from django.contrib.auth.models import Permission, Group
 from django.utils.translation import gettext as _
 from django.urls import reverse_lazy
 
-
 # Configuração do logger
 logger = logging.getLogger(__name__)
 
-# Função para renderizar a página home
-
-# Registrar usuários locais no banco de dados
+# Função para registrar usuários locais no banco de dados
 def registrar_usuario(request):
     if request.method == 'POST':
         form = UsuarioCadastroForm(request.POST)
@@ -33,14 +30,12 @@ def registrar_usuario(request):
             return redirect('usuarios:lista_usuarios')  # Redireciona com o namespace correto
     else:
         form = UsuarioCadastroForm()
-
     return render(request, 'usuarios/registrar.html', {'form': form})
 
 # Função de login
 def login_usuario(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
-
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -74,7 +69,6 @@ def lista_usuarios(request):
 @login_required
 def editar_usuario(request, usuario_id):
     usuario = get_object_or_404(Usuario, id=usuario_id)
-
     if request.method == 'POST':
         form = UsuarioChangeForm(request.POST, instance=usuario)
         if form.is_valid():
@@ -82,7 +76,6 @@ def editar_usuario(request, usuario_id):
             return redirect('usuarios:lista_usuarios')
     else:
         form = UsuarioChangeForm(instance=usuario)
-
     return render(request, 'usuarios/editar_usuario.html', {'form': form})
 
 # Função para buscar e importar usuários do Active Directory
@@ -92,10 +85,9 @@ def buscar_usuarios_ad(request):
     conn = None
     if request.method == "POST":
         nome_usuario = request.POST.get("nome_usuario", "")
-        
-        ldap_server = "ldap://tcc1.net"
-        ldap_user = "CN=Administrator,CN=Users,DC=tcc1,DC=net"
-        ldap_password = "Admin@ti"
+        ldap_server = "ldap://rotoplastyc.net"
+        ldap_user = "CN=Administrador,CN=Users,DC=rotoplastyc,DC=net"
+        ldap_password = "56dgqipcDuq78fRNhEkEkxvJGoeKa5hA"
 
         try:
             logger.info(f"Tentando conectar ao servidor LDAP: {ldap_server}")
@@ -103,9 +95,8 @@ def buscar_usuarios_ad(request):
             conn = Connection(server, user=ldap_user, password=ldap_password, auto_bind=True)
             logger.info("Conexão ao LDAP estabelecida com sucesso.")
 
-            search_base = "CN=Users,DC=tcc1,DC=net"
+            search_base = "OU=Usuarios,OU=Rotoplastyc,DC=rotoplastyc,DC=net"
             search_filter = f"(sAMAccountName=*{nome_usuario}*)"
-
             conn.search(search_base, search_filter, attributes=['sAMAccountName', 'givenName', 'sn', 'mail'])
 
             if conn.entries:
@@ -136,10 +127,9 @@ def importar_usuarios_ad(request):
     conn = None
     if request.method == "POST":
         usuarios_selecionados = request.POST.getlist("usuarios")
-
-        ldap_server = "ldap://tcc1.net"
-        ldap_user = "CN=Administrator,CN=Users,DC=tcc1,DC=net"
-        ldap_password = "Admin@ti"
+        ldap_server = "ldap://rotoplastyc.net"
+        ldap_user = "CN=Administrador,CN=Users,DC=rotoplastyc,DC=net"
+        ldap_password = "56dgqipcDuq78fRNhEkEkxvJGoeKa5hA"
 
         try:
             logger.info(f"Tentando conectar ao servidor LDAP: {ldap_server}")
@@ -156,15 +146,11 @@ def importar_usuarios_ad(request):
                     continue
 
                 search_filter = f"(sAMAccountName={username})"
-                search_base = "CN=Users,DC=tcc1,DC=net"
-                logger.info(f"Buscando no AD com filtro: {search_filter}")
-
+                search_base = "OU=Usuarios,OU=Rotoplastyc,DC=rotoplastyc,DC=net"
                 conn.search(search_base, search_filter, attributes=['sAMAccountName', 'givenName', 'sn', 'mail'])
-                logger.info(f"Busca no AD realizada. Resultados encontrados: {len(conn.entries)}")
 
                 if conn.entries:
                     entry = conn.entries[0]
-                    logger.info(f"Usuário encontrado no AD: {entry.sAMAccountName.value}")
                     user = Usuario(
                         username=entry.sAMAccountName.value,
                         first_name=entry.givenName.value,
@@ -175,10 +161,8 @@ def importar_usuarios_ad(request):
                     )
                     user.set_unusable_password()
                     user.save()
-                    logger.info(f"Usuário {username} importado com sucesso.")
                     messages.success(request, f"Usuário {username} importado com sucesso.")
                 else:
-                    logger.warning(f"Usuário {username} não encontrado no AD.")
                     messages.error(request, f"Usuário {username} não encontrado no AD.")
 
         except Exception as e:
@@ -192,7 +176,6 @@ def importar_usuarios_ad(request):
     return redirect('usuarios:buscar_usuarios_ad')
 
 # Funções relacionadas a grupos
-
 @login_required
 def lista_grupos(request):
     grupos = Grupo.objects.all()
@@ -220,23 +203,10 @@ def cadastrar_grupo(request):
 
         grupo.save()
         messages.success(request, "Grupo criado com sucesso!")
-
         return redirect('usuarios:lista_grupos')
 
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/cadastrar_grupo.html', {'usuarios': usuarios})
-
-# Função para buscar participantes (usuários) via AJAX
-@login_required
-def buscar_participantes(request):
-    query = request.GET.get('q', '')  # Pega o termo da query string
-    if query:
-        usuarios = Usuario.objects.filter(username__icontains=query)
-        resultados = [{'id': usuario.id, 'username': usuario.username} for usuario in usuarios]
-    else:
-        resultados = []
-
-    return JsonResponse(resultados, safe=False)
 
 @login_required
 def editar_grupo(request, grupo_id):
@@ -259,6 +229,7 @@ def editar_grupo(request, grupo_id):
             return redirect('usuarios:lista_grupos')
         else:
             messages.error(request, "O nome do grupo é obrigatório.")
+
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/editar_grupo.html', {'grupo': grupo, 'usuarios': usuarios})
 
@@ -271,6 +242,17 @@ def excluir_grupo(request, grupo_id):
         return redirect('usuarios:lista_grupos')
     return render(request, 'usuarios/excluir_grupo.html', {'grupo': grupo})
 
+# Função para buscar participantes (usuários) via AJAX
+@login_required
+def buscar_participantes(request):
+    query = request.GET.get('q', '')
+    if query:
+        usuarios = Usuario.objects.filter(username__icontains=query)
+        resultados = [{'id': usuario.id, 'username': usuario.username} for usuario in usuarios]
+    else:
+        resultados = []
+    return JsonResponse(resultados, safe=False)
+
 # Função para sugerir usuários ou grupos conforme a busca
 @login_required
 def sugestoes(request):
@@ -278,12 +260,10 @@ def sugestoes(request):
     sugestoes = []
 
     if query:
-        # Buscar usuários
         usuarios = Usuario.objects.filter(username__icontains=query)[:5]
         for usuario in usuarios:
             sugestoes.append({'id': usuario.id, 'nome': usuario.username, 'tipo': 'Usuário'})
 
-        # Buscar grupos
         grupos = Group.objects.filter(name__icontains=query)[:5]
         for grupo in grupos:
             sugestoes.append({'id': grupo.id, 'nome': grupo.name, 'tipo': 'Grupo'})
@@ -300,11 +280,7 @@ def liberar_permissoes(request):
 
         if usuario_grupo_id and tipo:
             permissoes = Permission.objects.all()
-
-            permissoes_list = []
-            for p in permissoes:
-                display_name = get_permission_display_name(p)
-                permissoes_list.append({'id': p.id, 'name': display_name})
+            permissoes_list = [{'id': p.id, 'name': get_permission_display_name(p)} for p in permissoes]
 
             if tipo == 'Usuário':
                 usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
@@ -325,7 +301,6 @@ def liberar_permissoes(request):
             return render(request, 'usuarios/liberar_permissoes.html')
 
     elif request.method == 'POST':
-        # Novo código para tratar o método POST
         usuario_grupo_id = request.POST.get('usuario_grupo_id')
         tipo = request.POST.get('tipo')
         permissoes_ids = request.POST.getlist('permissoes')
@@ -345,11 +320,8 @@ def liberar_permissoes(request):
         else:
             messages.error(request, "Por favor, selecione um usuário ou grupo e permissões.")
             return redirect('usuarios:liberar_permissoes')
-
     else:
-        # Se o método não for GET ou POST, retorna um erro adequado
         return HttpResponseNotAllowed(['GET', 'POST'])
-
 
 def get_permission_display_name(permission):
     codename = permission.codename
@@ -365,23 +337,21 @@ def get_permission_display_name(permission):
     elif codename.startswith('view_'):
         action = _('Pode visualizar')
     else:
-        # Para permissões personalizadas, usamos o nome diretamente
         return _(permission.name)
 
     return f'{action} {model_name}'
 
 # Página de perfil
 class ProfileView(TemplateView):
-    template_name = 'usuarios/profile.html'  # Defina o caminho correto para o template do perfil do usuário
+    template_name = 'usuarios/profile.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user  # Passa o objeto do usuário autenticado para o contexto do template
+        context['user'] = self.request.user
         return context
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('usuarios:login_usuario')
-
 
 # Função para listar permissões
 @login_required
@@ -389,19 +359,20 @@ def lista_permissoes(request):
     permissoes = Permission.objects.all()
     return render(request, 'usuarios/lista_permissoes.html', {'permissoes': permissoes})
 
+# Função para editar o perfil do usuário
 @login_required
 def editar_perfil(request):
-    usuario = request.user  # Pega o usuário logado
+    usuario = request.user
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=usuario)  # Inclui arquivos de imagem
+        form = ProfileForm(request.POST, request.FILES, instance=usuario)
         if form.is_valid():
             form.save()
             messages.success(request, "Perfil atualizado com sucesso!")
-            return redirect('usuarios:editar_perfil')  # Redireciona para a página de perfil
+            return redirect('usuarios:editar_perfil')
     else:
         form = ProfileForm(instance=usuario)
-    
     return render(request, 'usuarios/editar_perfil.html', {'form': form})
 
+# Função de erro 403 personalizada
 def error_403_view(request, exception):
     return render(request, 'usuarios/403.html', status=403)

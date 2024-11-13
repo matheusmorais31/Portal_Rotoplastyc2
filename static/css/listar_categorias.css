@@ -73,8 +73,10 @@ h1 {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    position: relative; /* Necessário para posicionar o tooltip */
 }
 
+/* Estilo dos Ícones */
 .edit-icon img {
     width: 20px;
     height: 20px;
@@ -84,6 +86,63 @@ h1 {
 
 .edit-icon img:hover {
     transform: scale(1.5);
+}
+
+/* Tooltip */
+.tooltip-text-create {
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+    top: 20%;
+    left: 8%;
+}
+
+.tooltip-text-create::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* Coloca a seta embaixo do tooltip */
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+
+.tooltip-text {
+    visibility: hidden;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 101%; /* Coloca o tooltip acima do ícone */
+    right: 20%;
+    transform: translateX(50%); /* Centraliza em relação ao ícone */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* Coloca a seta embaixo do tooltip */
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+/* Exibir Tooltip ao passar o mouse */
+.edit-icon:hover .tooltip-text .tooltip-text-create {
+    visibility: visible;
+    opacity: 1;
 }
 
 /* Responsividade */

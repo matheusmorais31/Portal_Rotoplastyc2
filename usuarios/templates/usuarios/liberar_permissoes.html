@@ -25,6 +25,7 @@
         <!-- Exibição das permissões -->
         <div class="form-group">
             <h3>Permissões para <span id="nome_usuario_grupo"></span></h3>
+            <button type="button" id="selecionar_tudo" class="btn btn-secondary mb-2">Selecionar Tudo</button>
             <table class="table">
                 <thead>
                     <tr>
@@ -57,6 +58,14 @@
 <script>
     $(document).ready(function () {
         var usuarioGrupoSelecionadoId = null;
+
+        // Função para selecionar/deselecionar todas as permissões
+        $('#selecionar_tudo').on('click', function () {
+            var checkboxes = $('#lista_permissoes input[type="checkbox"]');
+            var selecionar = $(this).text() === 'Selecionar Tudo';
+            checkboxes.prop('checked', selecionar);
+            $(this).text(selecionar ? 'Desmarcar Tudo' : 'Selecionar Tudo');
+        });
 
         // Função para buscar usuários ou grupos conforme o texto digitado
         $('#buscar_usuario_grupo').on('input', function () {
@@ -95,8 +104,8 @@
 
             // Atualiza o nome do usuário ou grupo selecionado
             $('#nome_usuario_grupo').text(nome);
-            $('#usuario_grupo_id').val(id);  // Preenche o campo oculto com o ID
-            $('#tipo').val(tipo);  // Preenche o campo oculto com o tipo (Usuário ou Grupo)
+            $('#usuario_grupo_id').val(id);
+            $('#tipo').val(tipo);
 
             // Limpa a lista de resultados e o campo de busca
             $('#resultados_pesquisa').empty();

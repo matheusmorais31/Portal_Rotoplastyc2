@@ -19,6 +19,53 @@ html, body {
     margin: 50px auto;
 }
 
+/* Estilo para a mensagem de alerta */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 16px;
+    width: 90%;
+    margin: 0 auto 20px auto; /* centraliza o alerta */
+    background-color: rgba(255, 0, 0, 0.2); /* fundo semi-transparente */
+    color: #fff; /* texto branco */
+    border: 1px solid #ff0000; /* borda laranja */
+}
+
+/* Estilo específico para alertas de aviso */
+.alert-warning {
+    background-color: rgba(255, 0, 0, 0.3); /* fundo laranja mais opaco */
+    border-color: #ff0000;
+    box-shadow: 0px 0px 10px #d62e2e;
+}
+.btn {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    padding: 6px;
+    margin: 10px 5px;
+ 
+}
+
+/* Estilo específico para btn-primary */
+.btn-primary {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2EC2D6;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+
 /* Estilizar os campos de texto e seleção */
 input[type="text"],
 input[type="password"],
@@ -121,19 +168,30 @@ button[type="submit"] {
 
 /* Botão Cancelar */
 button[type="button"] {
-    background-color: #2EC2D6;
+    background-color: #ff0000;
     color: white;
 }
 
-/* Efeito hover nos botões */
-button[type="submit"]:hover,
-button[type="button"]:hover {
-    background-color: #1EB2C1;
-    box-shadow: 0px 0px 15px #2EC2D6;
+.cancel-button:hover {
+    background-color: #d62e2e;
+    box-shadow: 0px 0px 10px #d62e2e;
 }
+
+button[type="submit"]:hover {
+    background-color: #2EC2D6;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
 
 /* Ajuste para que os botões fiquem centralizados */
 .form-buttons {
     text-align: center;
     margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Define a distância exata entre os botões */
+}
+
+.lista-revisao {
+    list-style: none;
 }

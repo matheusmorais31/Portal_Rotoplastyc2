@@ -1,9 +1,8 @@
-# views.py
-
 from django.shortcuts import render
 import requests
 import time
 import logging
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -36,10 +35,6 @@ def selecionar_icone(condicao):
         'muitas nuvens': '3',
         'céu limpo': '1',
         'algumas nuvens': 'nublado',
-
-
-
-
     }
 
     condicao_normalizada = condicao.lower()
@@ -54,11 +49,12 @@ def selecionar_icone(condicao):
 def obter_clima_atual(cidade_id, api_key):
     url_atual = f"https://apiadvisor.climatempo.com.br/api/v1/weather/locale/{cidade_id}/current?token={api_key}"
     try:
-        resposta = requests.get(url_atual)
+        # Desabilita a verificação SSL
+        resposta = requests.get(url_atual, verify=False)
         resposta.raise_for_status()
         dados = resposta.json()
         condicao_clima = dados['data']['condition']
-        print(f"Condição climática recebida: {condicao_clima}")  # Adicione esta linha
+        print(f"Condição climática recebida: {condicao_clima}")
         clima_atual = {
             'temperatura_atual': dados['data']['temperature'],
             'sensacao': dados['data']['sensation'],
@@ -80,7 +76,8 @@ def obter_previsao_15_dias(cidade_id, api_key, intervalo_cache=3600):
     if time.time() - ultima_atualizacao > intervalo_cache or previsao_cache is None:
         url_previsao = f"https://apiadvisor.climatempo.com.br/api/v1/forecast/locale/{cidade_id}/days/15?token={api_key}"
         try:
-            resposta = requests.get(url_previsao)
+            # Desabilita a verificação SSL
+            resposta = requests.get(url_previsao, verify=False)
             resposta.raise_for_status()
             dados = resposta.json()
             previsao = []
@@ -104,7 +101,7 @@ def obter_previsao_15_dias(cidade_id, api_key, intervalo_cache=3600):
 
     return previsao_cache
 
-# View da home
+
 def home(request):
     cidade_id = 5585  # Carazinho, RS
     api_key = '5f713c18b31aee4d7a93df6a3220cfb8'  # Substitua pela sua chave de API

@@ -1,0 +1,83 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #2E2F33;
+    color: #FFF;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Contêiner principal para o formulário */
+.container {
+    background-color: rgba(17, 16, 16, 0.44);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
+    width: 600px;
+    max-width: 70%;
+    text-align: center;
+    margin: 50px auto;
+}
+
+/* Título da página */
+h2 {
+    color: #ffffff;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Texto de confirmação */
+p {
+    font-size: 16px;
+    color: #FFF;
+    margin-bottom: 25px;
+}
+
+/* Estilizar os botões */
+button, .cancel-button {
+    padding: 10px 20px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    min-width: 100px;
+}
+
+/* Botão de confirmação */
+button[type="submit"] {
+    background-color: #2EC2D6;
+    color: #FFF;
+}
+
+button[type="submit"]:hover {
+    background-color: #2EC2D6;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+/* Botão de cancelamento estilo link */
+.cancel-button {
+    background-color: #d62e2e;
+    color: #FFF;
+    text-decoration: none;
+    text-align: center;
+}
+
+.cancel-button:hover {
+    background-color: #d62e2e;
+    box-shadow: 0px 0px 10px #d62e2e;
+}
+
+/* Contêiner para centralizar botões */
+.form-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 15px;
+}

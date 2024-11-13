@@ -4,7 +4,8 @@ def obter_previsao_completa(cidade_id='5585', api_key='5f713c18b31aee4d7a93df6a3
     url_previsao = f"https://apiadvisor.climatempo.com.br/api/v1/forecast/locale/{cidade_id}/days/15?token={api_key}"
     
     try:
-        resposta = requests.get(url_previsao)
+        # Desabilita a verificação SSL
+        resposta = requests.get(url_previsao, verify=False)
         resposta.raise_for_status()  # Verifica se houve algum erro na requisição
         dados = resposta.json()
 

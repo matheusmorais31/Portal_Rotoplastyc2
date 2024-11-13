@@ -1,0 +1,101 @@
+/* Estilo básico para o corpo da página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #38393F;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+/* Estilizar o contêiner do perfil */
+.profile-container {
+    background-color: rgba(17, 16, 16, 0.44);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
+    width: 600px;
+    max-width: 80%;
+    text-align: center;
+    margin: 50px auto;
+}
+
+/* Estilizar a foto do perfil */
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilizar o título do perfil */
+h1 {
+    color: #ffffff;
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+/* Estilizar o nome do usuário */
+h2 {
+    color: #ffffff;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+/* Estilizar a informação do perfil */
+.profile-info p {
+    font-size: 16px;
+    color: #ccc;
+    margin: 10px 0;
+    text-align: left;
+}
+
+/* Estilizar as ações do perfil */
+.profile-actions {
+    margin-top: 20px;
+}
+
+/* Botões de ações */
+.profile-actions .btn {
+    background-color: #2EC2D6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    display: inline-block;
+    margin: 0 10px;
+}
+
+/* Efeito hover nos botões */
+.profile-actions .btn:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 15px #2EC2D6;
+}
+
+/* Botão Sair com estilo perigoso */
+.btn-danger {
+    background-color: #D9534F;
+}
+
+.btn-danger:hover {
+    background-color: #C9302C;
+    box-shadow: 0px 0px 15px #D9534F;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .profile-container {
+        width: 90%;
+    }
+
+    .profile-actions .btn {
+        display: block;
+        margin: 10px auto;
+        width: 80%;
+    }
+}

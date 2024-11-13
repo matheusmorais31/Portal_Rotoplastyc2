@@ -1,0 +1,57 @@
+<!-- notificacoes/templates/notificacoes/listar_notificacoes.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>Notificações</h1>
+    <ul class="notification-list">
+        {% for notificacao in notificacoes_nao_lidas %}
+            <li id="notificacao-{{ notificacao.id }}">
+                <div class="notification-message">
+                    <img src="{% if notificacao.solicitante and notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
+                    <p>{{ notificacao.mensagem }}</p>
+                    {% if notificacao.link %}
+                        <a href="{{ notificacao.link }}" class="notification-action">Ver mais</a>
+                    {% endif %}
+                </div>
+                <button class="close-notification" data-id="{{ notificacao.id }}">✖</button>
+            </li>
+        {% empty %}
+            <li>Nenhuma notificação pendente.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    // Função para marcar notificação como lida via AJAX
+    document.querySelectorAll('.close-notification').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var notificacaoId = this.getAttribute('data-id');
+            var notificacaoElement = document.getElementById('notificacao-' + notificacaoId);
+
+            fetch("{% url 'notificacoes:marcar_notificacao_como_lida' notificacao_id=0 %}".replace('0', notificacaoId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    notificacaoElement.remove();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('Erro ao marcar notificação como lida.');
+                console.error('Error:', error);
+            });
+        });
+    });
+</script>
+{% endblock %}

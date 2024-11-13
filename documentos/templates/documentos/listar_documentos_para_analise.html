@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lista_documentos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ titulo }}</h1>
+
+    <!-- Campo de busca -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos pendentes...">
+    </div>
+
+    <div class="document-list" id="documentList">
+        {% for documento in documentos %}
+        <div class="document-container">
+            <div class="document-item">
+                <!-- Informações do documento -->
+                <div class="document-info">
+                    <div class="document-grid">
+                        <div><strong>Nome:</strong> {{ documento.nome }}</div>
+                        <div><strong>Revisão:</strong> {{ documento.revisao }}</div>
+                        <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
+                        <div><strong>Elaborador:</strong> 
+                            {% if documento.elaborador %}
+                                {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+                            {% else %}
+                                Não disponível
+                            {% endif %}
+                        </div>
+                        <div><strong>Status:</strong> {{ documento.get_status_display }}</div>
+                    </div>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="document-actions">
+                    <!-- Botão para visualizar o documento (PDF) -->
+                    {% if documento.documento_pdf %}
+                    <a href="{{ documento.documento_pdf.url }}" target="_blank" class="action-icon" title="Visualizar PDF">
+                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                    </a>
+                    {% endif %}
+
+                    <!-- Botão para baixar o documento editável -->
+                    {% if documento.documento %}
+                    <a href="{{ documento.documento.url }}" download class="action-icon" title="Baixar Documento Editável">
+                        <img src="{% static 'images/download-icon.png' %}" alt="Baixar Documento Editável" class="download-icon">
+                        <span class="tooltip-text">Baixar Editável</span>
+                    </a>
+                    {% endif %}
+
+                    <!-- Botão de upload do documento revisado -->
+                    <form method="post" enctype="multipart/form-data" action="{% url 'documentos:upload_documento_revisado' documento.id %}" id="uploadForm-{{ documento.id }}" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="file" name="documento" id="fileInput-{{ documento.id }}" style="display:none;" accept=".doc,.docx,.odt">
+                        <button type="button" onclick="handleFileUpload({{ documento.id }})" class="action-icon" title="Upload Documento Revisado">
+                            <img src="{% static 'images/upload-icon.png' %}" alt="Upload" class="upload-icon">
+                            <span class="tooltip-text">Upar Documento</span>
+                        </button>
+                    </form>
+
+                    <!-- Botão para aprovar o documento -->
+                    <form method="post" action="{% url 'documentos:aprovar_documento' documento.id %}" style="display:inline;" onsubmit="disableApproveButton(this)">
+                        {% csrf_token %}
+                        <input type="hidden" name="documento_id" value="{{ documento.id }}">
+                        <button type="submit" class="action-icon approve-button" title="Aprovar Documento">
+                            <img src="{% static 'images/approve-icon.png' %}" alt="Aprovar" class="approve-icon">
+                            <span class="tooltip-text">Aprovar</span>
+                        </button>
+                    </form>
+
+                    <!-- Botão para reprovar o documento -->
+                    <button class="action-icon" onclick="showRejectionModal({{ documento.id }})" title="Reprovar Documento">
+                        <img src="{% static 'images/reject-icon.png' %}" alt="Reprovar">
+                        <span class="tooltip-text">Reprovar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Nenhum documento encontrado.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Formulário invisível para CSRF token -->
+    <form id="csrf-form" style="display:none;">
+        {% csrf_token %}
+    </form>
+
+    <!-- Modal para inserção do motivo de reprovação -->
+    <div id="rejectionModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRejectionModal()">&times;</span>
+            <h2>Motivo da Reprovação</h2>
+            <form id="rejectionForm" method="post" action="{% url 'documentos:listar_aprovacoes_pendentes' %}">
+                {% csrf_token %}
+                <textarea id="rejectionReason" name="motivo_reprovacao" rows="5" placeholder="Digite o motivo da reprovação" required></textarea>
+                <input type="hidden" id="rejectionDocumentoId" name="documento_id" value="">
+                <input type="hidden" name="action" value="reprovar">
+                <button type="submit" id="submitRejection" class="btn btn-danger">Enviar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    // Função para mostrar o modal de reprovação
+    function showRejectionModal(documentoId) {
+        document.getElementById('rejectionModal').style.display = 'flex';
+        document.getElementById('rejectionDocumentoId').value = documentoId;
+    }
+
+    // Função para fechar o modal de reprovação
+    function closeRejectionModal() {
+        document.getElementById('rejectionModal').style.display = 'none';
+        document.getElementById('rejectionForm').reset();
+    }
+
+    // Função de upload com validação de formato
+    function handleFileUpload(documentoId) {
+        const fileInput = document.getElementById(`fileInput-${documentoId}`);
+        fileInput.click();
+
+        fileInput.onchange = function () {
+            const file = fileInput.files[0];
+            const allowedExtensions = /(\.doc|\.docx|\.odt)$/i;
+
+            if (file && allowedExtensions.exec(file.name)) {
+                document.getElementById(`uploadForm-${documentoId}`).submit();
+            } else {
+                alert('Formato de arquivo inválido. Por favor, selecione um arquivo .doc, .docx ou .odt.');
+                fileInput.value = ''; // Limpa o campo de arquivo
+            }
+        };
+    }
+
+    // Função para desativar o botão de aprovação após submissão
+    function disableApproveButton(form) {
+        const button = form.querySelector('button');
+        button.disabled = true;
+        button.innerHTML = '<div class="loading-spinner" title="Processando..."></div>';
+    }
+
+    // Fechar o modal ao clicar fora do conteúdo
+    window.onclick = function(event) {
+        const modal = document.getElementById('rejectionModal');
+        if (event.target == modal) {
+            closeRejectionModal();
+        }
+    }
+</script>
+{% endblock %}

@@ -50,7 +50,6 @@
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<!-- Incluindo o arquivo de idioma para português -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>
 <script>
     $(document).ready(function() {
@@ -62,8 +61,14 @@
 
     // Desativa o botão de envio após a submissão do formulário
     $('form').on('submit', function() {
-        // Desativa o botão de envio para evitar múltiplos envios
-        $('button[type="submit"]').attr('disabled', 'disabled').text('Enviando...');
+        var isValid = true;
+        {% if form.errors %}
+            isValid = false;
+        {% endif %}
+
+        if (isValid) {
+            $('button[type="submit"]').attr('disabled', 'disabled').text('Enviando...');
+        }
     });
 </script>
 {% endblock %}

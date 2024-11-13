@@ -1,4 +1,4 @@
-import os, logging
+import os, logging, ssl
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = 'django-insecure-1hy@(6*s2-g(gw)gh800lp_&&+0pm5-*kyl0zqetl%*^5-=8ig'
 DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '172.16.41.129']
 
 # Application definition
 INSTALLED_APPS = [
@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'usuarios.apps.UsuariosConfig',
     'django.contrib.humanize',
     'notificacoes',
+    'dirtyfields',
 ]
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
@@ -32,7 +33,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware', 
+    'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
 ROOT_URLCONF = 'gestao_documentos.urls'
@@ -56,17 +57,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gestao_documentos.wsgi.application'
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'portal_rotoplastyc',
         'USER': 'root',
-        'PASSWORD': 'Admin@123',
-        'HOST': '192.168.0.12',  # ou o endereço do servidor MySQL
+        'PASSWORD': 'ti@R0T0',
+        'HOST': 'irp.rotoplastyc.com',
         'PORT': '3306',
+        'OPTIONS': {
+            'ssl': {
+                'cert_reqs': ssl.CERT_NONE,
+            }
+        }
     }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -149,3 +155,6 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 from django.urls import reverse_lazy
 
 LOGOUT_REDIRECT_URL = reverse_lazy('usuarios:login_usuario')
+
+
+

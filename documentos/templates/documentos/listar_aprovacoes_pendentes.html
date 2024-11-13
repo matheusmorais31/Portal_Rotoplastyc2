@@ -7,7 +7,7 @@
 
 {% block content %}
 <div class="container">
-    <h1>Aprovações Pendentes</h1>
+    <h1>{{ titulo }}</h1>
 
     <!-- Campo de busca -->
     <div class="search-container">
@@ -18,16 +18,12 @@
         {% for documento in documentos %}
         <div class="document-container">
             <div class="document-item">
-                <div class="document-status">
-                    <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
-                </div>
+                <!-- Informações do documento -->
                 <div class="document-info">
                     <div class="document-grid">
                         <div><strong>Nome:</strong> {{ documento.nome }}</div>
                         <div><strong>Revisão:</strong> {{ documento.revisao }}</div>
                         <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
-
-                        <!-- Adicionando o Elaborador -->
                         <div><strong>Elaborador:</strong> 
                             {% if documento.elaborador %}
                                 {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
@@ -35,44 +31,33 @@
                                 Não disponível
                             {% endif %}
                         </div>
-
-                        <div><strong>Aprovações Realizadas:</strong>
-                            <ul>
-                                {% if documento.aprovado_por_aprovador1 %}
-                                    <li>Aprovado por: {{ documento.aprovador1.get_full_name }}</li>
-                                {% endif %}
-                                {% if documento.aprovado_por_aprovador2 %}
-                                    <li>Aprovado por: {{ documento.aprovador2.get_full_name }}</li>
-                                {% endif %}
-                                {% if not documento.aprovado_por_aprovador1 and not documento.aprovado_por_aprovador2 %}
-                                    <li>Nenhuma aprovação realizada.</li>
-                                {% endif %}
-                            </ul>
-                        </div>
-
-                        <div><strong>Aprovações Pendentes:</strong>
-                            <ul>
-                                {% if not documento.aprovado_por_aprovador1 %}
-                                    <li>{{ documento.aprovador1.get_full_name }}</li>
-                                {% endif %}
-                                {% if documento.aprovado_por_aprovador1 and not documento.aprovado_por_aprovador2 %}
-                                    <li>{{ documento.aprovador2.get_full_name }}</li>
-                                {% endif %}
-                            </ul>
-                        </div>
+                        <div><strong>Status:</strong> {{ documento.get_status_display }}</div>
                     </div>
                 </div>
 
                 <!-- Botões de ação -->
                 <div class="document-actions">
-                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
-                    </a>
-                    <a href="{% url 'documentos:aprovar_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/approve-icon.png' %}" alt="Aprovar" class="approve-icon">
-                    </a>
-                    <button class="action-icon" data-id="{{ documento.id }}" onclick="showRejectionModal({{ documento.id }})">
+                    <!-- Botão para visualizar o documento (PDF) -->
+                    <div class="document-actions">
+                        <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
+                            <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                            <span class="tooltip-text">Visualizar</span>
+                        </a>
+                    <!-- Botão para aprovar o documento -->
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="documento_id" value="{{ documento.id }}">
+                        <input type="hidden" name="action" value="aprovar">
+                        <button type="submit" class="action-icon">
+                            <img src="{% static 'images/approve-icon.png' %}" alt="Aprovar" class="approve-icon">
+                            <span class="tooltip-text">Aprovar</span>
+                        </button>
+                    </form>
+
+                    <!-- Botão para reprovar o documento -->
+                    <button class="action-icon" onclick="showRejectionModal({{ documento.id }})">
                         <img src="{% static 'images/reject-icon.png' %}" alt="Reprovar">
+                        <span class="tooltip-text">Reprovar</span>
                     </button>
                 </div>
             </div>
@@ -93,61 +78,71 @@
             <span class="close" onclick="closeRejectionModal()">&times;</span>
             <h2>Motivo da Reprovação</h2>
             <textarea id="rejectionReason" rows="5" placeholder="Digite o motivo da reprovação"></textarea>
-            <button id="submitRejection" onclick="submitRejection()">Enviar</button>
+            <button id="submitRejection">Enviar</button>
         </div>
     </div>
 </div>
 
+<!-- Scripts -->
 <script>
-    let documentoId = null;
-
-    // Abre o modal ao clicar no botão "Reprovar"
-    function showRejectionModal(id) {
-        documentoId = id;
-        document.getElementById("rejectionModal").style.display = "flex"; // Mostra o modal de forma flexível e centralizada
+    // Função para mostrar o modal de reprovação
+    function showRejectionModal(documentoId) {
+        const modal = document.getElementById('rejectionModal');
+        modal.style.display = 'flex'; // Define o modal como visível usando flex
+        document.getElementById('submitRejection').setAttribute('data-documento-id', documentoId);
     }
 
-    // Fecha o modal ao clicar no botão de fechamento
+    // Função para fechar o modal de reprovação
     function closeRejectionModal() {
-        document.getElementById("rejectionModal").style.display = "none"; // Esconde o modal
+        const modal = document.getElementById('rejectionModal');
+        modal.style.display = 'none'; // Oculta o modal
     }
 
-    // Envia o motivo da reprovação
-    function submitRejection() {
-        const motivo = document.getElementById("rejectionReason").value.trim(); // Pega o valor do textarea e remove espaços
+    // Envio do motivo de reprovação
+    document.getElementById('submitRejection').addEventListener('click', function() {
+        const documentoId = this.getAttribute('data-documento-id');
+        const motivo = document.getElementById('rejectionReason').value.trim();
 
         if (!motivo) {
-            alert("Por favor, insira o motivo da reprovação.");
+            alert('Por favor, insira o motivo da reprovação.');
             return;
         }
 
-        // Captura o CSRF token do form invisível
-        const csrftoken = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]').value;
+        // Cria um formulário para enviar via POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.style.display = 'none';
 
-        // Enviar requisição com fetch
-        fetch(`/documentos/reprovar/${documentoId}/`, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": csrftoken,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ motivo: motivo }) // Envia o motivo como JSON
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                alert("Documento reprovado com sucesso!");
-                window.location.reload();  // Recarrega a página para refletir as mudanças
-            } else {
-                alert("Erro ao reprovar documento: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Erro:", error);
-        });
+        // CSRF token
+        const csrfToken = document.querySelector('#csrf-form [name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
 
-        closeRejectionModal();  // Fecha o modal após enviar
-    }
+        // Campos adicionais
+        const documentoInput = document.createElement('input');
+        documentoInput.type = 'hidden';
+        documentoInput.name = 'documento_id';
+        documentoInput.value = documentoId;
+        form.appendChild(documentoInput);
+
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'reprovar';
+        form.appendChild(actionInput);
+
+        const motivoInput = document.createElement('input');
+        motivoInput.type = 'hidden';
+        motivoInput.name = 'motivo_reprovacao';
+        motivoInput.value = motivo;
+        form.appendChild(motivoInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    });
 
     // Função para buscar documentos
     document.getElementById('searchInput').addEventListener('keyup', function() {
@@ -183,11 +178,5 @@
             }
         }
     });
-
-    // Garante que o modal esteja fechado ao carregar a página
-    window.onload = function() {
-        closeRejectionModal();
-    };
 </script>
-
 {% endblock %}
