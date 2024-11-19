@@ -7,13 +7,22 @@ class Usuario(AbstractUser):
     ativo = models.BooleanField(default=True)
     profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
 
-
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
+        default_permissions = ()
         permissions = [
-            ('can_approve_documents', 'Pode aprovar documentos'),
+            ('list_user', 'Lista de Usuários'),
+            ('can_add_user', 'Cadastra Usuário'),
+            ('can_import_user', 'Importar Usuário '),
+            ('can_edit_user', 'Editar Usuário'),    
+            ('change_permission', 'Liberar Permissões'),
+            ('can_view_list_group', 'Lista de Grupos'),
+            ('can_add_group', 'Cadastra Grupo'),
+            ('can_edit_group', 'Editar Grupo'),
+            ('can_delete_group', 'Excluir Grupo'),
         ]
+
 
 class Grupo(models.Model):
     nome = models.CharField(max_length=255, unique=True)

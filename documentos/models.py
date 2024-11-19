@@ -1,17 +1,17 @@
 # documentos/models.py
 
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth import get_user_model
-from django.core.files import File
-import aspose.words as aw
+from django.core.files.storage import FileSystemStorage
+from django.utils.text import slugify
+from django.core.files.base import ContentFile
 from pathlib import Path
 from django.conf import settings
 import logging
-from django.utils.text import slugify
-from django.core.files.storage import FileSystemStorage
-from io import BytesIO
-import gc
+import subprocess
+import tempfile
 import os
+import shutil
 
 logger = logging.getLogger('django')
 
@@ -115,6 +115,40 @@ class Documento(models.Model):
         blank=True,
         related_name='documentos_analisados'
     )
+    documento_original = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='revisoes'
+    )
+
+    class Meta:
+        default_permissions = ()  # Desativa as permissões padrão
+        permissions = [
+            ('view_documentos', 'Listar Documentos'),
+            ('can_add_documento', 'Adicionar Documento'),
+            ('view_acessos_documento', 'Visualizar Acessos Documentos'),
+            ('can_view_revisions', 'Visualizar revisões de Documentos'),
+            ('list_pending_approvals', 'Aprovações Pendentes'),
+            ('list_reproaches', 'Lista Reprovações'),
+            ('can_approve', 'Pode aprovar documentos'),
+            ('can_analyze', 'Pode analisar documentos'),
+            ('can_view_editables', 'Lista Editáveis'),     
+            ('view_categoria', 'Lista Categorias'),
+            ('add_categoria', 'Adicionar Categoria'),
+            ('change_categoria', 'Editar Categoria'),
+            ('delete_categoria', 'Deletar Categoria'),
+            
+            
+            
+            
+            
+            
+         ]
+
+    def __str__(self):
+        return f"{self.nome} - Revisão {self.revisao} - Status: {self.get_status_display()}"
 
     def gerar_pdf_path(self):
         """
@@ -127,74 +161,102 @@ class Documento(models.Model):
         logger.debug(f"[gerar_pdf_path] Gerado caminho para o PDF: {path.as_posix()}")
         return path.as_posix()  # Garante que o separador é '/'
 
-    def remover_pdf_antigo(self):
-        """
-        Remove PDFs antigos com o mesmo nome base para evitar duplicações.
-        """
-        pdf_directory = Path(settings.MEDIA_ROOT) / 'documentos' / 'pdf'
-        pdf_base_name = slugify(self.nome)
-        # Construir o padrão de busca para PDFs com o mesmo nome base
-        search_pattern = f"{pdf_base_name}_v*.pdf"
-
-        # Remover todos os PDFs que correspondem ao padrão
-        for file_path in pdf_directory.glob(search_pattern):
-            if file_path.is_file():
-                try:
-                    file_path.unlink()
-                    logger.debug(f"[remover_pdf_antigo] PDF duplicado removido: {file_path}")
-                except Exception as e:
-                    logger.error(f"[remover_pdf_antigo] Falha ao remover {file_path}: {e}")
-
     def gerar_pdf(self):
         """
-        Gera um PDF a partir do documento editável e atualiza o campo documento_pdf.
+        Gera um PDF a partir do documento editável utilizando LibreOffice e atualiza o campo documento_pdf.
         """
         try:
-            logger.debug("[gerar_pdf] Iniciando geração do PDF.")
+            logger.debug("[gerar_pdf] Iniciando geração do PDF com LibreOffice.")
             documento_path = self.documento.path
-            doc = aw.Document(documento_path)
 
-            # Gerar o PDF em memória para evitar manter o arquivo aberto no disco
-            pdf_io = BytesIO()
-            doc.save(pdf_io, aw.SaveFormat.PDF)
-            pdf_io.seek(0)
-            logger.debug("[gerar_pdf] PDF gerado em memória.")
+            # Verificar se o arquivo de entrada existe
+            if not os.path.exists(documento_path):
+                raise FileNotFoundError(f"Arquivo de documento não encontrado: {documento_path}")
 
-            # Remover PDFs antigos antes de salvar o novo
-            self.remover_pdf_antigo()
+            # Definir o caminho completo para o executável soffice.exe
+            # Atualize este caminho conforme a instalação do LibreOffice no seu sistema
+            soffice_path = r"C:\Program Files\LibreOffice\program\soffice.exe"
 
-            # Deletar explicitamente o arquivo antigo no campo documento_pdf, se existir
-            if self.documento_pdf:
-                self.documento_pdf.delete(save=False)
-                logger.debug("[gerar_pdf] Arquivo antigo documento_pdf deletado.")
+            if not os.path.exists(soffice_path):
+                raise FileNotFoundError(f"Executável do LibreOffice não encontrado em: {soffice_path}")
 
-            # Forçar a liberação do objeto `doc`
-            del doc
-            gc.collect()
+            # Criar um diretório temporário para a conversão
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                # Comando para converter o documento para PDF usando LibreOffice
+                # --headless para execução sem interface gráfica
+                # --convert-to pdf para especificar o formato de saída
+                # --outdir para especificar o diretório de saída
+                comando = [
+                    soffice_path,
+                    '--headless',
+                    '--convert-to', 'pdf',
+                    '--outdir', tmpdirname,
+                    documento_path
+                ]
 
-            # Salvar o PDF no campo `documento_pdf`
-            safe_nome = slugify(self.nome)
-            filename = f"{safe_nome}_v{self.revisao}.pdf"
-            self.documento_pdf.save(filename, File(pdf_io), save=False)  # Passar apenas o nome do arquivo
+                logger.debug(f"[gerar_pdf] Executando comando: {' '.join(comando)}")
+                resultado = subprocess.run(
+                    comando,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
 
-            self.save(update_fields=['documento_pdf'])
+                logger.debug(f"[gerar_pdf] Retorno do subprocess: {resultado.returncode}")
+                logger.debug(f"[gerar_pdf] STDOUT: {resultado.stdout}")
+                logger.debug(f"[gerar_pdf] STDERR: {resultado.stderr}")
 
-            logger.info(f"[gerar_pdf] PDF atualizado e salvo no campo `documento_pdf`: {self.documento_pdf.path}")
-            return self.documento_pdf.path
+                if resultado.returncode != 0:
+                    logger.error(f"[gerar_pdf] Erro na conversão para PDF: {resultado.stderr}")
+                    raise RuntimeError(f"Erro na conversão para PDF: {resultado.stderr}")
+
+                # Nome do arquivo PDF gerado pelo LibreOffice (baseado no nome do arquivo de entrada)
+                input_filename = os.path.basename(documento_path)
+                base_name, _ = os.path.splitext(input_filename)
+                generated_pdf_filename = f"{base_name}.pdf"
+                generated_pdf_path = Path(tmpdirname) / generated_pdf_filename
+
+                # Verificar se o PDF foi criado
+                if not generated_pdf_path.exists():
+                    logger.error(f"[gerar_pdf] Arquivo PDF não encontrado após a conversão: {generated_pdf_path}")
+                    raise FileNotFoundError(f"Arquivo PDF não encontrado após a conversão: {generated_pdf_path}")
+
+                logger.debug("[gerar_pdf] PDF gerado com sucesso.")
+
+                # Definir o nome desejado para o PDF
+                safe_nome = slugify(self.nome)
+                desired_pdf_filename = f"{safe_nome}_v{self.revisao}.pdf"
+                desired_pdf_path = Path(tmpdirname) / desired_pdf_filename
+
+                # Renomear o PDF gerado para o nome desejado
+                try:
+                    shutil.move(str(generated_pdf_path), str(desired_pdf_path))
+                    logger.debug(f"[gerar_pdf] PDF renomeado para: {desired_pdf_path}")
+                except Exception as e:
+                    logger.error(f"[gerar_pdf] Falha ao renomear o PDF: {e}")
+                    raise
+
+                # Remover PDFs antigos antes de salvar o novo
+                # self.remover_pdf_antigo()  # <-- Linha comentada para não remover PDFs antigos
+
+                # Deletar explicitamente o arquivo antigo no campo documento_pdf, se existir
+                if self.documento_pdf:
+                    self.documento_pdf.delete(save=False)
+                    logger.debug("[gerar_pdf] Arquivo antigo documento_pdf deletado.")
+
+                # Ler o PDF gerado e salvar no campo documento_pdf
+                with open(desired_pdf_path, 'rb') as pdf_file:
+                    pdf_content = pdf_file.read()
+
+                self.documento_pdf.save(desired_pdf_filename, ContentFile(pdf_content), save=False)
+
+                self.save(update_fields=['documento_pdf'])
+
+                logger.info(f"[gerar_pdf] PDF atualizado e salvo no campo `documento_pdf`: {self.documento_pdf.path}")
+                return self.documento_pdf.path
         except Exception as e:
             logger.error(f"[gerar_pdf] Erro ao gerar ou salvar o PDF: {e}")
             raise
-
-    def __str__(self):
-        return f"{self.nome} - Revisão {self.revisao} - Status: {self.get_status_display()}"
-
-    class Meta:
-        permissions = [
-            ('can_approve', 'Pode aprovar documentos'),
-            ('can_reject', 'Pode reprovar documentos'),
-            ('can_analyze', 'Pode analisar documentos'),
-            ('can_view_editables', 'Pode visualizar documentos editáveis'),
-        ]
 
 # Modelo Acesso
 class Acesso(models.Model):

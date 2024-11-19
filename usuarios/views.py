@@ -1,36 +1,27 @@
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import UsuarioCadastroForm, UsuarioChangeForm, GrupoForm, UsuarioPermissaoForm, ProfileForm
-from .models import Usuario, Grupo
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-from ldap3 import Server, Connection, ALL
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import LogoutView
-from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.models import Permission
 from django.utils.translation import gettext as _
 from django.urls import reverse_lazy
+from ldap3 import Server, Connection, ALL
+from collections import defaultdict
+from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
+from .forms import UsuarioCadastroForm, UsuarioChangeForm, GrupoForm, UsuarioPermissaoForm, ProfileForm
+from .models import Usuario, Grupo
+
+
 
 # Configuração do logger
 logger = logging.getLogger(__name__)
-
-# Função para registrar usuários locais no banco de dados
-def registrar_usuario(request):
-    if request.method == 'POST':
-        form = UsuarioCadastroForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.is_ad_user = False  # Usuário local
-            user.save()
-            login(request, user)  # Faz login automaticamente após o cadastro
-            return redirect('usuarios:lista_usuarios')  # Redireciona com o namespace correto
-    else:
-        form = UsuarioCadastroForm()
-    return render(request, 'usuarios/registrar.html', {'form': form})
 
 # Função de login
 def login_usuario(request):
@@ -44,6 +35,7 @@ def login_usuario(request):
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
+                # Não é mais necessário sincronizar permissões aqui
                 login(request, user)
                 logger.info(f"Usuário {username} autenticado com sucesso.")
                 return redirect('home')
@@ -59,14 +51,33 @@ def login_usuario(request):
         form = AuthenticationForm(request)
         return render(request, 'usuarios/login.html', {'form': form})
 
+    
+# Função para registrar usuários locais no banco de dados
+@login_required
+@permission_required('usuarios.can_add_user', raise_exception=True)
+def registrar_usuario(request):
+    if request.method == 'POST':
+        form = UsuarioCadastroForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_ad_user = False  # Usuário local
+            user.save()
+            login(request, user)  # Faz login automaticamente após o cadastro
+            return redirect('usuarios:lista_usuarios')  # Redireciona com o namespace correto
+    else:
+        form = UsuarioCadastroForm()
+    return render(request, 'usuarios/registrar.html', {'form': form})
+
 # Função para listar os usuários
 @login_required
+@permission_required('usuarios.list_user', raise_exception=True)
 def lista_usuarios(request):
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/lista_usuarios.html', {'usuarios': usuarios})
 
 # Função para editar o usuário
 @login_required
+@permission_required('usuarios.can_edit_user', raise_exception=True)
 def editar_usuario(request, usuario_id):
     usuario = get_object_or_404(Usuario, id=usuario_id)
     if request.method == 'POST':
@@ -80,6 +91,7 @@ def editar_usuario(request, usuario_id):
 
 # Função para buscar e importar usuários do Active Directory
 @login_required
+@permission_required('usuarios.can_import_user', raise_exception=True)
 def buscar_usuarios_ad(request):
     usuarios_ad = []
     conn = None
@@ -177,15 +189,21 @@ def importar_usuarios_ad(request):
 
 # Funções relacionadas a grupos
 @login_required
+@permission_required('usuarios.can_view_list_group', raise_exception=True)
 def lista_grupos(request):
     grupos = Grupo.objects.all()
     return render(request, 'usuarios/lista_grupos.html', {'grupos': grupos})
 
 @login_required
+@permission_required('usuarios.can_add_group', raise_exception=True)
 def cadastrar_grupo(request):
     if request.method == 'POST':
-        nome_grupo = request.POST.get('nome_grupo')
+        nome_grupo = request.POST.get('nome')
         participantes_ids = request.POST.getlist('participantes')
+        
+        # Log dos dados recebidos
+        logger.debug(f"Nome do Grupo: {nome_grupo}")
+        logger.debug(f"Participantes IDs: {participantes_ids}")
 
         if not nome_grupo:
             messages.error(request, "O nome do grupo é obrigatório.")
@@ -208,7 +226,9 @@ def cadastrar_grupo(request):
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/cadastrar_grupo.html', {'usuarios': usuarios})
 
+
 @login_required
+@permission_required('usuarios.can_edit_group', raise_exception=True)
 def editar_grupo(request, grupo_id):
     grupo = get_object_or_404(Grupo, id=grupo_id)
     if request.method == 'POST':
@@ -234,6 +254,7 @@ def editar_grupo(request, grupo_id):
     return render(request, 'usuarios/editar_grupo.html', {'grupo': grupo, 'usuarios': usuarios})
 
 @login_required
+@permission_required('usuarios.can_delete_group', raise_exception=True)
 def excluir_grupo(request, grupo_id):
     grupo = get_object_or_404(Grupo, id=grupo_id)
     if request.method == 'POST':
@@ -264,65 +285,120 @@ def sugestoes(request):
         for usuario in usuarios:
             sugestoes.append({'id': usuario.id, 'nome': usuario.username, 'tipo': 'Usuário'})
 
-        grupos = Group.objects.filter(name__icontains=query)[:5]
+        grupos = Grupo.objects.filter(nome__icontains=query)[:5]
         for grupo in grupos:
-            sugestoes.append({'id': grupo.id, 'nome': grupo.name, 'tipo': 'Grupo'})
+            sugestoes.append({'id': grupo.id, 'nome': grupo.nome, 'tipo': 'Grupo'})
 
     return JsonResponse(sugestoes, safe=False)
-
 # Função para liberar permissões
 @login_required
-@permission_required('auth.change_permission', raise_exception=True)
+@permission_required('usuarios.change_permission', raise_exception=True)
 def liberar_permissoes(request):
     if request.method == 'GET':
-        usuario_grupo_id = request.GET.get('id')
-        tipo = request.GET.get('tipo')
+        # Verifica se a requisição é AJAX
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            usuario_grupo_id = request.GET.get('id')
+            tipo = request.GET.get('tipo')
+            app_label = request.GET.get('app_label')  # Parâmetro para filtrar por app
 
-        if usuario_grupo_id and tipo:
-            permissoes = Permission.objects.all()
-            permissoes_list = [{'id': p.id, 'name': get_permission_display_name(p)} for p in permissoes]
+            if usuario_grupo_id and tipo:
+                ordered_permissions = []
+                if app_label:
+                    # Obtém todos os modelos do aplicativo especificado
+                    app_models = apps.get_app_config(app_label).get_models()
 
-            if tipo == 'Usuário':
-                usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
-                permissoes_selecionadas = usuario.user_permissions.values_list('id', flat=True)
+                    for model in app_models:
+                        content_type = ContentType.objects.get_for_model(model)
+
+                        # Coleta permissões personalizadas na ordem definida nos modelos
+                        custom_permissions = getattr(model._meta, 'permissions', [])
+                        for codename, name in custom_permissions:
+                            try:
+                                permission = Permission.objects.get(content_type=content_type, codename=codename)
+                                ordered_permissions.append(permission)
+                            except Permission.DoesNotExist:
+                                pass
+
+                        # Verifica se as permissões padrão estão habilitadas
+                        default_permissions = getattr(model._meta, 'default_permissions', ('add', 'change', 'delete', 'view'))
+                        for perm in default_permissions:
+                            codename = f"{perm}_{model._meta.model_name}"
+                            try:
+                                permission = Permission.objects.get(content_type=content_type, codename=codename)
+                                ordered_permissions.append(permission)
+                            except Permission.DoesNotExist:
+                                pass
+
+                # Constrói a lista de permissões ordenadas
+                permissoes_list = [
+                    {'id': p.id, 'name': p.name, 'app_label': p.content_type.app_label}
+                    for p in ordered_permissions
+                ]
+
+                if tipo == 'Usuário':
+                    usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
+                    permissoes_selecionadas = usuario.user_permissions.filter(content_type__app_label=app_label).values_list('id', flat=True)
+                elif tipo == 'Grupo':
+                    grupo = get_object_or_404(Grupo, id=usuario_grupo_id)
+                    permissoes_selecionadas = grupo.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True)
+                else:
+                    permissoes_selecionadas = []
+
                 return JsonResponse({
                     'permissoes': permissoes_list,
                     'permissoes_selecionadas': list(permissoes_selecionadas)
                 })
-
-            elif tipo == 'Grupo':
-                grupo = get_object_or_404(Group, id=usuario_grupo_id)
-                permissoes_selecionadas = grupo.permissions.values_list('id', flat=True)
+            else:
+                # Retorna a lista de apps únicos e ordenados
+                apps_permissions = Permission.objects.order_by('content_type__app_label').values_list('content_type__app_label', flat=True).distinct()
+                apps_list = list(apps_permissions)
                 return JsonResponse({
-                    'permissoes': permissoes_list,
-                    'permissoes_selecionadas': list(permissoes_selecionadas)
+                    'apps': apps_list
                 })
+
         else:
+            # Requisição normal: renderiza o template
             return render(request, 'usuarios/liberar_permissoes.html')
 
     elif request.method == 'POST':
         usuario_grupo_id = request.POST.get('usuario_grupo_id')
         tipo = request.POST.get('tipo')
         permissoes_ids = request.POST.getlist('permissoes')
+        app_label = request.POST.get('app_label')  # Campo para identificar o app
 
-        if usuario_grupo_id and tipo:
+        if usuario_grupo_id and tipo and app_label:
+            permissoes_submetidas = set(map(int, permissoes_ids))
+            permissoes_app = Permission.objects.filter(content_type__app_label=app_label)
+            permissoes_app_ids = set(permissoes_app.values_list('id', flat=True))
+
             if tipo == 'Usuário':
                 usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
-                permissoes = Permission.objects.filter(id__in=permissoes_ids)
-                usuario.user_permissions.set(permissoes)
+                permissoes_atual = set(usuario.user_permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
+                permissoes_a_adicionar = permissoes_submetidas - permissoes_atual
+                permissoes_a_remover = permissoes_atual - permissoes_submetidas
+                usuario.user_permissions.add(*Permission.objects.filter(id__in=permissoes_a_adicionar))
+                usuario.user_permissions.remove(*Permission.objects.filter(id__in=permissoes_a_remover))
                 messages.success(request, f"Permissões atualizadas para o usuário {usuario.username}")
             elif tipo == 'Grupo':
-                grupo = get_object_or_404(Group, id=usuario_grupo_id)
-                permissoes = Permission.objects.filter(id__in=permissoes_ids)
-                grupo.permissions.set(permissoes)
-                messages.success(request, f"Permissões atualizadas para o grupo {grupo.name}")
+                grupo = get_object_or_404(Grupo, id=usuario_grupo_id)
+                permissoes_atual = set(grupo.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
+                permissoes_a_adicionar = permissoes_submetidas - permissoes_atual
+                permissoes_a_remover = permissoes_atual - permissoes_submetidas
+                grupo.permissions.add(*Permission.objects.filter(id__in=permissoes_a_adicionar))
+                grupo.permissions.remove(*Permission.objects.filter(id__in=permissoes_a_remover))
+                messages.success(request, f"Permissões atualizadas para o grupo {grupo.nome}")
+            else:
+                messages.error(request, "Tipo inválido.")
+                return redirect('usuarios:liberar_permissoes')
+
             return redirect('usuarios:liberar_permissoes')
         else:
-            messages.error(request, "Por favor, selecione um usuário ou grupo e permissões.")
+            messages.error(request, "Por favor, selecione um usuário ou grupo, um aplicativo e as permissões.")
             return redirect('usuarios:liberar_permissoes')
     else:
         return HttpResponseNotAllowed(['GET', 'POST'])
-
+    
+  
 def get_permission_display_name(permission):
     codename = permission.codename
     model = permission.content_type.model_class()
@@ -355,6 +431,7 @@ class CustomLogoutView(LogoutView):
 
 # Função para listar permissões
 @login_required
+@permission_required('usuarios.change_permission', raise_exception=True)
 def lista_permissoes(request):
     permissoes = Permission.objects.all()
     return render(request, 'usuarios/lista_permissoes.html', {'permissoes': permissoes})

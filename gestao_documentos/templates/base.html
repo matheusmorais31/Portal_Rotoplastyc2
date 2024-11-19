@@ -1,5 +1,3 @@
-<!-- templates/base.html -->
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -28,23 +26,29 @@
                     {% endif %}
                 </a>
                 <div id="notification-dropdown" class="notification-dropdown">
+                    <!-- Botão "Limpar Todas" -->
+                    {% if notificacoes_nao_lidas|length > 0 %}
+                        <button id="clear-all-notifications" class="clear-all-button">Limpar Todas</button>
+                    {% endif %}
                     <ul id="notification-list">
                         {% for notificacao in notificacoes_nao_lidas %}
                             <li id="notificacao-{{ notificacao.id }}">
-                                <div class="notification-message">
-                                    <!-- Exibindo a foto do solicitante -->
-                                    <img src="{% if notificacao.solicitante and notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
-                                    <p>{{ notificacao.mensagem }}</p>
+                                <button class="close-notification" data-id="{{ notificacao.id }}">✖</button>
+                                <div class="notification-content">
+                                    <div class="notification-message">
+                                        <!-- Exibindo a foto do solicitante -->
+                                        <img src="{% if notificacao.solicitante and notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
+                                        <p>{{ notificacao.mensagem }}</p>
+                                    </div>
                                     <div class="notification-controls">
                                         {% if notificacao.link %}
                                             <a href="{{ notificacao.link }}" class="notification-action">Ir para</a>
                                         {% endif %}
                                     </div>
                                 </div>
-                                <button class="close-notification" data-id="{{ notificacao.id }}">✖</button>
                             </li>
                         {% empty %}
-                            <li>Nenhuma notificação pendente.</li>
+                            <li class="no-notifications">Nenhuma notificação pendente.</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -85,29 +89,54 @@
                     <span class="menu-label">Home</span>
                 </a>
             </li>
-            <li>
+            <!-- Menu Documentos -->
+            <li> 
+                {% if perms.documentos %}
                 <a href="#" onclick="toggleSubmenu(event, this)">
                     <img src="{% static 'images/documento.png' %}" alt="Documentos">
                     <span class="menu-label">Documentos</span>
                 </a>
+                {% endif %}
                 <ul class="submenu">
+                    {% if perms.documentos.view_documentos %}
                     <li><a href="{% url 'documentos:listar_documentos_aprovados' %}">Listar Documentos</a></li>
+                    {% endif %}
+                    {% if perms.documentos.list_pending_approvals %}
                     <li><a href="{% url 'documentos:listar_aprovacoes_pendentes' %}">Aprovações Pendentes</a></li>
+                    {% endif %}
+                    {% if perms.documentos.can_analyze %}
                     <li><a href="{% url 'documentos:listar_documentos_para_analise' %}">Análise de Documento SGQ</a></li>
+                    {% endif %}
+                    {% if perms.documentos.can_view_editables %}
                     <li><a href="{% url 'documentos:listar_documentos_editaveis' %}">Editáveis</a></li>
+                    {% endif %}
+                    {% if perms.documentos.list_reproaches %}
                     <li><a href="{% url 'documentos:listar_documentos_reprovados' %}">Reprovações</a></li>
+                    {% endif %}
+                    {% if perms.documentos.view_categoria %}
                     <li><a href="{% url 'documentos:listar_categorias' %}">Categorias</a></li>
+                    {% endif %}
                 </ul>
             </li>
+
+            <!-- Menu Adiministração -->
             <li>
+                {% if perms.usuarios %}
                 <a href="#" onclick="toggleSubmenu(event, this)">
                     <img src="{% static 'images/administracao.png' %}" alt="Administração">
                     <span class="menu-label">Administração</span>
                 </a>
+                {% endif %}
                 <ul class="submenu">
+                    {% if perms.usuarios.list_user %}
                     <li><a href="{% url 'usuarios:lista_usuarios' %}">Usuários</a></li>
+                    {% endif %}
+                    {% if perms.usuarios.can_view_list_group %}
                     <li><a href="{% url 'usuarios:lista_grupos' %}">Grupos de Usuários</a></li>
+                    {% endif %}
+                    {% if perms.usuarios.change_permission %}
                     <li><a href="{% url 'usuarios:liberar_permissoes' %}">Permissões</a></li>
+                    {% endif %}
                 </ul>
             </li>
         </ul>
@@ -188,14 +217,17 @@
             }
         });
 
-        function updateNotificationCount() {
+        function updateNotificationCount(delta = 0) {
             const notificationCountElement = document.getElementById('notification-count');
-            let currentCount = parseInt(notificationCountElement.textContent);
-            currentCount = currentCount - 1;
-            if (currentCount > 0) {
-                notificationCountElement.textContent = currentCount;
-            } else {
-                notificationCountElement.style.display = 'none';
+            if (notificationCountElement) {
+                let currentCount = parseInt(notificationCountElement.textContent);
+                currentCount += delta;
+                if (currentCount > 0) {
+                    notificationCountElement.textContent = currentCount;
+                    notificationCountElement.style.display = 'block';
+                } else {
+                    notificationCountElement.style.display = 'none';
+                }
             }
         }
 
@@ -211,16 +243,45 @@
                     },
                     body: JSON.stringify({})
                 })
-                .then(response => {
-                    if (response.ok) {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
                         this.closest('li').style.display = 'none';
-                        updateNotificationCount();
+                        updateNotificationCount(-1);
                     } else {
-                        console.error('Erro ao marcar a notificação como lida.');
+                        console.error('Erro ao marcar a notificação como lida:', data.message);
                     }
                 })
                 .catch(error => console.error('Erro:', error));
             });
+        });
+
+        // Adicionando evento para o botão "Limpar Todas"
+        document.getElementById('clear-all-notifications')?.addEventListener('click', function() {
+            if (confirm('Tem certeza de que deseja limpar todas as notificações?')) {
+                fetch("{% url 'notificacoes:limpar_todas_notificacoes' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Ocultar todas as notificações
+                        document.querySelectorAll('#notification-list li').forEach(function(li) {
+                            li.style.display = 'none';
+                        });
+                        // Atualizar a contagem de notificações
+                        updateNotificationCount(-data.total_limpos);
+                    } else {
+                        console.error('Erro ao limpar notificações:', data.message);
+                    }
+                })
+                .catch(error => console.error('Erro:', error));
+            }
         });
     </script>
 

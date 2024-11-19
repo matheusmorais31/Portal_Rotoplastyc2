@@ -1,0 +1,142 @@
+<!-- documentos/templates/documentos/listar_revisoes_documento.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/listar_revisoes_documento.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ titulo }}</h1>
+    
+    <!-- Informações do Documento Atual -->
+    <div class="document-container">
+        <div class="document-item">
+            <div class="document-status">
+                <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
+            </div>
+            <div class="document-info">
+                <div class="document-grid">
+                    <div><strong>Nome:</strong> {{ documento_atual.nome }}</div>
+                    <div><strong>Revisão Atual:</strong> {{ documento_atual.revisao }}</div>
+                    <div><strong>Categoria:</strong> {{ documento_atual.categoria.nome }}</div>
+                    <p><strong>Data de Criação:</strong> {{ documento_atual.data_criacao|date:"d/m/Y" }}</p>
+                    <div><strong>Elaborador:</strong> 
+                        {% if documento_atual.elaborador %}
+                            {{ documento_atual.elaborador.get_full_name|default:documento_atual.elaborador.username }}
+                        {% else %}
+                            Não disponível
+                        {% endif %}
+                    </div>
+                    <div><strong>Aprovador:</strong> 
+                        {% if revisao.aprovador1 %}
+                            {{ revisao.aprovador1.get_full_name|default:revisao.aprovador1.username }}
+                        {% else %}
+                            Não disponível
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão para Voltar -->
+    <div class="icons-bar">
+        <a href="javascript:history.back()" class="back-button">Voltar</a>
+        
+    </div>
+
+    <!-- Campo de Busca para Revisões -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar revisões aprovadas...">
+    </div>
+
+    <!-- Lista de Revisões Aprovadas -->
+    <div class="document-list" id="documentList">
+        {% for revisao in revisoes %}
+        <div class="document-container">
+            <div class="document-item">
+                <!-- Ícone do documento -->
+                <div class="document-status">
+                    <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
+                </div>
+
+                <!-- Informações da Revisão Aprovada -->
+                <div class="document-info">
+                    <div class="document-grid">
+                        <div><strong>Revisão:</strong> {{ revisao.revisao }}</div>
+                        <div><strong>Data de Criação:</strong> {{ revisao.data_criacao|date:"d/m/Y" }}</div>
+                        <div><strong>Status:</strong> {{ revisao.get_status_display }}</div>
+                        <div><strong>Aprovador:</strong> 
+                            {% if revisao.aprovador1 %}
+                                {{ revisao.aprovador1.get_full_name|default:revisao.aprovador1.username }}
+                            {% else %}
+                                Não disponível
+                            {% endif %}
+                        </div>
+                        <div><strong>Elaborador:</strong> 
+                            {% if revisao.elaborador %}
+                                {{ revisao.elaborador.get_full_name|default:revisao.elaborador.username }}
+                            {% else %}
+                                Não disponível
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="document-actions">
+                    <a href="{% url 'documentos:visualizar_documento' revisao.id %}" class="action-icon">
+                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                        <span class="tooltip-text">Visualizar</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Nenhuma revisão aprovada encontrada para este documento.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script para o filtro de busca -->
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var documentContainers = document.querySelectorAll('.document-container');
+        var hasResults = false;
+
+        documentContainers.forEach(function(container) {
+            var revisionNumber = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
+            var status = container.querySelector('.document-grid div:nth-child(3)').innerText.toLowerCase();
+            if (revisionNumber.includes(searchTerm) || status.includes(searchTerm)) {
+                container.style.display = '';
+                hasResults = true;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Exibe ou esconde a mensagem de "Nenhuma revisão encontrada"
+        var noResultsMessage = document.getElementById('noResultsMessage');
+        if (!hasResults) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'noResultsMessage';
+                noResultsMessage.innerText = 'Nenhuma revisão aprovada encontrada.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.marginTop = '20px';
+                noResultsMessage.style.color = '#fff';
+                document.getElementById('documentList').appendChild(noResultsMessage);
+            }
+            noResultsMessage.style.display = 'block';
+        } else {
+            if (noResultsMessage) {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -19,11 +19,13 @@
     </div>
 
     <div class="icons-bar">
+        {% if perms.documentos.add_categoria %}
         <!-- Ícone de adicionar categoria -->
         <a href="{% url 'documentos:criar_categoria' %}" class="icon-link">
             <img src="{% static 'images/nova-categoria-icon.png' %}" alt="Adicionar Categoria" class="icon">
-            <span class="tooltip-text-create">Criar</span>
+            <span class="tooltip-text">Criar</span>
         </a>
+        {% endif %}
     </div>
 
     <div class="category-list" id="categoryList">
@@ -40,15 +42,23 @@
                         <div><strong>Nome:</strong> {{ categoria.nome }}</div>
                     </div>
                 </div>
+
+                <!--Botões de ação-->
                 <div class="category-actions">
-                    <a href="{% url 'documentos:editar_categoria' categoria.id %}" class="edit-icon">
-                        <img src="{% static 'images/edit-icon.png' %}" alt="Editar">
+                    <!--Botões de editar-->
+                    {% if perms.documentos.change_categoria %}
+                    <a href="{% url 'documentos:editar_categoria' categoria.id %}" class="action-icon">
+                        <img src="{% static 'images/edit-icon.png' %}" alt="Editar" class="edit-icon">
                         <span class="tooltip-text">Editar</span>
                     </a>
-                    <a href="{% url 'documentos:excluir_categoria' categoria.id %}" class="edit-icon">
-                        <img src="{% static 'images/delete-icon.png' %}" alt="Excluir">
+                    {% endif %}
+                    <!--Botão de excluir-->
+                    {% if perms.documentos.delete_categoria %}
+                    <a href="{% url 'documentos:excluir_categoria' categoria.id %}" class="action-icon">
+                        <img src="{% static 'images/delete-icon.png' %}" alt="Excluir" class="edit-icon">
                         <span class="tooltip-text">Excluir</span>
                     </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
