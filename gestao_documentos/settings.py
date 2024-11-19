@@ -34,6 +34,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+
 ]
 
 ROOT_URLCONF = 'gestao_documentos.urls'
@@ -97,6 +99,10 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -134,19 +140,21 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',  # Altere para DEBUG
+            'level': 'DEBUG',  
             'propagate': True,
         },
         'myapp': {
             'handlers': ['file'],
-            'level': 'DEBUG',  # Altere para DEBUG
+            'level': 'DEBUG',  
         },
     },
 }
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
-    'usuarios.auth_backends.ActiveDirectoryBackend',  # Certifique-se de que o caminho está correto
+    'usuarios.auth_backends.ActiveDirectoryBackend',  
     'django.contrib.auth.backends.ModelBackend',
+    'usuarios.authentication.CustomBackend',  
+
 ]
 
 # Security settings

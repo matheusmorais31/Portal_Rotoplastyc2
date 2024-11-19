@@ -15,16 +15,20 @@ from django.http import HttpResponse, Http404
 from django.http import FileResponse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 
 
 logger = logging.getLogger('django')
 User = get_user_model()
 
+#Função para listar as categorias
 @login_required
+@permission_required('documentos.view_categoria', raise_exception=True)
 def listar_categorias(request):
     categorias = Categoria.objects.all()
     return render(request, 'documentos/listar_categorias.html', {'categorias': categorias})
 
+#Função para criar categoria
 @login_required
 @permission_required('documentos.add_categoria', raise_exception=True)
 def criar_categoria(request):
@@ -38,6 +42,7 @@ def criar_categoria(request):
         form = CategoriaForm()
     return render(request, 'documentos/criar_categoria.html', {'form': form})
 
+#Função para editar categoria
 @login_required
 @permission_required('documentos.change_categoria', raise_exception=True)
 def editar_categoria(request, pk):
@@ -52,6 +57,7 @@ def editar_categoria(request, pk):
         form = CategoriaForm(instance=categoria)
     return render(request, 'documentos/editar_categoria.html', {'form': form})
 
+# Função para deletar categoria
 @login_required
 @permission_required('documentos.delete_categoria', raise_exception=True)
 def excluir_categoria(request, pk):
@@ -62,8 +68,9 @@ def excluir_categoria(request, pk):
         return redirect('documentos:listar_categorias')
     return render(request, 'documentos/excluir_categoria.html', {'categoria': categoria})
 
+#Função para criar documentos
 @login_required
-@permission_required('documentos.add_documento', raise_exception=True)
+@permission_required('documentos.can_add_documento', raise_exception=True)
 def criar_documento(request):
     if request.method == 'POST':
         form = DocumentoForm(request.POST, request.FILES)
@@ -86,6 +93,7 @@ def criar_documento(request):
         form = DocumentoForm()
     return render(request, 'documentos/criar_documento.html', {'form': form})
 
+#Função para analise de documentos
 @login_required
 @permission_required('documentos.can_analyze', raise_exception=True)
 def listar_documentos_para_analise(request):
@@ -132,7 +140,6 @@ def listar_documentos_para_analise(request):
     return render(request, 'documentos/listar_documentos_para_analise.html', {'documentos': documentos, 'titulo': 'Documentos para Análise'})
 
 @login_required
-@permission_required('documentos.change_documento', raise_exception=True)
 def substituir_documento(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
 
@@ -156,7 +163,6 @@ def substituir_documento(request, documento_id):
     return redirect('documentos:listar_documentos_para_analise')
 
 @login_required
-@permission_required('documentos.change_documento', raise_exception=True)
 def atualizar_documento(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
     if request.method == 'POST':
@@ -172,6 +178,7 @@ def atualizar_documento(request, documento_id):
             messages.error(request, 'Falha ao atualizar o documento.')
     return redirect('documentos:listar_documentos_para_analise')
 
+# Função para aprovar documentos
 @login_required
 @permission_required('documentos.can_approve', raise_exception=True)
 def aprovar_documento(request, documento_id):
@@ -198,7 +205,9 @@ def aprovar_documento(request, documento_id):
     
     return redirect('documentos:listar_documentos_para_analise')
 
+#Função para listar Aprovações pendentes
 @login_required
+@permission_required('documentos.list_pending_approvals', raise_exception=True)
 def listar_aprovacoes_pendentes(request):
     user = request.user
     documentos = Documento.objects.none()
@@ -256,7 +265,9 @@ def listar_aprovacoes_pendentes(request):
                 messages.error(request, 'É necessário informar o motivo da reprovação.')
     return render(request, 'documentos/listar_aprovacoes_pendentes.html', {'documentos': documentos, 'titulo': 'Aprovações Pendentes'})
 
+#Função para listar os documentos aprovados
 @login_required
+
 def listar_documentos_aprovados(request):
     documentos = Documento.objects.filter(status='aprovado').order_by('nome', '-revisao')
     documentos_unicos = {}
@@ -267,12 +278,7 @@ def listar_documentos_aprovados(request):
     documentos.sort(key=lambda x: x.nome)
     return render(request, 'documentos/listar_documentos.html', {'documentos': documentos, 'titulo': 'Documentos Aprovados'})
 
-# documentos/views.py
-from django.urls import reverse
-
-# views.py
-from django.urls import reverse
-
+#Função para vizualizar documentos
 @login_required
 @xframe_options_sameorigin
 def visualizar_documento(request, id):
@@ -334,20 +340,24 @@ def baixar_pdf(request, id):
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(os.path.basename(file_path))
     return response
 
-
+#Função para visualizar acessos
 @login_required
+@permission_required('documentos.view_acessos_documento', raise_exception=True)
 def visualizar_acessos_documento(request, id):
     documento = get_object_or_404(Documento, id=id)
     acessos = Acesso.objects.filter(documento=documento)
     return render(request, 'documentos/visualizar_acessos.html', {'documento': documento, 'acessos': acessos})
 
+#Função lista de reprovações
 @login_required
+@permission_required('documentos.list_reproaches', raise_exception=True)
 def listar_documentos_reprovados(request):
     documentos_reprovados = Documento.objects.filter(elaborador=request.user, status='reprovado')
     return render(request, 'documentos/lista_reprovados.html', {'documentos': documentos_reprovados, 'titulo': 'Documentos Reprovados'})
 
+#Função nova revisão
 @login_required
-@permission_required('documentos.add_documento', raise_exception=True)
+@permission_required('documentos.can_add_documento', raise_exception=True)
 def nova_revisao(request, documento_id):
     documento_atual = get_object_or_404(Documento, id=documento_id)
     
@@ -391,37 +401,48 @@ def nova_revisao(request, documento_id):
     return render(request, 'documentos/nova_revisao.html', {'form': form, 'documento': documento_atual})
 
 @login_required
-@permission_required('documentos.change_documento', raise_exception=True)
 def upload_documento_revisado(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
+    logger.debug(f"[upload_documento_revisado] Iniciando upload revisado para documento ID: {documento_id}")
 
     if request.method == 'POST' and request.FILES.get('documento'):
         novo_documento = request.FILES['documento']
-        
+        logger.debug(f"[upload_documento_revisado] Arquivo recebido: {novo_documento.name}")
+
         # Verificar extensão do arquivo
         if not novo_documento.name.lower().endswith(('.doc', '.docx', '.odt')):
             messages.error(request, 'Formato de arquivo inválido. Apenas arquivos .doc, .docx e .odt são permitidos.')
+            logger.warning(f"[upload_documento_revisado] Formato de arquivo inválido: {novo_documento.name}")
             return redirect('documentos:listar_documentos_para_analise')
 
         try:
             with transaction.atomic():
-                # Remover o documento antigo, se existir
+                # Remover o documento editável antigo, se existir
                 if documento.documento:
-                    documento.remover_pdf_antigo()  # Remover o PDF antigo associado
-                    documento.documento.delete()    # Deletar o documento editável antigo
+                    documento.documento.delete(save=False)
+                    logger.debug(f"[upload_documento_revisado] Documento editável antigo removido: {documento.documento.name}")
                 
                 # Salvar o novo documento revisado
                 documento.documento.save(novo_documento.name, novo_documento)
+                logger.debug(f"[upload_documento_revisado] Novo documento revisado salvo: {documento.documento.name}")
                 
-                documento.status = 'aguardando_analise'  # **Redefine status para aguardar nova análise**
+                # Atualizar o status para aguardar nova análise
+                documento.status = 'aguardando_analise'
                 documento.save(update_fields=['documento', 'status'])
+                logger.debug(f"[upload_documento_revisado] Status atualizado para: {documento.status}")
                 
                 messages.success(request, 'Documento revisado carregado com sucesso. Ele será analisado antes de ser aprovado.')
         except Exception as e:
+            logger.error(f'[upload_documento_revisado] Erro ao carregar o documento revisado: {e}', exc_info=True)
             messages.error(request, f'Ocorreu um erro ao carregar o documento revisado: {e}')
+
+    else:
+        messages.error(request, 'Nenhum arquivo foi enviado para substituição.')
+        logger.warning(f"[upload_documento_revisado] Nenhum arquivo enviado para documento ID: {documento_id}")
 
     return redirect('documentos:listar_documentos_para_analise')
 
+#Função para listar os editaveis
 @login_required
 @permission_required('documentos.can_view_editables', raise_exception=True)
 def listar_documentos_editaveis(request):
@@ -447,4 +468,25 @@ def listar_documentos_editaveis(request):
     return render(request, 'documentos/listar_documentos_editaveis.html', {
         'documentos_por_categoria': documentos_por_categoria,
         'titulo': 'Documentos Editáveis',
+    })
+
+
+#Função lista de revisões
+@login_required
+@permission_required('documentos.can_view_revisions', raise_exception=True)
+def listar_revisoes_documento(request, documento_id):
+    """
+    Lista todas as revisões aprovadas de um documento específico.
+    """
+    documento_atual = get_object_or_404(Documento, id=documento_id)
+    # Filtrar apenas revisões aprovadas
+    revisoes_aprovadas = Documento.objects.filter(
+        nome=documento_atual.nome,
+        status='aprovado'  # Filtra apenas revisões aprovadas
+    ).order_by('-revisao')
+
+    return render(request, 'documentos/listar_revisoes_documento.html', {
+        'documento_atual': documento_atual,
+        'revisoes': revisoes_aprovadas,
+        'titulo': f'Revisões Aprovadas de {documento_atual.nome}',
     })

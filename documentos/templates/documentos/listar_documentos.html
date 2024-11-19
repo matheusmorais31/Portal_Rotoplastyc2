@@ -17,10 +17,12 @@
     <!-- Barra de ícones -->
     <div class="icons-bar">
         <!-- Ícone de adicionar documento -->
+        {% if perms.documentos.can_add_documento %}
         <a href="{% url 'documentos:criar_documento' %}" class="icon-link">
             <img src="{% static 'images/add-document-icon.png' %}" alt="Adicionar Documento" class="icon">
             <span class="tooltip-text">Criar</span>
         </a>
+        {% endif %}
     </div>
 
     <!-- Lista de documentos -->
@@ -31,6 +33,7 @@
                 <!-- Ícone do documento -->
                 <div class="document-status">
                     <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
+                    
                 </div>
 
                 <!-- Informações do documento -->
@@ -62,14 +65,23 @@
                         <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
                         <span class="tooltip-text">Visualizar</span>
                     </a>
+                    {% if perms.documentos.can_add_documento %}
                     <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/revision-icon.png' %}" alt="Nova Revisão" class="revision-icon">
+                        <img src="{% static 'images/versao.png' %}" alt="Nova Revisão" class="revision-icon">
                         <span class="tooltip-text">Nova Revisão</span>
                     </a> 
+                    {% endif %}
                     <!-- Botão para visualizar acessos -->
+                    {% if perms.documentos.view_acessos_documento %}
                     <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon">
                         <img src="{% static 'images/acessou.png' %}" alt="Visualizar Acessos" class="view-access-icon">
                         <span class="tooltip-text">Acessos</span>
+                    {% endif %}   
+                    {% if perms.documentos.can_view_revisions %}
+                    <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
+                        <img src="{% static 'images/revision-icon.png' %}" alt="Visualizar Acessos" class="view-access-icon">
+                        <span class="tooltip-text">Histórico</span>
+                    {% endif %}      
                     </a>
                 </div>
             </div>

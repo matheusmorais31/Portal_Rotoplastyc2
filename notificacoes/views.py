@@ -24,3 +24,16 @@ def marcar_notificacao_como_lida(request, notificacao_id):
             return JsonResponse({'status': 'error', 'message': 'Notificação não encontrada.'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Método não permitido.'})
+
+@login_required
+@csrf_exempt
+def limpar_todas_notificacoes(request):
+    if request.method == 'POST':
+        try:
+            notificacoes = Notificacao.objects.filter(destinatario=request.user, lida=False)
+            notificacoes.update(lida=True)
+            return JsonResponse({'status': 'success', 'total_limpos': notificacoes.count()})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Método não permitido.'})
