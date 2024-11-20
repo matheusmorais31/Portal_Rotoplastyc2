@@ -163,6 +163,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 from django.urls import reverse_lazy
 
 LOGOUT_REDIRECT_URL = reverse_lazy('usuarios:login_usuario')
+LOGIN_URL = reverse_lazy('usuarios:login_usuario')
 
 
 
