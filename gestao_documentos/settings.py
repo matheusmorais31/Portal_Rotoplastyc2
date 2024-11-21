@@ -1,13 +1,20 @@
-import os, logging, ssl
+import os
+import logging
+import ssl
 from pathlib import Path
+from decouple import config
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-SECRET_KEY = 'django-insecure-1hy@(6*s2-g(gw)gh800lp_&&+0pm5-*kyl0zqetl%*^5-=8ig'
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '172.16.41.129']
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = False
+ALLOWED_HOSTS = [
+    'portal.rotoplastyc.com.br',
+    '172.16.44.11',       
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -23,19 +30,18 @@ INSTALLED_APPS = [
     'notificacoes',
     'dirtyfields',
 ]
+
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware', 
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-
 ]
 
 ROOT_URLCONF = 'gestao_documentos.urls'
@@ -43,7 +49,7 @@ ROOT_URLCONF = 'gestao_documentos.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'gestao_documentos', 'templates')],
+        'DIRS': [BASE_DIR / 'gestao_documentos' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -59,14 +65,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gestao_documentos.wsgi.application'
 
+# Database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'portal_rotoplastyc',
-        'USER': 'root',
-        'PASSWORD': 'ti@R0T0',
-        'HOST': 'irp.rotoplastyc.com',
-        'PORT': '3306',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', default='3306'),
         'OPTIONS': {
             'ssl': {
                 'cert_reqs': ssl.CERT_NONE,
@@ -74,7 +81,6 @@ DATABASES = {
         }
     }
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -100,20 +106,30 @@ USE_L10N = True
 USE_TZ = True
 
 LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'locale'),
+    BASE_DIR / 'locale',
 ]
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [BASE_DIR / "static"]  # Certifique-se de que esta pasta existe
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # Diretório para coletar arquivos estáticos
 
 # Media files (uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR / 'media'          # Diretório para arquivos de mídia
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# LibreOffice configuration
+# Adiciona o caminho do executável do LibreOffice, ajustável por sistema operacional
+if os.name == 'nt':  # Windows
+    SOFFICE_PATH = r"C:\Program Files\LibreOffice\program\soffice.exe"
+else:  # Linux/Unix (incluindo Debian)
+    SOFFICE_PATH = "/usr/bin/soffice"
+
+# Alternativamente, utilize variáveis de ambiente para flexibilidade
+SOFFICE_PATH = os.getenv('SOFFICE_PATH', SOFFICE_PATH)
 
 # Logging configuration with log rotation
 LOGGING = {
@@ -131,39 +147,39 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',  # Altere para DEBUG para registrar tudo
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django.log'),
+            'filename': BASE_DIR / 'django.log',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',  
+            'level': 'DEBUG',
             'propagate': True,
         },
-        'myapp': {
+        'documentos': {  
             'handlers': ['file'],
-            'level': 'DEBUG',  
+            'level': 'DEBUG',
         },
     },
 }
+
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
-    'usuarios.auth_backends.ActiveDirectoryBackend',  
+    'usuarios.auth_backends.ActiveDirectoryBackend',
     'django.contrib.auth.backends.ModelBackend',
-    'usuarios.authentication.CustomBackend',  
-
+    'usuarios.authentication.CustomBackend',
 ]
+
+
+LIBREOFFICE_PATH = '/usr/bin/soffice'
+
 
 # Security settings
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-from django.urls import reverse_lazy
-
+# Redirect URLs
 LOGOUT_REDIRECT_URL = reverse_lazy('usuarios:login_usuario')
 LOGIN_URL = reverse_lazy('usuarios:login_usuario')
-
-
-

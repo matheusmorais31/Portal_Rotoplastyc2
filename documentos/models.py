@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 import os
 import shutil
+import platform
 
 logger = logging.getLogger('django')
 
@@ -139,13 +140,7 @@ class Documento(models.Model):
             ('add_categoria', 'Adicionar Categoria'),
             ('change_categoria', 'Editar Categoria'),
             ('delete_categoria', 'Deletar Categoria'),
-            
-            
-            
-            
-            
-            
-         ]
+        ]
 
     def __str__(self):
         return f"{self.nome} - Revisão {self.revisao} - Status: {self.get_status_display()}"
@@ -173,12 +168,23 @@ class Documento(models.Model):
             if not os.path.exists(documento_path):
                 raise FileNotFoundError(f"Arquivo de documento não encontrado: {documento_path}")
 
-            # Definir o caminho completo para o executável soffice.exe
-            # Atualize este caminho conforme a instalação do LibreOffice no seu sistema
-            soffice_path = r"C:\Program Files\LibreOffice\program\soffice.exe"
+            # Determinar o caminho do LibreOffice baseado no sistema operacional ou configuração
+            if platform.system() == 'Windows':
+                soffice_path = settings.LIBREOFFICE_PATH  
+            else:
+                soffice_path = settings.LIBREOFFICE_PATH  
 
-            if not os.path.exists(soffice_path):
-                raise FileNotFoundError(f"Executável do LibreOffice não encontrado em: {soffice_path}")
+            logger.debug(f"[gerar_pdf] Caminho do LibreOffice: {soffice_path}")
+
+            if not shutil.which(soffice_path):
+                raise FileNotFoundError(f"Executável do LibreOffice não encontrado: {soffice_path}")
+
+            # Preparar o ambiente com PATH adequado
+            env = os.environ.copy()
+            # Garantir que /usr/bin e /bin estão no PATH
+            env["PATH"] = "/usr/bin:/bin:" + env.get("PATH", "")
+
+            logger.debug(f"[gerar_pdf] PATH para subprocesso: {env['PATH']}")
 
             # Criar um diretório temporário para a conversão
             with tempfile.TemporaryDirectory() as tmpdirname:
@@ -199,7 +205,8 @@ class Documento(models.Model):
                     comando,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True
+                    text=True,
+                    env=env  # Passar o ambiente com PATH ajustado
                 )
 
                 logger.debug(f"[gerar_pdf] Retorno do subprocess: {resultado.returncode}")
@@ -236,9 +243,6 @@ class Documento(models.Model):
                     logger.error(f"[gerar_pdf] Falha ao renomear o PDF: {e}")
                     raise
 
-                # Remover PDFs antigos antes de salvar o novo
-                # self.remover_pdf_antigo()  # <-- Linha comentada para não remover PDFs antigos
-
                 # Deletar explicitamente o arquivo antigo no campo documento_pdf, se existir
                 if self.documento_pdf:
                     self.documento_pdf.delete(save=False)
@@ -252,7 +256,7 @@ class Documento(models.Model):
 
                 self.save(update_fields=['documento_pdf'])
 
-                logger.info(f"[gerar_pdf] PDF atualizado e salvo no campo `documento_pdf`: {self.documento_pdf.path}")
+                logger.info(f"[gerar_pdf] PDF atualizado e salvo no campo documento_pdf: {self.documento_pdf.path}")
                 return self.documento_pdf.path
         except Exception as e:
             logger.error(f"[gerar_pdf] Erro ao gerar ou salvar o PDF: {e}")

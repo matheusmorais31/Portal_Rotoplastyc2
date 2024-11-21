@@ -180,7 +180,7 @@ def atualizar_documento(request, documento_id):
 
 # Função para aprovar documentos
 @login_required
-@permission_required('documentos.can_approve', raise_exception=True)
+
 def aprovar_documento(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
     if documento.status != 'aguardando_analise':
