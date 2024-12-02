@@ -1,3 +1,5 @@
+# models.py
+
 from django.db import models, transaction
 from django.contrib.auth import get_user_model
 from django.core.files.storage import FileSystemStorage
@@ -168,49 +170,59 @@ class Documento(models.Model):
         Sobrescreve o método save para determinar automaticamente o tipo de documento
         com base na extensão do arquivo enviado.
         """
+        logger.debug(f"[save] Salvando documento '{self.nome}' (ID: {self.id}) com status '{self.status}'.")
+
         if self.documento:
             ext = os.path.splitext(self.documento.name)[1].lower()
+            logger.debug(f"[save] Extensão do documento: {ext}")
             if ext in ['.doc', '.docx', '.odt']:
                 self.document_type = 'pdf'
             elif ext in ['.xls', '.xlsx', '.ods']:
                 self.document_type = 'spreadsheet'
             else:
+                logger.error(f"[save] Tipo de arquivo inválido: {ext}")
                 raise ValidationError('Tipo de arquivo inválido.')
 
         super(Documento, self).save(*args, **kwargs)
+        logger.debug(f"[save] Documento '{self.nome}' (ID: {self.id}) salvo com sucesso.")
 
     def gerar_pdf(self):
         """
         Gera um PDF a partir do documento editável utilizando LibreOffice e atualiza o campo documento_pdf.
         Para planilhas, apenas copia o arquivo original para documento_pdf sem conversão.
         """
-        try:
-            logger.debug("[gerar_pdf] Iniciando processo de geração ou cópia do documento_pdf.")
+        logger.debug(f"[gerar_pdf] Iniciando processo para o documento '{self.nome}' (ID: {self.id}) com tipo '{self.document_type}'.")
 
+        try:
             if self.document_type == 'spreadsheet':
                 # Para planilhas, copiar o arquivo original para documento_pdf
                 documento_path = self.documento.path
+                logger.debug(f"[gerar_pdf] Caminho do documento editável: {documento_path}")
                 safe_nome = slugify(self.nome)
                 desired_spreadsheet_filename = f"{safe_nome}_v{self.revisao}{Path(documento_path).suffix}"
                 desired_spreadsheet_path = Path('documentos') / 'spreadsheet' / desired_spreadsheet_filename
-
-                # Definir o caminho completo no sistema de arquivos
                 full_desired_spreadsheet_path = os.path.join(settings.MEDIA_ROOT, desired_spreadsheet_path)
+                logger.debug(f"[gerar_pdf] Caminho desejado para a planilha: {full_desired_spreadsheet_path}")
+
+                # Deletar explicitamente o arquivo antigo no campo documento_pdf, se existir
+                if self.documento_pdf and self.documento_pdf.storage.exists(self.documento_pdf.name):
+                    old_spreadsheet_path = self.documento_pdf.path
+                    logger.debug(f"[gerar_pdf] Deletando arquivo antigo documento_pdf: {old_spreadsheet_path}")
+                    self.documento_pdf.delete(save=False)
+                    logger.debug("[gerar_pdf] Arquivo antigo documento_pdf deletado.")
 
                 # Garantir que o diretório de destino exista
                 os.makedirs(os.path.dirname(full_desired_spreadsheet_path), exist_ok=True)
+                logger.debug(f"[gerar_pdf] Diretório criado ou já existente: {os.path.dirname(full_desired_spreadsheet_path)}")
 
                 # Copiar o arquivo
                 shutil.copy(documento_path, full_desired_spreadsheet_path)
                 logger.debug(f"[gerar_pdf] Planilha copiada para: {full_desired_spreadsheet_path}")
 
-                # Deletar o arquivo antigo no campo documento_pdf, se existir
-                if self.documento_pdf:
-                    self.documento_pdf.delete(save=False)
-                    logger.debug("[gerar_pdf] Arquivo antigo documento_pdf deletado.")
-
                 # Salvar o caminho da planilha no campo documento_pdf
                 self.documento_pdf.name = desired_spreadsheet_path.as_posix()
+                logger.debug(f"[gerar_pdf] Caminho salvo no campo documento_pdf: {self.documento_pdf.name}")
+
                 # Chamar save sem processar novamente
                 self.save(update_fields=['documento_pdf'])
                 logger.info(f"[gerar_pdf] Planilha atualizada e salva no campo documento_pdf: {self.documento_pdf.path}")
@@ -219,26 +231,26 @@ class Documento(models.Model):
             elif self.document_type == 'pdf':
                 # Lógica para conversão para PDF
                 logger.debug("[gerar_pdf] Tipo de documento é PDF. Iniciando conversão para PDF.")
-
                 documento_path = self.documento.path
+                logger.debug(f"[gerar_pdf] Caminho do documento editável: {documento_path}")
 
                 # Verificar se o arquivo de entrada existe
                 if not os.path.exists(documento_path):
+                    logger.error(f"[gerar_pdf] Arquivo de documento não encontrado: {documento_path}")
                     raise FileNotFoundError(f"Arquivo de documento não encontrado: {documento_path}")
 
                 # Determinar o caminho do LibreOffice baseado no sistema operacional ou configuração
                 soffice_path = settings.LIBREOFFICE_PATH  # Assegure-se de definir esta configuração
-
                 logger.debug(f"[gerar_pdf] Caminho do LibreOffice: {soffice_path}")
 
                 if not shutil.which(soffice_path):
+                    logger.error(f"[gerar_pdf] Executável do LibreOffice não encontrado: {soffice_path}")
                     raise FileNotFoundError(f"Executável do LibreOffice não encontrado: {soffice_path}")
 
                 # Preparar o ambiente com PATH adequado
                 env = os.environ.copy()
                 # Garantir que /usr/bin e /bin estão no PATH
                 env["PATH"] = "/usr/bin:/bin:" + env.get("PATH", "")
-
                 logger.debug(f"[gerar_pdf] PATH para subprocesso: {env['PATH']}")
 
                 # Criar um diretório temporário para a conversão
@@ -282,39 +294,46 @@ class Documento(models.Model):
 
                     logger.debug("[gerar_pdf] PDF gerado com sucesso.")
 
+                    # Deletar explicitamente o arquivo antigo no campo documento_pdf, se existir
+                    if self.documento_pdf and self.documento_pdf.storage.exists(self.documento_pdf.name):
+                        old_pdf_path = self.documento_pdf.path
+                        logger.debug(f"[gerar_pdf] Deletando arquivo antigo documento_pdf: {old_pdf_path}")
+                        self.documento_pdf.delete(save=False)
+                        logger.debug("[gerar_pdf] Arquivo antigo documento_pdf deletado.")
+
                     # Definir o nome desejado para o PDF
                     safe_nome = slugify(self.nome)
                     desired_pdf_filename = f"{safe_nome}_v{self.revisao}.pdf"
                     desired_pdf_path = Path('documentos') / 'pdf' / desired_pdf_filename
+                    full_desired_pdf_path = os.path.join(settings.MEDIA_ROOT, desired_pdf_path)
+                    logger.debug(f"[gerar_pdf] Caminho desejado para o PDF: {full_desired_pdf_path}")
 
                     # Garantir que o diretório de destino exista
-                    os.makedirs(os.path.dirname(os.path.join(settings.MEDIA_ROOT, desired_pdf_path)), exist_ok=True)
+                    os.makedirs(os.path.dirname(full_desired_pdf_path), exist_ok=True)
+                    logger.debug(f"[gerar_pdf] Diretório criado ou já existente: {os.path.dirname(full_desired_pdf_path)}")
 
                     # Mover e renomear o PDF gerado para o caminho desejado
-                    shutil.move(str(generated_pdf_path), os.path.join(settings.MEDIA_ROOT, desired_pdf_path))
-                    logger.debug(f"[gerar_pdf] PDF movido para: {desired_pdf_path}")
-
-                    # Deletar explicitamente o arquivo antigo no campo documento_pdf, se existir
-                    if self.documento_pdf:
-                        self.documento_pdf.delete(save=False)
-                        logger.debug("[gerar_pdf] Arquivo antigo documento_pdf deletado.")
+                    shutil.move(str(generated_pdf_path), full_desired_pdf_path)
+                    logger.debug(f"[gerar_pdf] PDF movido para: {full_desired_pdf_path}")
 
                     # Salvar o caminho do PDF no campo documento_pdf
                     self.documento_pdf.name = desired_pdf_path.as_posix()
+                    logger.debug(f"[gerar_pdf] Caminho salvo no campo documento_pdf: {self.documento_pdf.name}")
+
                     # Chamar save sem processar novamente
                     self.save(update_fields=['documento_pdf'])
-
                     logger.info(f"[gerar_pdf] PDF atualizado e salvo no campo documento_pdf: {self.documento_pdf.path}")
                     return self.documento_pdf.path
 
             else:
+                logger.error("[gerar_pdf] Tipo de documento inválido.")
                 raise ValueError("Tipo de documento inválido.")
 
         except ValidationError as ve:
             logger.error(f"[gerar_pdf] Validação de erro: {ve}")
             raise ve
         except Exception as e:
-            logger.error(f"[gerar_pdf] Erro ao gerar ou salvar o documento_pdf: {e}")
+            logger.error(f"[gerar_pdf] Erro ao gerar ou salvar o documento_pdf: {e}", exc_info=True)
             raise
 
 # Modelo Acesso
