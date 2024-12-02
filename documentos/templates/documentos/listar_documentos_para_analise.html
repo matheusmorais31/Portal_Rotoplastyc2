@@ -56,7 +56,7 @@
                     <!-- Botão de upload do documento revisado -->
                     <form method="post" enctype="multipart/form-data" action="{% url 'documentos:upload_documento_revisado' documento.id %}" id="uploadForm-{{ documento.id }}" style="display:inline;">
                         {% csrf_token %}
-                        <input type="file" name="documento" id="fileInput-{{ documento.id }}" style="display:none;" accept=".doc,.docx,.odt">
+                        <input type="file" name="documento" id="fileInput-{{ documento.id }}" style="display:none;" accept=".doc,.docx,.odt,.xls,.xlsx,.ods">
                         <button type="button" onclick="handleFileUpload({{ documento.id }})" class="action-icon" title="Upload Documento Revisado">
                             <img src="{% static 'images/upload-icon.png' %}" alt="Upload" class="upload-icon">
                             <span class="tooltip-text">Upar Documento</span>
@@ -128,12 +128,12 @@
 
         fileInput.onchange = function () {
             const file = fileInput.files[0];
-            const allowedExtensions = /(\.doc|\.docx|\.odt)$/i;
+            const allowedExtensions = /(\.doc|\.docx|\.odt\.|\.xls|\.xlsx|\.ods)$/i;
 
             if (file && allowedExtensions.exec(file.name)) {
                 document.getElementById(`uploadForm-${documentoId}`).submit();
             } else {
-                alert('Formato de arquivo inválido. Por favor, selecione um arquivo .doc, .docx ou .odt.');
+                alert('Formato de arquivo inválido. Por favor, selecione um arquivo .doc, .docx, .odt, .xlsx, .xls ou .ods.');
                 fileInput.value = ''; // Limpa o campo de arquivo
             }
         };
