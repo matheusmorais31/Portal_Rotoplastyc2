@@ -1,0 +1,16 @@
+[0;1;32m●[0m gunicorn.service - Gunicorn daemon for Portal Rotoplastyc
+     Loaded: loaded (]8;;file://python-desenv/etc/systemd/system/gunicorn.service/etc/systemd/system/gunicorn.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Fri 2024-11-22 14:19:23 -03; 3s ago
+   Main PID: 1166 (gunicorn)
+      Tasks: 3 (limit: 4644)
+     Memory: 40.9M
+        CPU: 247ms
+     CGroup: /system.slice/gunicorn.service
+             ├─[0;38;5;245m1166 /opt/Portal_Rotoplastyc/venv/bin/python3.12 /opt/Portal_Rotoplastyc/venv/bin/gunicorn gestao_documentos.wsgi:application --bind 127.0.0.1:8000 --reload[0m
+             └─[0;38;5;245m1167 /opt/Portal_Rotoplastyc/venv/bin/python3.12 /opt/Portal_Rotoplastyc/venv/bin/gunicorn gestao_documentos.wsgi:application --bind 127.0.0.1:8000 --reload[0m
+
+nov 22 14:19:23 python-desenv systemd[1]: Started gunicorn.service - Gunicorn daemon for Portal Rotoplastyc.
+nov 22 14:19:23 python-desenv gunicorn[1166]: [2024-11-22 14:19:23 -0300] [1166] [INFO] Starting gunicorn 23.0.0
+nov 22 14:19:23 python-desenv gunicorn[1166]: [2024-11-22 14:19:23 -0300] [1166] [INFO] Listening at: http://127.0.0.1:8000 (1166)
+nov 22 14:19:23 python-desenv gunicorn[1166]: [2024-11-22 14:19:23 -0300] [1166] [INFO] Using worker: sync
+nov 22 14:19:23 python-desenv gunicorn[1167]: [2024-11-22 14:19:23 -0300] [1167] [INFO] Booting worker with pid: 1167

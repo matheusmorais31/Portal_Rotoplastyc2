@@ -16,15 +16,20 @@
 
     <div class="icons-bar">
         <!-- Ícone de adicionar usuário -->
-        <a href="{% url 'usuarios:registrar' %}" class="icon-link">
+        <div class="icons-bar">
+            <!-- Ícone de Adicionar Documento -->
+            {% if perms.documentos.can_add_documento %}
+                <a href="{% url 'usuarios:registrar' %}" class="icon-link">
+                    <img src="{% static 'images/add-user-icon.png' %}" alt="Adicionar Usuário" class="icon">
+                    <span class="tooltip-text">Adicionar usuário</span>
+                </a>
 
-            <img src="{% static 'images/add-user-icon.png' %}" alt="Adicionar Usuário" class="icon">
-        </a>
-
-        <!-- Ícone de atualizar ou qualquer outro ícone adicional -->
-        <a href="{% url 'usuarios:buscar_usuarios_ad' %}" class="icon-link">
-            <img src="{% static 'images/import-user-icon.png' %}" alt="Atualizar Lista" class="icon">
-        </a>
+                <a href="{% url 'usuarios:buscar_usuarios_ad' %}" class="icon-link">
+                    <img src="{% static 'images/import-user-icon.png' %}" alt="Atualizar Lista" class="icon">
+                    <span class="tooltip-text">Buscar usuário</span>
+                </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="user-list" id="userList">

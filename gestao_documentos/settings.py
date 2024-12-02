@@ -10,10 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = [
-    'portal.rotoplastyc.com.br',
-    '172.16.44.11',       
+    'portal.desenvolvimento.com.br',
+    '172.16.44.12',       
 ]
 
 # Application definition
@@ -183,3 +183,9 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 # Redirect URLs
 LOGOUT_REDIRECT_URL = reverse_lazy('usuarios:login_usuario')
 LOGIN_URL = reverse_lazy('usuarios:login_usuario')
+
+
+
+# Tamanho máximo de upload em bytes (Exemplo: 500MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 * 1024 * 1024

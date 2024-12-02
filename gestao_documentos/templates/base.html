@@ -116,6 +116,9 @@
                     {% if perms.documentos.view_categoria %}
                     <li><a href="{% url 'documentos:listar_categorias' %}">Categorias</a></li>
                     {% endif %}
+                    {% if perms.documentos.view_documentos_ina%}
+                    <li><a href="{% url 'documentos:listar_documentos_inativos' %}">Documentos Inativos</a></li>
+                    {% endif %}
                 </ul>
             </li>
 

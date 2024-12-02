@@ -17,6 +17,10 @@ urlpatterns = [
     path('substituir/<int:documento_id>/', views.substituir_documento, name='substituir_documento'),
     path('atualizar/<int:documento_id>/', views.atualizar_documento, name='atualizar_documento'),
     path('upload_revisado/<int:documento_id>/', views.upload_documento_revisado, name='upload_documento_revisado'),
+    path('documento/<int:documento_id>/toggle-active/', views.toggle_documento_active_status, name='toggle_active_status'),
+    path('documentos/inativos/', views.listar_documentos_inativos, name='listar_documentos_inativos'),
+
+
 
     # URLs para Aprovações Pendentes e Aprovados
     path('aprovacoes_pendentes/', views.listar_aprovacoes_pendentes, name='listar_aprovacoes_pendentes'),
@@ -33,5 +37,8 @@ urlpatterns = [
     path('nova_revisao/<int:documento_id>/', views.nova_revisao, name='nova_revisao'),
     path('editaveis/', views.listar_documentos_editaveis, name='listar_documentos_editaveis'),
     path('revisoes/<int:documento_id>/', views.listar_revisoes_documento, name='listar_revisoes_documento'),
+
+    
+
 
 ]

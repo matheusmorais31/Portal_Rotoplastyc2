@@ -56,8 +56,8 @@ h1 {
 }
 
 .category-status img {
-    width: 50px;
-    height: 50px;
+    width: 35px;
+    height: 35px;
 }
 
 .category-info {
@@ -88,6 +88,26 @@ h1 {
     transform: scale(1.5);
 }
 
+.action-icon, .icon-link {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.action-icon img{
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.action-icon img:hover, .icon:hover {
+    transform: scale(1.5);
+}
+
 /* Tooltip */
 .tooltip-text {
     visibility: hidden;
@@ -99,18 +119,18 @@ h1 {
     padding: 5px 8px;
     position: absolute;
     z-index: 1;
-    bottom: 100%; /* Coloca o tooltip acima do ícone */
-    left: 50%; /* Coloca o tooltip no centro do ícone */
-    transform: translateX(-50%); /* Centraliza em relação ao ícone */
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s;
     white-space: nowrap;
 }
 
 .tooltip-text::after {
-    content: "";
+     content: "";
     position: absolute;
-    top: 100%; /* Coloca a seta embaixo do tooltip */
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     border-width: 5px;
@@ -118,17 +138,17 @@ h1 {
     border-color: #555 transparent transparent transparent;
 }
 
-/* Exibir Tooltip ao passar o mouse */
-.edit-icon:hover .tooltip-text {
+.action-icon:hover .tooltip-text,
+.icon-link:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
-    .category-item {
+    /* .category-item {
         grid-template-columns: 1fr;
-    }
+    } */
 
     .category-actions {
         margin-left: 0;
@@ -145,6 +165,8 @@ h1 {
 
 .icon-link {
     margin-right: 10px;
+    transition: opacity 0.3s ease;
+
 }
 
 .icon {

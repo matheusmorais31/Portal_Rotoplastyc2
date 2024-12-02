@@ -3,100 +3,160 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/lista_documentos.css' %}">
+<link rel="stylesheet" href="{% static 'css/listar_documentos_editaveis.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h1>{{ titulo }}</h1>
 
-    <!-- Campo de busca -->
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos...">
+    <!-- Contêiner Flexível para Busca e Filtro -->
+    <div class="filters-container">
+        <!-- Campo de Busca -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos...">
+        </div>
+
+        <!-- Campo de Filtro por Categoria -->
+        <div class="filter-container">
+            <select id="categoryFilter" class="filter-select">
+                <option value="all">Todas as Categorias</option>
+                {% for categoria in categorias %}
+                    <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 
-    <!-- Lista de documentos separados por categoria -->
-    {% for categoria, documentos in documentos_por_categoria.items %}
-    <h2>{{ categoria.nome }}</h2>
+    <!-- Lista de Documentos Separados por Categoria -->
     <div class="document-list" id="documentList">
-        {% for documento in documentos %}
-        <div class="document-container">
-            <div class="document-item">
-                <!-- Ícone do documento -->
-                <div class="document-status">
-                    <img src="{% static 'images/doc_icon.png' %}" alt="Documento" class="status-icon">
-                </div>
+        {% for categoria, documentos in documentos_por_categoria.items %}
+            <h2 class="category-title" data-category-id="{{ categoria.id }}">{{ categoria.nome }}</h2>
+            <div class="category-documents">
+                {% for documento in documentos %}
+                    <div class="document-container" data-category-id="{{ categoria.id }}">
+                        <div class="document-item">
+                            <!-- Ícone do documento -->
+                            <div class="document-status">
+                                {% if documento.document_type == 'pdf' %}
+                                    <img src="{% static 'images/doc_icon.png' %}" alt="PDF" class="status-icon">
+                                {% elif documento.document_type == 'spreadsheet' %}
+                                    <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
+                                {% else %}
+                                    <img src="{% static 'images/default-icon.png' %}" alt="Documento" class="status-icon">
+                                {% endif %}
+                            </div>
 
-                <!-- Informações do documento -->
-                <div class="document-info">
-                    <div class="document-grid">
-                        <div><strong>Nome:</strong> {{ documento.nome }}</div>
-                        <div><strong>Última Revisão:</strong> {{ documento.revisao }}</div>
-                        <div><strong>Elaborador:</strong> 
-                            {% if documento.elaborador %}
-                                {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
-                            {% else %}
-                                Não disponível
-                            {% endif %}
-                        </div>
-                        <div><strong>Aprovações Realizadas:</strong>
-                            {% if documento.aprovado_por_aprovador1 %}
-                                {{ documento.aprovador1.get_full_name }}
-                            {% endif %}
+                            <!-- Informações do documento -->
+                            <div class="document-info">
+                                <div class="document-grid">
+                                    <div><strong>Nome:</strong> {{ documento.nome }}</div>
+                                    <div><strong>Última Revisão:</strong> {{ documento.revisao }}</div>
+                                    <div><strong>Elaborador:</strong> 
+                                        {% if documento.elaborador %}
+                                            {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+                                        {% else %}
+                                            Não disponível
+                                        {% endif %}
+                                    </div>
+                                    <div><strong>Aprovações Realizadas:</strong>
+                                        {% if documento.aprovado_por_aprovador1 %}
+                                            {{ documento.aprovador1.get_full_name }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botões de ação -->
+                            <div class="document-actions">
+                                <!-- Botão para baixar o arquivo editável -->
+                                <a href="{{ documento.documento.url }}" download class="action-icon">
+                                    <img src="{% static 'images/download-icon.png' %}" alt="Baixar Editável" class="download-icon">
+                                    <span class="tooltip-text">Baixar</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Botões de ação -->
-                <div class="document-actions">
-                    <!-- Botão para baixar o arquivo editável -->
-                    <a href="{{ documento.documento.url }}" download class="action-icon">
-                        <img src="{% static 'images/download-icon.png' %}" alt="Baixar Editável" class="download-icon">
-                        <span class="tooltip-text">Baixar Editável</span>
-                    </a>
-                </div>
+                {% empty %}
+                    <p>Nenhum documento encontrado nesta categoria.</p>
+                {% endfor %}
             </div>
-        </div>
+        {% empty %}
+            <p class="no-documents-message">Nenhum documento encontrado.</p>
         {% endfor %}
     </div>
-    {% endfor %}
 </div>
 
-<!-- Script para o filtro de busca -->
+<!-- Script para os Filtros de Busca e Categoria -->
 <script>
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        var searchTerm = this.value.toLowerCase();
-        var documentContainers = document.querySelectorAll('.document-container');
-        var hasResults = false;
+    // Função para Filtrar Documentos com Base no Campo de Busca e no Filtro de Categoria
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const documentContainers = document.querySelectorAll('.document-container');
+        const categoryTitles = document.querySelectorAll('.category-title');
+        const documentList = document.getElementById('documentList');
 
-        documentContainers.forEach(function(container) {
-            var documentName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
-            if (documentName.includes(searchTerm)) {
-                container.style.display = '';
-                hasResults = true;
+        // Função para Atualizar a Visibilidade dos Documentos e Categorias
+        function filterDocuments() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            let hasResults = false;
+
+            documentContainers.forEach(function(container) {
+                const documentName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
+                const documentCategoryId = container.getAttribute('data-category-id');
+
+                // Verificar se o Documento Satisfaz os Critérios de Busca e Filtro
+                const matchesSearch = documentName.includes(searchTerm);
+                const matchesCategory = (selectedCategory === 'all') || (documentCategoryId === selectedCategory);
+
+                if (matchesSearch && matchesCategory) {
+                    container.style.display = '';
+                    hasResults = true;
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+
+            // Atualizar a Visibilidade das Categorias com Base nos Documentos Visíveis
+            categoryTitles.forEach(function(title) {
+                const categoryId = title.getAttribute('data-category-id');
+                const relatedDocuments = document.querySelectorAll(`.document-container[data-category-id="${categoryId}"]`);
+                const anyVisible = Array.from(relatedDocuments).some(doc => doc.style.display !== 'none');
+
+                if (anyVisible) {
+                    title.style.display = '';
+                } else {
+                    title.style.display = 'none';
+                }
+            });
+
+            // Exibir ou Ocultar a Mensagem de "Nenhum Documento Encontrado"
+            const totalVisibleDocuments = Array.from(documentContainers).filter(doc => doc.style.display !== 'none').length;
+            let noResultsMessage = document.getElementById('noResultsMessage');
+
+            if (totalVisibleDocuments === 0) {
+                if (!noResultsMessage) {
+                    noResultsMessage = document.createElement('div');
+                    noResultsMessage.id = 'noResultsMessage';
+                    noResultsMessage.innerText = 'Nenhum documento encontrado.';
+                    noResultsMessage.style.textAlign = 'center';
+                    noResultsMessage.style.marginTop = '20px';
+                    noResultsMessage.style.color = '#fff';
+                    documentList.appendChild(noResultsMessage);
+                }
+                noResultsMessage.style.display = 'block';
             } else {
-                container.style.display = 'none';
-            }
-        });
-
-        // Exibe ou esconde a mensagem de "Nenhum documento encontrado"
-        var noResultsMessage = document.getElementById('noResultsMessage');
-        if (!hasResults) {
-            if (!noResultsMessage) {
-                noResultsMessage = document.createElement('div');
-                noResultsMessage.id = 'noResultsMessage';
-                noResultsMessage.innerText = 'Nenhum documento encontrado.';
-                noResultsMessage.style.textAlign = 'center';
-                noResultsMessage.style.marginTop = '20px';
-                noResultsMessage.style.color = '#fff';
-                document.getElementById('documentList').appendChild(noResultsMessage);
-            }
-            noResultsMessage.style.display = 'block';
-        } else {
-            if (noResultsMessage) {
-                noResultsMessage.style.display = 'none';
+                if (noResultsMessage) {
+                    noResultsMessage.style.display = 'none';
+                }
             }
         }
+
+        // Adicionar Event Listeners para os Filtros
+        searchInput.addEventListener('keyup', filterDocuments);
+        categoryFilter.addEventListener('change', filterDocuments);
     });
 </script>
 {% endblock %}
