@@ -1,5 +1,3 @@
-# documentos/views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -16,6 +14,8 @@ from django.http import FileResponse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
+from django.core.exceptions import ValidationError
+
 
 
 logger = logging.getLogger('django')
@@ -79,19 +79,23 @@ def criar_documento(request):
                 with transaction.atomic():
                     documento = form.save(commit=False)
                     documento.elaborador = request.user
-                    documento.status = 'aguardando_analise'  # **Alteração para definir status inicial**
-                    documento.save()
+                    documento.status = 'aguardando_analise'  # Define o status inicial
+                    documento.save()  # O método save do modelo já chama gerar_pdf
                     messages.success(request, 'Documento criado e enviado para análise.')
                     return redirect('documentos:listar_documentos_aprovados')
             except IntegrityError as e:
                 logger.error(f"Erro de integridade ao criar documento: {e}")
                 messages.error(request, 'Erro ao criar o documento.')
+            except ValidationError as e:
+                logger.error(f"Erro de validação ao criar documento: {e}")
+                messages.error(request, e.messages)
             except Exception as e:
                 logger.error(f"Erro inesperado ao criar documento: {e}", exc_info=True)
                 messages.error(request, 'Erro inesperado ao criar o documento.')
     else:
         form = DocumentoForm()
     return render(request, 'documentos/criar_documento.html', {'form': form})
+
 
 #Função para analise de documentos
 @login_required
@@ -180,7 +184,6 @@ def atualizar_documento(request, documento_id):
 
 # Função para aprovar documentos
 @login_required
-
 def aprovar_documento(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
     if documento.status != 'aguardando_analise':
@@ -191,11 +194,11 @@ def aprovar_documento(request, documento_id):
         with transaction.atomic():
             # Bloquear o documento para evitar condições de corrida
             documento = Documento.objects.select_for_update().get(id=documento_id)
-            documento.status = 'aguardando_elaborador'  # **Alteração de status para aguardar aprovação do elaborador**
-            documento.aprovado_por_aprovador1 = True  # **Atualização do campo de aprovação**
-            documento.gerar_pdf()
+            documento.status = 'aguardando_elaborador'  # Altera o status para aguardar aprovação do elaborador
+            documento.aprovado_por_aprovador1 = True  # Atualiza o campo de aprovação
+            documento.gerar_pdf()  # Gera o PDF ou copia a planilha conforme o tipo
             documento.save()
-            messages.success(request, "Documento aprovado e PDF gerado com sucesso.")
+            messages.success(request, "Documento aprovado e processado com sucesso.")
             # As notificações serão enviadas pelo sinal após salvar o documento
     except Documento.DoesNotExist:
         messages.error(request, "Documento não encontrado.")
@@ -205,10 +208,14 @@ def aprovar_documento(request, documento_id):
     
     return redirect('documentos:listar_documentos_para_analise')
 
-#Função para listar Aprovações pendentes
+
 @login_required
 @permission_required('documentos.list_pending_approvals', raise_exception=True)
 def listar_aprovacoes_pendentes(request):
+    """
+    View para listar os documentos pendentes de aprovação pelo elaborador ou pelo aprovador,
+    permitindo que eles aprovem ou reprovem os documentos.
+    """
     user = request.user
     documentos = Documento.objects.none()
 
@@ -225,26 +232,31 @@ def listar_aprovacoes_pendentes(request):
 
         if action == 'aprovar':
             if documento.status in ['analise_concluida', 'aguardando_elaborador'] and user == documento.elaborador:
+                # Elaborador aprova o documento e envia para o aprovador
                 try:
                     with transaction.atomic():
-                        documento.status = 'aguardando_aprovador1'  # **Alteração de status para aguardar aprovador1**
+                        documento.status = 'aguardando_aprovador1'  # Alteração de status para aguardar o aprovador
                         documento.save()
                         messages.success(request, 'Documento aprovado e enviado para o Aprovador.')
-                        # As notificações serão enviadas pelo sinal após salvar o documento
+                        # Notificações podem ser enviadas aqui, se necessário
                 except Exception as e:
-                    logger.error(f"Erro ao aprovar documento {documento_id}: {e}")
+                    logger.error(f"Erro ao aprovar documento {documento_id}: {e}", exc_info=True)
                     messages.error(request, 'Erro ao aprovar o documento.')
             elif documento.status == 'aguardando_aprovador1' and user == documento.aprovador1:
+                # Aprovador final aprova o documento
                 try:
                     with transaction.atomic():
                         documento.aprovado_por_aprovador1 = True
-                        documento.status = 'aprovado'  # **Alteração de status para aprovado**
-                        documento.gerar_pdf()
+                        documento.status = 'aprovado'  # Alteração de status para aprovado
                         documento.save()
+                        documento.gerar_pdf()  # Chama gerar_pdf após salvar o documento aprovado
                         messages.success(request, 'Documento aprovado com sucesso!')
-                        # As notificações serão enviadas pelo sinal após salvar o documento
+                        # Notificações podem ser enviadas aqui, se necessário
+                except ValidationError as ve:
+                    logger.error(f"Erro de validação ao aprovar documento {documento_id}: {ve}", exc_info=True)
+                    messages.error(request, f'Erro de validação: {ve.messages}')
                 except Exception as e:
-                    logger.error(f"Erro ao aprovar documento {documento_id}: {e}")
+                    logger.error(f"Erro ao aprovar documento {documento_id}: {e}", exc_info=True)
                     messages.error(request, 'Erro ao aprovar o documento.')
             else:
                 messages.error(request, 'Você não tem permissão para aprovar este documento.')
@@ -253,23 +265,32 @@ def listar_aprovacoes_pendentes(request):
             if motivo:
                 try:
                     with transaction.atomic():
-                        documento.status = 'reprovado'  # **Alteração de status para reprovado**
-                        documento.motivo_reprovacao = motivo  # **Registro do motivo da reprovação**
+                        documento.status = 'reprovado'  # Alteração de status para reprovado
+                        documento.motivo_reprovacao = motivo  # Registro do motivo da reprovação
                         documento.save()
                         messages.success(request, 'Documento reprovado com sucesso!')
-                        # As notificações serão enviadas pelo sinal após salvar o documento
+                        # Notificações podem ser enviadas aqui, se necessário
                 except Exception as e:
-                    logger.error(f"Erro ao reprovar documento {documento_id}: {e}")
+                    logger.error(f"Erro ao reprovar documento {documento_id}: {e}", exc_info=True)
                     messages.error(request, 'Erro ao reprovar o documento.')
             else:
                 messages.error(request, 'É necessário informar o motivo da reprovação.')
-    return render(request, 'documentos/listar_aprovacoes_pendentes.html', {'documentos': documentos, 'titulo': 'Aprovações Pendentes'})
+        else:
+            messages.error(request, 'Ação inválida.')
+    else:
+        # Se não for uma requisição POST, renderiza a lista de documentos pendentes
+        pass  # Nenhuma ação adicional necessária
+
+    return render(request, 'documentos/listar_aprovacoes_pendentes.html', {
+        'documentos': documentos,
+        'titulo': 'Aprovações Pendentes'
+    })
 
 #Função para listar os documentos aprovados
 @login_required
 
 def listar_documentos_aprovados(request):
-    documentos = Documento.objects.filter(status='aprovado').order_by('nome', '-revisao')
+    documentos = Documento.objects.filter(status='aprovado', is_active=True).order_by('nome', '-revisao')
     documentos_unicos = {}
     for doc in documentos:
         if doc.nome not in documentos_unicos:
@@ -277,6 +298,39 @@ def listar_documentos_aprovados(request):
     documentos = list(documentos_unicos.values())
     documentos.sort(key=lambda x: x.nome)
     return render(request, 'documentos/listar_documentos.html', {'documentos': documentos, 'titulo': 'Documentos Aprovados'})
+
+from django.contrib.auth.decorators import permission_required
+
+# View para inativar ou ativar um documento
+@login_required
+@permission_required('documentos.can_active', raise_exception=True)
+def toggle_documento_active_status(request, documento_id):
+    documento = get_object_or_404(Documento, id=documento_id)
+    
+    if request.method == 'POST':
+        documento.is_active = not documento.is_active
+        documento.save()
+        status = 'ativo' if documento.is_active else 'inativo'
+        messages.success(request, f'Documento "{documento.nome}" foi marcado como {status}.')
+    else:
+        messages.error(request, 'Método de requisição inválido.')
+    
+    return redirect('documentos:listar_documentos_aprovados')
+
+# View para listar documentos aprovados e inativos
+@login_required
+@permission_required('documentos.view_documentos_ina', raise_exception=True)
+def listar_documentos_inativos(request):
+    documentos_inativos = Documento.objects.filter(status='aprovado', is_active=False).order_by('nome', '-revisao')
+    documentos_unicos = {}
+    for doc in documentos_inativos:
+        if doc.nome not in documentos_unicos:
+            documentos_unicos[doc.nome] = doc
+    documentos_inativos = list(documentos_unicos.values())
+    documentos_inativos.sort(key=lambda x: x.nome)
+    return render(request, 'documentos/listar_documentos_inativos.html', {'documentos': documentos_inativos, 'titulo': 'Documentos Inativos'})
+
+
 
 #Função para vizualizar documentos
 @login_required
@@ -400,6 +454,7 @@ def nova_revisao(request, documento_id):
         form = NovaRevisaoForm(documento_atual=documento_atual)
     return render(request, 'documentos/nova_revisao.html', {'form': form, 'documento': documento_atual})
 
+
 @login_required
 def upload_documento_revisado(request, documento_id):
     documento = get_object_or_404(Documento, id=documento_id)
@@ -410,8 +465,9 @@ def upload_documento_revisado(request, documento_id):
         logger.debug(f"[upload_documento_revisado] Arquivo recebido: {novo_documento.name}")
 
         # Verificar extensão do arquivo
-        if not novo_documento.name.lower().endswith(('.doc', '.docx', '.odt')):
-            messages.error(request, 'Formato de arquivo inválido. Apenas arquivos .doc, .docx e .odt são permitidos.')
+        ext = os.path.splitext(novo_documento.name)[1].lower()
+        if ext not in ['.doc', '.docx', '.odt', '.xls', '.xlsx', '.ods']:
+            messages.error(request, 'Formato de arquivo inválido. Apenas arquivos .doc, .docx, .odt, .xls, .xlsx e .ods são permitidos.')
             logger.warning(f"[upload_documento_revisado] Formato de arquivo inválido: {novo_documento.name}")
             return redirect('documentos:listar_documentos_para_analise')
 
@@ -428,7 +484,7 @@ def upload_documento_revisado(request, documento_id):
                 
                 # Atualizar o status para aguardar nova análise
                 documento.status = 'aguardando_analise'
-                documento.save(update_fields=['documento', 'status'])
+                documento.save()
                 logger.debug(f"[upload_documento_revisado] Status atualizado para: {documento.status}")
                 
                 messages.success(request, 'Documento revisado carregado com sucesso. Ele será analisado antes de ser aprovado.')
@@ -442,6 +498,7 @@ def upload_documento_revisado(request, documento_id):
 
     return redirect('documentos:listar_documentos_para_analise')
 
+
 #Função para listar os editaveis
 @login_required
 @permission_required('documentos.can_view_editables', raise_exception=True)
@@ -452,7 +509,8 @@ def listar_documentos_editaveis(request):
     for categoria in categorias:
         documentos = Documento.objects.filter(
             categoria=categoria,
-            status='aprovado'
+            status='aprovado',
+            is_active=True
         ).order_by('nome', '-revisao')
 
         documentos_unicos = {}
@@ -467,9 +525,9 @@ def listar_documentos_editaveis(request):
 
     return render(request, 'documentos/listar_documentos_editaveis.html', {
         'documentos_por_categoria': documentos_por_categoria,
+        'categorias': categorias,  # Certifique-se de passar as categorias
         'titulo': 'Documentos Editáveis',
     })
-
 
 #Função lista de revisões
 @login_required

@@ -146,9 +146,9 @@ h1 {
 
 /* Responsividade */
 @media (max-width: 768px) {
-    .category-item {
+    /* .category-item {
         grid-template-columns: 1fr;
-    }
+    } */
 
     .category-actions {
         margin-left: 0;

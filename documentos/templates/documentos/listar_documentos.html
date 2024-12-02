@@ -1,3 +1,4 @@
+<!-- templates/documentos/listar_documentos.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -9,124 +10,236 @@
 <div class="container">
     <h1>{{ titulo }}</h1>
 
-    <!-- Campo de busca -->
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos...">
+    <!-- Contêiner Flexível para Busca e Filtro -->
+    <div class="filters-container">
+        <!-- Campo de Busca -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar documentos...">
+        </div>
+
+        <!-- Campo de Filtro por Categoria -->
+        <div class="filter-container">
+            <select id="categoryFilter" class="filter-select">
+                <option value="all">Todas as Categorias</option>
+                {% regroup documentos by categoria as documentos_por_categoria %}
+                {% for categoria_group in documentos_por_categoria %}
+                    <option value="{{ categoria_group.grouper.id }}">{{ categoria_group.grouper.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 
-    <!-- Barra de ícones -->
+    <!-- Barra de Ícones -->
     <div class="icons-bar">
-        <!-- Ícone de adicionar documento -->
+        <!-- Ícone de Adicionar Documento -->
         {% if perms.documentos.can_add_documento %}
-        <a href="{% url 'documentos:criar_documento' %}" class="icon-link">
-            <img src="{% static 'images/add-document-icon.png' %}" alt="Adicionar Documento" class="icon">
-            <span class="tooltip-text">Criar</span>
-        </a>
+            <a href="{% url 'documentos:criar_documento' %}" class="icon-link">
+                <img src="{% static 'images/add-document-icon.png' %}" alt="Adicionar Documento" class="icon">
+                <span class="tooltip-text">Criar</span>
+            </a>
         {% endif %}
     </div>
 
-    <!-- Lista de documentos -->
-    <div class="document-list" id="documentList">
-        {% for documento in documentos %}
-        <div class="document-container">
-            <div class="document-item">
-                <!-- Ícone do documento -->
-                <div class="document-status">
-                    <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
-                    
-                </div>
+    <!-- Lista de Documentos Agrupados por Categoria Usando Regroup -->
+    {% regroup documentos by categoria as documentos_por_categoria %}
 
-                <!-- Informações do documento -->
-                <div class="document-info">
-                    <div class="document-grid">
-                        <div><strong>Nome:</strong> {{ documento.nome }}</div>
-                        <div><strong>Última Revisão:</strong> {{ documento.revisao }}</div>
-                        <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
-                        <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y " }}</p>
-                        <div><strong>Elaborador:</strong> 
-                            {% if documento.elaborador %}
-                                {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
-                            {% else %}
-                                Não disponível
+    <div class="document-list" id="documentList">
+        {% for categoria_group in documentos_por_categoria %}
+            <h2 class="category-title" data-category-id="{{ categoria_group.grouper.id }}">{{ categoria_group.grouper.nome }}</h2>
+            <div class="category-documents">
+                {% for documento in categoria_group.list %}
+                    <div class="document-container" data-category-id="{{ documento.categoria.id }}">
+                        <div class="document-item">
+                            <!-- Ícone do Documento -->
+                            <div class="document-status">
+                                {% if documento.document_type == 'pdf' %}
+                                    <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
+                                {% elif documento.document_type == 'spreadsheet' %}
+                                    <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
+                                {% else %}
+                                    <img src="{% static 'images/default-icon.png' %}" alt="Documento" class="status-icon">
+                                {% endif %}
+                            </div>
+
+                            <!-- Informações do Documento -->
+                            <div class="document-info">
+                                <div class="document-grid">
+                                    <div><strong>Nome:</strong> {{ documento.nome }}</div>
+                                    <div><strong>Última Revisão:</strong> {{ documento.revisao }}</div>
+                                    <div><strong>Categoria:</strong> {{ documento.categoria.nome }}</div>
+                                    <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y" }}</p>
+                                    <div><strong>Elaborador:</strong> 
+                                        {% if documento.elaborador %}
+                                            {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+                                        {% else %}
+                                            Não disponível
+                                        {% endif %}
+                                    </div>
+                                    <div><strong>Aprovações Realizadas:</strong>
+                                        {% if documento.aprovado_por_aprovador1 %}
+                                            {{ documento.aprovador1.get_full_name }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botões de Ação -->
+                            <div class="document-actions">
+                                {% if documento.document_type == 'spreadsheet' %}
+                                    <!-- Apenas a opção de download para planilhas -->
+                                    {% if perms.documentos.can_add_documento %}
+                                    <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
+                                        <img src="{% static 'images/versao.png' %}" alt="Nova Revisão" class="revision-icon">
+                                        <span class="tooltip-text">Nova Revisão</span>
+                                    </a> 
+                                {% if perms.documentos.can_view_revisions %}
+                                    <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
+                                        <img src="{% static 'images/revision-icon.png' %}" alt="Histórico" class="view-access-icon">
+                                        <span class="tooltip-text">Histórico</span>
+                                    </a>
+                                {% endif %}
+                                {% if perms.documentos.can_active %}
+                                <form action="{% url 'documentos:toggle_active_status' documento.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    {% if documento.is_active %}
+                                        <button type="submit" class="action-icon" title="Inativar Documento" onclick="return confirm('Tem certeza que deseja inativar este documento?');">
+                                            <img src="{% static 'images/deactivate-icon.png' %}" alt="Inativar" class="view-icon">
+                                            <span class="tooltip-text">Inativar</span>
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="action-icon" title="Ativar Documento" onclick="return confirm('Tem certeza que deseja ativar este documento?');">
+                                            <img src="{% static 'images/activate-icon.png' %}" alt="Ativar" class="view-icon">
+                                            <span class="tooltip-text">Ativar</span>
+                                        </button>
+                                    {% endif %}
+                                </form>
                             {% endif %}
-                        </div>
-                        <div><strong>Aprovações Realizadas:</strong>
-                            {% if documento.aprovado_por_aprovador1 %}
-                                {{ documento.aprovador1.get_full_name }}
-                            {% endif %}
-                            
+                                {% endif %}
+                                    <a href="{{ documento.documento.url }}" download class="action-icon">
+                                        <img src="{% static 'images/download-icon.png' %}" alt="Baixar Editável" class="download-icon">
+                                        <span class="tooltip-text">Baixar</span>
+                                    </a>
+                                {% elif documento.document_type == 'pdf' %}
+                                    <!-- Opções existentes para PDFs -->
+                                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
+                                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                                        <span class="tooltip-text">Visualizar</span>
+                                    </a>
+                                    {% if perms.documentos.can_add_documento %}
+                                        <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
+                                            <img src="{% static 'images/versao.png' %}" alt="Nova Revisão" class="revision-icon">
+                                            <span class="tooltip-text">Nova Revisão</span>
+                                        </a> 
+                                    {% endif %}
+                                  
+                                    {% if perms.documentos.view_acessos_documento %}
+                                        <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon">
+                                            <img src="{% static 'images/acessou.png' %}" alt="Visualizar Acessos" class="view-access-icon">
+                                            <span class="tooltip-text">Acessos</span>
+                                        </a>
+                                    {% endif %}
+                                    {% if perms.documentos.can_view_revisions %}
+                                        <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
+                                            <img src="{% static 'images/revision-icon.png' %}" alt="Histórico" class="view-access-icon">
+                                            <span class="tooltip-text">Histórico</span>
+                                        </a>
+                                    {% endif %}
+                                      <!-- Botão para Inativar/Ativar -->
+                                      {% if perms.documentos.can_active %}
+                                      <form action="{% url 'documentos:toggle_active_status' documento.id %}" method="post" style="display:inline;">
+                                          {% csrf_token %}
+                                          {% if documento.is_active %}
+                                              <button type="submit" class="action-icon" title="Inativar Documento" onclick="return confirm('Tem certeza que deseja inativar este documento?');">
+                                                  <img src="{% static 'images/deactivate-icon.png' %}" alt="Inativar" class="view-icon">
+                                                  <span class="tooltip-text">Inativar</span>
+                                              </button>
+                                          {% endif %}
+                                      </form>
+                                  {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Botões de ação -->
-                <div class="document-actions">
-                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
-                        <span class="tooltip-text">Visualizar</span>
-                    </a>
-                    {% if perms.documentos.can_add_documento %}
-                    <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/versao.png' %}" alt="Nova Revisão" class="revision-icon">
-                        <span class="tooltip-text">Nova Revisão</span>
-                    </a> 
-                    {% endif %}
-                    <!-- Botão para visualizar acessos -->
-                    {% if perms.documentos.view_acessos_documento %}
-                    <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/acessou.png' %}" alt="Visualizar Acessos" class="view-access-icon">
-                        <span class="tooltip-text">Acessos</span>
-                    {% endif %}   
-                    {% if perms.documentos.can_view_revisions %}
-                    <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/revision-icon.png' %}" alt="Visualizar Acessos" class="view-access-icon">
-                        <span class="tooltip-text">Histórico</span>
-                    {% endif %}      
-                    </a>
-                </div>
+                {% empty %}
+                    <p>Nenhum documento encontrado nesta categoria.</p>
+                {% endfor %}
             </div>
-        </div>
         {% empty %}
-        <p>Nenhum documento encontrado.</p>
+            <p class="no-documents-message">Nenhum documento encontrado.</p>
         {% endfor %}
     </div>
 </div>
 
-<!-- Script para o filtro de busca -->
+<!-- Script para os Filtros de Busca e Categoria -->
 <script>
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        var searchTerm = this.value.toLowerCase();
-        var documentContainers = document.querySelectorAll('.document-container');
-        var hasResults = false;
+    // Função para Filtrar Documentos com Base no Campo de Busca e no Filtro de Categoria
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const documentContainers = document.querySelectorAll('.document-container');
+        const categoryTitles = document.querySelectorAll('.category-title');
+        const documentList = document.getElementById('documentList');
 
-        documentContainers.forEach(function(container) {
-            var documentName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
-            if (documentName.includes(searchTerm)) {
-                container.style.display = '';
-                hasResults = true;
+        // Função para Atualizar a Visibilidade dos Documentos e Categorias
+        function filterDocuments() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            let hasResults = false;
+
+            documentContainers.forEach(function(container) {
+                const documentName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
+                const documentCategoryId = container.getAttribute('data-category-id');
+
+                // Verificar se o Documento Satisfaz os Critérios de Busca e Filtro
+                const matchesSearch = documentName.includes(searchTerm);
+                const matchesCategory = (selectedCategory === 'all') || (documentCategoryId === selectedCategory);
+
+                if (matchesSearch && matchesCategory) {
+                    container.style.display = '';
+                    hasResults = true;
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+
+            // Atualizar a Visibilidade das Categorias com Base nos Documentos Visíveis
+            categoryTitles.forEach(function(title) {
+                const categoryId = title.getAttribute('data-category-id');
+                const relatedDocuments = document.querySelectorAll(`.document-container[data-category-id="${categoryId}"]`);
+                const anyVisible = Array.from(relatedDocuments).some(doc => doc.style.display !== 'none');
+
+                if (anyVisible) {
+                    title.style.display = '';
+                } else {
+                    title.style.display = 'none';
+                }
+            });
+
+            // Exibir ou Ocultar a Mensagem de "Nenhum Documento Encontrado"
+            const totalVisibleDocuments = Array.from(documentContainers).filter(doc => doc.style.display !== 'none').length;
+            let noResultsMessage = document.getElementById('noResultsMessage');
+
+            if (totalVisibleDocuments === 0) {
+                if (!noResultsMessage) {
+                    noResultsMessage = document.createElement('div');
+                    noResultsMessage.id = 'noResultsMessage';
+                    noResultsMessage.innerText = 'Nenhum documento encontrado.';
+                    noResultsMessage.style.textAlign = 'center';
+                    noResultsMessage.style.marginTop = '20px';
+                    noResultsMessage.style.color = '#fff';
+                    documentList.appendChild(noResultsMessage);
+                }
+                noResultsMessage.style.display = 'block';
             } else {
-                container.style.display = 'none';
-            }
-        });
-
-        // Exibe ou esconde a mensagem de "Nenhum documento encontrado"
-        var noResultsMessage = document.getElementById('noResultsMessage');
-        if (!hasResults) {
-            if (!noResultsMessage) {
-                noResultsMessage = document.createElement('div');
-                noResultsMessage.id = 'noResultsMessage';
-                noResultsMessage.innerText = 'Nenhum documento encontrado.';
-                noResultsMessage.style.textAlign = 'center';
-                noResultsMessage.style.marginTop = '20px';
-                noResultsMessage.style.color = '#fff';
-                document.getElementById('documentList').appendChild(noResultsMessage);
-            }
-            noResultsMessage.style.display = 'block';
-        } else {
-            if (noResultsMessage) {
-                noResultsMessage.style.display = 'none';
+                if (noResultsMessage) {
+                    noResultsMessage.style.display = 'none';
+                }
             }
         }
+
+        // Adicionar Event Listeners para os Filtros
+        searchInput.addEventListener('keyup', filterDocuments);
+        categoryFilter.addEventListener('change', filterDocuments);
     });
 </script>
 {% endblock %}

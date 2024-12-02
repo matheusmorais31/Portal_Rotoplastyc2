@@ -33,6 +33,7 @@ class CategoriaForm(forms.ModelForm):
 class DocumentoForm(forms.ModelForm):
     class Meta:
         model = Documento
+        # Removido 'document_type' dos campos
         fields = ['nome', 'revisao', 'categoria', 'aprovador1', 'documento']
         labels = {
             'nome': 'Nome do Documento',
@@ -48,7 +49,7 @@ class DocumentoForm(forms.ModelForm):
             'aprovador1': forms.Select(attrs={'class': 'form-control select2'}),
             'documento': forms.FileInput(attrs={
                 'class': 'form-control-file',
-                'accept': '.doc,.docx,.odt'  # Restringe os tipos de arquivo no cliente
+                'accept': '.doc,.docx,.odt,.xls,.xlsx,.ods'  # Atualiza os tipos de arquivo aceitos
             }),
         }
 
@@ -59,39 +60,55 @@ class DocumentoForm(forms.ModelForm):
     def _set_aprovadores(self):
         """Define a queryset dos aprovadores com permissão e que estão ativos."""
         content_type = ContentType.objects.get_for_model(Documento)
-        permission = Permission.objects.get(content_type=content_type, codename='can_approve')
-        aprovadores = User.objects.filter(
-            Q(user_permissions=permission) | Q(groups__permissions=permission),
-            is_active=True  # Filtra apenas usuários ativos
-        ).distinct()
-        self.fields['aprovador1'].queryset = aprovadores
+        try:
+            permission = Permission.objects.get(content_type=content_type, codename='can_approve')
+            aprovadores = User.objects.filter(
+                Q(user_permissions=permission) | Q(groups__permissions=permission),
+                is_active=True  # Filtra apenas usuários ativos
+            ).distinct()
+            self.fields['aprovador1'].queryset = aprovadores
+        except Permission.DoesNotExist:
+            # Caso a permissão 'can_approve' não exista, define como vazio
+            self.fields['aprovador1'].queryset = User.objects.none()
+            logger.warning("Permissão 'can_approve' não encontrada.")
 
     def clean_documento(self):
         documento = self.cleaned_data.get('documento')
+
         if not documento:
             raise ValidationError('É necessário anexar o documento.')
 
-        # Validação da extensão do arquivo
-        ext = os.path.splitext(documento.name)[1]  # Obtém a extensão
-        valid_extensions = ['.doc', '.docx', '.odt']
-        if not ext.lower() in valid_extensions:
-            raise ValidationError('Formato de arquivo inválido. Apenas arquivos .doc, .docx e .odt são permitidos.')
+        # Validação da extensão do arquivo para determinar o tipo automaticamente
+        ext = os.path.splitext(documento.name)[1].lower()
+        if ext in ['.doc', '.docx', '.odt']:
+            # Tipo PDF
+            valid_extensions = ['.doc', '.docx', '.odt']
+            # O 'document_type' será definido automaticamente no modelo
+        elif ext in ['.xls', '.xlsx', '.ods']:
+            # Tipo Planilha
+            valid_extensions = ['.xls', '.xlsx', '.ods']
+            # O 'document_type' será definido automaticamente no modelo
+        else:
+            raise ValidationError('Formato de arquivo inválido. Apenas arquivos .doc, .docx, .odt, .xls, .xlsx e .ods são permitidos.')
+
+        if ext not in valid_extensions:
+            raise ValidationError('Formato de arquivo inválido.')
 
         return documento
 
     def clean(self):
         cleaned_data = super().clean()
         nome = cleaned_data.get('nome')
-        
+
         # Verificar se já existe um documento com o mesmo nome que não foi reprovado
         documentos_existentes = Documento.objects.filter(nome=nome).exclude(status='reprovado')
-        
+
         if documentos_existentes.exists():
             raise ValidationError('Já existe um documento aprovado ou pendente com este nome. Escolha outro nome.')
 
         return cleaned_data
 
-# Formulário para o analista
+# Formulário para análise de documento
 class AnaliseDocumentoForm(forms.ModelForm):
     class Meta:
         model = Documento
@@ -102,7 +119,7 @@ class AnaliseDocumentoForm(forms.ModelForm):
         widgets = {
             'documento': forms.FileInput(attrs={
                 'class': 'form-control-file',
-                'accept': '.doc,.docx,.odt'  # Restringe os tipos de arquivo no cliente
+                'accept': '.doc,.docx,.odt,.xls,.xlsx,.ods'  # Atualiza os tipos de arquivo aceitos
             }),
         }
 
@@ -111,17 +128,29 @@ class AnaliseDocumentoForm(forms.ModelForm):
         if not documento:
             raise ValidationError('É necessário fazer o upload do documento revisado.')
 
-        # Validação da extensão do arquivo
-        ext = os.path.splitext(documento.name)[1]
-        valid_extensions = ['.doc', '.docx', '.odt']
-        if not ext.lower() in valid_extensions:
-            raise ValidationError('Formato de arquivo inválido. Apenas arquivos .doc, .docx e .odt são permitidos.')
+        # Validação da extensão do arquivo para determinar o tipo automaticamente
+        ext = os.path.splitext(documento.name)[1].lower()
+        if ext in ['.doc', '.docx', '.odt']:
+            # Tipo PDF
+            valid_extensions = ['.doc', '.docx', '.odt']
+            # O 'document_type' será definido automaticamente no modelo
+        elif ext in ['.xls', '.xlsx', '.ods']:
+            # Tipo Planilha
+            valid_extensions = ['.xls', '.xlsx', '.ods']
+            # O 'document_type' será definido automaticamente no modelo
+        else:
+            raise ValidationError('Formato de arquivo inválido. Apenas arquivos .doc, .docx, .odt, .xls, .xlsx e .ods são permitidos.')
+
+        if ext not in valid_extensions:
+            raise ValidationError('Formato de arquivo inválido.')
 
         return documento
 
+# Formulário para criar uma nova revisão
 class NovaRevisaoForm(forms.ModelForm):
     class Meta:
         model = Documento
+        # Removido 'document_type' dos campos
         fields = ['revisao', 'aprovador1', 'documento']
         labels = {
             'revisao': 'Revisão',
@@ -133,13 +162,13 @@ class NovaRevisaoForm(forms.ModelForm):
             'aprovador1': forms.Select(attrs={'class': 'form-control select2'}),
             'documento': forms.FileInput(attrs={
                 'class': 'form-control-file',
-                'accept': '.doc,.docx,.odt'
+                'accept': '.doc,.docx,.odt,.xls,.xlsx,.ods'  # Atualiza os tipos de arquivo aceitos
             }),
         }
 
     def __init__(self, *args, **kwargs):
         self.documento_atual = kwargs.pop('documento_atual', None)
-        super().__init__(*args, **kwargs)
+        super(NovaRevisaoForm, self).__init__(*args, **kwargs)
         
         # Definir as revisões maiores que a atual
         if self.documento_atual:
@@ -153,23 +182,38 @@ class NovaRevisaoForm(forms.ModelForm):
         
         # Definir o queryset dos aprovadores
         content_type = ContentType.objects.get_for_model(Documento)
-        permission = Permission.objects.get(content_type=content_type, codename='can_approve')
-        aprovadores = User.objects.filter(
-            Q(user_permissions=permission) | Q(groups__permissions=permission),
-            is_active=True
-        ).distinct()
-        self.fields['aprovador1'].queryset = aprovadores
+        try:
+            permission = Permission.objects.get(content_type=content_type, codename='can_approve')
+            aprovadores = User.objects.filter(
+                Q(user_permissions=permission) | Q(groups__permissions=permission),
+                is_active=True
+            ).distinct()
+            self.fields['aprovador1'].queryset = aprovadores
+        except Permission.DoesNotExist:
+            # Caso a permissão 'can_approve' não exista, define como vazio
+            self.fields['aprovador1'].queryset = User.objects.none()
+            logger.warning("Permissão 'can_approve' não encontrada.")
 
     def clean_documento(self):
         documento = self.cleaned_data.get('documento')
         if not documento:
             raise ValidationError('É necessário anexar o documento.')
 
-        # Validação da extensão do arquivo
-        ext = os.path.splitext(documento.name)[1]
-        valid_extensions = ['.doc', '.docx', '.odt']
-        if not ext.lower() in valid_extensions:
-            raise ValidationError('Formato de arquivo inválido. Apenas arquivos .doc, .docx e .odt são permitidos.')
+        # Validação da extensão do arquivo para determinar o tipo automaticamente
+        ext = os.path.splitext(documento.name)[1].lower()
+        if ext in ['.doc', '.docx', '.odt']:
+            # Tipo PDF
+            valid_extensions = ['.doc', '.docx', '.odt']
+            # O 'document_type' será definido automaticamente no modelo
+        elif ext in ['.xls', '.xlsx', '.ods']:
+            # Tipo Planilha
+            valid_extensions = ['.xls', '.xlsx', '.ods']
+            # O 'document_type' será definido automaticamente no modelo
+        else:
+            raise ValidationError('Formato de arquivo inválido. Apenas arquivos .doc, .docx, .odt, .xls, .xlsx e .ods são permitidos.')
+
+        if ext not in valid_extensions:
+            raise ValidationError('Formato de arquivo inválido.')
 
         return documento
 

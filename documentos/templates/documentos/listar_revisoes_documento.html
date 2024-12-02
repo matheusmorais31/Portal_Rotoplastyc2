@@ -15,7 +15,13 @@
     <div class="document-container">
         <div class="document-item">
             <div class="document-status">
-                <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
+                {% if documento_atual.document_type == 'pdf' %}
+                    <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
+                {% elif documento_atual.document_type == 'spreadsheet' %}
+                    <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
+                {% else %}
+                    <img src="{% static 'images/default-icon.png' %}" alt="Documento" class="status-icon">
+                {% endif %}
             </div>
             <div class="document-info">
                 <div class="document-grid">
@@ -45,7 +51,6 @@
     <!-- Botão para Voltar -->
     <div class="icons-bar">
         <a href="javascript:history.back()" class="back-button">Voltar</a>
-        
     </div>
 
     <!-- Campo de Busca para Revisões -->
@@ -60,7 +65,17 @@
             <div class="document-item">
                 <!-- Ícone do documento -->
                 <div class="document-status">
-                    <img src="{% static 'images/pdf.png' %}" alt="Documento" class="status-icon">
+                    {% comment %}
+                        Supondo que cada revisão (`revisao`) está relacionada a um documento (`documento_atual`).
+                        Se a revisão estiver relacionada a um documento diferente, ajuste a referência conforme necessário.
+                    {% endcomment %}
+                    {% if documento_atual.document_type == 'pdf' %}
+                        <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
+                    {% elif documento_atual.document_type == 'spreadsheet' %}
+                        <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
+                    {% else %}
+                        <img src="{% static 'images/default-icon.png' %}" alt="Documento" class="status-icon">
+                    {% endif %}
                 </div>
 
                 <!-- Informações da Revisão Aprovada -->

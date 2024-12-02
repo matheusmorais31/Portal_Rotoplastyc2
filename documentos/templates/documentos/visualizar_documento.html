@@ -31,7 +31,7 @@
 
     <!-- Contêiner para o PDF renderizado -->
     <div id="pdf-container" class="pdf-container">
-        <p>Carregando PDF...</p>
+        <p class="pdf-message">Carregando PDF...</p>
     </div>
 </div>
 
@@ -99,10 +99,12 @@
         pdfjsLib.getDocument(url).promise.then((pdf) => {
             renderPDF(pdf).then((pageImages) => {
                 // Adicionar evento de impressão após carregar as imagens
-                printButton.onclick = () => printPDF(pageImages);
+                if (printButton) {
+                    printButton.onclick = () => printPDF(pageImages);
+                }
             });
         }).catch((error) => {
-            pdfContainer.innerHTML = `<p>Erro ao carregar PDF: ${error.message}</p>`;
+            pdfContainer.innerHTML = `<p class="pdf-message">Erro ao carregar PDF: ${error.message}</p>`;
         });
     });
 

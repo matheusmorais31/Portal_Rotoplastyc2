@@ -39,8 +39,9 @@
                 <div class="document-actions">
                     <!-- Botão para visualizar o documento (PDF) -->
                     {% if documento.documento_pdf %}
-                    <a href="{{ documento.documento_pdf.url }}" target="_blank" class="action-icon" title="Visualizar PDF">
+                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
                         <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                        <span class="tooltip-text">Visualizar</span>
                     </a>
                     {% endif %}
 
