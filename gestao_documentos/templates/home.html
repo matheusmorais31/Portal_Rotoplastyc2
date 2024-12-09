@@ -1,74 +1,169 @@
-<!-- home.html -->
-
 {% extends 'base.html' %}
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+<!-- <link rel="stylesheet" href="{% static 'css/style.css' %}"> -->
 {% endblock %}
 
 {% block content %}
-<div class="weather-card">
-    {% if erro %}
-        <p>{{ erro }}</p>
-    {% else %}
-        <!-- Clima Atual -->
-        {% if clima_atual %}
-            <div class="current-weather-container">
-                <h2>Clima Atual</h2>
-                <p>{{ clima_atual.data }}</p>
-                {% if clima_atual.icone %}
-                    <img src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="Ícone do tempo" class="weather-icon">
-                {% endif %}
-                <h1>{{ clima_atual.temperatura_atual }}°C</h1>
-                <p>Sensação: {{ clima_atual.sensacao }}°C</p>
-                <p>Umidade: {{ clima_atual.humidade }}%</p>
-                <p>{{ clima_atual.condicao }}</p>
-            </div>
-        {% else %}
-            <p>Dados do clima atual não disponíveis.</p>
-        {% endif %}
 
-        <!-- Linha de separação -->
-        <div class="separator-line"></div>
 
-        <!-- Previsão -->
-        {% if previsao %}
-            <div class="forecast-container">
-                <h2>Previsão do Dia</h2>
-                <div class="forecast-content">
-                    <button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
-                    <div id="previsao-dia">
-                        <p>{{ previsao.data_br }}</p>
-                        {% if previsao.condicao_icone %}
-                            <img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
-                        {% else %}
-                            <p>Sem ícone para a condição: {{ previsao.condicao }}</p>
-                        {% endif %}
-                        <div class="temp-container">
-                            <h1>{{ previsao.temperatura_max }}°C</h1>
-                            <p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
-                        </div>
-                        <p>
-                            <img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon">
-                            {{ previsao.probabilidade_chuva }}%
-                        </p>
-                        <p>{{ previsao.condicao }}</p>
-                    </div>
-                    <button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
-                </div>
-            </div>
-        {% else %}
-            <p>Dados de previsão não disponíveis.</p>
-        {% endif %}
-    {% endif %}
-</div>
+<body onload="showModal()">
+	<!-- LIKS ABAIXO PARA OUTROS SISTEMAS -->
+	<a href="{% url 'tecnicon' %}" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Tecnicon.png" class="modal-img">
+			<span class="modal-title">Tecnicon</span>
+		</div>
+	</a>
 
-<script>
-    function mudarDia(dia) {
-        const queryString = new URLSearchParams(window.location.search);
-        queryString.set('dia', dia);
-        window.location.search = queryString.toString();
-    }
-</script>
+	<!-- LINK PARA OS MES -->
+	<a href="{% url 'allcance' %}" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Allcance.png" class="modal-img">
+			<span class="modal-title">Allcance</span>
+		</div>
+	</a>
+
+	<!-- LIKS ABAIXO PARA OUTROS SISTEMAS -->
+	<a href="https://mail.google.com/mail" target="_blank" id="email-link" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Gmail.png" class="modal-img">
+			<span class="modal-title">Gmail</span>
+		</div>
+	</a>
+
+	<a href="https://rotoview.irp.rotoplastyc.com/" target="_blank" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Rotoview.png" class="modal-img">
+			<span class="modal-title">Rotoview</span>
+		</div>
+	</a>
+
+
+	<!-- LINK PARA OS GLPI -->
+	<a href="{% url 'glpi' %}" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/GLPI.png" class="modal-img">
+			<span class="modal-title">GLPI</span>
+		</div>
+	</a>
+
+	<!-- LINKS ABAIXO PARA OUTROS SISTEMAS -->
+	<a href="https://irp.rotoplastyc.com/sistemas/" target="_blank" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Sistemas Rotoplastyc.png" class="modal-img">
+			<span class="modal-title">Sistemas Rotoplastyc</span>
+		</div>
+	</a>
+
+	<a href="{% url 'gestao' %}" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/GestaoPessoas.png" class="modal-img">
+			<span class="modal-title">Gestão de Pessoas</span>
+		</div>
+	</a>
+
+	<a href="https://irp.rotoplastyc.com/agenda/" target="_blank" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Tarifador.png" class="modal-img">
+			<span class="modal-title">Tarifador</span>
+		</div>
+	</a>
+
+	<!-- LINK PARA MURAL DE SUGESTÃ•ES -->
+	<a href="{% url 'mural' %}" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Mural.png" class="modal-img">
+			<span class="modal-title">Mural de sugestões</span>
+		</div>
+	</a>
+
+	<!-- LINKS ABAIXO PARA OUTROS SISTEMAS -->
+	<a href="http://vmphp.rotoplastyc.com.br/bi" target="_blank" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Indicadores.png" class="modal-img">
+			<span class="modal-title">Indicadores</span>
+		</div>
+	</a>
+
+	<a href="https://sig.grupoadvis.com.br/login" target="_blank" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/SIG.png" class="modal-img">
+			<span class="modal-title">Sistema Inteligente de Gestão</span>
+		</div>
+	</a>
+
+	<!-- LINHA PARA OS MANUAIS -->
+	<a href="{% url 'manuais' %}" class="modal-content">
+		<div class="modal-container">
+			<img src="/static/images/Manuais.png" class="modal-img">
+			<span class="modal-title">Manuais</span>
+		</div>
+	</a>
+
+	<div class="weather-card">
+		{% if erro %}
+			<p>{{ erro }}</p>
+		{% else %}
+			<!-- Clima Atual -->
+			{% if clima_atual %}
+				<div class="current-weather-container">
+					<h2>Clima Atual</h2>
+					<p>{{ clima_atual.data }}</p>
+					{% if clima_atual.icone %}
+						<img src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="Ícone do tempo" class="weather-icon">
+					{% endif %}
+					<h1>{{ clima_atual.temperatura_atual }}°C</h1>
+					<p>Sensação: {{ clima_atual.sensacao }}°C</p>
+					<p>Umidade: {{ clima_atual.humidade }}%</p>
+					<p>{{ clima_atual.condicao }}</p>
+				</div>
+			{% else %}
+				<p>Dados do clima atual não disponíveis.</p>
+			{% endif %}
+	
+			<!-- Linha de separação -->
+			<div class="separator-line"></div>
+	
+			<!-- Previsão -->
+			{% if previsao %}
+				<div class="forecast-container">
+					<h2>Previsão do Dia</h2>
+					<div class="forecast-content">
+						<button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
+						<div id="previsao-dia">
+							<p>{{ previsao.data_br }}</p>
+							{% if previsao.condicao_icone %}
+								<img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
+							{% else %}
+								<p>Sem ícone para a condição: {{ previsao.condicao }}</p>
+							{% endif %}
+							<div class="temp-container">
+								<h1>{{ previsao.temperatura_max }}°C</h1>
+								<p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
+							</div>
+							<p>
+								<img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon">
+								{{ previsao.probabilidade_chuva }}%
+							</p>
+							<p>{{ previsao.condicao }}</p>
+						</div>
+						<button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
+					</div>
+				</div>
+			{% else %}
+				<p>Dados de previsão não disponíveis.</p>
+			{% endif %}
+		{% endif %}
+	</div>
+	
+	<script>
+		function mudarDia(dia) {
+			const queryString = new URLSearchParams(window.location.search);
+			queryString.set('dia', dia);
+			window.location.search = queryString.toString();
+		}
+	</script>
 {% endblock %}

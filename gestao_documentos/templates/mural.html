@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Botï¿½o de Voltar -->
+<!-- <a href="{% url 'home' %}" class="back-button">Voltar</a> -->
+
+<a href="https://irp.rotoplastyc.com/mural/" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/Sugestao.png" class="modal-img">
+        <span class="modal-title">Sugestão</span>
+    </div>
+</a>
+<!-- <a href="https://irp.rotoplastyc.com/teste/" target="_blank"><img src="img/inovar.png" id="efect"></a> -->
+
+<a href="https://docs.google.com/spreadsheets/d/1vgyZNZmw36edF2dBzzP0YmVqqTkIdI5a8C99u10o-m4/edit?usp=sharing" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/Respostas.png" class="modal-img">
+        <span class="modal-title">Repostas</span>
+    </div>
+</a>
+
+{% endblock %}

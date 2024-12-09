@@ -288,18 +288,31 @@ def listar_aprovacoes_pendentes(request):
 
 #Função para listar os documentos aprovados
 @login_required
-
+@permission_required('documentos.can_add_documento', raise_exception=True)
 def listar_documentos_aprovados(request):
-    documentos = Documento.objects.filter(status='aprovado', is_active=True).order_by('nome', '-revisao')
+    # Ordena os documentos primeiro pela categoria, depois pelo nome e revisão
+    documentos = Documento.objects.filter(status='aprovado', is_active=True)\
+        .select_related('categoria')\
+        .order_by('categoria__nome', 'nome', '-revisao')
+    
+    # Remove documentos duplicados baseados no nome e categoria, mantendo a ordem
     documentos_unicos = {}
     for doc in documentos:
-        if doc.nome not in documentos_unicos:
-            documentos_unicos[doc.nome] = doc
+        chave_unica = (doc.nome, doc.categoria.id)
+        if chave_unica not in documentos_unicos:
+            documentos_unicos[chave_unica] = doc
+    
+    # Converte para lista mantendo a ordem
     documentos = list(documentos_unicos.values())
-    documentos.sort(key=lambda x: x.nome)
-    return render(request, 'documentos/listar_documentos.html', {'documentos': documentos, 'titulo': 'Documentos Aprovados'})
+    
+    # Reordena a lista de documentos para garantir que estão agrupados por categoria
+    documentos.sort(key=lambda x: (x.categoria.nome, x.nome))
+    
+    return render(request, 'documentos/listar_documentos.html', {
+        'documentos': documentos,
+        'titulo': 'Documentos Aprovados'
+    })
 
-from django.contrib.auth.decorators import permission_required
 
 # View para inativar ou ativar um documento
 @login_required
@@ -441,10 +454,10 @@ def nova_revisao(request, documento_id):
                     nova_revisao.nome = documento_atual.nome  # Mantém o mesmo nome
                     nova_revisao.categoria = documento_atual.categoria
                     nova_revisao.elaborador = request.user
-                    nova_revisao.status = 'aguardando_analise'  # **Define status para iniciar o fluxo**
+                    nova_revisao.status = 'aguardando_analise'  # Define status para iniciar o fluxo
                     nova_revisao.save()
                     messages.success(request, 'Nova revisão criada com sucesso!')
-                    return redirect('documentos:listar_aprovacoes_pendentes')
+                    return redirect('documentos:listar_documentos_aprovados')  # Atualizado para a lista de documentos
             except Exception as e:
                 logger.error(f'Erro ao criar nova revisão: {e}', exc_info=True)
                 messages.error(request, f'Ocorreu um erro ao criar a nova revisão: {e}')

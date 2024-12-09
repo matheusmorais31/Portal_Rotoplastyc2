@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- BotÃ£o de Voltar -->
+<!-- <a href="{% url 'home' %}" class="back-button">Voltar</a> -->
+
+<a href="http://vmphp.rotoplastyc.com.br/glpi/ti" class="modal-content">
+	<div class="modal-container">
+		<img src="/static/images/Tecnicon.png" class="modal-img">
+		<span class="modal-title">Solicitações a TI</span>
+	</div>
+</a>
+<a href="http://vmphp.rotoplastyc.com.br/glpi/manutencao" class="modal-content">
+	<div class="modal-container">
+		<img src="/static/images/Tecnicon.png" class="modal-img">
+		<span class="modal-title">Solicitações a Manutenção</span>
+	</div>
+</a>
+<a href="http://vmphp.rotoplastyc.com.br/glpi/engpro" target="_blank" class="modal-content">
+	<div class="modal-container">
+		<img src="/static/images/Tecnicon.png" class="modal-img">
+		<span class="modal-title">Solicitações a Eng. Produto</span>
+	</div>
+</a>
+<a href="http://vmphp.rotoplastyc.com.br/glpi/engproduto/" class="modal-content">
+	<div class="modal-container">
+		<img src="/static/images/Tecnicon.png" class="modal-img">
+		<span class="modal-title">Solicitações a Eng. Processo</span>
+	</div>
+</a>
+
+
+{% endblock %}

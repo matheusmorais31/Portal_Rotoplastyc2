@@ -137,3 +137,28 @@ def home(request):
     logger.debug(f"Contexto enviado para o template: {context}")
 
     return render(request, 'home.html', context)
+
+
+def tecnicon(request):
+    return render(request, 'tecnicon.html')
+
+def monitores(request):
+    return render(request, 'monitores.html')
+
+def allcance(request):
+    return render(request, 'allcance.html')
+
+def glpi(request):
+    return render(request, 'glpi.html')
+
+def gestao(request):
+    return render(request, 'gestao.html')
+
+def mural(request):
+    return render(request, 'mural.html')
+
+def manuais(request):
+    return render(request, 'manuais.html')
+
+def andon(request):
+    return render(request, 'andon.html')

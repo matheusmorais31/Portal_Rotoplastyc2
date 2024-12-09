@@ -1,0 +1,23 @@
+<!-- bi/templates/bi/assign_roles_to_user.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Atribuir Roles ao Usuário{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Atribuir Roles ao Usuário: {{ user.get_full_name }} no Relatório {{ bi_report.title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Roles Disponíveis:</label>
+            {{ form.roles }}
+        </div>
+        <div class="form-buttons">
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <button type="button" class="btn btn-cancel" onclick="window.location.href='{% url 'bi:edit_bi_report' bi_report.pk %}'">Cancelar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

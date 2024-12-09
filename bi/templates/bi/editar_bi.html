@@ -1,0 +1,169 @@
+<!-- bi/templates/bi/editar_bi.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Relatório BI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/editar_bi.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Editar Relatório BI: {{ bi_report.title }}</h2>
+    <form method="post" id="form-bi">
+        {% csrf_token %}
+        
+        <!-- Campo Título -->
+        <div class="form-group">
+            <label for="id_title">Título:</label>
+            {{ form.title }}
+        </div>
+        
+        <!-- Campo Código Embed -->
+        <div class="form-group">
+            <label for="id_embed_code">Código Embed:</label>
+            {{ form.embed_code }}
+        </div>
+        
+        <!-- Campo Adicionar Participante -->
+        <div class="form-group">
+            <label for="buscar_participante">Adicionar Participante:</label>
+            <input type="text" id="buscar_participante" placeholder="Buscar participante..." autocomplete="off">
+            <ul id="resultados_pesquisa" class="resultados-pesquisa"></ul>
+        </div>
+
+        <!-- Participantes Adicionados -->
+        <div class="form-group">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="participantes_adicionados">
+                    {% for user in bi_report.allowed_users.all %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.get_full_name }}</td>
+                            <td>
+                                <button type="button" class="remover-participante" data-id="{{ user.id }}">Remover</button>
+                            </td>
+                        </tr>
+                        <input type="hidden" name="allowed_users" value="{{ user.id }}">
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botões do Formulário -->
+        <div class="form-buttons">
+            <button type="button" class="btn btn-cancel" onclick="window.location.href='{% url 'bi:bi_report_list' %}'">Cancelar</button>
+            <button type="submit" class="btn btn-submit">Atualizar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Inclua o jQuery localmente -->
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+
+<!-- Seu código JavaScript -->
+<script>
+    $(document).ready(function () {
+        console.log("JavaScript carregado.");
+        
+        // Array para rastrear participantes adicionados
+        var participantesAdicionados = [];
+        
+        // Inicializar participantesAdicionados com os IDs já adicionados
+        $('#participantes_adicionados tr').each(function() {
+            var usuarioId = $(this).find('td:first').text();
+            participantesAdicionados.push(usuarioId);
+        });
+
+        // URL para buscar participantes via AJAX
+        var buscarParticipantesUrl = "{% url 'usuarios:buscar_participantes' %}";
+        console.log("URL para buscar participantes:", buscarParticipantesUrl);
+
+        // Função para buscar participantes conforme o usuário digita
+        $('#buscar_participante').on('input', function () {
+            var query = $(this).val();
+            console.log("Usuário digitou:", query);
+
+            if (query.length > 0) {
+                $.ajax({
+                    url: buscarParticipantesUrl,
+                    data: {
+                        'q': query
+                    },
+                    success: function (data) {
+                        console.log("Dados recebidos:", data);
+                        $('#resultados_pesquisa').empty();
+
+                        data.forEach(function (usuario) {
+                            if (participantesAdicionados.indexOf(usuario.id.toString()) === -1) {
+                                var li = $('<li></li>')
+                                            .text(usuario.username)
+                                            .attr('data-id', usuario.id);
+                                $('#resultados_pesquisa').append(li);
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Erro na requisição AJAX:", error);
+                    }
+                });
+            } else {
+                $('#resultados_pesquisa').empty();
+            }
+        });
+
+        // Adicionar participante ao clicar no nome da lista de resultados
+        $('#resultados_pesquisa').on('click', 'li', function () {
+            var usuarioId = $(this).attr('data-id');
+            var usuarioNome = $(this).text();
+
+            // Verificar se o participante já foi adicionado
+            if (participantesAdicionados.indexOf(usuarioId.toString()) === -1) {
+                participantesAdicionados.push(usuarioId.toString());
+
+                // Criar nova linha na tabela de participantes adicionados
+                var row = '<tr>' +
+                            '<td>' + usuarioId + '</td>' +
+                            '<td>' + usuarioNome + '</td>' +
+                            '<td><button type="button" class="remover-participante" data-id="' + usuarioId + '">Remover</button></td>' +
+                          '</tr>';
+
+                $('#participantes_adicionados').append(row);
+
+                // Adicionar um campo oculto para enviar o ID do participante no formulário
+                $('#form-bi').append('<input type="hidden" name="allowed_users" value="' + usuarioId + '">');
+            }
+
+            // Limpar os resultados de busca após adicionar o participante
+            $('#resultados_pesquisa').empty();
+            $('#buscar_participante').val('');
+        });
+
+        // Remover participante ao clicar no botão "Remover"
+        $('#participantes_adicionados').on('click', '.remover-participante', function () {
+            var row = $(this).closest('tr');
+            var usuarioId = $(this).attr('data-id');
+
+            // Remover da tabela e do array de IDs
+            row.remove();
+            participantesAdicionados = participantesAdicionados.filter(function(id) {
+                return id !== usuarioId.toString();
+            });
+
+            // Remover o campo oculto correspondente
+            $('input[name="allowed_users"][value="' + usuarioId + '"]').remove();
+        });
+    });
+</script>
+{% endblock %}

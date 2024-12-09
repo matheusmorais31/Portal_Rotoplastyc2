@@ -1,3 +1,5 @@
+/* lista_documentos.css */
+
 /* Remove os marcadores (bolinhas) das listas */
 ul {
     list-style-type: none;
@@ -39,7 +41,7 @@ h1 {
     flex: 1 1 300px; /* Flex-grow, flex-shrink, flex-basis */
 }
 
-#searchInput {
+.search-input {
     width: 100%;
     padding: 10px;
     border-radius: 5px;
@@ -47,12 +49,18 @@ h1 {
     background-color: #ddd;
     color: #333;
     font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.search-input:focus {
+    background-color: #fff;
+    outline: none;
+    border-color: #2EC2D6;
 }
 
 /* Filtro por Categoria */
 .filter-container {
     flex: 0 1 200px; /* Flex-grow, flex-shrink, flex-basis */
-    
 }
 
 .filter-select {
@@ -70,6 +78,13 @@ h1 {
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.filter-select:focus {
+    background-color: #fff;
+    outline: none;
+    border-color: #2EC2D6;
 }
 
 /* Ajuste Responsivo para o Dropdown */
@@ -82,15 +97,16 @@ h1 {
 /* Lista de Documentos */
 .document-container {
     margin-top: 2%;
-    background-color: rgba(33, 32, 32, 0);
+    background-color: rgba(33, 32, 32, 0.265); /* Leve transparência para destaque */
     margin-bottom: 20px;
-    padding: 10px;
-    border-top: 2px solid #bdbcbc;
-    border-bottom: 2px solid #bdbcbc;
-    transition: background-color 0.3s ease;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #bdbcbc;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .document-container:hover {
+    background-color: rgba(33, 32, 32, 0.2);
     transform: scale(1.01);
 }
 
@@ -104,6 +120,12 @@ h1 {
     margin-right: 20px;
 }
 
+.status-icon {
+    width: 40px;
+    height: 40px;
+}
+
+/* Informações do Documento */
 .document-info {
     flex-grow: 1;
 }
@@ -116,6 +138,11 @@ h1 {
 }
 
 .document-info div {
+    margin: 5px 0;
+    word-wrap: break-word;
+}
+
+.document-info p {
     margin: 5px 0;
 }
 
@@ -133,6 +160,8 @@ h1 {
     padding: 0;
     cursor: pointer;
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .icon {
@@ -163,17 +192,11 @@ h1 {
     margin-right: 10px;
 }
 
-/* Ícone do Documento */
-.status-icon {
-    width: 40px;
-    height: 40px;
-}
-
 /* Modal */
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
@@ -191,15 +214,14 @@ h1 {
     width: 600px;
     max-width: 90%;
     text-align: center;
+    position: relative;
 }
 
-/* Estilizar o título do modal */
 .modal-content h2 {
     color: #ffffff;
     margin-bottom: 15px;
 }
 
-/* Estilizar o campo de textarea para motivo */
 .modal-content textarea {
     width: 90%;
     padding: 8px;
@@ -212,7 +234,6 @@ h1 {
     resize: none;
 }
 
-/* Estilizar os botões do modal */
 .modal-content button {
     width: 100px;
     padding: 6px;
@@ -240,7 +261,9 @@ h1 {
     color: white;
     font-size: 28px;
     font-weight: bold;
-    float: right;
+    position: absolute;
+    top: 10px;
+    right: 20px;
     cursor: pointer;
 }
 
@@ -313,6 +336,18 @@ h1 {
     .filter-select {
         font-size: 14px;
     }
+
+    .modal-content {
+        width: 90%;
+    }
+}
+
+.no-documents-message,
+.no-results-message {
+    text-align: center;
+    margin-top: 20px;
+    color: #ccc;
+    font-size: 18px;
 }
 
 .loading-spinner {

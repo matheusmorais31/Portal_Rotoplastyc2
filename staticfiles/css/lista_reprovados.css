@@ -41,11 +41,13 @@ h1 {
 
 /* Lista de Documentos */
 .document-container {
-    background-color: #21202000;
+    margin-top: 2%;
+    background-color: rgba(33, 32, 32, 0.265); /* Leve transparência para destaque */
     margin-bottom: 20px;
-    padding: 10px; /* Aumentado para melhor espaçamento */
-    border-top: 2px solid #bdbcbc;
-    border-bottom: 2px solid #bdbcbc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #bdbcbc;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .document-item {

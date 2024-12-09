@@ -1,0 +1,20 @@
+<!-- notificacoes/templates/notificacoes/email_notificacao.html -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Notificação</title>
+</head>
+<body>
+    <p>Olá {{ destinatario.get_full_name }},</p>
+    <p>Você tem uma nova notificação:</p>
+    <p><strong>{{ notificacao.mensagem }}</strong></p>
+    {% if notificacao.link %}
+        <p>Você pode visualizá-la em: <a href="{{ site_url }}{{ notificacao.link }}">{{ site_url }}{{ notificacao.link }}</a></p>
+    {% else %}
+        <p>Acesse o sistema para mais detalhes.</p>
+    {% endif %}
+    <p>Atenciosamente,<br>Equipe de Gestão de Documentos</p>
+</body>
+</html>

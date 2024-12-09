@@ -1,0 +1,50 @@
+<!-- bi/templates/bi/visualizar_bi.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/visualizar_bi.css' %}">
+{% endblock %}
+
+{% block content %}
+  <!-- Contêiner do relatório Power BI -->
+  <div id="reportContainer"></div>
+
+  <!-- Power BI Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.19.1/dist/powerbi.min.js"></script>
+  <script>
+    (function() {
+      var models = window['powerbi-client'].models;
+      var groupId = '{{ bi_report.group_id }}';  // Certifique-se de que 'group_id' está sendo passado corretamente
+
+      function embedReport(embedUrl, embedToken, reportId) {
+        var embedConfiguration = {
+          type: 'report',
+          id: reportId,
+          embedUrl: embedUrl,
+          accessToken: embedToken,
+          tokenType: models.TokenType.Embed,
+          permissions: models.Permissions.View,
+          settings: {
+            panes: {
+              filters: { visible: true }, // Exibe barra de filtros
+              pageNavigation: { visible: true } // Exibe navegação entre páginas
+            },
+            navContentPaneEnabled: true,
+            layoutType: models.LayoutType.Custom,
+            customLayout: {
+              displayOption: models.DisplayOption.FitToPage // Ajusta ao tamanho da página
+            }
+          }
+        };
+
+        var reportContainer = document.getElementById('reportContainer');
+        powerbi.reset(reportContainer); // Limpa relatórios existentes
+        powerbi.embed(reportContainer, embedConfiguration); // Embute o relatório
+      }
+
+      embedReport('{{ embed_url }}', '{{ embed_token }}', '{{ report_id }}');
+    })();
+  </script>
+{% endblock %}

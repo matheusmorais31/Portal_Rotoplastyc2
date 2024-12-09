@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- BotÃ£o de Voltar -->
+<!-- <a href="{% url 'home' %}" class="back-button">Voltar</a> -->
+<!-- Universidade -->
+<a href="https://painel.umentor.com.br/cadastro_treinamento/?con_cod=rot271583&pla=5" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/UniversidadeCorporativa.png" class="modal-img">
+        <span class="modal-title">Universidade Corporativa</span>
+    </div>
+</a>
+<!-- Metadados -->
+<a href="https://portalrhrotoplastyc.cloudmetadados.com.br/PortalRH/Account/Login?ReturnUrl=%2fPortalRH/"
+    class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/PortalColaborador.png" class="modal-img">
+        <span class="modal-title">Metadados</span>
+    </div>
+</a>
+<!-- Klipfolio -->
+<a href="https://app.klipfolio.com/login" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/Klipfolio.png" class="modal-img">
+        <span class="modal-title">Klipfolio</span>
+    </div>
+</a>
+<!--DescriÃ§Ã£o de Cargos-->
+<a href="/static/pdfs/Descricao de cargos.pdf" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/DescricaoCargos.png" class="modal-img">
+        <span class="modal-title">Descrição de Cargos</span>
+    </div>
+</a>
+
+<!--Pesquisa de Clima -->
+<!--Para ativar: comentar a linha 35 e descomentar a linha 34, para desativar comentar a linha 34 e descomentar a linha 35 -->
+<!--<a href="http://vmphp.rotoplastyc.com.br/pesquisa/"  ><img src="img/Pesquisa.png" id="efect"></a>-->
+
+<a onclick="alert('A pesquisa de clima ainda nao esta liberada!')" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/PesquisaClima.png" class="modal-img">
+        <span class="modal-title">Pesquisa de Clima</span>
+    </div>
+</a>
+<!--DescriÃ§Ã£o de Cargos-->
+<a href="http://vmphp.rotoplastyc.com.br/feedback.html" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/Avaliacao.png" class="modal-img">
+        <span class="modal-title">Avaliação de Desempenho</span>
+    </div>
+</a>
+
+{% endblock %}
