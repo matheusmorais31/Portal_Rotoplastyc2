@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Portal Rotoplastyc{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="shortcut icon" href="/static/images/favicon.png">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -121,6 +122,27 @@
                     {% endif %}
                 </ul>
             </li>
+
+            <!-- Menu BI-->
+            <li> 
+                
+                <a href="#" onclick="toggleSubmenu(event, this)">
+                    <img src="{% static 'images/indicador.png' %}" alt="Documentos">
+                    <span class="menu-label">BI</span>
+                </a>
+                
+                <ul class="submenu">
+                    
+                    <li><a href="{% url 'bi:my_bi_report_list' %}">Lista de BI</a></li>
+                    
+
+                    {% if perms.bi.view_bi %}
+                    <li><a href="{% url 'bi:bi_report_list' %}">Lista geral de BI'S</a></li>
+                    {% endif %}
+
+                </ul>
+            </li>
+
 
             <!-- Menu Adiministração -->
             <li>

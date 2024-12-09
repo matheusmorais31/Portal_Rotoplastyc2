@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- BotÃ£o de Voltar -->
+<!-- <a href="{% url 'home' %}" class="back-button">Voltar</a> -->
+
+<a href="http://vmphp.rotoplastyc.com.br/manual-marca.pdf" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/ManualMarca.png" class="modal-img">
+                <span class="modal-title">Manual da Marca</span>
+        </div>
+</a>
+<a href="http://vmphp.rotoplastyc.com.br/layout/" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/ManualDoc.png" class="modal-img">
+                <span class="modal-title">Manual da Documentação</span>
+        </div>
+</a>
+
+<!-- <a href="http://vmphp.rotoplastyc.com.br/manualrp/index.html" target="_blank"><img src="img/img2/Manual-colab.png" id="efect"></a> -->
+
+<a href="/static/pdfs/Colaborador.pdf" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/ManualColab.png" class="modal-img">
+                <span class="modal-title">Manual do Colaborador</span>
+        </div>
+</a>
+<a href="http://vmphp.rotoplastyc.com.br/covid/" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/ManualCovid.png" class="modal-img">
+                <span class="modal-title">Medidas Prevenção Covid-19</span>
+        </div>
+</a>
+{% endblock %}

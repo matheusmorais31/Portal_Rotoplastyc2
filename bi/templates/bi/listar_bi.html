@@ -1,0 +1,136 @@
+<!-- bi/templates/bi/listar_bi.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/listar_bi.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Lista de BIs</h1>
+
+    <!-- Contêiner Flexível para Busca e Filtro -->
+    <div class="filters-container">
+        <!-- Campo de Busca -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar BIs...">
+        </div>
+
+        <!-- Campo de Filtro por Categoria (Opcional, caso você tenha categorias associadas) -->
+        <!-- Você pode implementar categorias com base em propriedades dos relatórios ou mantê-las no banco de dados -->
+    </div>
+
+    <!-- Barra de Ícones -->
+    
+
+    <!-- Lista de BIs -->
+    <div class="bi-list" id="biList">
+        {% for bi in bi_reports %}
+            <div class="bi-container">
+                <div class="bi-item">
+                    <!-- Ícone do BI -->
+                    <div class="bi-status">
+                        <img src="{% static 'images/bi-icon.png' %}" alt="BI" class="status-icon">
+                    </div>
+
+                    <!-- Informações do BI -->
+                    <div class="bi-info">
+                        <div class="bi-grid">
+                            <div><strong>Título:</strong> {{ bi.title }}</div>
+                        
+                            <div>
+                                <strong>Última Atualização:</strong>
+                                {% if bi.last_updated %}
+                                    {{ bi.last_updated|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    Não disponível
+                                {% endif %}
+                            </div>
+                           
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="bi-actions">
+                        
+                        <!-- Visualizar-->
+                        <a href="{% url 'bi:bi_report_detail' bi.pk %}" class="action-icon {% if not request.user in bi.allowed_users.all %}disabled{% endif %}">
+                            <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                            <span class="tooltip-text">Visualizar</span>
+                        </a>
+                        
+                        <!-- Ver acessos -->
+                        {% if perms.bi.view_access %}
+                        <a href="{% url 'bi:visualizar_acessos_bi' bi.pk %}" class="action-icon">
+                            <img src="{% static 'images/acessou.png' %}" alt="Acessos" class="access-icon">
+                            <span class="tooltip-text">Acessos</span>
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Editar -->
+                        {% if perms.bi.edit_bi %}
+                        <a href="{% url 'bi:edit_bi_report' bi.pk %}" class="action-icon">
+                            <img src="{% static 'images/edit-icon.png' %}" alt="Editar" class="edit-icon">
+                            <span class="tooltip-text">Editar</span>
+                        </a>
+                        {% endif %}
+                                            
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="no-bis-message">Nenhum BI encontrado.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script para os Filtros de Busca -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const biContainers = document.querySelectorAll('.bi-container');
+
+        function filterBIs() {
+            const searchTerm = searchInput.value.toLowerCase();
+            let hasResults = false;
+
+            biContainers.forEach(function(container) {
+                const biTitle = container.querySelector('.bi-grid div:nth-child(1)').innerText.toLowerCase();
+                
+                if (biTitle.includes(searchTerm)) {
+                    container.style.display = '';
+                    hasResults = true;
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+
+            // Exibir ou Ocultar a Mensagem de "Nenhum BI Encontrado"
+            const totalVisibleBIs = Array.from(biContainers).filter(bi => bi.style.display !== 'none').length;
+            let noResultsMessage = document.getElementById('noResultsMessage');
+
+            if (totalVisibleBIs === 0) {
+                if (!noResultsMessage) {
+                    noResultsMessage = document.createElement('div');
+                    noResultsMessage.id = 'noResultsMessage';
+                    noResultsMessage.innerText = 'Nenhum BI encontrado.';
+                    noResultsMessage.style.textAlign = 'center';
+                    noResultsMessage.style.marginTop = '20px';
+                    noResultsMessage.style.color = '#f00';
+                    document.getElementById('biList').appendChild(noResultsMessage);
+                }
+                noResultsMessage.style.display = 'block';
+            } else {
+                if (noResultsMessage) {
+                    noResultsMessage.style.display = 'none';
+                }
+            }
+        }
+
+        // Adicionar Event Listener para o Campo de Busca
+        searchInput.addEventListener('keyup', filterBIs);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+/* visualizar_bi.css */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Remove barras de rolagem */
+  background-color: #38393F; /* Define o fundo como #38393F */
+}
+
+#reportContainer {
+  position: absolute; /* Garante posicionamento relativo ao conteúdo */
+  top: 50px; /* Alinha abaixo da barra superior */
+  left: 60px; /* Respeita a largura da barra lateral */
+  width: calc(100% - 60px); /* Subtrai a largura da barra lateral */
+  height: calc(100% - 50px); /* Subtrai a altura da barra superior */
+  overflow: hidden; /* Remove qualquer barra de rolagem */
+  background-color: transparent; /* O fundo do relatório permanece transparente */
+}

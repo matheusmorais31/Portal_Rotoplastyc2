@@ -5,6 +5,8 @@ from pathlib import Path
 from decouple import config
 from django.urls import reverse_lazy
 
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,6 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'notificacoes',
     'dirtyfields',
+    'django_celery_beat',
+    'bi',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -148,8 +152,10 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR / 'django.log',
+            'maxBytes': 1024*1024*5,  # 5MB
+            'backupCount': 5,
             'formatter': 'verbose',
         },
     },
@@ -159,9 +165,14 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'documentos': {  
+        'documentos': {
             'handlers': ['file'],
             'level': 'DEBUG',
+        },
+        'bi': {  # Logger para o aplicativo 'bi'
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }
@@ -189,3 +200,39 @@ LOGIN_URL = reverse_lazy('usuarios:login_usuario')
 # Tamanho máximo de upload em bytes (Exemplo: 500MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 * 1024 * 1024
+
+
+
+# settings.py
+
+from decouple import config
+
+# Configurações de e-mail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# URL do site (utilizado para construir links completos)
+SITE_URL = config('SITE_URL', default='http://172.16.44.12:8000')
+
+# Celery Configuration Options
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Exemplo usando Redis
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/Sao_Paulo'  # Ajuste conforme sua região
+
+
+
+
+# Power BI Configuration
+POWERBI_CLIENT_ID = config('POWERBI_CLIENT_ID') 
+POWERBI_CLIENT_SECRET = config('POWERBI_CLIENT_SECRET')
+POWERBI_TENANT_ID = config('POWERBI_TENANT_ID')
+POWERBI_GROUP_ID = config('POWERBI_GROUP_ID')
+

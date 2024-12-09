@@ -10,6 +10,9 @@
 <div class="container">
     <h1>{{ titulo }}</h1>
 
+    <!-- Executa o regroup apenas uma vez no início -->
+    {% regroup documentos by categoria as documentos_por_categoria %}
+
     <!-- Contêiner Flexível para Busca e Filtro -->
     <div class="filters-container">
         <!-- Campo de Busca -->
@@ -21,7 +24,6 @@
         <div class="filter-container">
             <select id="categoryFilter" class="filter-select">
                 <option value="all">Todas as Categorias</option>
-                {% regroup documentos by categoria as documentos_por_categoria %}
                 {% for categoria_group in documentos_por_categoria %}
                     <option value="{{ categoria_group.grouper.id }}">{{ categoria_group.grouper.nome }}</option>
                 {% endfor %}
@@ -31,7 +33,6 @@
 
     <!-- Barra de Ícones -->
     <div class="icons-bar">
-        <!-- Ícone de Adicionar Documento -->
         {% if perms.documentos.can_add_documento %}
             <a href="{% url 'documentos:criar_documento' %}" class="icon-link">
                 <img src="{% static 'images/add-document-icon.png' %}" alt="Adicionar Documento" class="icon">
@@ -40,9 +41,7 @@
         {% endif %}
     </div>
 
-    <!-- Lista de Documentos Agrupados por Categoria Usando Regroup -->
-    {% regroup documentos by categoria as documentos_por_categoria %}
-
+    <!-- Lista de Documentos Agrupados por Categoria -->
     <div class="document-list" id="documentList">
         {% for categoria_group in documentos_por_categoria %}
             <h2 class="category-title" data-category-id="{{ categoria_group.grouper.id }}">{{ categoria_group.grouper.nome }}</h2>
@@ -86,41 +85,39 @@
                             <!-- Botões de Ação -->
                             <div class="document-actions">
                                 {% if documento.document_type == 'spreadsheet' %}
-                                    <!-- Apenas a opção de download para planilhas -->
                                     {% if perms.documentos.can_add_documento %}
-                                    <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
-                                        <img src="{% static 'images/versao.png' %}" alt="Nova Revisão" class="revision-icon">
-                                        <span class="tooltip-text">Nova Revisão</span>
-                                    </a> 
-                                {% if perms.documentos.can_view_revisions %}
-                                    <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
-                                        <img src="{% static 'images/revision-icon.png' %}" alt="Histórico" class="view-access-icon">
-                                        <span class="tooltip-text">Histórico</span>
-                                    </a>
-                                {% endif %}
-                                {% if perms.documentos.can_active %}
-                                <form action="{% url 'documentos:toggle_active_status' documento.id %}" method="post" style="display:inline;">
-                                    {% csrf_token %}
-                                    {% if documento.is_active %}
-                                        <button type="submit" class="action-icon" title="Inativar Documento" onclick="return confirm('Tem certeza que deseja inativar este documento?');">
-                                            <img src="{% static 'images/deactivate-icon.png' %}" alt="Inativar" class="view-icon">
-                                            <span class="tooltip-text">Inativar</span>
-                                        </button>
-                                    {% else %}
-                                        <button type="submit" class="action-icon" title="Ativar Documento" onclick="return confirm('Tem certeza que deseja ativar este documento?');">
-                                            <img src="{% static 'images/activate-icon.png' %}" alt="Ativar" class="view-icon">
-                                            <span class="tooltip-text">Ativar</span>
-                                        </button>
+                                        <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
+                                            <img src="{% static 'images/versao.png' %}" alt="Nova Revisão" class="revision-icon">
+                                            <span class="tooltip-text">Nova Revisão</span>
+                                        </a> 
                                     {% endif %}
-                                </form>
-                            {% endif %}
-                                {% endif %}
+                                    {% if perms.documentos.can_view_revisions %}
+                                        <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
+                                            <img src="{% static 'images/revision-icon.png' %}" alt="Histórico" class="view-access-icon">
+                                            <span class="tooltip-text">Histórico</span>
+                                        </a>
+                                    {% endif %}
+                                    {% if perms.documentos.can_active %}
+                                        <form action="{% url 'documentos:toggle_active_status' documento.id %}" method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            {% if documento.is_active %}
+                                                <button type="submit" class="action-icon" title="Inativar Documento" onclick="return confirm('Tem certeza que deseja inativar este documento?');">
+                                                    <img src="{% static 'images/deactivate-icon.png' %}" alt="Inativar" class="view-icon">
+                                                    <span class="tooltip-text">Inativar</span>
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="action-icon" title="Ativar Documento" onclick="return confirm('Tem certeza que deseja ativar este documento?');">
+                                                    <img src="{% static 'images/activate-icon.png' %}" alt="Ativar" class="view-icon">
+                                                    <span class="tooltip-text">Ativar</span>
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    {% endif %}
                                     <a href="{{ documento.documento.url }}" download class="action-icon">
                                         <img src="{% static 'images/download-icon.png' %}" alt="Baixar Editável" class="download-icon">
                                         <span class="tooltip-text">Baixar</span>
                                     </a>
                                 {% elif documento.document_type == 'pdf' %}
-                                    <!-- Opções existentes para PDFs -->
                                     <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
                                         <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
                                         <span class="tooltip-text">Visualizar</span>
@@ -131,7 +128,6 @@
                                             <span class="tooltip-text">Nova Revisão</span>
                                         </a> 
                                     {% endif %}
-                                  
                                     {% if perms.documentos.view_acessos_documento %}
                                         <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon">
                                             <img src="{% static 'images/acessou.png' %}" alt="Visualizar Acessos" class="view-access-icon">
@@ -144,18 +140,17 @@
                                             <span class="tooltip-text">Histórico</span>
                                         </a>
                                     {% endif %}
-                                      <!-- Botão para Inativar/Ativar -->
-                                      {% if perms.documentos.can_active %}
-                                      <form action="{% url 'documentos:toggle_active_status' documento.id %}" method="post" style="display:inline;">
-                                          {% csrf_token %}
-                                          {% if documento.is_active %}
-                                              <button type="submit" class="action-icon" title="Inativar Documento" onclick="return confirm('Tem certeza que deseja inativar este documento?');">
-                                                  <img src="{% static 'images/deactivate-icon.png' %}" alt="Inativar" class="view-icon">
-                                                  <span class="tooltip-text">Inativar</span>
-                                              </button>
-                                          {% endif %}
-                                      </form>
-                                  {% endif %}
+                                    {% if perms.documentos.can_active %}
+                                        <form action="{% url 'documentos:toggle_active_status' documento.id %}" method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            {% if documento.is_active %}
+                                                <button type="submit" class="action-icon" title="Inativar Documento" onclick="return confirm('Tem certeza que deseja inativar este documento?');">
+                                                    <img src="{% static 'images/deactivate-icon.png' %}" alt="Inativar" class="view-icon">
+                                                    <span class="tooltip-text">Inativar</span>
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </div>
@@ -205,7 +200,7 @@
             // Atualizar a Visibilidade das Categorias com Base nos Documentos Visíveis
             categoryTitles.forEach(function(title) {
                 const categoryId = title.getAttribute('data-category-id');
-                const relatedDocuments = document.querySelectorAll(`.document-container[data-category-id="${categoryId}"]`);
+                const relatedDocuments = document.querySelectorAll('.document-container[data-category-id="'+categoryId+'"]');
                 const anyVisible = Array.from(relatedDocuments).some(doc => doc.style.display !== 'none');
 
                 if (anyVisible) {

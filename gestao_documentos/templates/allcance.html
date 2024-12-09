@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Botï¿½o de Voltar -->
+<!-- <a href="{% url 'home' %}" class="back-button">Voltar</a> -->
+
+<!-- LINK PARA O MES E ANDON -->
+<a href="http://mes.rotoplastyc.com.br" target="_blank" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/Tecnicon.png" id="efect" class="modal-img">
+                <span class="modal-title">MES</span>
+        </div>
+</a>
+
+
+<!-- LINK PARA ANDON PRODUï¿½ï¿½O -->
+<a href="{% url 'andon' %}" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/Andons.png" id="efect" class="modal-img">
+                <span class="modal-title">Andons</span>
+        </div>
+</a>
+
+{% endblock %}
