@@ -1,3 +1,4 @@
+<!-- usuarios/templates/usuarios/editar_grupo.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -9,15 +10,15 @@
 
 {% block content %}
 <div class="container">
-    <h2>Editar Grupo: {{ grupo.nome }}</h2>
+    <h2>Editar Grupo: {{ group.name }}</h2>
 
-    <form id="form-grupo" method="POST" action="{% url 'usuarios:editar_grupo' grupo.id %}">
+    <form id="form-grupo" method="POST" action="{% url 'usuarios:editar_grupo' group.id %}">
         {% csrf_token %}
         
         <!-- Nome do Grupo -->
         <div class="form-group">
             <label for="nome_grupo">Nome do Grupo:</label>
-            <input type="text" id="nome_grupo" name="nome_grupo" value="{{ grupo.nome }}" required>
+            <input type="text" id="nome_grupo" name="nome_grupo" value="{{ group.name }}" required>
         </div>
 
         <!-- Buscar Participante -->
@@ -38,7 +39,7 @@
                     </tr>
                 </thead>
                 <tbody id="participantes_adicionados">
-                    {% for participante in grupo.participantes.all %}
+                    {% for participante in group.user_set.all %}
                         <tr>
                             <td>{{ participante.id }}</td>
                             <td>{{ participante.username }}</td>
@@ -70,7 +71,7 @@
         var participantesAdicionados = [];
         
         // Adicionar os IDs dos participantes existentes
-        {% for participante in grupo.participantes.all %}
+        {% for participante in group.user_set.all %}
             participantesAdicionados.push("{{ participante.id }}");
         {% endfor %}
 

@@ -2,8 +2,10 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .models import Usuario, Grupo
+from .models import Usuario
 from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group
+
 
 # Formulário de Cadastro de Usuário
 class UsuarioCadastroForm(UserCreationForm):
@@ -122,11 +124,14 @@ class GrupoForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Grupo
-        fields = ['nome', 'participantes', 'permissions']
-        widgets = {
-            'participantes': forms.CheckboxSelectMultiple(),
-        }
+        model = Group  # Use o modelo padrão
+        fields = ['name', 'permissions']
+
+    def __init__(self, *args, **kwargs):
+        super(GrupoForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = "Nome do Grupo"
+        self.fields['permissions'].label = "Permissões do Grupo"
+
 
 # Formulário de Perfil
 class ProfileForm(forms.ModelForm):

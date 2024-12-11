@@ -2,36 +2,19 @@
 
 import logging
 from django.contrib.auth.backends import BaseBackend
-from django.contrib.auth.models import Permission
-from usuarios.models import Usuario, Grupo  # Importa o modelo Grupo personalizado
+from django.contrib.auth.models import Permission, Group
+from usuarios.models import Usuario
+from django.contrib.contenttypes.models import ContentType
 
 logger = logging.getLogger(__name__)
 
 class CustomBackend(BaseBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
-        try:
-            user = Usuario.objects.get(username=username)
-            if user.check_password(password):
-                return user
-        except Usuario.DoesNotExist:
-            return None
-
-    def get_user(self, user_id):
-        try:
-            return Usuario.objects.get(pk=user_id)
-        except Usuario.DoesNotExist:
-            return None
-
     def get_group_permissions(self, user_obj, obj=None):
         if not hasattr(user_obj, '_group_perm_cache'):
-            # Obtém todos os grupos aos quais o usuário pertence
-            grupos = Grupo.objects.filter(participantes=user_obj)
-
-            # Obtém todas as permissões associadas a esses grupos
-            permissions = Permission.objects.filter(grupos__in=grupos).values_list(
+            groups = user_obj.groups.all()
+            permissions = Permission.objects.filter(group__in=groups).values_list(
                 'content_type__app_label', 'codename'
             ).distinct()
-
             user_obj._group_perm_cache = set(
                 f"{perm[0]}.{perm[1]}" for perm in permissions
             )
@@ -65,3 +48,15 @@ class CustomBackend(BaseBackend):
             return True
         logger.debug(f"Usuário {user_obj.username} NÃO TEM permissão {perm}")
         return False
+
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        try:
+            user = Usuario.objects.get(username=username)
+            if user.is_ad_user:
+                # Implementar autenticação via AD se necessário
+                pass
+            else:
+                if user.check_password(password):
+                    return user
+        except Usuario.DoesNotExist:
+            return None

@@ -38,11 +38,10 @@
                 <!-- Botões de ação -->
                 <div class="document-actions">
                     <!-- Botão para visualizar o documento (PDF) -->
-                    <div class="document-actions">
-                        <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
-                            <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
-                            <span class="tooltip-text">Visualizar</span>
-                        </a>
+                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
+                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                        <span class="tooltip-text">Visualizar</span>
+                    </a>
                     <!-- Botão para aprovar o documento -->
                     <form method="post" style="display:inline;">
                         {% csrf_token %}

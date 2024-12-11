@@ -2,6 +2,7 @@
 
 import logging
 from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.models import Permission, Group
 from .models import Usuario
 from ldap3 import Server, Connection, ALL, NTLM
 
@@ -9,14 +10,13 @@ logger = logging.getLogger(__name__)
 
 def autenticar_usuario_ad(username, password):
     ldap_server = "ldap://rotoplastyc.net"
-    admin_user = "CN=Administrador,CN=Users,DC=rotoplastyc,DC=net"  # Certifique-se de que este DN está correto
+    admin_user = "CN=Administrador,CN=Users,DC=rotoplastyc,DC=net"
     admin_password = "56dgqipcDuq78fRNhEkEkxvJGoeKa5hA"
 
     try:
         logger.info(f"Tentando autenticar o usuário {username} no LDAP.")
         server = Server(ldap_server, get_info=ALL)
 
-        # Conexão com credenciais de administrador para buscar o DN do usuário
         with Connection(server, user=admin_user, password=admin_password, auto_bind=True) as admin_conn:
             search_base = "OU=Usuarios,OU=Rotoplastyc,DC=rotoplastyc,DC=net"
             search_filter = f"(sAMAccountName={username})"
@@ -29,7 +29,6 @@ def autenticar_usuario_ad(username, password):
             user_dn = admin_conn.entries[0].distinguishedName.value
             logger.info(f"DN encontrado para o usuário {username}: {user_dn}")
 
-        # Tentar autenticar com as credenciais do usuário
         with Connection(server, user=user_dn, password=password, auto_bind=True) as user_conn:
             logger.info(f"Usuário {username} autenticado com sucesso no LDAP.")
             return True
@@ -45,7 +44,6 @@ class ActiveDirectoryBackend(BaseBackend):
             logger.info(f"Usuário encontrado: {user.username}")
 
             if user.is_ad_user:
-                # Tentar autenticar via AD
                 logger.info(f"Tentando autenticar {username} no AD.")
                 if autenticar_usuario_ad(username, password):
                     logger.info(f"Usuário {username} autenticado com sucesso via AD.")
@@ -54,7 +52,6 @@ class ActiveDirectoryBackend(BaseBackend):
                     logger.warning(f"Falha na autenticação do usuário {username} no AD.")
                     return None
             else:
-                # Usuário local, verifica a senha local
                 if user.check_password(password):
                     logger.info(f"Usuário {username} autenticado com sucesso com senha local.")
                     return user
