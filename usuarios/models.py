@@ -1,3 +1,5 @@
+# models.py
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Permission
 from django.contrib.auth import get_user_model
@@ -14,7 +16,7 @@ class Usuario(AbstractUser):
         permissions = [
             ('list_user', 'Lista de Usuários'),
             ('can_add_user', 'Cadastra Usuário'),
-            ('can_import_user', 'Importar Usuário '),
+            ('can_import_user', 'Importar Usuário'),
             ('can_edit_user', 'Editar Usuário'),    
             ('change_permission', 'Liberar Permissões'),
             ('can_view_list_group', 'Lista de Grupos'),
@@ -24,10 +26,3 @@ class Usuario(AbstractUser):
         ]
 
 
-class Grupo(models.Model):
-    nome = models.CharField(max_length=255, unique=True)
-    participantes = models.ManyToManyField(get_user_model(), related_name='grupos')
-    permissions = models.ManyToManyField(Permission, blank=True)
-
-    def __str__(self):
-        return self.nome

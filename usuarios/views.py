@@ -16,7 +16,9 @@ from collections import defaultdict
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from .forms import UsuarioCadastroForm, UsuarioChangeForm, GrupoForm, UsuarioPermissaoForm, ProfileForm
-from .models import Usuario, Grupo
+from .models import Usuario
+from django.contrib.auth.models import Group
+
 
 
 
@@ -191,8 +193,9 @@ def importar_usuarios_ad(request):
 @login_required
 @permission_required('usuarios.can_view_list_group', raise_exception=True)
 def lista_grupos(request):
-    grupos = Grupo.objects.all()
-    return render(request, 'usuarios/lista_grupos.html', {'grupos': grupos})
+    groups = Group.objects.all()  # Renomear de 'grupos' para 'groups' no contexto
+    return render(request, 'usuarios/lista_grupos.html', {'groups': groups})
+
 
 @login_required
 @permission_required('usuarios.can_add_group', raise_exception=True)
@@ -201,25 +204,19 @@ def cadastrar_grupo(request):
         nome_grupo = request.POST.get('nome')
         participantes_ids = request.POST.getlist('participantes')
         
-        # Log dos dados recebidos
-        logger.debug(f"Nome do Grupo: {nome_grupo}")
-        logger.debug(f"Participantes IDs: {participantes_ids}")
-
         if not nome_grupo:
             messages.error(request, "O nome do grupo é obrigatório.")
             return render(request, 'usuarios/cadastrar_grupo.html')
 
-        grupo = Grupo(nome=nome_grupo)
-        grupo.save()
+        group, created = Group.objects.get_or_create(name=nome_grupo)
 
         for usuario_id in participantes_ids:
             try:
                 usuario = Usuario.objects.get(id=usuario_id)
-                grupo.participantes.add(usuario)
+                group.user_set.add(usuario)
             except Usuario.DoesNotExist:
                 messages.error(request, f"Usuário com ID {usuario_id} não existe.")
 
-        grupo.save()
         messages.success(request, "Grupo criado com sucesso!")
         return redirect('usuarios:lista_grupos')
 
@@ -227,41 +224,44 @@ def cadastrar_grupo(request):
     return render(request, 'usuarios/cadastrar_grupo.html', {'usuarios': usuarios})
 
 
+
 @login_required
 @permission_required('usuarios.can_edit_group', raise_exception=True)
 def editar_grupo(request, grupo_id):
-    grupo = get_object_or_404(Grupo, id=grupo_id)
+    group = get_object_or_404(Group, id=grupo_id)
     if request.method == 'POST':
         nome_grupo = request.POST.get('nome_grupo')
         participantes_ids = request.POST.getlist('participantes')
 
         if nome_grupo:
-            grupo.nome = nome_grupo
-            grupo.participantes.clear()  # Remove todos os participantes antigos
+            group.name = nome_grupo
+            group.save()
+            group.user_set.clear()  # Remove todos os participantes antigos
             for usuario_id in participantes_ids:
                 try:
                     usuario = Usuario.objects.get(id=usuario_id)
-                    grupo.participantes.add(usuario)
+                    group.user_set.add(usuario)
                 except Usuario.DoesNotExist:
                     messages.error(request, f"Usuário com ID {usuario_id} não existe.")
-            grupo.save()
             messages.success(request, "Grupo atualizado com sucesso!")
             return redirect('usuarios:lista_grupos')
         else:
             messages.error(request, "O nome do grupo é obrigatório.")
 
     usuarios = Usuario.objects.all()
-    return render(request, 'usuarios/editar_grupo.html', {'grupo': grupo, 'usuarios': usuarios})
+    return render(request, 'usuarios/editar_grupo.html', {'group': group, 'usuarios': usuarios})
+
 
 @login_required
 @permission_required('usuarios.can_delete_group', raise_exception=True)
 def excluir_grupo(request, grupo_id):
-    grupo = get_object_or_404(Grupo, id=grupo_id)
+    group = get_object_or_404(Group, id=grupo_id)
     if request.method == 'POST':
-        grupo.delete()
+        group.delete()
         messages.success(request, "Grupo excluído com sucesso!")
         return redirect('usuarios:lista_grupos')
-    return render(request, 'usuarios/excluir_grupo.html', {'grupo': grupo})
+    return render(request, 'usuarios/excluir_grupo.html', {'group': group})
+
 
 # Função para buscar participantes (usuários) via AJAX
 @login_required
@@ -285,17 +285,17 @@ def sugestoes(request):
         for usuario in usuarios:
             sugestoes.append({'id': usuario.id, 'nome': usuario.username, 'tipo': 'Usuário'})
 
-        grupos = Grupo.objects.filter(nome__icontains=query)[:5]
+        grupos = Group.objects.filter(name__icontains=query)[:5]  # Correção aqui
         for grupo in grupos:
-            sugestoes.append({'id': grupo.id, 'nome': grupo.nome, 'tipo': 'Grupo'})
+            sugestoes.append({'id': grupo.id, 'nome': grupo.name, 'tipo': 'Grupo'})  # E aqui
 
     return JsonResponse(sugestoes, safe=False)
+
 # Função para liberar permissões
 @login_required
-@permission_required('usuarios.change_permission', raise_exception=True)
+@permission_required('auth.change_group', raise_exception=True)
 def liberar_permissoes(request):
     if request.method == 'GET':
-        # Verifica se a requisição é AJAX
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             usuario_grupo_id = request.GET.get('id')
             tipo = request.GET.get('tipo')
@@ -304,13 +304,10 @@ def liberar_permissoes(request):
             if usuario_grupo_id and tipo:
                 ordered_permissions = []
                 if app_label:
-                    # Obtém todos os modelos do aplicativo especificado
                     app_models = apps.get_app_config(app_label).get_models()
 
                     for model in app_models:
                         content_type = ContentType.objects.get_for_model(model)
-
-                        # Coleta permissões personalizadas na ordem definida nos modelos
                         custom_permissions = getattr(model._meta, 'permissions', [])
                         for codename, name in custom_permissions:
                             try:
@@ -319,7 +316,6 @@ def liberar_permissoes(request):
                             except Permission.DoesNotExist:
                                 pass
 
-                        # Verifica se as permissões padrão estão habilitadas
                         default_permissions = getattr(model._meta, 'default_permissions', ('add', 'change', 'delete', 'view'))
                         for perm in default_permissions:
                             codename = f"{perm}_{model._meta.model_name}"
@@ -329,7 +325,6 @@ def liberar_permissoes(request):
                             except Permission.DoesNotExist:
                                 pass
 
-                # Constrói a lista de permissões ordenadas
                 permissoes_list = [
                     {'id': p.id, 'name': p.name, 'app_label': p.content_type.app_label}
                     for p in ordered_permissions
@@ -339,8 +334,8 @@ def liberar_permissoes(request):
                     usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
                     permissoes_selecionadas = usuario.user_permissions.filter(content_type__app_label=app_label).values_list('id', flat=True)
                 elif tipo == 'Grupo':
-                    grupo = get_object_or_404(Grupo, id=usuario_grupo_id)
-                    permissoes_selecionadas = grupo.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True)
+                    group = get_object_or_404(Group, id=usuario_grupo_id)
+                    permissoes_selecionadas = group.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True)
                 else:
                     permissoes_selecionadas = []
 
@@ -349,7 +344,6 @@ def liberar_permissoes(request):
                     'permissoes_selecionadas': list(permissoes_selecionadas)
                 })
             else:
-                # Retorna a lista de apps únicos e ordenados
                 apps_permissions = Permission.objects.order_by('content_type__app_label').values_list('content_type__app_label', flat=True).distinct()
                 apps_list = list(apps_permissions)
                 return JsonResponse({
@@ -357,7 +351,6 @@ def liberar_permissoes(request):
                 })
 
         else:
-            # Requisição normal: renderiza o template
             return render(request, 'usuarios/liberar_permissoes.html')
 
     elif request.method == 'POST':
@@ -380,13 +373,13 @@ def liberar_permissoes(request):
                 usuario.user_permissions.remove(*Permission.objects.filter(id__in=permissoes_a_remover))
                 messages.success(request, f"Permissões atualizadas para o usuário {usuario.username}")
             elif tipo == 'Grupo':
-                grupo = get_object_or_404(Grupo, id=usuario_grupo_id)
-                permissoes_atual = set(grupo.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
+                group = get_object_or_404(Group, id=usuario_grupo_id)
+                permissoes_atual = set(group.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
                 permissoes_a_adicionar = permissoes_submetidas - permissoes_atual
                 permissoes_a_remover = permissoes_atual - permissoes_submetidas
-                grupo.permissions.add(*Permission.objects.filter(id__in=permissoes_a_adicionar))
-                grupo.permissions.remove(*Permission.objects.filter(id__in=permissoes_a_remover))
-                messages.success(request, f"Permissões atualizadas para o grupo {grupo.nome}")
+                group.permissions.add(*Permission.objects.filter(id__in=permissoes_a_adicionar))
+                group.permissions.remove(*Permission.objects.filter(id__in=permissoes_a_remover))
+                messages.success(request, f"Permissões atualizadas para o grupo {group.name}")
             else:
                 messages.error(request, "Tipo inválido.")
                 return redirect('usuarios:liberar_permissoes')
@@ -397,6 +390,7 @@ def liberar_permissoes(request):
             return redirect('usuarios:liberar_permissoes')
     else:
         return HttpResponseNotAllowed(['GET', 'POST'])
+
     
   
 def get_permission_display_name(permission):

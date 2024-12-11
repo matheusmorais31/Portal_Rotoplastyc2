@@ -133,11 +133,11 @@
                 
                 <ul class="submenu">
                     
-                    <li><a href="{% url 'bi:my_bi_report_list' %}">Lista de BI</a></li>
+                    <li><a href="{% url 'bi:my_bi_report_list' %}">Lista de BI's</a></li>
                     
 
                     {% if perms.bi.view_bi %}
-                    <li><a href="{% url 'bi:bi_report_list' %}">Lista geral de BI'S</a></li>
+                    <li><a href="{% url 'bi:bi_report_list' %}">Lista geral de BI's</a></li>
                     {% endif %}
 
                 </ul>

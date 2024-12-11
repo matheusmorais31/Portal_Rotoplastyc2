@@ -1,5 +1,3 @@
-<!-- usuarios/templates/usuarios/lista_grupos.html -->
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -22,12 +20,13 @@
         <!-- Ícone de adicionar grupo -->
         <a href="{% url 'usuarios:cadastrar_grupo' %}" class="icon-link">
             <img src="{% static 'images/add-group-icon.png' %}" alt="Adicionar Grupo" class="icon">
+            <span class="tooltip-text">Adicionar</span>
         </a>
     </div>
 
     <div class="group-list" id="groupList">
         <!-- Para cada grupo, exibir um container individual -->
-        {% for grupo in grupos %}
+        {% for group in groups %}
         <div class="group-container">
             <div class="group-item">
                 <div class="group-status">
@@ -35,22 +34,23 @@
                 </div>
                 <div class="group-info">
                     <div class="group-grid">
-                        <div><strong>ID:</strong> {{ grupo.id }}</div>
-                        <div><strong>Nome:</strong> {{ grupo.nome }}
-                        </div>
+                        <div><strong>ID:</strong> {{ group.id }}</div>
+                        <div><strong>Nome:</strong> {{ group.name }}</div>
                         <div><strong>Participantes:</strong>
-                            {% for participante in grupo.participantes.all %}
+                            {% for participante in group.user_set.all %}
                                 {{ participante.username }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </div>
                     </div>
                 </div>
                 <div class="group-actions">
-                    <a href="{% url 'usuarios:editar_grupo' grupo.id %}" class="edit-icon">
+                    <a href="{% url 'usuarios:editar_grupo' group.id %}" class="edit-icon">
                         <img src="{% static 'images/edit-icon.png' %}" alt="Editar">
+                        <span class="tooltip-text">Editar Grupo</span>
                     </a>
-                    <a href="{% url 'usuarios:excluir_grupo' grupo.id %}" class="edit-icon">
+                    <a href="{% url 'usuarios:excluir_grupo' group.id %}" class="delete-icon">
                         <img src="{% static 'images/delete-icon.png' %}" alt="Excluir">
+                        <span class="tooltip-text">Excluir Grupo</span>
                     </a>
                 </div>
             </div>

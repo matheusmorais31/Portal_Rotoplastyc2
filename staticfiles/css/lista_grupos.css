@@ -4,11 +4,11 @@ body {
     background-color: #38393F;
     color: #fff;
     margin: 0;
-    padding: 5;
+    padding: 0;
 }
 
 .container {
-    padding: 5px;
+    padding: 20px;
 }
 
 h1 {
@@ -31,21 +31,35 @@ h1 {
     background-color: #ddd;
     color: #333;
     font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#searchInput:focus {
+    background-color: #fff;
+    outline: none;
+    border-color: #2EC2D6;
 }
 
 /* Estilos da Lista de Grupos */
 .group-container {
-    background-color: #21202000;
-    margin-bottom: 10px;
-    padding: 5px;
-    border-top: 2px solid #bdbcbc;
-    border-bottom: 2px solid #bdbcbc;
+    margin-top: 2%;
+    background-color: rgba(33, 32, 32, 0.265); /* Leve transparência para destaque */
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #bdbcbc;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.group-container:hover {
+    background-color: rgba(33, 32, 32, 0.2);
+    transform: scale(1.01);
 }
 
 .group-item {
     display: grid;
     grid-template-columns: 50px 2.5fr 1fr; /* Primeira coluna com tamanho fixo para o ícone */
-    align-items: center;
+    align-items: center; /* Alinha verticalmente os itens no centro */
     gap: 10px; /* Espaçamento menor entre as colunas */
 }
 
@@ -58,6 +72,7 @@ h1 {
 .group-status img {
     width: 50px; /* Tamanho fixo para o ícone */
     height: 50px;
+    object-fit: cover; /* Garante que a imagem não distorça */
 }
 
 .group-info {
@@ -67,38 +82,38 @@ h1 {
 
 .group-info div {
     margin: 5px 0;
+    word-wrap: break-word;
 }
 
+/* Barra de Ações dos Grupos */
 .group-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center; /* Alinha os ícones verticalmente no centro */
     gap: 10px; /* Espaçamento entre os ícones de ação */
 }
 
-.edit-icon img {
+.group-actions a {
+    position: relative; /* Necessário para posicionar o tooltip corretamente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-icon img,
+.delete-icon img {
     width: 20px;
     height: 20px;
     cursor: pointer;
     transition: transform 0.2s;
 }
 
-.edit-icon img:hover {
+.edit-icon img:hover,
+.delete-icon img:hover {
     transform: scale(1.5);
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-    .group-item {
-        grid-template-columns: 1fr; /* Ajuste para uma coluna em telas menores */
-    }
-
-    .group-actions {
-        margin-left: 0;
-        margin-top: 10px;
-    }
-}
-
-/* Barra de ícones para adicionar e atualizar grupos */
+/* Barra de Ícones para Adicionar Grupos */
 .icons-bar {
     display: flex;
     align-items: center;
@@ -106,6 +121,7 @@ h1 {
 }
 
 .icon-link {
+    position: relative;
     margin-right: 10px;
 }
 
@@ -120,7 +136,68 @@ h1 {
     transform: scale(1.5);
 }
 
-/* Remover âncoras vazias */
+/* Tooltip Personalizado para os Ícones */
+.tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Posição acima do ícone */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* Posição abaixo do tooltip */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.icon-link:hover .tooltip-text,
+.edit-icon:hover .tooltip-text,
+.delete-icon:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Mensagem de "Nenhum Grupo Encontrado" */
+.no-groups {
+    text-align: center;
+    margin-top: 20px;
+    color: #ccc;
+    font-size: 18px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .group-item {
+        grid-template-columns: 1fr; /* Ajuste para uma coluna em telas menores */
+    }
+
+    .group-actions {
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .icons-bar {
+        justify-content: center;
+    }
+}
+
+/* Estilo de Botões e Links Escondidos */
 a:empty {
     display: none;
 }
