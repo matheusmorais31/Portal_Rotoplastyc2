@@ -2,8 +2,9 @@
 
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %} <!-- Carrega as tags de tradução -->
 
-{% block title %}Editar Relatório BI{% endblock %}
+{% block title %}{% trans "Editar Relatório BI" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/editar_bi.css' %}">
@@ -11,37 +12,41 @@
 
 {% block content %}
 <div class="container">
-    <h2>Editar Relatório BI: {{ bi_report.title }}</h2>
-    <form method="post" id="form-bi">
+    <h2>{% trans "Editar Relatório BI" %}: {{ bi_report.title }}</h2>
+
+    <!-- Formulário para editar relatório BI -->
+    <form id="form-bi" method="POST" action="{% url 'bi:edit_bi_report' bi_report.pk %}">
         {% csrf_token %}
         
         <!-- Campo Título -->
         <div class="form-group">
-            <label for="id_title">Título:</label>
+            <label for="id_title">{% trans "Título:" %}</label>
             {{ form.title }}
         </div>
         
         <!-- Campo Código Embed -->
         <div class="form-group">
-            <label for="id_embed_code">Código Embed:</label>
+            <label for="id_embed_code">{% trans "Código Embed:" %}</label>
             {{ form.embed_code }}
         </div>
         
-        <!-- Campo Adicionar Participante -->
+        <!-- Campo Adicionar Participante (Usuário ou Grupo) -->
         <div class="form-group">
-            <label for="buscar_participante">Adicionar Participante:</label>
-            <input type="text" id="buscar_participante" placeholder="Buscar participante..." autocomplete="off">
-            <ul id="resultados_pesquisa" class="resultados-pesquisa"></ul>
+            <label for="buscar_participante_grupo">{% trans "Buscar Usuário ou Grupo:" %}</label>
+            <input type="text" id="buscar_participante_grupo" class="form-control" placeholder="{% trans "Digite o nome do usuário ou grupo..." %}" autocomplete="off">
+            <ul id="resultados_pesquisa" class="list-group resultados-pesquisa"></ul>
         </div>
 
-        <!-- Participantes Adicionados -->
+        <!-- Participantes Adicionados (Usuários e Grupos) -->
         <div class="form-group">
-            <table>
+            <h4>{% trans "Participantes Permitidos:" %}</h4>
+            <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Usuário</th>
-                        <th>Ações</th>
+                        <th>{% trans "ID" %}</th>
+                        <th>{% trans "Nome" %}</th>
+                        <th>{% trans "Tipo" %}</th>
+                        <th>{% trans "Ações" %}</th>
                     </tr>
                 </thead>
                 <tbody id="participantes_adicionados">
@@ -49,49 +54,75 @@
                         <tr>
                             <td>{{ user.id }}</td>
                             <td>{{ user.get_full_name }}</td>
+                            <td>{% trans "Usuário" %}</td>
                             <td>
-                                <button type="button" class="remover-participante" data-id="{{ user.id }}">Remover</button>
+                                <button type="button" class="btn btn-danger remover-participante" data-id="{{ user.id }}" data-tipo="usuario">
+                                    {% trans "Remover" %}
+                                </button>
                             </td>
                         </tr>
                         <input type="hidden" name="allowed_users" value="{{ user.id }}">
+                    {% endfor %}
+                    
+                    {% for group in bi_report.allowed_groups.all %}
+                        <tr>
+                            <td>{{ group.id }}</td>
+                            <td>{{ group.name }}</td>
+                            <td>{% trans "Grupo" %}</td>
+                            <td>
+                                <button type="button" class="btn btn-danger remover-participante" data-id="{{ group.id }}" data-tipo="grupo">
+                                    {% trans "Remover" %}
+                                </button>
+                            </td>
+                        </tr>
+                        <input type="hidden" name="allowed_groups" value="{{ group.id }}">
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <!-- Botões do Formulário -->
+        <!-- Botões de ação -->
         <div class="form-buttons">
-            <button type="button" class="btn btn-cancel" onclick="window.location.href='{% url 'bi:bi_report_list' %}'">Cancelar</button>
-            <button type="submit" class="btn btn-submit">Atualizar</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'bi:bi_report_list' %}'">
+                {% trans "Cancelar" %}
+            </button>
+            <button type="submit" class="btn btn-primary">
+                {% trans "Atualizar" %}
+            </button>
         </div>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Inclua o jQuery localmente -->
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 
-<!-- Seu código JavaScript -->
 <script>
     $(document).ready(function () {
         console.log("JavaScript carregado.");
-        
-        // Array para rastrear participantes adicionados
-        var participantesAdicionados = [];
-        
-        // Inicializar participantesAdicionados com os IDs já adicionados
+
+        // Arrays para rastrear participantes adicionados
+        var participantesAdicionadosUsuario = [];
+        var participantesAdicionadosGrupo = [];
+
+        // Inicializar participantesAdicionadosUsuario e participantesAdicionadosGrupo com os IDs já adicionados
         $('#participantes_adicionados tr').each(function() {
-            var usuarioId = $(this).find('td:first').text();
-            participantesAdicionados.push(usuarioId);
+            var tipo = $(this).find('td:nth-child(3)').text().toLowerCase();
+            var id = $(this).find('td:first').text();
+            if(tipo === 'usuário' || tipo === 'usuario'){
+                participantesAdicionadosUsuario.push(id);
+            } else if(tipo === 'grupo'){
+                participantesAdicionadosGrupo.push(id);
+            }
         });
 
         // URL para buscar participantes via AJAX
-        var buscarParticipantesUrl = "{% url 'usuarios:buscar_participantes' %}";
+        var buscarParticipantesUrl = "{% url 'usuarios:sugestoes' %}";
+
         console.log("URL para buscar participantes:", buscarParticipantesUrl);
 
         // Função para buscar participantes conforme o usuário digita
-        $('#buscar_participante').on('input', function () {
+        $('#buscar_participante_grupo').on('input', function () {
             var query = $(this).val();
             console.log("Usuário digitou:", query);
 
@@ -105,13 +136,17 @@
                         console.log("Dados recebidos:", data);
                         $('#resultados_pesquisa').empty();
 
-                        data.forEach(function (usuario) {
-                            if (participantesAdicionados.indexOf(usuario.id.toString()) === -1) {
-                                var li = $('<li></li>')
-                                            .text(usuario.username)
-                                            .attr('data-id', usuario.id);
-                                $('#resultados_pesquisa').append(li);
-                            }
+                        data.forEach(function (item) {
+                            // item.tipo pode ser 'usuario' ou 'grupo'
+                            var tipo = item.tipo;
+                            var nome = item.nome;
+                            var tipoLabel = tipo === 'usuario' ? "{% trans 'Usuário' %}" : "{% trans 'Grupo' %}";
+                            var li = $('<li></li>')
+                                        .addClass('list-group-item list-group-item-action')
+                                        .text(nome + ' (' + tipoLabel + ')')
+                                        .attr('data-id', item.id)
+                                        .attr('data-tipo', tipo);
+                            $('#resultados_pesquisa').append(li);
                         });
                     },
                     error: function(xhr, status, error) {
@@ -123,46 +158,97 @@
             }
         });
 
-        // Adicionar participante ao clicar no nome da lista de resultados
+        // Seleciona um participante da lista
         $('#resultados_pesquisa').on('click', 'li', function () {
-            var usuarioId = $(this).attr('data-id');
-            var usuarioNome = $(this).text();
+            var id = $(this).attr('data-id');
+            var tipo = $(this).attr('data-tipo');
+            var nome = $(this).text().split(' (')[0];
 
-            // Verificar se o participante já foi adicionado
-            if (participantesAdicionados.indexOf(usuarioId.toString()) === -1) {
-                participantesAdicionados.push(usuarioId.toString());
+            console.log("Participante selecionado:", nome, "Tipo:", tipo, "ID:", id);
 
-                // Criar nova linha na tabela de participantes adicionados
-                var row = '<tr>' +
-                            '<td>' + usuarioId + '</td>' +
-                            '<td>' + usuarioNome + '</td>' +
-                            '<td><button type="button" class="remover-participante" data-id="' + usuarioId + '">Remover</button></td>' +
-                          '</tr>';
+            if (tipo === 'usuario') {
+                // Verificar se já foi adicionado
+                if (participantesAdicionadosUsuario.indexOf(id.toString()) === -1) {
+                    participantesAdicionadosUsuario.push(id.toString());
 
-                $('#participantes_adicionados').append(row);
+                    // Adicionar à tabela de participantes permitidos
+                    var row = $('<tr></tr>');
+                    row.append('<td>' + id + '</td>');
+                    row.append('<td>' + nome + '</td>');
+                    row.append('<td>{% trans "Usuário" %}</td>');
+                    var removerBtn = $('<button></button>')
+                                        .attr('type', 'button')
+                                        .addClass('btn btn-danger remover-participante')
+                                        .attr('data-id', id)
+                                        .attr('data-tipo', 'usuario')
+                                        .text("{% trans 'Remover' %}");
+                    row.append($('<td></td>').append(removerBtn));
+                    $('#participantes_adicionados').append(row);
 
-                // Adicionar um campo oculto para enviar o ID do participante no formulário
-                $('#form-bi').append('<input type="hidden" name="allowed_users" value="' + usuarioId + '">');
+                    // Adicionar campo oculto
+                    var hiddenInput = $('<input>')
+                                        .attr('type', 'hidden')
+                                        .attr('name', 'allowed_users')
+                                        .attr('value', id);
+                    $('#form-bi').append(hiddenInput);
+                }
+            } else if (tipo === 'grupo') {
+                // Verificar se já foi adicionado
+                if (participantesAdicionadosGrupo.indexOf(id.toString()) === -1) {
+                    participantesAdicionadosGrupo.push(id.toString());
+
+                    // Adicionar à tabela de participantes permitidos
+                    var row = $('<tr></tr>');
+                    row.append('<td>' + id + '</td>');
+                    row.append('<td>' + nome + '</td>');
+                    row.append('<td>{% trans "Grupo" %}</td>');
+                    var removerBtn = $('<button></button>')
+                                        .attr('type', 'button')
+                                        .addClass('btn btn-danger remover-participante')
+                                        .attr('data-id', id)
+                                        .attr('data-tipo', 'grupo')
+                                        .text("{% trans 'Remover' %}");
+                    row.append($('<td></td>').append(removerBtn));
+                    $('#participantes_adicionados').append(row);
+
+                    // Adicionar campo oculto
+                    var hiddenInput = $('<input>')
+                                        .attr('type', 'hidden')
+                                        .attr('name', 'allowed_groups')
+                                        .attr('value', id);
+                    $('#form-bi').append(hiddenInput);
+                }
             }
 
-            // Limpar os resultados de busca após adicionar o participante
+            // Limpar os resultados de pesquisa e o campo de busca
             $('#resultados_pesquisa').empty();
-            $('#buscar_participante').val('');
+            $('#buscar_participante_grupo').val('');
         });
 
-        // Remover participante ao clicar no botão "Remover"
+        // Remover participante (Usuário ou Grupo)
         $('#participantes_adicionados').on('click', '.remover-participante', function () {
-            var row = $(this).closest('tr');
-            var usuarioId = $(this).attr('data-id');
+            var id = $(this).attr('data-id');
+            var tipo = $(this).attr('data-tipo');
 
-            // Remover da tabela e do array de IDs
-            row.remove();
-            participantesAdicionados = participantesAdicionados.filter(function(id) {
-                return id !== usuarioId.toString();
-            });
+            console.log("Remover participante:", id, "Tipo:", tipo);
 
-            // Remover o campo oculto correspondente
-            $('input[name="allowed_users"][value="' + usuarioId + '"]').remove();
+            // Remover da tabela
+            $(this).closest('tr').remove();
+
+            // Remover do array correspondente
+            if(tipo === 'usuario'){
+                participantesAdicionadosUsuario = participantesAdicionadosUsuario.filter(function(item) {
+                    return item !== id.toString();
+                });
+                // Remover o campo oculto correspondente
+                $('input[name="allowed_users"][value="' + id + '"]').remove();
+            } else if(tipo === 'grupo'){
+                participantesAdicionadosGrupo = participantesAdicionadosGrupo.filter(function(item) {
+                    return item !== id.toString();
+                });
+                // Remover o campo oculto correspondente
+                $('input[name="allowed_groups"][value="' + id + '"]').remove();
+            }
         });
     });
 </script>

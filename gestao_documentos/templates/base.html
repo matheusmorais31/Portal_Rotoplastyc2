@@ -59,7 +59,7 @@
             <div class="profile-dropdown">
                 <div class="profile-icon" onclick="toggleProfileMenu()">
                     <img src="{% if user.profile_photo and user.profile_photo.url != '' %}{{ user.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Usuário" class="profile-photo">
-                    <span class="dropdown">&#9660;</span>
+                    
                 </div>
                 <div id="profile-menu" class="profile-menu">
                     <div class="profile-info">

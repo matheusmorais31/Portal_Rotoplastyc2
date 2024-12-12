@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'dirtyfields',
     'django_celery_beat',
     'bi',
+    
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -236,3 +237,13 @@ POWERBI_CLIENT_SECRET = config('POWERBI_CLIENT_SECRET')
 POWERBI_TENANT_ID = config('POWERBI_TENANT_ID')
 POWERBI_GROUP_ID = config('POWERBI_GROUP_ID')
 
+# settings.py
+
+
+
+LDAP_SERVER = config('LDAP_SERVER')
+LDAP_USER = config('LDAP_USER')
+LDAP_PASSWORD = config('LDAP_PASSWORD')
+LDAP_SEARCH_BASE = config('LDAP_SEARCH_BASE')
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'

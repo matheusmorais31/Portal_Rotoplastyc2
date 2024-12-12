@@ -14,10 +14,10 @@ html, body {
 
 /* Estilizar o contêiner do formulário */
 .container {
-    background-color: rgba(17, 16, 16, 0.44); /* Fundo semi-transparente */
+    background-color: rgba(17, 16, 16, 44%); /* Fundo semi-transparente */
     padding: 20px 20px; /* Diminui o padding para reduzir a altura */
     border-radius: 80px;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
     width: 600px; /* Diminuir a largura do contêiner */
     max-width: 70%; /* Limita a largura máxima a 70% da tela */
     text-align: center; /* Centraliza o texto no contêiner */
@@ -72,38 +72,28 @@ button {
     border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
+    transition: background-color 0.3s;
     display: inline-block;
 }
 
-/* Botão de Submit (Atualizar) */
 button[type="submit"] {
     background-color: #2EC2D6;
     color: white;
 }
 
-button[type="submit"]:hover {
-    background-color: #1EB2C1;
-    box-shadow: 0px 0px 15px #2EC2D6;
-}
-
-button[type="submit"]:hover {
-    color: #ffffff;
-}
-
 /* Botão Cancelar */
-button.btn-cancel {
-    background-color: #ff0000; /* Cor de fundo vermelha */
-    color: #ffffff; /* Texto branco */
+button[type="button"] {
+    background-color: #2EC2D6;
+    color: white;
 }
 
-button.btn-cancel:hover {
-    background-color: #cc0000; /* Tom mais escuro ao passar o mouse */
-    box-shadow: 0px 0px 15px #ff0000; /* Sombra vermelha */
+button[type="submit"]:hover, button[type="button"]:hover {
+    background-color: #1EB2C1;
+    box-shadow:  0px 0px 15px #2EC2D6;
 }
 
-button.btn-cancel:hover {
-    color: #ffffff; /* Garantir que o texto permaneça branco no hover */
+button:hover {
+    color: #ffffff;
 }
 
 /* Ajuste para que os botões fiquem centralizados */
@@ -123,6 +113,10 @@ button.btn-cancel:hover {
     margin-bottom: 20px;
     font-size: 14px;
     text-align: left;
+}
+h4 {
+    color:#ffffff
+    
 }
 
 /* Estilo para a tabela */
@@ -188,7 +182,7 @@ tr:hover {
         font-size: 16px;
     }
 
-    input[type="text"], input[type="password"], input[type="email"], input[type="search"] {
+    input[type="text"], input[type="password"], input[type="email"] {
         font-size: 14px;
     }
 
@@ -201,16 +195,5 @@ tr:hover {
         font-size: 14px;
         padding: 10px 12px;
     }
-}
-
-/* Botão Remover Participante */
-button.remover-participante {
-    background-color: #2EC2D6; /* Mesma cor do botão "Atualizar" */
-    color: white; /* Texto branco */
-}
-
-button.remover-participante:hover {
-    background-color: #1EB2C1; /* Tom mais escuro ao passar o mouse */
-    box-shadow: 0px 0px 15px #2EC2D6; /* Sombra azul */
-    color: #ffffff; /* Garantir que o texto permaneça branco no hover */
+    
 }
