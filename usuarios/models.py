@@ -25,4 +25,7 @@ class Usuario(AbstractUser):
             ('can_delete_group', 'Excluir Grupo'),
         ]
 
+    def save(self, *args, **kwargs):
+        self.is_active = self.ativo
+        super().save(*args, **kwargs)
 

@@ -22,6 +22,8 @@ from django.contrib.auth.models import Group
 
 
 
+
+
 # Configuração do logger
 logger = logging.getLogger(__name__)
 
@@ -37,22 +39,38 @@ def login_usuario(request):
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
-                # Não é mais necessário sincronizar permissões aqui
-                login(request, user)
-                logger.info(f"Usuário {username} autenticado com sucesso.")
-                return redirect('home')
+                if user.is_active:
+                    login(request, user)
+                    logger.info(f"Usuário {username} autenticado com sucesso.")
+                    return redirect('home')
+                else:
+                    logger.warning(f"Usuário {username} está inativo e tentou realizar login.")
+                    form.add_error(None, 'Sua conta está inativa. Por favor, entre em contato com o administrador.')
             else:
-                logger.warning(f"Falha na autenticação do usuário {username}.")
-                messages.error(request, 'Usuário ou senha incorretos.')
+                logger.warning(f"Falha na autenticação do usuário {username}. Tentando verificar status da conta.")
+                # Verificação adicional para conta inativa
+                User = get_user_model()
+                try:
+                    user = User.objects.get(username=username)
+                    logger.debug(f"Usuário encontrado: {username} | Ativo: {user.is_active}")
+                    if not user.is_active:
+                        form.add_error(None, 'Sua conta está inativa. Por favor, entre em contato com o administrador.')
+                        logger.info(f"Mensagem de conta inativa adicionada para o usuário: {username}")
+                    else:
+                        form.add_error(None, 'Usuário ou senha incorretos.')
+                        logger.info(f"Mensagem genérica de erro adicionada para o usuário: {username}")
+                except User.DoesNotExist:
+                    form.add_error(None, 'Usuário ou senha incorretos.')
+                    logger.debug(f"Usuário {username} não existe no sistema.")
+
         else:
             logger.error(f"Erros no formulário de login: {form.errors}")
-            messages.error(request, 'Formulário inválido. Verifique os campos.')
+            # Os erros do formulário já estão sendo exibidos no template
 
         return render(request, 'usuarios/login.html', {'form': form})
     else:
         form = AuthenticationForm(request)
         return render(request, 'usuarios/login.html', {'form': form})
-
     
 # Função para registrar usuários locais no banco de dados
 @login_required
@@ -64,7 +82,6 @@ def registrar_usuario(request):
             user = form.save(commit=False)
             user.is_ad_user = False  # Usuário local
             user.save()
-            login(request, user)  # Faz login automaticamente após o cadastro
             return redirect('usuarios:lista_usuarios')  # Redireciona com o namespace correto
     else:
         form = UsuarioCadastroForm()
@@ -275,25 +292,36 @@ def buscar_participantes(request):
     return JsonResponse(resultados, safe=False)
 
 # Função para sugerir usuários ou grupos conforme a busca
+
 @login_required
 def sugestoes(request):
     query = request.GET.get('q', '')
     sugestoes = []
 
     if query:
-        usuarios = Usuario.objects.filter(username__icontains=query)[:5]
+        # Filtra apenas usuários ativos (considerando 'ativo=True')
+        usuarios = Usuario.objects.filter(username__icontains=query, ativo=True)[:5]
         for usuario in usuarios:
-            sugestoes.append({'id': usuario.id, 'nome': usuario.username, 'tipo': 'Usuário'})
+            sugestoes.append({
+                'id': usuario.id,
+                'nome': usuario.username,
+                'tipo': 'usuario'  # Alterado para minúsculo
+            })
 
-        grupos = Group.objects.filter(name__icontains=query)[:5]  # Correção aqui
+        # Busca por grupos sem filtro de atividade
+        grupos = Group.objects.filter(name__icontains=query)[:5]
         for grupo in grupos:
-            sugestoes.append({'id': grupo.id, 'nome': grupo.name, 'tipo': 'Grupo'})  # E aqui
+            sugestoes.append({
+                'id': grupo.id,
+                'nome': grupo.name,
+                'tipo': 'grupo'  # Alterado para minúsculo
+            })
 
     return JsonResponse(sugestoes, safe=False)
 
 # Função para liberar permissões
 @login_required
-@permission_required('auth.change_group', raise_exception=True)
+@permission_required('usuarios.change_permission', raise_exception=True)
 def liberar_permissoes(request):
     if request.method == 'GET':
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
