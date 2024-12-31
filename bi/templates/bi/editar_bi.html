@@ -1,8 +1,6 @@
-<!-- bi/templates/bi/editar_bi.html -->
-
 {% extends 'base.html' %}
 {% load static %}
-{% load i18n %} <!-- Carrega as tags de tradução -->
+{% load i18n %}
 
 {% block title %}{% trans "Editar Relatório BI" %}{% endblock %}
 
@@ -14,20 +12,27 @@
 <div class="container">
     <h2>{% trans "Editar Relatório BI" %}: {{ bi_report.title }}</h2>
 
-    <!-- Formulário para editar relatório BI -->
     <form id="form-bi" method="POST" action="{% url 'bi:edit_bi_report' bi_report.pk %}">
         {% csrf_token %}
         
-        <!-- Campo Título -->
+        <!-- Campo Título (Desabilitado) -->
         <div class="form-group">
             <label for="id_title">{% trans "Título:" %}</label>
             {{ form.title }}
         </div>
         
-        <!-- Campo Código Embed -->
+        <!-- Campo Código Embed (Desabilitado) -->
         <div class="form-group">
             <label for="id_embed_code">{% trans "Código Embed:" %}</label>
             {{ form.embed_code }}
+        </div>
+        
+        <!-- Checkbox para permitir todos os usuários -->
+        <div class="form-group">
+            <div class="form-check">
+                {{ form.all_users }}
+                <label class="form-check-label" for="id_all_users">{% trans "Permitir a todos os usuários" %}</label>
+            </div>
         </div>
         
         <!-- Campo Adicionar Participante (Usuário ou Grupo) -->
@@ -38,7 +43,7 @@
         </div>
 
         <!-- Participantes Adicionados (Usuários e Grupos) -->
-        <div class="form-group">
+        <div class="form-group" id="participantes_section">
             <h4>{% trans "Participantes Permitidos:" %}</h4>
             <table class="table">
                 <thead>
@@ -250,6 +255,27 @@
                 $('input[name="allowed_groups"][value="' + id + '"]').remove();
             }
         });
+
+        // Função para alternar a seleção de participantes com base no checkbox 'all_users'
+        function toggleParticipantSelection() {
+            if ($('#id_all_users').is(':checked')) {
+                // Desabilitar seleção de participantes
+                $('#buscar_participante_grupo').prop('disabled', true);
+                $('#resultados_pesquisa').empty();
+                $('#participantes_adicionados').empty();
+                // Remover campos ocultos de participantes
+                $('input[name="allowed_users"], input[name="allowed_groups"]').remove();
+            } else {
+                // Habilitar seleção de participantes
+                $('#buscar_participante_grupo').prop('disabled', false);
+            }
+        }
+
+        // Inicializar estado na carga da página
+        toggleParticipantSelection();
+
+        // Vincular a função de toggle ao evento de mudança do checkbox
+        $('#id_all_users').on('change', toggleParticipantSelection);
     });
 </script>
 {% endblock %}

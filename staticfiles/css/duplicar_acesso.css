@@ -1,0 +1,188 @@
+/* usuarios/static/css/duplicar_acesso.css */
+
+/* Estilos Gerais */
+.container {
+    margin-top: 5%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+    background-color: #000000; /* Fundo preto */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* Para posicionar elementos absolutos dentro */
+}
+
+h2 {
+    margin-top: 0;
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 28px;
+}
+
+/* Estilização das Mensagens */
+#mensagens .alert {
+    margin-top: 20px;
+    border-radius: 4px;
+    padding: 15px;
+    font-size: 16px;
+}
+
+/* Estilização do Formulário */
+.form-group {
+    margin-bottom: 20px;
+    position: relative; /* Para posicionamento absoluto das listas de resultados */
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #ffffff;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: #d3d3d3;
+    color: #000000;
+}
+
+.form-control:focus {
+    border-color: #2EC2D6;
+    outline: none;
+    box-shadow: 0 0 5px rgba(46, 194, 214, 0.5);
+}
+
+/* Lista de resultados de pesquisa */
+.resultados-pesquisa {
+    list-style-type: none;
+    padding-left: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #000000;
+    margin-top: 5px;
+    border-radius: 4px;
+    background-color: #383737;
+    z-index: 1000;
+    position: absolute;
+    width: 100%;
+}
+
+.resultados-pesquisa li {
+    padding: 10px;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+.resultados-pesquisa li:hover {
+    background-color: #535353;
+}
+
+/* Botões */
+.form-buttons {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #28a5b0;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    box-shadow: 0px 0px 10px #6c757d;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    box-shadow: 0px 0px 10px #dc3545;
+}
+
+/* Botão Voltar */
+.back-button {
+    background-color: #2EC2D6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.back-button:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+        margin-top: 10%;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+    }
+
+    .form-control {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .form-buttons {
+        text-align: center;
+    }
+
+    .back-button {
+        position: static;
+        display: block;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+}

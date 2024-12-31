@@ -1,0 +1,125 @@
+<!-- usuarios/templates/usuarios/duplicar_acesso.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Duplicar Acesso{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/duplicar_acesso.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Botão para Voltar -->
+    <a href="javascript:history.back()" class="back-button">{% trans "Voltar" %}</a>
+
+    <h2>Duplicar Acesso</h2>
+
+    <!-- Exibição de mensagens -->
+    <div id="mensagens">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Formulário para duplicar acessos -->
+    <form method="post" action="{% url 'usuarios:duplicar_acesso' %}">
+        {% csrf_token %}
+        
+        <!-- Campo de busca para Origem -->
+        <div class="form-group position-relative">
+            <label for="buscar_origem">{% trans "Buscar Origem (Usuário ou Grupo):" %}</label>
+            <input type="text" id="buscar_origem" class="form-control" placeholder="{% trans "Digite o nome do usuário ou grupo..." %}" autocomplete="off">
+            <ul id="resultados_busca_origem" class="list-group resultados-pesquisa"></ul>
+        </div>
+        <input type="hidden" name="origem_id" id="origem_id">
+        <input type="hidden" name="origem_nome" id="origem_nome"> <!-- Opcional -->
+
+        <!-- Campo de busca para Destino -->
+        <div class="form-group position-relative">
+            <label for="buscar_destino">{% trans "Buscar Destino (Usuário ou Grupo):" %}</label>
+            <input type="text" id="buscar_destino" class="form-control" placeholder="{% trans "Digite o nome do usuário ou grupo..." %}" autocomplete="off">
+            <ul id="resultados_busca_destino" class="list-group resultados-pesquisa"></ul>
+        </div>
+        <input type="hidden" name="destino_id" id="destino_id">
+        <input type="hidden" name="destino_nome" id="destino_nome"> <!-- Opcional -->
+
+        <button type="submit" class="btn btn-primary mt-3">{% trans "Duplicar Permissões" %}</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        // Função para buscar entidades (usuários ou grupos)
+        function buscarEntidade(query, resultadoId) {
+            if (query.length > 0) {
+                $.ajax({
+                    url: "{% url 'usuarios:buscar_entidade' %}",
+                    data: { 'q': query },
+                    success: function (data) {
+                        $(resultadoId).empty();
+                        data.forEach(function (item) {
+                            var li = $('<li></li>')
+                                .text(item.nome + ' (' + (item.tipo === 'usuario' ? '{% trans "Usuário" %}' : '{% trans "Grupo" %}') + ')')
+                                .addClass('list-group-item list-group-item-action')
+                                .attr('data-id', item.id)
+                                .attr('data-tipo', item.tipo);
+                            $(resultadoId).append(li);
+                        });
+                    },
+                    error: function (xhr) {
+                        console.error("Erro ao buscar entidades:", xhr.responseText);
+                    }
+                });
+            } else {
+                $(resultadoId).empty();
+            }
+        }
+
+        // Função para selecionar uma entidade da lista de resultados
+        function selecionarEntidade(resultadoId, hiddenInputId, visibleInputId) {
+            $(resultadoId).on('click', 'li', function () {
+                var nomeCompleto = $(this).text();
+                var nome = nomeCompleto.substring(0, nomeCompleto.lastIndexOf(' ('));
+                var id = $(this).attr('data-id');
+                var tipo = $(this).attr('data-tipo');
+
+                // Atualiza o campo oculto com o ID
+                $(hiddenInputId).val(id);
+
+                // Atualiza o campo de busca com o nome selecionado
+                $(visibleInputId).val(nome);
+
+                // Limpa os resultados e o campo de busca
+                $(resultadoId).empty();
+            });
+        }
+
+        // Eventos de input para Origem
+        $('#buscar_origem').on('input', function () {
+            var query = $(this).val();
+            buscarEntidade(query, '#resultados_busca_origem');
+        });
+
+        // Eventos de input para Destino
+        $('#buscar_destino').on('input', function () {
+            var query = $(this).val();
+            buscarEntidade(query, '#resultados_busca_destino');
+        });
+
+        // Eventos de seleção para Origem
+        selecionarEntidade('#resultados_busca_origem', '#origem_id', '#buscar_origem');
+
+        // Eventos de seleção para Destino
+        selecionarEntidade('#resultados_busca_destino', '#destino_id', '#buscar_destino');
+    });
+</script>
+{% endblock %}

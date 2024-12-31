@@ -42,13 +42,24 @@ def edit_bi_report(request, pk):
         form = BIReportEditForm(request.POST, instance=bi_report)
         if form.is_valid():
             bi_report = form.save(commit=False)
+            
+            # Garantir que 'title' e 'embed_code' não sejam alterados
+            bi_report.title = bi_report.title  # Mantém o valor original
+            bi_report.embed_code = bi_report.embed_code  # Mantém o valor original
+            
+            bi_report.all_users = form.cleaned_data.get('all_users')
             bi_report.save()
             
-            # Atualiza allowed_users e allowed_groups manualmente
-            allowed_users_ids = request.POST.getlist('allowed_users')
-            allowed_groups_ids = request.POST.getlist('allowed_groups')
-            bi_report.allowed_users.set(allowed_users_ids)
-            bi_report.allowed_groups.set(allowed_groups_ids)
+            if not bi_report.all_users:
+                # Atualiza allowed_users e allowed_groups manualmente
+                allowed_users_ids = request.POST.getlist('allowed_users')
+                allowed_groups_ids = request.POST.getlist('allowed_groups')
+                bi_report.allowed_users.set(allowed_users_ids)
+                bi_report.allowed_groups.set(allowed_groups_ids)
+            else:
+                # Se todos os usuários forem permitidos, limpa allowed_users e allowed_groups
+                bi_report.allowed_users.clear()
+                bi_report.allowed_groups.clear()
             
             logger.info(f"Relatório '{bi_report.title}' editado com sucesso por {request.user.username}.")
             messages.success(request, "Relatório BI atualizado com sucesso.")
@@ -71,16 +82,18 @@ def bi_report_list(request):
     bi_reports = BIReport.objects.all().prefetch_related('allowed_users')  # Otimização opcional
     return render(request, 'bi/listar_bi.html', {'bi_reports': bi_reports})
 
+#Função para listar somente BI's que o usuário tem acesso
 @login_required
 def my_bi_report_list(request):
     """
     View para listar os relatórios BI que o usuário atual pode acessar,
-    seja diretamente ou através de um grupo.
+    seja diretamente, através de um grupo ou todos os usuários.
     """
     user = request.user
     user_groups = user.groups.all()
     
     bi_reports = BIReport.objects.filter(
+        Q(all_users=True) |
         Q(allowed_users=user) |
         Q(allowed_groups__in=user_groups)
     ).distinct().prefetch_related('allowed_users', 'allowed_groups')
@@ -98,13 +111,11 @@ def bi_report_detail(request, pk):
     allowed_users = bi_report.allowed_users.all()
     allowed_groups = bi_report.allowed_groups.all()
     
-    # Verificar se o usuário está diretamente na lista de usuários permitidos
+    has_all_users = bi_report.all_users
     has_user_permission = allowed_users.filter(id=user.id).exists()
-    
-    # Verificar se o usuário pertence a algum grupo permitido
     has_group_permission = Group.objects.filter(id__in=allowed_groups.values_list('id', flat=True), user=user).exists()
     
-    if has_user_permission or has_group_permission:
+    if has_all_users or has_user_permission or has_group_permission:
         # Registrando acesso do usuário a este relatório
         BIAccess.objects.create(bi_report=bi_report, user=user)
         
@@ -148,7 +159,8 @@ def bi_report_detail(request, pk):
     else:
         logger.warning(f"Usuário {user.username} tentou acessar um relatório sem permissão.")
         messages.error(request, "Você não tem permissão para acessar este relatório.")
-        return render(request, 'bi/acesso_negado.html')
+        return render(request, 'bi/403.html')
+
 
     
 @require_POST
@@ -189,8 +201,9 @@ def get_embed_params(request):
 @permission_required('bi.view_access', raise_exception=True)
 def visualizar_acessos_bi(request, pk):
     bi_report = get_object_or_404(BIReport, pk=pk)
-    acessos = BIAccess.objects.filter(bi_report=bi_report).select_related('user')
-    return render(request, 'bi/visualizar_acessos.html', {'bi_report': bi_report, 'acessos': acessos})
+    acessos = BIAccess.objects.filter(bi_report=bi_report).select_related('user').order_by('-accessed_at')
+    total_acessos = acessos.count()
+    return render(request, 'bi/visualizar_acessos.html', {'bi_report': bi_report, 'acessos': acessos, 'total_acessos': total_acessos})
 
 
 @login_required

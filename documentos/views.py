@@ -15,6 +15,8 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.core.exceptions import ValidationError
+from django.utils.text import slugify
+
 
 
 
@@ -101,47 +103,84 @@ def criar_documento(request):
 @login_required
 @permission_required('documentos.can_analyze', raise_exception=True)
 def listar_documentos_para_analise(request):
-    documentos = Documento.objects.filter(status='aguardando_analise')  # **Filtra documentos aguardando análise**
+    documentos = Documento.objects.filter(status='aguardando_analise')
     if request.method == 'POST':
         documento_id = request.POST.get('documento_id')
         action = request.POST.get('action')
         documento = get_object_or_404(Documento, id=documento_id, status='aguardando_analise')
-        
+
         if action == 'upload':
+            # Upload do documento revisado original
             form = AnaliseDocumentoForm(request.POST, request.FILES, instance=documento)
             if form.is_valid():
                 try:
                     with transaction.atomic():
                         documento = form.save(commit=False)
-                        documento.status = 'analise_concluida'  # **Alteração de status após análise**
-                        documento.analista = request.user  # **Registro do analista**
+                        # Depois do upload do documento revisado, marcamos como analise_concluida
+                        # para seguir o fluxo normal
+                        documento.status = 'analise_concluida'
+                        documento.analista = request.user
                         documento.save()
                         messages.success(request, f'Documento "{documento.nome}" analisado com sucesso!')
-                        # As notificações serão enviadas pelo sinal após salvar o documento
                         return redirect('documentos:listar_documentos_para_analise')
                 except Exception as e:
                     logger.error(f"Erro ao analisar documento {documento_id}: {e}", exc_info=True)
                     messages.error(request, 'Erro ao fazer upload do documento revisado.')
             else:
                 messages.error(request, 'Erro ao fazer upload do documento revisado.')
-        
+
+        elif action == 'upload_pdf_spreadsheet':
+            # Upload manual do PDF para um documento do tipo planilha
+            pdf_file = request.FILES.get('pdf_upload')
+            logger.debug(f"Upload de PDF manual para planilha, documento ID: {documento_id}")
+            if pdf_file:
+                ext = os.path.splitext(pdf_file.name)[1].lower()
+                if ext == '.pdf':
+                    try:
+                        with transaction.atomic():
+                            # Deleta o PDF antigo se houver
+                            if documento.documento_pdf and documento.documento_pdf.storage.exists(documento.documento_pdf.name):
+                                documento.documento_pdf.delete(save=False)
+
+                            safe_nome = slugify(documento.nome)
+                            desired_pdf_filename = f"{safe_nome}_v{documento.revisao}.pdf"
+
+                            # Salva o novo PDF no mesmo diretório definido em pdf_upload_path
+                            documento.documento_pdf.save(desired_pdf_filename, pdf_file)
+
+                            documento.document_type = 'pdf_spreadsheet'
+                            # Mantém o documento no status 'aguardando_analise' após o upload do PDF
+                            documento.status = 'aguardando_analise'
+                            documento.analista = request.user
+                            documento.save()
+                            messages.success(request, f'PDF da planilha "{documento.nome}" enviado com sucesso! O documento continua aguardando análise.')
+                            return redirect('documentos:listar_documentos_para_analise')
+                    except Exception as e:
+                        logger.error(f"Erro ao fazer upload do PDF da planilha {documento_id}: {e}", exc_info=True)
+                        messages.error(request, 'Erro ao fazer upload do PDF da planilha.')
+                else:
+                    messages.error(request, 'Formato inválido. Envie um arquivo PDF.')
+            else:
+                messages.error(request, 'Nenhum arquivo PDF enviado.')
+
         elif action == 'reprovar':
             motivo = request.POST.get('motivo_reprovacao')
             if motivo:
                 try:
                     with transaction.atomic():
-                        documento.status = 'reprovado'  # **Alteração de status para reprovado**
-                        documento.motivo_reprovacao = motivo  # **Registro do motivo da reprovação**
-                        documento.analista = request.user  # **Registro do analista**
+                        documento.status = 'reprovado'
+                        documento.motivo_reprovacao = motivo
+                        documento.analista = request.user
                         documento.save()
                         messages.success(request, f'Documento "{documento.nome}" reprovado com sucesso!')
-                        # As notificações serão enviadas pelo sinal após salvar o documento
                 except Exception as e:
                     logger.error(f"Erro ao reprovar documento {documento_id}: {e}", exc_info=True)
                     messages.error(request, 'Erro ao reprovar o documento.')
             else:
                 messages.error(request, 'É necessário informar o motivo da reprovação.')
+
     return render(request, 'documentos/listar_documentos_para_analise.html', {'documentos': documentos, 'titulo': 'Documentos para Análise'})
+
 
 @login_required
 def substituir_documento(request, documento_id):
@@ -412,8 +451,9 @@ def baixar_pdf(request, id):
 @permission_required('documentos.view_acessos_documento', raise_exception=True)
 def visualizar_acessos_documento(request, id):
     documento = get_object_or_404(Documento, id=id)
-    acessos = Acesso.objects.filter(documento=documento)
-    return render(request, 'documentos/visualizar_acessos.html', {'documento': documento, 'acessos': acessos})
+    acessos = Acesso.objects.filter(documento=documento).select_related('usuario').order_by('-data_acesso')
+    total_acessos = acessos.count()
+    return render(request, 'documentos/visualizar_acessos.html', {'documento': documento, 'acessos': acessos, 'total_acessos': total_acessos})
 
 #Função lista de reprovações
 @login_required

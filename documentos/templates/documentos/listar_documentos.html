@@ -51,7 +51,7 @@
                         <div class="document-item">
                             <!-- Ícone do Documento -->
                             <div class="document-status">
-                                {% if documento.document_type == 'pdf' %}
+                                {% if documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet' %}
                                     <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
                                 {% elif documento.document_type == 'spreadsheet' %}
                                     <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
@@ -117,7 +117,7 @@
                                         <img src="{% static 'images/download-icon.png' %}" alt="Baixar Editável" class="download-icon">
                                         <span class="tooltip-text">Baixar</span>
                                     </a>
-                                {% elif documento.document_type == 'pdf' %}
+                                {% elif documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet'%}
                                     <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
                                         <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
                                         <span class="tooltip-text">Visualizar</span>

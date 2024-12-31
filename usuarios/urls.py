@@ -19,9 +19,10 @@ urlpatterns = [
     path('grupos/buscar_participantes/', views.buscar_participantes, name='buscar_participantes'),
     path('grupos/editar_grupo/<int:grupo_id>/', views.editar_grupo, name='editar_grupo'),
     path('grupos/excluir_grupo/<int:grupo_id>/', views.excluir_grupo, name='excluir_grupo'),
-    path('liberar_permissoes/', views.liberar_permissoes, name='liberar_permissoes'),
-    
+    path('liberar_permissoes/', views.liberar_permissoes, name='liberar_permissoes'),   
     path('sugestoes/', views.sugestoes, name='sugestoes'),
     path('perfil/', ProfileView.as_view(), name='perfil_usuario'),
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
+    path('duplicar_acesso/', views.duplicar_acesso, name='duplicar_acesso'),
+    path('buscar_entidade/', views.buscar_entidade, name='buscar_entidade'),
 ]

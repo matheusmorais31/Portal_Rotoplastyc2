@@ -19,10 +19,12 @@ class Usuario(AbstractUser):
             ('can_import_user', 'Importar Usuário'),
             ('can_edit_user', 'Editar Usuário'),    
             ('change_permission', 'Liberar Permissões'),
+            ('can_duplica_acesso', 'Duplicar Acesso'),
             ('can_view_list_group', 'Lista de Grupos'),
             ('can_add_group', 'Cadastra Grupo'),
             ('can_edit_group', 'Editar Grupo'),
             ('can_delete_group', 'Excluir Grupo'),
+            
         ]
 
     def save(self, *args, **kwargs):

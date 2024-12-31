@@ -15,7 +15,8 @@
     <div class="document-container">
         <div class="document-item">
             <div class="document-status">
-                {% if documento_atual.document_type == 'pdf' %}
+                {% if documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet' %}
+
                     <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
                 {% elif documento_atual.document_type == 'spreadsheet' %}
                     <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
@@ -69,7 +70,8 @@
                         Supondo que cada revisão (`revisao`) está relacionada a um documento (`documento_atual`).
                         Se a revisão estiver relacionada a um documento diferente, ajuste a referência conforme necessário.
                     {% endcomment %}
-                    {% if documento_atual.document_type == 'pdf' %}
+                    {% if documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet' %}
+
                         <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
                     {% elif documento_atual.document_type == 'spreadsheet' %}
                         <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
