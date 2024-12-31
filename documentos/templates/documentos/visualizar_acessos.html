@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -11,7 +10,11 @@
         <a href="javascript:history.back()" class="back-button">Voltar</a>
         <h1 class="mt-4">Acessos ao Documento: {{ documento.nome }}</h1>
         
-        
+        <!-- Totalizador de Acessos -->
+        <div class="total-acessos mt-3">
+            <strong>Total de Acessos:</strong> {{ total_acessos }}
+        </div>
+
         <table class="table table-striped mt-3">
             <thead>
                 <tr>
@@ -23,7 +26,7 @@
                 {% for acesso in acessos %}
                 <tr>
                     <td>{{ acesso.usuario.username }}</td>
-                    <td>{{ acesso.data_acesso }}</td>
+                    <td>{{ acesso.data_acesso|date:"d/m/Y H:i" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -34,7 +37,3 @@
         </table>
     </div>
 {% endblock %}
-
-
-
-

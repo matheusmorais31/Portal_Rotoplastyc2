@@ -9,6 +9,11 @@
     <div class="container">
         <a href="javascript:history.back()" class="back-button">Voltar</a>
         <h1 class="mt-4">Acessos ao Relatório: {{ bi_report.title }}</h1>
+        
+        <!-- Totalizador de Acessos -->
+        <div class="total-acessos mt-3">
+            <strong>Total de Acessos:</strong> {{ total_acessos }}
+        </div>
 
         <table class="table table-striped mt-3">
             <thead>

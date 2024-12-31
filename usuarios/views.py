@@ -18,6 +18,11 @@ from django.contrib.contenttypes.models import ContentType
 from .forms import UsuarioCadastroForm, UsuarioChangeForm, GrupoForm, UsuarioPermissaoForm, ProfileForm
 from .models import Usuario
 from django.contrib.auth.models import Group
+from .forms import DuplicarAcessoForm
+from django.contrib import admin
+from django.contrib.sessions.models import Session
+from django.utils.timezone import localtime
+from django.utils import timezone
 
 
 
@@ -327,57 +332,67 @@ def liberar_permissoes(request):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             usuario_grupo_id = request.GET.get('id')
             tipo = request.GET.get('tipo')
-            app_label = request.GET.get('app_label')  # Parâmetro para filtrar por app
+            app_label = request.GET.get('app_label')
 
-            if usuario_grupo_id and tipo:
+            # Caso para retornar a lista de apps se nenhum ID ou tipo for fornecido
+            if not usuario_grupo_id and not tipo and not app_label:
+                apps_permissions = Permission.objects.order_by('content_type__app_label').values_list('content_type__app_label', flat=True).distinct()
+                apps_list = list(apps_permissions)
+                return JsonResponse({'apps': apps_list})
+
+            if usuario_grupo_id and tipo and app_label:
                 ordered_permissions = []
-                if app_label:
-                    app_models = apps.get_app_config(app_label).get_models()
+                try:
+                    app_config = apps.get_app_config(app_label)
+                    app_models = app_config.get_models()
+                except LookupError:
+                    logger.error(f"App label inválido: {app_label}")
+                    return JsonResponse({'error': 'Aplicação inválida.'}, status=400)
 
-                    for model in app_models:
-                        content_type = ContentType.objects.get_for_model(model)
-                        custom_permissions = getattr(model._meta, 'permissions', [])
-                        for codename, name in custom_permissions:
-                            try:
-                                permission = Permission.objects.get(content_type=content_type, codename=codename)
-                                ordered_permissions.append(permission)
-                            except Permission.DoesNotExist:
-                                pass
+                # Carregar permissões do app
+                for model in app_models:
+                    content_type = ContentType.objects.get_for_model(model)
+                    # Permissões customizadas
+                    custom_permissions = getattr(model._meta, 'permissions', [])
+                    for codename, name in custom_permissions:
+                        try:
+                            permission = Permission.objects.get(content_type=content_type, codename=codename)
+                            ordered_permissions.append(permission)
+                        except Permission.DoesNotExist:
+                            pass
 
-                        default_permissions = getattr(model._meta, 'default_permissions', ('add', 'change', 'delete', 'view'))
-                        for perm in default_permissions:
-                            codename = f"{perm}_{model._meta.model_name}"
-                            try:
-                                permission = Permission.objects.get(content_type=content_type, codename=codename)
-                                ordered_permissions.append(permission)
-                            except Permission.DoesNotExist:
-                                pass
+                    # Permissões padrão
+                    default_permissions = getattr(model._meta, 'default_permissions', ('add', 'change', 'delete', 'view'))
+                    for perm in default_permissions:
+                        codename = f"{perm}_{model._meta.model_name}"
+                        try:
+                            permission = Permission.objects.get(content_type=content_type, codename=codename)
+                            ordered_permissions.append(permission)
+                        except Permission.DoesNotExist:
+                            pass
 
                 permissoes_list = [
                     {'id': p.id, 'name': p.name, 'app_label': p.content_type.app_label}
                     for p in ordered_permissions
                 ]
 
-                if tipo == 'Usuário':
+                tipo_lower = tipo.lower()
+                if tipo_lower == 'usuario':
                     usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
-                    permissoes_selecionadas = usuario.user_permissions.filter(content_type__app_label=app_label).values_list('id', flat=True)
-                elif tipo == 'Grupo':
+                    permissoes_selecionadas = list(usuario.user_permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
+                elif tipo_lower == 'grupo':
                     group = get_object_or_404(Group, id=usuario_grupo_id)
-                    permissoes_selecionadas = group.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True)
+                    permissoes_selecionadas = list(group.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
                 else:
                     permissoes_selecionadas = []
 
                 return JsonResponse({
                     'permissoes': permissoes_list,
-                    'permissoes_selecionadas': list(permissoes_selecionadas)
-                })
-            else:
-                apps_permissions = Permission.objects.order_by('content_type__app_label').values_list('content_type__app_label', flat=True).distinct()
-                apps_list = list(apps_permissions)
-                return JsonResponse({
-                    'apps': apps_list
+                    'permissoes_selecionadas': permissoes_selecionadas
                 })
 
+            else:
+                return JsonResponse({'error': 'Parâmetros insuficientes.'}, status=400)
         else:
             return render(request, 'usuarios/liberar_permissoes.html')
 
@@ -385,41 +400,62 @@ def liberar_permissoes(request):
         usuario_grupo_id = request.POST.get('usuario_grupo_id')
         tipo = request.POST.get('tipo')
         permissoes_ids = request.POST.getlist('permissoes')
-        app_label = request.POST.get('app_label')  # Campo para identificar o app
+        app_label = request.POST.get('app_label')
 
         if usuario_grupo_id and tipo and app_label:
-            permissoes_submetidas = set(map(int, permissoes_ids))
+            try:
+                permissoes_submetidas = set(map(int, permissoes_ids))
+            except ValueError:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'IDs de permissões inválidos.'
+                }, status=400)
+
             permissoes_app = Permission.objects.filter(content_type__app_label=app_label)
             permissoes_app_ids = set(permissoes_app.values_list('id', flat=True))
 
-            if tipo == 'Usuário':
+            # Filtrar apenas as permissões válidas para o app
+            permissoes_submetidas = permissoes_submetidas & permissoes_app_ids
+
+            tipo_lower = tipo.lower()
+            if tipo_lower == 'usuario':
                 usuario = get_object_or_404(Usuario, id=usuario_grupo_id)
                 permissoes_atual = set(usuario.user_permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
                 permissoes_a_adicionar = permissoes_submetidas - permissoes_atual
                 permissoes_a_remover = permissoes_atual - permissoes_submetidas
                 usuario.user_permissions.add(*Permission.objects.filter(id__in=permissoes_a_adicionar))
                 usuario.user_permissions.remove(*Permission.objects.filter(id__in=permissoes_a_remover))
-                messages.success(request, f"Permissões atualizadas para o usuário {usuario.username}")
-            elif tipo == 'Grupo':
+
+                return JsonResponse({
+                    'success': True,
+                    'message': f"Permissões atualizadas para o usuário {usuario.username}."
+                })
+
+            elif tipo_lower == 'grupo':
                 group = get_object_or_404(Group, id=usuario_grupo_id)
                 permissoes_atual = set(group.permissions.filter(content_type__app_label=app_label).values_list('id', flat=True))
                 permissoes_a_adicionar = permissoes_submetidas - permissoes_atual
                 permissoes_a_remover = permissoes_atual - permissoes_submetidas
                 group.permissions.add(*Permission.objects.filter(id__in=permissoes_a_adicionar))
                 group.permissions.remove(*Permission.objects.filter(id__in=permissoes_a_remover))
-                messages.success(request, f"Permissões atualizadas para o grupo {group.name}")
-            else:
-                messages.error(request, "Tipo inválido.")
-                return redirect('usuarios:liberar_permissoes')
 
-            return redirect('usuarios:liberar_permissoes')
+                return JsonResponse({
+                    'success': True,
+                    'message': f"Permissões atualizadas para o grupo {group.name}."
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': "Tipo inválido."
+                }, status=400)
         else:
-            messages.error(request, "Por favor, selecione um usuário ou grupo, um aplicativo e as permissões.")
-            return redirect('usuarios:liberar_permissoes')
+            return JsonResponse({
+                'success': False,
+                'message': "Por favor, selecione um usuário ou grupo, um aplicativo e as permissões."
+            }, status=400)
+
     else:
         return HttpResponseNotAllowed(['GET', 'POST'])
-
-    
   
 def get_permission_display_name(permission):
     codename = permission.codename
@@ -475,3 +511,114 @@ def editar_perfil(request):
 # Função de erro 403 personalizada
 def error_403_view(request, exception):
     return render(request, 'usuarios/403.html', status=403)
+
+
+
+@login_required
+@permission_required('usuarios.can_duplica_acesso', raise_exception=True)
+def duplicar_acesso(request):
+    if request.method == 'POST':
+        form = DuplicarAcessoForm(request.POST)
+        if form.is_valid():
+            origem_id = form.cleaned_data['origem_id']
+            destino_id = form.cleaned_data['destino_id']
+            origem_nome = form.cleaned_data.get('origem_nome', 'Origem')
+            destino_nome = form.cleaned_data.get('destino_nome', 'Destino')
+            
+            logger.debug(f"Origem ID: {origem_id}, Destino ID: {destino_id}")
+
+            # Determinar se a origem é um usuário ou grupo
+            origem_entidade = None
+            origem_tipo = None
+            try:
+                origem_entidade = Usuario.objects.get(id=origem_id)
+                origem_tipo = 'usuario'
+                logger.debug(f"Origem é um Usuário: {origem_entidade.username}")
+            except Usuario.DoesNotExist:
+                try:
+                    origem_entidade = Group.objects.get(id=origem_id)
+                    origem_tipo = 'grupo'
+                    logger.debug(f"Origem é um Grupo: {origem_entidade.name}")
+                except Group.DoesNotExist:
+                    messages.error(request, "Origem inválida selecionada.")
+                    logger.error("Origem inválida: Nenhum usuário ou grupo encontrado com o ID fornecido.")
+                    return redirect('usuarios:duplicar_acesso')
+
+            # Determinar se o destino é um usuário ou grupo
+            destino_entidade = None
+            destino_tipo = None
+            try:
+                destino_entidade = Usuario.objects.get(id=destino_id)
+                destino_tipo = 'usuario'
+                logger.debug(f"Destino é um Usuário: {destino_entidade.username}")
+            except Usuario.DoesNotExist:
+                try:
+                    destino_entidade = Group.objects.get(id=destino_id)
+                    destino_tipo = 'grupo'
+                    logger.debug(f"Destino é um Grupo: {destino_entidade.name}")
+                except Group.DoesNotExist:
+                    messages.error(request, "Destino inválido selecionado.")
+                    logger.error("Destino inválido: Nenhum usuário ou grupo encontrado com o ID fornecido.")
+                    return redirect('usuarios:duplicar_acesso')
+
+            # Obter permissões da origem
+            origem_permissoes = set()
+            if origem_tipo == 'usuario':
+                # **Ajuste Aqui: Apenas permissões diretas do usuário**
+                origem_permissoes.update(origem_entidade.user_permissions.all())
+                logger.debug(f"Permissões da Origem (Usuário): {[perm.codename for perm in origem_permissoes]}")
+            elif origem_tipo == 'grupo':
+                origem_permissoes.update(origem_entidade.permissions.all())
+                logger.debug(f"Permissões da Origem (Grupo): {[perm.codename for perm in origem_permissoes]}")
+
+            # Aplicar permissões ao destino
+            if destino_tipo == 'usuario':
+                destino_entidade.user_permissions.set(origem_permissoes)
+                logger.debug(f"Permissões aplicadas ao usuário {destino_entidade.username}")
+                messages.success(request, f"Permissões duplicadas de {origem_entidade} para o usuário {destino_entidade} com sucesso.")
+            elif destino_tipo == 'grupo':
+                destino_entidade.permissions.set(origem_permissoes)
+                logger.debug(f"Permissões aplicadas ao grupo {destino_entidade.name}")
+                messages.success(request, f"Permissões duplicadas de {origem_entidade} para o grupo {destino_entidade} com sucesso.")
+
+            # Verificar se as permissões foram aplicadas corretamente
+            if destino_tipo == 'usuario':
+                atual_permissoes = destino_entidade.user_permissions.all()
+                logger.debug(f"Permissões atuais do usuário {destino_entidade.username}: {[perm.codename for perm in atual_permissoes]}")
+            elif destino_tipo == 'grupo':
+                atual_permissoes = destino_entidade.permissions.all()
+                logger.debug(f"Permissões atuais do grupo {destino_entidade.name}: {[perm.codename for perm in atual_permissoes]}")
+
+            return redirect('usuarios:duplicar_acesso')
+        else:
+            logger.error(f"Formulário inválido: {form.errors}")
+            messages.error(request, "Erro ao processar o formulário. Verifique os dados inseridos.")
+            return redirect('usuarios:duplicar_acesso')
+    else:
+        form = DuplicarAcessoForm()
+    return render(request, 'usuarios/duplicar_acesso.html', {'form': form})
+
+@login_required
+@permission_required('usuarios.can_duplica_acesso', raise_exception=True)
+def buscar_entidade(request):
+    query = request.GET.get('q', '')
+    resultados = []
+    if query:
+        usuarios = Usuario.objects.filter(username__icontains=query, ativo=True).values('id', 'username')
+        grupos = Group.objects.filter(name__icontains=query).values('id', 'name')
+        for user in usuarios:
+            resultados.append({
+                'id': user['id'],
+                'nome': user['username'],
+                'tipo': 'usuario'
+            })
+        for group in grupos:
+            resultados.append({
+                'id': group['id'],
+                'nome': group['name'],
+                'tipo': 'grupo'
+            })
+    return JsonResponse(resultados, safe=False)
+
+
+

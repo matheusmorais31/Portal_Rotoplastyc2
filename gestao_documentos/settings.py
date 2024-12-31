@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'usuarios.session_timeout_middleware.SessionIdleTimeoutMiddleware',
 ]
 
 ROOT_URLCONF = 'gestao_documentos.urls'
@@ -247,3 +248,12 @@ LDAP_PASSWORD = config('LDAP_PASSWORD')
 LDAP_SEARCH_BASE = config('LDAP_SEARCH_BASE')
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+#Tempo de sessão
+SESSION_COOKIE_AGE = 3600
+SESSION_IDLE_TIMEOUT = 3600
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+#Gravar sessão
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+

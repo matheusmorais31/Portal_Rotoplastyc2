@@ -40,7 +40,7 @@
                             <div class="document-status">
                                 {% if documento.document_type == 'pdf' %}
                                     <img src="{% static 'images/doc_icon.png' %}" alt="PDF" class="status-icon">
-                                {% elif documento.document_type == 'spreadsheet' %}
+                                {% elif documento.document_type == 'spreadsheet' or documento.document_type == 'pdf_spreadsheet' %}
                                     <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
                                 {% else %}
                                     <img src="{% static 'images/default-icon.png' %}" alt="Documento" class="status-icon">

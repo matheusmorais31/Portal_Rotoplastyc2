@@ -12,25 +12,35 @@
 <div class="container">
     <h2>Editar Grupo: {{ group.name }}</h2>
 
+    <!-- Exibição de mensagens de feedback -->
+    {% if messages %}
+        <div>
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <form id="form-grupo" method="POST" action="{% url 'usuarios:editar_grupo' group.id %}">
         {% csrf_token %}
         
         <!-- Nome do Grupo -->
         <div class="form-group">
             <label for="nome_grupo">Nome do Grupo:</label>
-            <input type="text" id="nome_grupo" name="nome_grupo" value="{{ group.name }}" required>
+            <input type="text" id="nome_grupo" name="nome_grupo" value="{{ group.name }}" required class="form-control">
         </div>
 
         <!-- Buscar Participante -->
         <div class="form-group">
             <label for="buscar_participante">Adicionar Participante:</label>
-            <input type="text" id="buscar_participante" placeholder="Buscar participante..." autocomplete="off">
-            <ul id="resultados_pesquisa" class="resultados-pesquisa"></ul>
+            <input type="text" id="buscar_participante" placeholder="Buscar participante..." autocomplete="off" class="form-control">
+            <ul id="resultados_pesquisa" class="list-group resultados-pesquisa"></ul>
         </div>
 
         <!-- Participantes Adicionados -->
         <div class="form-group">
-            <table>
+            <label>Participantes:</label>
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -40,11 +50,13 @@
                 </thead>
                 <tbody id="participantes_adicionados">
                     {% for participante in group.user_set.all %}
-                        <tr>
+                        <tr data-id="{{ participante.id }}">
                             <td>{{ participante.id }}</td>
                             <td>{{ participante.username }}</td>
-                            <td><button type="button" class="remover-participante">Remover</button></td>
+                            <td><button type="button" class="btn btn-danger btn-sm remover-participante">Remover</button></td>
                         </tr>
+                        <!-- Campo oculto para participantes existentes -->
+                        <input type="hidden" name="participantes" value="{{ participante.id }}">
                     {% endfor %}
                 </tbody>
             </table>
@@ -53,9 +65,9 @@
         <!-- Botões do Formulário -->
         <div class="form-buttons">
             <!-- Botão Cancelar -->
-            <button type="button" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
             <!-- Botão Salvar -->
-            <button type="submit">Salvar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
         </div>
     </form>
 </div>
@@ -69,7 +81,7 @@
 <script>
     $(document).ready(function () {
         var participantesAdicionados = [];
-        
+
         // Adicionar os IDs dos participantes existentes
         {% for participante in group.user_set.all %}
             participantesAdicionados.push("{{ participante.id }}");
@@ -90,10 +102,21 @@
                     success: function (data) {
                         $('#resultados_pesquisa').empty();
 
+                        if (data.length === 0) {
+                            $('#resultados_pesquisa').append('<li class="list-group-item">Nenhum participante encontrado.</li>');
+                            return;
+                        }
+
                         data.forEach(function (usuario) {
-                            var li = $('<li></li>').text(usuario.username).attr('data-id', usuario.id);
+                            var li = $('<li></li>')
+                                .text(usuario.username)
+                                .attr('data-id', usuario.id)
+                                .addClass('list-group-item list-group-item-action');
                             $('#resultados_pesquisa').append(li);
                         });
+                    },
+                    error: function (xhr) {
+                        console.error("Erro ao buscar participantes:", xhr.responseText);
                     }
                 });
             } else {
@@ -111,16 +134,18 @@
                 participantesAdicionados.push(usuarioId);
 
                 // Criar nova linha na tabela de participantes adicionados
-                var row = '<tr>' +
+                var row = '<tr data-id="' + usuarioId + '">' +
                             '<td>' + usuarioId + '</td>' +
                             '<td>' + usuarioNome + '</td>' +
-                            '<td><button type="button" class="remover-participante">Remover</button></td>' +
+                            '<td><button type="button" class="btn btn-danger btn-sm remover-participante">Remover</button></td>' +
                           '</tr>';
 
                 $('#participantes_adicionados').append(row);
 
                 // Adicionar um campo oculto para enviar o ID do participante no formulário
                 $('#form-grupo').append('<input type="hidden" name="participantes" value="' + usuarioId + '">');
+            } else {
+                alert("Este participante já foi adicionado ao grupo.");
             }
 
             // Limpar os resultados de busca após adicionar o participante
@@ -131,7 +156,7 @@
         // Remover participante ao clicar no botão "Remover"
         $('#participantes_adicionados').on('click', '.remover-participante', function () {
             var row = $(this).closest('tr');
-            var usuarioId = row.find('td:first').text();
+            var usuarioId = row.attr('data-id');
 
             // Remover da tabela e do array de IDs
             row.remove();

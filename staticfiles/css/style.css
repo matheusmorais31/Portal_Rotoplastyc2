@@ -31,7 +31,8 @@ body {
 .top-bar-right {
     display: flex;
     align-items: center;
-    gap: 20px; /* Espaço entre as notificações e o perfil */
+    gap: 20px;
+    /* Espaço entre as notificações e o perfil */
 }
 
 /* Ícone do menu superior */
@@ -155,7 +156,7 @@ body {
 }
 
 .side-bar:not(.expanded) ul li:hover .submenu {
-    display: block; 
+    display: block;
 }
 
 /* Ajuste de margem para o conteúdo principal quando o menu lateral está expandido */
@@ -167,7 +168,7 @@ body {
     transition: margin-left 0.3s ease;
 }
 
-.side-bar.expanded ~ .main-content {
+.side-bar.expanded~.main-content {
     margin-left: 250px;
 }
 
@@ -181,8 +182,10 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    object-fit: cover; /* Garante que a imagem seja proporcional */
-    aspect-ratio: 1 / 1; /* Mantém a imagem sempre quadrada */
+    object-fit: cover;
+    /* Garante que a imagem seja proporcional */
+    aspect-ratio: 1 / 1;
+    /* Mantém a imagem sempre quadrada */
 }
 
 /* Ajustando a posição da foto dentro da barra superior */
@@ -319,14 +322,17 @@ body {
 
 /* Ajuste para a lista de notificações */
 .notification-dropdown ul li {
-    position: relative; /* Necessário para posicionar o botão de fechar */
-    padding: 15px 10px 10px 10px; /* Espaçamento interno */
+    position: relative;
+    /* Necessário para posicionar o botão de fechar */
+    padding: 15px 10px 10px 10px;
+    /* Espaçamento interno */
     background-color: #202020;
     border-radius: 10px;
     margin-bottom: 10px;
     border: 0.5px solid rgb(145, 142, 142);
     display: flex;
-    flex-direction: column; /* Alinha o conteúdo verticalmente */
+    flex-direction: column;
+    /* Alinha o conteúdo verticalmente */
     align-items: flex-start;
 }
 
@@ -335,7 +341,8 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centraliza os itens horizontalmente */
+    align-items: center;
+    /* Centraliza os itens horizontalmente */
 }
 
 /* Ajuste para centralizar o botão de fechar e garantir que não sobreponha o texto */
@@ -360,8 +367,10 @@ body {
     display: flex;
     align-items: center;
     flex-grow: 1;
-    width: 100%; /* Garante que o conteúdo ocupe a largura completa */
-    margin-bottom: 10px; /* Espaço entre a mensagem e o link "Ir para" */
+    width: 100%;
+    /* Garante que o conteúdo ocupe a largura completa */
+    margin-bottom: 10px;
+    /* Espaço entre a mensagem e o link "Ir para" */
 }
 
 .notification-message img {
@@ -389,7 +398,8 @@ body {
 .notification-controls {
     width: 100%;
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
+    justify-content: center;
+    /* Centraliza horizontalmente */
 }
 
 /* Estilos para o botão "Ir para" */
@@ -399,16 +409,19 @@ body {
     text-decoration: none;
     display: inline-block;
     margin-top: 1px;
-    padding: 5px 10px; /* Adicione padding para melhor aparência */
-   
-    border-radius: 5px; /* Opcional: borda arredondada */
+    padding: 5px 10px;
+    /* Adicione padding para melhor aparência */
+
+    border-radius: 5px;
+    /* Opcional: borda arredondada */
     transition: all 0.3s;
 }
 
 .notification-action:hover {
     text-shadow: 0px 0px 10px #2EC2D6;
-    transform: scale(1.05); /* Redução de escala para melhor efeito */
-   
+    transform: scale(1.05);
+    /* Redução de escala para melhor efeito */
+
 }
 
 /* Estilo para quando não há notificações */
@@ -417,4 +430,24 @@ body {
     padding: 20px;
     font-size: 16px;
     color: #cccccc;
+}
+
+@media (max-width: 650px) {
+    .notification-dropdown {
+        width: 400px;
+    }
+
+}
+
+@media (max-width: 550px) {
+    .notification-dropdown {
+        right: -180%;
+        z-index: 9999;
+    }
+}
+
+@media (max-width: 480px){
+    .notification-dropdown {
+        width: 250px;
+    }
 }

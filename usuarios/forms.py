@@ -137,4 +137,13 @@ class GrupoForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ['first_name', 'last_name', 'email', 'profile_photo']  
+        fields = ['first_name', 'last_name', 'email', 'profile_photo'] 
+
+
+class DuplicarAcessoForm(forms.Form):
+    origem_id = forms.IntegerField(widget=forms.HiddenInput())
+    destino_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    # Opcional: Se desejar exibir os nomes selecionados no formulário
+    origem_nome = forms.CharField(widget=forms.HiddenInput(), required=False)
+    destino_nome = forms.CharField(widget=forms.HiddenInput(), required=False)

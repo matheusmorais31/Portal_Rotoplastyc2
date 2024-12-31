@@ -32,12 +32,13 @@
                             {% endif %}
                         </div>
                         <div><strong>Status:</strong> {{ documento.get_status_display }}</div>
+                        <div><strong>Tipo:</strong> {{ documento.get_document_type_display }}</div>
                     </div>
                 </div>
 
                 <!-- Botões de ação -->
                 <div class="document-actions">
-                    <!-- Botão para visualizar o documento (PDF) -->
+                    <!-- Botão para visualizar o documento (PDF), se existir -->
                     {% if documento.documento_pdf %}
                     <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
                         <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
@@ -45,7 +46,7 @@
                     </a>
                     {% endif %}
 
-                    <!-- Botão para baixar o documento editável -->
+                    <!-- Botão para baixar o documento editável original -->
                     {% if documento.documento %}
                     <a href="{{ documento.documento.url }}" download class="action-icon" title="Baixar Documento Editável">
                         <img src="{% static 'images/download-icon.png' %}" alt="Baixar Documento Editável" class="download-icon">
@@ -53,15 +54,35 @@
                     </a>
                     {% endif %}
 
-                    <!-- Botão de upload do documento revisado -->
+                    <!-- Botão de upload do documento revisado original (.doc, .docx, .odt, .xls, .xlsx, .ods) -->
                     <form method="post" enctype="multipart/form-data" action="{% url 'documentos:upload_documento_revisado' documento.id %}" id="uploadForm-{{ documento.id }}" style="display:inline;">
                         {% csrf_token %}
                         <input type="file" name="documento" id="fileInput-{{ documento.id }}" style="display:none;" accept=".doc,.docx,.odt,.xls,.xlsx,.ods">
                         <button type="button" onclick="handleFileUpload({{ documento.id }})" class="action-icon" title="Upload Documento Revisado">
                             <img src="{% static 'images/upload-icon.png' %}" alt="Upload" class="upload-icon">
-                            <span class="tooltip-text">Upar Documento</span>
+                            <span class="tooltip-text">Upar Editável</span>
                         </button>
                     </form>
+
+                    <!-- Se for planilha (spreadsheet) e não tiver PDF, permitir upload manual de PDF -->
+                    {% if documento.document_type == 'spreadsheet' or documento.document_type == 'pdf_spreadsheet' %}
+                    <form method="post" enctype="multipart/form-data" action="{% url 'documentos:listar_documentos_para_analise' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="documento_id" value="{{ documento.id }}">
+                        <input type="hidden" name="action" value="upload_pdf_spreadsheet">
+
+                        <!-- Input de arquivo oculto -->
+                        <input type="file" name="pdf_upload" id="pdfInput-{{ documento.id }}" accept=".pdf" style="display:none;" 
+                            onchange="this.form.submit();">
+
+                        <!-- Botão que aciona o input de arquivo ao ser clicado -->
+                        <button type="button" class="action-icon" title="Upload PDF da Planilha" onclick="document.getElementById('pdfInput-{{ documento.id }}').click();">
+                            <img src="{% static 'images/upload_pdf.png' %}" alt="Upload PDF" class="upload-icon">
+                            <span class="tooltip-text">Upar PDF</span>
+                        </button>
+                    </form>
+                    {% endif %}
+                                        
 
                     <!-- Botão para aprovar o documento -->
                     <form method="post" action="{% url 'documentos:aprovar_documento' documento.id %}" style="display:inline;" onsubmit="disableApproveButton(this)">
@@ -96,7 +117,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeRejectionModal()">&times;</span>
             <h2>Motivo da Reprovação</h2>
-            <form id="rejectionForm" method="post" action="{% url 'documentos:listar_aprovacoes_pendentes' %}">
+            <form id="rejectionForm" method="post" action="{% url 'documentos:listar_documentos_para_analise' %}">
                 {% csrf_token %}
                 <textarea id="rejectionReason" name="motivo_reprovacao" rows="5" placeholder="Digite o motivo da reprovação" required></textarea>
                 <input type="hidden" id="rejectionDocumentoId" name="documento_id" value="">
@@ -121,19 +142,20 @@
         document.getElementById('rejectionForm').reset();
     }
 
-    // Função de upload com validação de formato
+    // Função de upload do documento revisado original
     function handleFileUpload(documentoId) {
         const fileInput = document.getElementById(`fileInput-${documentoId}`);
         fileInput.click();
 
         fileInput.onchange = function () {
             const file = fileInput.files[0];
-            const allowedExtensions = /(\.doc|\.docx|\.odt\.|\.xls|\.xlsx|\.ods)$/i;
+            // Aceita doc, docx, odt, xls, xlsx, ods
+            const allowedExtensions = /\.(doc|docx|odt|xls|xlsx|ods)$/i;
 
-            if (file && allowedExtensions.exec(file.name)) {
+            if (file && allowedExtensions.test(file.name)) {
                 document.getElementById(`uploadForm-${documentoId}`).submit();
             } else {
-                alert('Formato de arquivo inválido. Por favor, selecione um arquivo .doc, .docx, .odt, .xlsx, .xls ou .ods.');
+                alert('Formato de arquivo inválido. Por favor, selecione um arquivo .doc, .docx, .odt, .xls, .xlsx ou .ods.');
                 fileInput.value = ''; // Limpa o campo de arquivo
             }
         };

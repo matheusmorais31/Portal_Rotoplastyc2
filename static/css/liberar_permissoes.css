@@ -117,11 +117,21 @@ h2 {
 }
 
 .btn-secondary {
-    background-color: #2EC2D6;
+    background-color: #e80c0c;
     color: white;
 }
 
 .btn-secondary:hover {
+    background-color: #e80c0c;
+    box-shadow: 0px 0px 10px #e80c0c;
+}
+
+.btn-third {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+.btn-third:hover {
     background-color: #2EC2D6;
     box-shadow: 0px 0px 10px #2EC2D6;
 }
@@ -163,6 +173,10 @@ h2 {
 /* Estilos para o dropdown de seleção de aplicação */
 #selecionar_app {
     background-color: #d3d3d3;
+}
+
+#selecionar_app_container {
+    display: block !important;
 }
 
 #nome_usuario_grupo, #nome_app {
