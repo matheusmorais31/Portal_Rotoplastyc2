@@ -20,6 +20,7 @@ urlpatterns = [
     path('mural/', views.mural, name='mural'),
     path('manuais/', views.manuais, name='manuais'),
     path('andon/', views.andon, name='andon'),
+    path('assinatura/', views.assinatura, name='assinatura'),
 
     
     # Administração

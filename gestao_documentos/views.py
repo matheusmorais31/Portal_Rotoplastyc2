@@ -162,3 +162,6 @@ def manuais(request):
 
 def andon(request):
     return render(request, 'andon.html')
+
+def assinatura(request):
+    return render(request, 'assinatura.html')

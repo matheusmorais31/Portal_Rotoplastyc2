@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/assinatura.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container" id="containerScreen">
+    <div class="screen active" id="inputScreen">
+        <h1>Preencha as Informações</h1>
+        <form id="editForm">
+            <label for="nameInput">Nome</label>
+            <input type="text" id="nameInput" placeholder="Preencha com seu nome completo" maxlength="17">
+
+            <label for="sectorInput">Setor</label>
+            <select id="sectorInput">
+                <option value="SESMT">SESMT</option>
+                <option value="Almoxarifado">Almoxarifado</option>
+                <option value="Recursos Humanos">Recursos Humanos</option>
+                <option value="Recepção">Recepção</option>
+                <option value="Tecnologia da Informação">Tecnologia</option>
+                <option value="Financeiro">Financeiro</option>
+                <option value="Fiscal/ Contábil">Fiscal/ Contábil</option>
+                <option value="Custos">Custos</option>
+                <option value="Compras">Compras</option>
+                <option value="Comercial OEM">Comercial OEM</option>
+                <option value="Comercial RP">Comercial RP</option>
+                <option value="Comercial Administrativo">Comercial Administrativo</option>
+                <option value="Eng. Desenvolvimento OEM">Eng. Desenvolvimento OEM</option>
+                <option value="Eng. Desenvolvimento RP">Eng. Desenvolvimento RP</option>
+                <option value="Projetos">Projetos</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Eng. Métodos e Processos">Eng. Métodos e Processos</option>
+            </select>
+
+            <label for="phone2Input">Telefone Celular</label>
+            <input type="text" id="phone2Input" placeholder="55 (54) 99123-4567">
+
+            <div class="button-container">
+                <button type="button" id="generateSignature">Gerar Assinatura</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="screen" id="outputScreen">
+    <div class="signature" id="signature">
+        <img src="{% static 'images/imagem-assinatura.png' %}" alt="Imagem informações assinatura" class="roto-infos">
+        <div class="infos">
+            <h1 class="name">João Marcos Schaeffer da Silva</h1>
+            <h3 class="function">Assistente de T.I</h3>
+
+            <h4 class="phone">55 (54) 3331-6230</h4>
+            <h4 class="phone">55 (54) 99123-4567</h4>
+
+            <a class="link" href="#">www.rotoplastyc.com.br</a>
+
+            <img src="{% static 'images/redes-sociais.png' %}" alt="Redes sociais" class="social">
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button id="downloadButton">Baixar Imagem</button>
+        <button id="backButton">Voltar</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+    const inputScreen = document.getElementById("inputScreen");
+    const outputScreen = document.getElementById("outputScreen");
+    const containerScreen = document.getElementById("containerScreen");
+    const generateSignatureButton = document.getElementById("generateSignature");
+    const downloadButton = document.getElementById("downloadButton");
+    const backButton = document.getElementById("backButton");
+
+    // Geração da assinatura
+    generateSignatureButton.addEventListener("click", () => {
+        const nameInput = document.getElementById("nameInput");
+        const functionInput = document.getElementById("sectorInput");
+        const phone2Input = document.getElementById("phone2Input");
+
+        let isValid = true;
+
+        // Validação dos campos
+        if (nameInput.value.trim() === "") {
+            nameInput.classList.add("invalid");
+            isValid = false;
+        } else {
+            nameInput.classList.remove("invalid");
+        }
+
+        if (functionInput.value.trim() === "") {
+            functionInput.classList.add("invalid");
+            isValid = false;
+        } else {
+            functionInput.classList.remove("invalid");
+        }
+
+        // const phonePattern = /^\d{2} \(\d{2}\) \d{4,5}-\d{4}$/;
+        // if (!phonePattern.test(phone2Input.value.trim())) {
+        //     phone2Input.classList.add("invalid");
+        //     isValid = false;
+        // } else {
+        //     phone2Input.classList.remove("invalid");
+        // }
+
+        if (!isValid) {
+            alert("Por favor, preencha todos os campos corretamente.");
+            return;
+        }
+
+        // Atualiza os campos na tela de saída
+        document.querySelector(".name").textContent = nameInput.value;
+        document.querySelector(".function").textContent = functionInput.value;
+        document.querySelectorAll(".phone")[1].textContent = phone2Input.value;
+
+        // Troca para a tela de saída
+        containerScreen.classList.add("off");
+        inputScreen.classList.remove("active");
+        outputScreen.classList.add("active");
+    });
+
+    // Download da assinatura
+    downloadButton.addEventListener("click", () => {
+        const element = document.getElementById("signature");
+
+        html2canvas(element, { 
+            width: 345, 
+            height: 561, 
+            scale: 1,
+            useCORS: true 
+        }).then((canvas) => {
+            const link = document.createElement("a");
+            link.download = "assinatura.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    });
+
+    // Voltar para a tela de entrada
+    backButton.addEventListener("click", () => {
+        outputScreen.classList.remove("active");
+        inputScreen.classList.add("active");
+        containerScreen.classList.remove("off");
+    });
+</script>
+{% endblock %}
