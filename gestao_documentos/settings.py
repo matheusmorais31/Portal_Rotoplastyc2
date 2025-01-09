@@ -12,10 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = [
-    'portal.desenvolvimento.com.br',
-    '172.16.44.12',       
+    'portal.rotoplastyc.com.br',
+    '172.16.44.11',       
 ]
 
 # Application definition
