@@ -1,0 +1,12 @@
+[0;1;32m●[0m celery-beat.service - Celery Beat Service
+     Loaded: loaded (]8;;file://python/etc/systemd/system/celery-beat.service/etc/systemd/system/celery-beat.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Fri 2024-12-20 17:35:25 -03; 1min 31s ago
+   Main PID: 3618 (celery)
+      Tasks: 1 (limit: 4639)
+     Memory: 72.0M
+        CPU: 1.185s
+     CGroup: /system.slice/celery-beat.service
+             └─[0;38;5;245m3618 /opt/gestao_documentos/venv/bin/python3 /opt/gestao_documentos/venv/bin/celery -A gestao_documentos beat --loglevel=info[0m
+
+dez 20 17:35:25 python systemd[1]: Started celery-beat.service - Celery Beat Service.
+dez 20 17:35:26 python celery[3618]: [2024-12-20 17:35:26,577: INFO/MainProcess] beat: Starting...

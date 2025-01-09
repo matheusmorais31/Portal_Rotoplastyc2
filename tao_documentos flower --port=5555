@@ -1,0 +1,21 @@
+[0;1;32m●[0m celery.service - Celery Service
+     Loaded: loaded (]8;;file://python/etc/systemd/system/celery.service/etc/systemd/system/celery.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Fri 2024-12-13 10:33:58 -03; 2s ago
+   Main PID: 6712 (celery)
+      Tasks: 2 (limit: 4639)
+     Memory: 96.2M
+        CPU: 774ms
+     CGroup: /system.slice/celery.service
+             ├─[0;38;5;245m6712 /opt/gestao_documentos/venv/bin/python3 /opt/gestao_documentos/venv/bin/celery -A gestao_documentos worker --loglevel=info[0m
+             └─[0;38;5;245m6730 /opt/gestao_documentos/venv/bin/python3 /opt/gestao_documentos/venv/bin/celery -A gestao_documentos worker --loglevel=info[0m
+
+dez 13 10:33:59 python celery[6712]: you should set broker_connection_retry_on_startup to True.
+dez 13 10:33:59 python celery[6712]:   warnings.warn(
+dez 13 10:33:59 python celery[6712]: [2024-12-13 10:33:59,143: INFO/MainProcess] mingle: searching for neighbors
+dez 13 10:34:00 python celery[6712]: [2024-12-13 10:34:00,155: INFO/MainProcess] mingle: all alone
+dez 13 10:34:00 python celery[6712]: [2024-12-13 10:34:00,162: INFO/MainProcess] celery@python ready.
+dez 13 10:34:00 python celery[6712]: [2024-12-13 10:34:00,165: INFO/MainProcess] Task notificacoes.tasks.enviar_notificacao_email_task[533c7263-e33e-4cb2-8a6c-f34eedba5c64] received
+dez 13 10:34:00 python celery[6712]: [2024-12-13 10:34:00,166: INFO/MainProcess] Task notificacoes.tasks.enviar_notificacao_email_task[372eae2b-ca1b-428f-9216-64571bfd3fc2] received
+dez 13 10:34:00 python celery[6712]: [2024-12-13 10:34:00,173: INFO/MainProcess] Task notificacoes.tasks.enviar_notificacao_email_task[c057b265-e333-447d-8a2b-cba9959325bb] received
+dez 13 10:34:00 python celery[6712]: [2024-12-13 10:34:00,174: INFO/MainProcess] Task notificacoes.tasks.enviar_notificacao_email_task[d759a5bb-4ca3-4fac-88e9-77ff403f5ebd] received
+dez 13 10:34:00 python celery[6712]: [2024-12-13 10:34:00,175: INFO/MainProcess] Task notificacoes.tasks.enviar_notificacao_email_task[24e7b7a2-a2bd-48ca-aadc-980e961624b2] received

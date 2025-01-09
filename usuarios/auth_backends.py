@@ -1,22 +1,16 @@
-# usuarios/auth_backends.py
-
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
-from ldap3 import Server, Connection, ALL, NTLM
+from ldap3 import Server, Connection, ALL
 from django.conf import settings
 import logging
 
-
 User = get_user_model()
 logger = logging.getLogger(__name__)
-# usuarios/auth_backends.py
-
-# usuarios/auth_backends.py
 
 class ActiveDirectoryBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
-            logger.info(f"Iniciando autenticação para o usuário: {username}")
+            logger.info(f"Iniciando autenticação no AD para o usuário: {username}")
 
             # Configurações do AD
             server = Server(settings.LDAP_SERVER, get_info=ALL)
@@ -29,41 +23,51 @@ class ActiveDirectoryBackend(BaseBackend):
             
             # Realiza a busca do usuário no AD
             search_filter = f"(sAMAccountName={username})"
-            conn.search(settings.LDAP_SEARCH_BASE, search_filter, attributes=['sAMAccountName', 'userAccountControl'])
+            conn.search(settings.LDAP_SEARCH_BASE, search_filter, attributes=['sAMAccountName','userAccountControl'])
             
             if not conn.entries:
                 logger.warning(f"Usuário {username} não encontrado no AD.")
                 return None
-            
+
+            # Pega a primeira entrada
             entry = conn.entries[0]
             user_account_control = entry.userAccountControl.value
             is_disabled = bool(user_account_control & 0x2)  # ACCOUNTDISABLE = 0x2
-            
-            # Busca ou cria o usuário no Django
-            user, created = User.objects.get_or_create(username=username, defaults={
-                'is_ad_user': True,
-                'ativo': not is_disabled,
-                'is_active': not is_disabled
-            })
-            
-            if not created:
-                # Atualiza o status do usuário se necessário
-                if user.ativo != (not is_disabled):
-                    user.ativo = not is_disabled
-                    user.is_active = user.ativo
+
+            # Tenta recuperar o usuário local que seja AD
+            try:
+                user = User.objects.get(username=username, is_ad_user=True)
+            except User.DoesNotExist:
+                # Aqui está o pulo do gato:
+                # Se não existe localmente como is_ad_user=True,
+                # simplesmente não autentica.
+                logger.warning(
+                    f"Usuário {username} existe no AD mas não foi importado (não existe no Django)."
+                )
+                return None
+
+            # Verifica se está inativo
+            if is_disabled:
+                logger.warning(f"Usuário {username} está desabilitado no AD.")
+                # Opcionalmente você pode inativar também localmente
+                if user.is_active:
+                    user.is_active = False
+                    user.ativo = False
                     user.save()
-                    status = 'ativado' if user.is_active else 'inativado'
-                    logger.info(f"Usuário '{username}' foi {status} no portal Django.")
-            
+                return None
+
+            # Se no local (Django) o usuário estiver marcado como inativo
             if not user.is_active:
-                logger.warning(f"Usuário {username} está inativo e não pode ser autenticado.")
-                return None  # Não autentica usuários inativos
-            
-            logger.info(f"Usuário {username} autenticado com sucesso.")
+                logger.warning(f"Usuário {username} está inativo no Django.")
+                return None
+
+            logger.info(f"Usuário {username} autenticado com sucesso via AD.")
             return user
+
         except Exception as e:
             logger.error(f"Erro na autenticação do usuário {username}: {str(e)}")
             return None
+
 
     def get_user(self, user_id):
         try:

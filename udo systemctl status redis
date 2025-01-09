@@ -1,0 +1,725 @@
+dez 12 11:39:16 python systemd[1]: Starting celery.service - Celery Service...
+dez 12 11:39:16 python systemd[1]: Started celery.service - Celery Service.
+dez 12 11:39:23 python celery[1095]: Traceback (most recent call last):
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 951, in create_channel
+dez 12 11:39:23 python celery[1095]:     return self._avail_channels.pop()
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]: IndexError: pop from empty list
+dez 12 11:39:23 python celery[1095]: During handling of the above exception, another exception occurred:
+dez 12 11:39:23 python celery[1095]: Traceback (most recent call last):
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 357, in connect
+dez 12 11:39:23 python celery[1095]:     sock = self.retry.call_with_retry(
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+dez 12 11:39:23 python celery[1095]:     return do()
+dez 12 11:39:23 python celery[1095]:            ^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 358, in <lambda>
+dez 12 11:39:23 python celery[1095]:     lambda: self._connect(), lambda error: self.disconnect(error)
+dez 12 11:39:23 python celery[1095]:             ^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 730, in _connect
+dez 12 11:39:23 python celery[1095]:     raise err
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 718, in _connect
+dez 12 11:39:23 python celery[1095]:     sock.connect(socket_address)
+dez 12 11:39:23 python celery[1095]: ConnectionRefusedError: [Errno 111] Connection refused
+dez 12 11:39:23 python celery[1095]: During handling of the above exception, another exception occurred:
+dez 12 11:39:23 python celery[1095]: Traceback (most recent call last):
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 472, in _reraise_as_library_errors
+dez 12 11:39:23 python celery[1095]:     yield
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 459, in _ensure_connection
+dez 12 11:39:23 python celery[1095]:     return retry_over_time(
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/utils/functional.py", line 318, in retry_over_time
+dez 12 11:39:23 python celery[1095]:     return fun(*args, **kwargs)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 934, in _connection_factory
+dez 12 11:39:23 python celery[1095]:     self._connection = self._establish_connection()
+dez 12 11:39:23 python celery[1095]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 860, in _establish_connection
+dez 12 11:39:23 python celery[1095]:     conn = self.transport.establish_connection()
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 975, in establish_connection
+dez 12 11:39:23 python celery[1095]:     self._avail_channels.append(self.create_channel(self))
+dez 12 11:39:23 python celery[1095]:                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 953, in create_channel
+dez 12 11:39:23 python celery[1095]:     channel = self.Channel(connection)
+dez 12 11:39:23 python celery[1095]:               ^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/redis.py", line 744, in __init__
+dez 12 11:39:23 python celery[1095]:     self.client.ping()
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/commands/core.py", line 1212, in ping
+dez 12 11:39:23 python celery[1095]:     return self.execute_command("PING", **kwargs)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 559, in execute_command
+dez 12 11:39:23 python celery[1095]:     return self._execute_command(*args, **options)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 565, in _execute_command
+dez 12 11:39:23 python celery[1095]:     conn = self.connection or pool.get_connection(command_name, **options)
+dez 12 11:39:23 python celery[1095]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 1422, in get_connection
+dez 12 11:39:23 python celery[1095]:     connection.connect()
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 363, in connect
+dez 12 11:39:23 python celery[1095]:     raise ConnectionError(self._error_message(e))
+dez 12 11:39:23 python celery[1095]: redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:39:23 python celery[1095]: The above exception was the direct cause of the following exception:
+dez 12 11:39:23 python celery[1095]: Traceback (most recent call last):
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/bin/celery", line 8, in <module>
+dez 12 11:39:23 python celery[1095]:     sys.exit(main())
+dez 12 11:39:23 python celery[1095]:              ^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/__main__.py", line 15, in main
+dez 12 11:39:23 python celery[1095]:     sys.exit(_main())
+dez 12 11:39:23 python celery[1095]:              ^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/celery.py", line 236, in main
+dez 12 11:39:23 python celery[1095]:     return celery(auto_envvar_prefix="CELERY")
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+dez 12 11:39:23 python celery[1095]:     return self.main(*args, **kwargs)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1078, in main
+dez 12 11:39:23 python celery[1095]:     rv = self.invoke(ctx)
+dez 12 11:39:23 python celery[1095]:          ^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+dez 12 11:39:23 python celery[1095]:     return _process_result(sub_ctx.command.invoke(sub_ctx))
+dez 12 11:39:23 python celery[1095]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+dez 12 11:39:23 python celery[1095]:     return ctx.invoke(self.callback, **ctx.params)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+dez 12 11:39:23 python celery[1095]:     return __callback(*args, **kwargs)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/decorators.py", line 33, in new_func
+dez 12 11:39:23 python celery[1095]:     return f(get_current_context(), *args, **kwargs)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/base.py", line 135, in caller
+dez 12 11:39:23 python celery[1095]:     return f(ctx, *args, **kwargs)
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/control.py", line 239, in control
+dez 12 11:39:23 python celery[1095]:     replies = ctx.obj.app.control.broadcast(command, timeout=timeout,
+dez 12 11:39:23 python celery[1095]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/app/control.py", line 776, in broadcast
+dez 12 11:39:23 python celery[1095]:     return self.mailbox(conn)._broadcast(
+dez 12 11:39:23 python celery[1095]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/pidbox.py", line 330, in _broadcast
+dez 12 11:39:23 python celery[1095]:     chan = channel or self.connection.default_channel
+dez 12 11:39:23 python celery[1095]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 953, in default_channel
+dez 12 11:39:23 python celery[1095]:     self._ensure_connection(**conn_opts)
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 458, in _ensure_connection
+dez 12 11:39:23 python celery[1095]:     with ctx():
+dez 12 11:39:23 python celery[1095]:   File "/usr/lib/python3.11/contextlib.py", line 155, in __exit__
+dez 12 11:39:23 python celery[1095]:     self.gen.throw(typ, value, traceback)
+dez 12 11:39:23 python celery[1095]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 476, in _reraise_as_library_errors
+dez 12 11:39:23 python celery[1095]:     raise ConnectionError(str(exc)) from exc
+dez 12 11:39:23 python celery[1095]: kombu.exceptions.OperationalError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:39:23 python systemd[1]: [0;1;39m[0;1;31m[0;1;39mcelery.service: Control process exited, code=exited, status=1/FAILURE[0m
+dez 12 11:39:25 python systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mcelery.service: Failed with result 'exit-code'.[0m
+dez 12 11:39:25 python systemd[1]: celery.service: Consumed 1.512s CPU time.
+dez 12 11:39:30 python systemd[1]: celery.service: Scheduled restart job, restart counter is at 1.
+dez 12 11:39:30 python systemd[1]: Stopped celery.service - Celery Service.
+dez 12 11:39:30 python systemd[1]: celery.service: Consumed 1.512s CPU time.
+dez 12 11:39:30 python systemd[1]: Starting celery.service - Celery Service...
+dez 12 11:39:30 python systemd[1]: Started celery.service - Celery Service.
+dez 12 11:39:37 python celery[1156]: Traceback (most recent call last):
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 951, in create_channel
+dez 12 11:39:37 python celery[1156]:     return self._avail_channels.pop()
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]: IndexError: pop from empty list
+dez 12 11:39:37 python celery[1156]: During handling of the above exception, another exception occurred:
+dez 12 11:39:37 python celery[1156]: Traceback (most recent call last):
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 357, in connect
+dez 12 11:39:37 python celery[1156]:     sock = self.retry.call_with_retry(
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+dez 12 11:39:37 python celery[1156]:     return do()
+dez 12 11:39:37 python celery[1156]:            ^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 358, in <lambda>
+dez 12 11:39:37 python celery[1156]:     lambda: self._connect(), lambda error: self.disconnect(error)
+dez 12 11:39:37 python celery[1156]:             ^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 730, in _connect
+dez 12 11:39:37 python celery[1156]:     raise err
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 718, in _connect
+dez 12 11:39:37 python celery[1156]:     sock.connect(socket_address)
+dez 12 11:39:37 python celery[1156]: ConnectionRefusedError: [Errno 111] Connection refused
+dez 12 11:39:37 python celery[1156]: During handling of the above exception, another exception occurred:
+dez 12 11:39:37 python celery[1156]: Traceback (most recent call last):
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 472, in _reraise_as_library_errors
+dez 12 11:39:37 python celery[1156]:     yield
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 459, in _ensure_connection
+dez 12 11:39:37 python celery[1156]:     return retry_over_time(
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/utils/functional.py", line 318, in retry_over_time
+dez 12 11:39:37 python celery[1156]:     return fun(*args, **kwargs)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 934, in _connection_factory
+dez 12 11:39:37 python celery[1156]:     self._connection = self._establish_connection()
+dez 12 11:39:37 python celery[1156]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 860, in _establish_connection
+dez 12 11:39:37 python celery[1156]:     conn = self.transport.establish_connection()
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 975, in establish_connection
+dez 12 11:39:37 python celery[1156]:     self._avail_channels.append(self.create_channel(self))
+dez 12 11:39:37 python celery[1156]:                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 953, in create_channel
+dez 12 11:39:37 python celery[1156]:     channel = self.Channel(connection)
+dez 12 11:39:37 python celery[1156]:               ^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/redis.py", line 744, in __init__
+dez 12 11:39:37 python celery[1156]:     self.client.ping()
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/commands/core.py", line 1212, in ping
+dez 12 11:39:37 python celery[1156]:     return self.execute_command("PING", **kwargs)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 559, in execute_command
+dez 12 11:39:37 python celery[1156]:     return self._execute_command(*args, **options)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 565, in _execute_command
+dez 12 11:39:37 python celery[1156]:     conn = self.connection or pool.get_connection(command_name, **options)
+dez 12 11:39:37 python celery[1156]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 1422, in get_connection
+dez 12 11:39:37 python celery[1156]:     connection.connect()
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 363, in connect
+dez 12 11:39:37 python celery[1156]:     raise ConnectionError(self._error_message(e))
+dez 12 11:39:37 python celery[1156]: redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:39:37 python celery[1156]: The above exception was the direct cause of the following exception:
+dez 12 11:39:37 python celery[1156]: Traceback (most recent call last):
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/bin/celery", line 8, in <module>
+dez 12 11:39:37 python celery[1156]:     sys.exit(main())
+dez 12 11:39:37 python celery[1156]:              ^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/__main__.py", line 15, in main
+dez 12 11:39:37 python celery[1156]:     sys.exit(_main())
+dez 12 11:39:37 python celery[1156]:              ^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/celery.py", line 236, in main
+dez 12 11:39:37 python celery[1156]:     return celery(auto_envvar_prefix="CELERY")
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+dez 12 11:39:37 python celery[1156]:     return self.main(*args, **kwargs)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1078, in main
+dez 12 11:39:37 python celery[1156]:     rv = self.invoke(ctx)
+dez 12 11:39:37 python celery[1156]:          ^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+dez 12 11:39:37 python celery[1156]:     return _process_result(sub_ctx.command.invoke(sub_ctx))
+dez 12 11:39:37 python celery[1156]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+dez 12 11:39:37 python celery[1156]:     return ctx.invoke(self.callback, **ctx.params)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+dez 12 11:39:37 python celery[1156]:     return __callback(*args, **kwargs)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/decorators.py", line 33, in new_func
+dez 12 11:39:37 python celery[1156]:     return f(get_current_context(), *args, **kwargs)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/base.py", line 135, in caller
+dez 12 11:39:37 python celery[1156]:     return f(ctx, *args, **kwargs)
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/control.py", line 239, in control
+dez 12 11:39:37 python celery[1156]:     replies = ctx.obj.app.control.broadcast(command, timeout=timeout,
+dez 12 11:39:37 python celery[1156]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/app/control.py", line 776, in broadcast
+dez 12 11:39:37 python celery[1156]:     return self.mailbox(conn)._broadcast(
+dez 12 11:39:37 python celery[1156]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/pidbox.py", line 330, in _broadcast
+dez 12 11:39:37 python celery[1156]:     chan = channel or self.connection.default_channel
+dez 12 11:39:37 python celery[1156]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 953, in default_channel
+dez 12 11:39:37 python celery[1156]:     self._ensure_connection(**conn_opts)
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 458, in _ensure_connection
+dez 12 11:39:37 python celery[1156]:     with ctx():
+dez 12 11:39:37 python celery[1156]:   File "/usr/lib/python3.11/contextlib.py", line 155, in __exit__
+dez 12 11:39:37 python celery[1156]:     self.gen.throw(typ, value, traceback)
+dez 12 11:39:37 python celery[1156]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 476, in _reraise_as_library_errors
+dez 12 11:39:37 python celery[1156]:     raise ConnectionError(str(exc)) from exc
+dez 12 11:39:37 python celery[1156]: kombu.exceptions.OperationalError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:39:37 python systemd[1]: [0;1;39m[0;1;31m[0;1;39mcelery.service: Control process exited, code=exited, status=1/FAILURE[0m
+dez 12 11:39:39 python systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mcelery.service: Failed with result 'exit-code'.[0m
+dez 12 11:39:39 python systemd[1]: celery.service: Consumed 1.627s CPU time.
+dez 12 11:39:44 python systemd[1]: celery.service: Scheduled restart job, restart counter is at 2.
+dez 12 11:39:44 python systemd[1]: Stopped celery.service - Celery Service.
+dez 12 11:39:44 python systemd[1]: celery.service: Consumed 1.627s CPU time.
+dez 12 11:39:44 python systemd[1]: Starting celery.service - Celery Service...
+dez 12 11:39:44 python systemd[1]: Started celery.service - Celery Service.
+dez 12 11:39:51 python celery[1167]: Traceback (most recent call last):
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 951, in create_channel
+dez 12 11:39:51 python celery[1167]:     return self._avail_channels.pop()
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]: IndexError: pop from empty list
+dez 12 11:39:51 python celery[1167]: During handling of the above exception, another exception occurred:
+dez 12 11:39:51 python celery[1167]: Traceback (most recent call last):
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 357, in connect
+dez 12 11:39:51 python celery[1167]:     sock = self.retry.call_with_retry(
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+dez 12 11:39:51 python celery[1167]:     return do()
+dez 12 11:39:51 python celery[1167]:            ^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 358, in <lambda>
+dez 12 11:39:51 python celery[1167]:     lambda: self._connect(), lambda error: self.disconnect(error)
+dez 12 11:39:51 python celery[1167]:             ^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 730, in _connect
+dez 12 11:39:51 python celery[1167]:     raise err
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 718, in _connect
+dez 12 11:39:51 python celery[1167]:     sock.connect(socket_address)
+dez 12 11:39:51 python celery[1167]: ConnectionRefusedError: [Errno 111] Connection refused
+dez 12 11:39:51 python celery[1167]: During handling of the above exception, another exception occurred:
+dez 12 11:39:51 python celery[1167]: Traceback (most recent call last):
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 472, in _reraise_as_library_errors
+dez 12 11:39:51 python celery[1167]:     yield
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 459, in _ensure_connection
+dez 12 11:39:51 python celery[1167]:     return retry_over_time(
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/utils/functional.py", line 318, in retry_over_time
+dez 12 11:39:51 python celery[1167]:     return fun(*args, **kwargs)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 934, in _connection_factory
+dez 12 11:39:51 python celery[1167]:     self._connection = self._establish_connection()
+dez 12 11:39:51 python celery[1167]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 860, in _establish_connection
+dez 12 11:39:51 python celery[1167]:     conn = self.transport.establish_connection()
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 975, in establish_connection
+dez 12 11:39:51 python celery[1167]:     self._avail_channels.append(self.create_channel(self))
+dez 12 11:39:51 python celery[1167]:                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 953, in create_channel
+dez 12 11:39:51 python celery[1167]:     channel = self.Channel(connection)
+dez 12 11:39:51 python celery[1167]:               ^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/redis.py", line 744, in __init__
+dez 12 11:39:51 python celery[1167]:     self.client.ping()
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/commands/core.py", line 1212, in ping
+dez 12 11:39:51 python celery[1167]:     return self.execute_command("PING", **kwargs)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 559, in execute_command
+dez 12 11:39:51 python celery[1167]:     return self._execute_command(*args, **options)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 565, in _execute_command
+dez 12 11:39:51 python celery[1167]:     conn = self.connection or pool.get_connection(command_name, **options)
+dez 12 11:39:51 python celery[1167]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 1422, in get_connection
+dez 12 11:39:51 python celery[1167]:     connection.connect()
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 363, in connect
+dez 12 11:39:51 python celery[1167]:     raise ConnectionError(self._error_message(e))
+dez 12 11:39:51 python celery[1167]: redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:39:51 python celery[1167]: The above exception was the direct cause of the following exception:
+dez 12 11:39:51 python celery[1167]: Traceback (most recent call last):
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/bin/celery", line 8, in <module>
+dez 12 11:39:51 python celery[1167]:     sys.exit(main())
+dez 12 11:39:51 python celery[1167]:              ^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/__main__.py", line 15, in main
+dez 12 11:39:51 python celery[1167]:     sys.exit(_main())
+dez 12 11:39:51 python celery[1167]:              ^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/celery.py", line 236, in main
+dez 12 11:39:51 python celery[1167]:     return celery(auto_envvar_prefix="CELERY")
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+dez 12 11:39:51 python celery[1167]:     return self.main(*args, **kwargs)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1078, in main
+dez 12 11:39:51 python celery[1167]:     rv = self.invoke(ctx)
+dez 12 11:39:51 python celery[1167]:          ^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+dez 12 11:39:51 python celery[1167]:     return _process_result(sub_ctx.command.invoke(sub_ctx))
+dez 12 11:39:51 python celery[1167]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+dez 12 11:39:51 python celery[1167]:     return ctx.invoke(self.callback, **ctx.params)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+dez 12 11:39:51 python celery[1167]:     return __callback(*args, **kwargs)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/decorators.py", line 33, in new_func
+dez 12 11:39:51 python celery[1167]:     return f(get_current_context(), *args, **kwargs)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/base.py", line 135, in caller
+dez 12 11:39:51 python celery[1167]:     return f(ctx, *args, **kwargs)
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/control.py", line 239, in control
+dez 12 11:39:51 python celery[1167]:     replies = ctx.obj.app.control.broadcast(command, timeout=timeout,
+dez 12 11:39:51 python celery[1167]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/app/control.py", line 776, in broadcast
+dez 12 11:39:51 python celery[1167]:     return self.mailbox(conn)._broadcast(
+dez 12 11:39:51 python celery[1167]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/pidbox.py", line 330, in _broadcast
+dez 12 11:39:51 python celery[1167]:     chan = channel or self.connection.default_channel
+dez 12 11:39:51 python celery[1167]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 953, in default_channel
+dez 12 11:39:51 python celery[1167]:     self._ensure_connection(**conn_opts)
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 458, in _ensure_connection
+dez 12 11:39:51 python celery[1167]:     with ctx():
+dez 12 11:39:51 python celery[1167]:   File "/usr/lib/python3.11/contextlib.py", line 155, in __exit__
+dez 12 11:39:51 python celery[1167]:     self.gen.throw(typ, value, traceback)
+dez 12 11:39:51 python celery[1167]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 476, in _reraise_as_library_errors
+dez 12 11:39:51 python celery[1167]:     raise ConnectionError(str(exc)) from exc
+dez 12 11:39:51 python celery[1167]: kombu.exceptions.OperationalError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:39:51 python systemd[1]: [0;1;39m[0;1;31m[0;1;39mcelery.service: Control process exited, code=exited, status=1/FAILURE[0m
+dez 12 11:39:53 python systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mcelery.service: Failed with result 'exit-code'.[0m
+dez 12 11:39:53 python systemd[1]: celery.service: Consumed 1.556s CPU time.
+dez 12 11:39:58 python systemd[1]: celery.service: Scheduled restart job, restart counter is at 3.
+dez 12 11:39:58 python systemd[1]: Stopped celery.service - Celery Service.
+dez 12 11:39:58 python systemd[1]: celery.service: Consumed 1.556s CPU time.
+dez 12 11:39:58 python systemd[1]: Starting celery.service - Celery Service...
+dez 12 11:39:58 python systemd[1]: Started celery.service - Celery Service.
+dez 12 11:40:05 python celery[1173]: Traceback (most recent call last):
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 951, in create_channel
+dez 12 11:40:05 python celery[1173]:     return self._avail_channels.pop()
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]: IndexError: pop from empty list
+dez 12 11:40:05 python celery[1173]: During handling of the above exception, another exception occurred:
+dez 12 11:40:05 python celery[1173]: Traceback (most recent call last):
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 357, in connect
+dez 12 11:40:05 python celery[1173]:     sock = self.retry.call_with_retry(
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+dez 12 11:40:05 python celery[1173]:     return do()
+dez 12 11:40:05 python celery[1173]:            ^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 358, in <lambda>
+dez 12 11:40:05 python celery[1173]:     lambda: self._connect(), lambda error: self.disconnect(error)
+dez 12 11:40:05 python celery[1173]:             ^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 730, in _connect
+dez 12 11:40:05 python celery[1173]:     raise err
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 718, in _connect
+dez 12 11:40:05 python celery[1173]:     sock.connect(socket_address)
+dez 12 11:40:05 python celery[1173]: ConnectionRefusedError: [Errno 111] Connection refused
+dez 12 11:40:05 python celery[1173]: During handling of the above exception, another exception occurred:
+dez 12 11:40:05 python celery[1173]: Traceback (most recent call last):
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 472, in _reraise_as_library_errors
+dez 12 11:40:05 python celery[1173]:     yield
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 459, in _ensure_connection
+dez 12 11:40:05 python celery[1173]:     return retry_over_time(
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/utils/functional.py", line 318, in retry_over_time
+dez 12 11:40:05 python celery[1173]:     return fun(*args, **kwargs)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 934, in _connection_factory
+dez 12 11:40:05 python celery[1173]:     self._connection = self._establish_connection()
+dez 12 11:40:05 python celery[1173]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 860, in _establish_connection
+dez 12 11:40:05 python celery[1173]:     conn = self.transport.establish_connection()
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 975, in establish_connection
+dez 12 11:40:05 python celery[1173]:     self._avail_channels.append(self.create_channel(self))
+dez 12 11:40:05 python celery[1173]:                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 953, in create_channel
+dez 12 11:40:05 python celery[1173]:     channel = self.Channel(connection)
+dez 12 11:40:05 python celery[1173]:               ^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/redis.py", line 744, in __init__
+dez 12 11:40:05 python celery[1173]:     self.client.ping()
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/commands/core.py", line 1212, in ping
+dez 12 11:40:05 python celery[1173]:     return self.execute_command("PING", **kwargs)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 559, in execute_command
+dez 12 11:40:05 python celery[1173]:     return self._execute_command(*args, **options)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 565, in _execute_command
+dez 12 11:40:05 python celery[1173]:     conn = self.connection or pool.get_connection(command_name, **options)
+dez 12 11:40:05 python celery[1173]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 1422, in get_connection
+dez 12 11:40:05 python celery[1173]:     connection.connect()
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 363, in connect
+dez 12 11:40:05 python celery[1173]:     raise ConnectionError(self._error_message(e))
+dez 12 11:40:05 python celery[1173]: redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:40:05 python celery[1173]: The above exception was the direct cause of the following exception:
+dez 12 11:40:05 python celery[1173]: Traceback (most recent call last):
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/bin/celery", line 8, in <module>
+dez 12 11:40:05 python celery[1173]:     sys.exit(main())
+dez 12 11:40:05 python celery[1173]:              ^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/__main__.py", line 15, in main
+dez 12 11:40:05 python celery[1173]:     sys.exit(_main())
+dez 12 11:40:05 python celery[1173]:              ^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/celery.py", line 236, in main
+dez 12 11:40:05 python celery[1173]:     return celery(auto_envvar_prefix="CELERY")
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+dez 12 11:40:05 python celery[1173]:     return self.main(*args, **kwargs)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1078, in main
+dez 12 11:40:05 python celery[1173]:     rv = self.invoke(ctx)
+dez 12 11:40:05 python celery[1173]:          ^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+dez 12 11:40:05 python celery[1173]:     return _process_result(sub_ctx.command.invoke(sub_ctx))
+dez 12 11:40:05 python celery[1173]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+dez 12 11:40:05 python celery[1173]:     return ctx.invoke(self.callback, **ctx.params)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+dez 12 11:40:05 python celery[1173]:     return __callback(*args, **kwargs)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/decorators.py", line 33, in new_func
+dez 12 11:40:05 python celery[1173]:     return f(get_current_context(), *args, **kwargs)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/base.py", line 135, in caller
+dez 12 11:40:05 python celery[1173]:     return f(ctx, *args, **kwargs)
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/control.py", line 239, in control
+dez 12 11:40:05 python celery[1173]:     replies = ctx.obj.app.control.broadcast(command, timeout=timeout,
+dez 12 11:40:05 python celery[1173]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/app/control.py", line 776, in broadcast
+dez 12 11:40:05 python celery[1173]:     return self.mailbox(conn)._broadcast(
+dez 12 11:40:05 python celery[1173]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/pidbox.py", line 330, in _broadcast
+dez 12 11:40:05 python celery[1173]:     chan = channel or self.connection.default_channel
+dez 12 11:40:05 python celery[1173]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 953, in default_channel
+dez 12 11:40:05 python celery[1173]:     self._ensure_connection(**conn_opts)
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 458, in _ensure_connection
+dez 12 11:40:05 python celery[1173]:     with ctx():
+dez 12 11:40:05 python celery[1173]:   File "/usr/lib/python3.11/contextlib.py", line 155, in __exit__
+dez 12 11:40:05 python celery[1173]:     self.gen.throw(typ, value, traceback)
+dez 12 11:40:05 python celery[1173]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 476, in _reraise_as_library_errors
+dez 12 11:40:05 python celery[1173]:     raise ConnectionError(str(exc)) from exc
+dez 12 11:40:05 python celery[1173]: kombu.exceptions.OperationalError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:40:05 python systemd[1]: [0;1;39m[0;1;31m[0;1;39mcelery.service: Control process exited, code=exited, status=1/FAILURE[0m
+dez 12 11:40:07 python systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mcelery.service: Failed with result 'exit-code'.[0m
+dez 12 11:40:07 python systemd[1]: celery.service: Consumed 1.539s CPU time.
+dez 12 11:40:12 python systemd[1]: celery.service: Scheduled restart job, restart counter is at 4.
+dez 12 11:40:12 python systemd[1]: Stopped celery.service - Celery Service.
+dez 12 11:40:12 python systemd[1]: celery.service: Consumed 1.539s CPU time.
+dez 12 11:40:12 python systemd[1]: Starting celery.service - Celery Service...
+dez 12 11:40:12 python systemd[1]: Started celery.service - Celery Service.
+dez 12 11:40:19 python celery[1179]: Traceback (most recent call last):
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 951, in create_channel
+dez 12 11:40:19 python celery[1179]:     return self._avail_channels.pop()
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]: IndexError: pop from empty list
+dez 12 11:40:19 python celery[1179]: During handling of the above exception, another exception occurred:
+dez 12 11:40:19 python celery[1179]: Traceback (most recent call last):
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 357, in connect
+dez 12 11:40:19 python celery[1179]:     sock = self.retry.call_with_retry(
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+dez 12 11:40:19 python celery[1179]:     return do()
+dez 12 11:40:19 python celery[1179]:            ^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 358, in <lambda>
+dez 12 11:40:19 python celery[1179]:     lambda: self._connect(), lambda error: self.disconnect(error)
+dez 12 11:40:19 python celery[1179]:             ^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 730, in _connect
+dez 12 11:40:19 python celery[1179]:     raise err
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 718, in _connect
+dez 12 11:40:19 python celery[1179]:     sock.connect(socket_address)
+dez 12 11:40:19 python celery[1179]: ConnectionRefusedError: [Errno 111] Connection refused
+dez 12 11:40:19 python celery[1179]: During handling of the above exception, another exception occurred:
+dez 12 11:40:19 python celery[1179]: Traceback (most recent call last):
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 472, in _reraise_as_library_errors
+dez 12 11:40:19 python celery[1179]:     yield
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 459, in _ensure_connection
+dez 12 11:40:19 python celery[1179]:     return retry_over_time(
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/utils/functional.py", line 318, in retry_over_time
+dez 12 11:40:19 python celery[1179]:     return fun(*args, **kwargs)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 934, in _connection_factory
+dez 12 11:40:19 python celery[1179]:     self._connection = self._establish_connection()
+dez 12 11:40:19 python celery[1179]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 860, in _establish_connection
+dez 12 11:40:19 python celery[1179]:     conn = self.transport.establish_connection()
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 975, in establish_connection
+dez 12 11:40:19 python celery[1179]:     self._avail_channels.append(self.create_channel(self))
+dez 12 11:40:19 python celery[1179]:                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 953, in create_channel
+dez 12 11:40:19 python celery[1179]:     channel = self.Channel(connection)
+dez 12 11:40:19 python celery[1179]:               ^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/redis.py", line 744, in __init__
+dez 12 11:40:19 python celery[1179]:     self.client.ping()
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/commands/core.py", line 1212, in ping
+dez 12 11:40:19 python celery[1179]:     return self.execute_command("PING", **kwargs)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 559, in execute_command
+dez 12 11:40:19 python celery[1179]:     return self._execute_command(*args, **options)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 565, in _execute_command
+dez 12 11:40:19 python celery[1179]:     conn = self.connection or pool.get_connection(command_name, **options)
+dez 12 11:40:19 python celery[1179]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 1422, in get_connection
+dez 12 11:40:19 python celery[1179]:     connection.connect()
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 363, in connect
+dez 12 11:40:19 python celery[1179]:     raise ConnectionError(self._error_message(e))
+dez 12 11:40:19 python celery[1179]: redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:40:19 python celery[1179]: The above exception was the direct cause of the following exception:
+dez 12 11:40:19 python celery[1179]: Traceback (most recent call last):
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/bin/celery", line 8, in <module>
+dez 12 11:40:19 python celery[1179]:     sys.exit(main())
+dez 12 11:40:19 python celery[1179]:              ^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/__main__.py", line 15, in main
+dez 12 11:40:19 python celery[1179]:     sys.exit(_main())
+dez 12 11:40:19 python celery[1179]:              ^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/celery.py", line 236, in main
+dez 12 11:40:19 python celery[1179]:     return celery(auto_envvar_prefix="CELERY")
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+dez 12 11:40:19 python celery[1179]:     return self.main(*args, **kwargs)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1078, in main
+dez 12 11:40:19 python celery[1179]:     rv = self.invoke(ctx)
+dez 12 11:40:19 python celery[1179]:          ^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+dez 12 11:40:19 python celery[1179]:     return _process_result(sub_ctx.command.invoke(sub_ctx))
+dez 12 11:40:19 python celery[1179]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+dez 12 11:40:19 python celery[1179]:     return ctx.invoke(self.callback, **ctx.params)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+dez 12 11:40:19 python celery[1179]:     return __callback(*args, **kwargs)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/decorators.py", line 33, in new_func
+dez 12 11:40:19 python celery[1179]:     return f(get_current_context(), *args, **kwargs)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/base.py", line 135, in caller
+dez 12 11:40:19 python celery[1179]:     return f(ctx, *args, **kwargs)
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/control.py", line 239, in control
+dez 12 11:40:19 python celery[1179]:     replies = ctx.obj.app.control.broadcast(command, timeout=timeout,
+dez 12 11:40:19 python celery[1179]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/app/control.py", line 776, in broadcast
+dez 12 11:40:19 python celery[1179]:     return self.mailbox(conn)._broadcast(
+dez 12 11:40:19 python celery[1179]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/pidbox.py", line 330, in _broadcast
+dez 12 11:40:19 python celery[1179]:     chan = channel or self.connection.default_channel
+dez 12 11:40:19 python celery[1179]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 953, in default_channel
+dez 12 11:40:19 python celery[1179]:     self._ensure_connection(**conn_opts)
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 458, in _ensure_connection
+dez 12 11:40:19 python celery[1179]:     with ctx():
+dez 12 11:40:19 python celery[1179]:   File "/usr/lib/python3.11/contextlib.py", line 155, in __exit__
+dez 12 11:40:19 python celery[1179]:     self.gen.throw(typ, value, traceback)
+dez 12 11:40:19 python celery[1179]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 476, in _reraise_as_library_errors
+dez 12 11:40:19 python celery[1179]:     raise ConnectionError(str(exc)) from exc
+dez 12 11:40:19 python celery[1179]: kombu.exceptions.OperationalError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:40:19 python systemd[1]: [0;1;39m[0;1;31m[0;1;39mcelery.service: Control process exited, code=exited, status=1/FAILURE[0m
+dez 12 11:40:21 python systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mcelery.service: Failed with result 'exit-code'.[0m
+dez 12 11:40:21 python systemd[1]: celery.service: Consumed 1.581s CPU time.
+dez 12 11:40:26 python systemd[1]: celery.service: Scheduled restart job, restart counter is at 5.
+dez 12 11:40:26 python systemd[1]: Stopped celery.service - Celery Service.
+dez 12 11:40:26 python systemd[1]: celery.service: Consumed 1.581s CPU time.
+dez 12 11:40:26 python systemd[1]: Starting celery.service - Celery Service...
+dez 12 11:40:26 python systemd[1]: Started celery.service - Celery Service.
+dez 12 11:40:33 python celery[1185]: Traceback (most recent call last):
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 951, in create_channel
+dez 12 11:40:33 python celery[1185]:     return self._avail_channels.pop()
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]: IndexError: pop from empty list
+dez 12 11:40:33 python celery[1185]: During handling of the above exception, another exception occurred:
+dez 12 11:40:33 python celery[1185]: Traceback (most recent call last):
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 357, in connect
+dez 12 11:40:33 python celery[1185]:     sock = self.retry.call_with_retry(
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+dez 12 11:40:33 python celery[1185]:     return do()
+dez 12 11:40:33 python celery[1185]:            ^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 358, in <lambda>
+dez 12 11:40:33 python celery[1185]:     lambda: self._connect(), lambda error: self.disconnect(error)
+dez 12 11:40:33 python celery[1185]:             ^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 730, in _connect
+dez 12 11:40:33 python celery[1185]:     raise err
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 718, in _connect
+dez 12 11:40:33 python celery[1185]:     sock.connect(socket_address)
+dez 12 11:40:33 python celery[1185]: ConnectionRefusedError: [Errno 111] Connection refused
+dez 12 11:40:33 python celery[1185]: During handling of the above exception, another exception occurred:
+dez 12 11:40:33 python celery[1185]: Traceback (most recent call last):
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 472, in _reraise_as_library_errors
+dez 12 11:40:33 python celery[1185]:     yield
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 459, in _ensure_connection
+dez 12 11:40:33 python celery[1185]:     return retry_over_time(
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/utils/functional.py", line 318, in retry_over_time
+dez 12 11:40:33 python celery[1185]:     return fun(*args, **kwargs)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 934, in _connection_factory
+dez 12 11:40:33 python celery[1185]:     self._connection = self._establish_connection()
+dez 12 11:40:33 python celery[1185]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 860, in _establish_connection
+dez 12 11:40:33 python celery[1185]:     conn = self.transport.establish_connection()
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 975, in establish_connection
+dez 12 11:40:33 python celery[1185]:     self._avail_channels.append(self.create_channel(self))
+dez 12 11:40:33 python celery[1185]:                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 953, in create_channel
+dez 12 11:40:33 python celery[1185]:     channel = self.Channel(connection)
+dez 12 11:40:33 python celery[1185]:               ^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/redis.py", line 744, in __init__
+dez 12 11:40:33 python celery[1185]:     self.client.ping()
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/commands/core.py", line 1212, in ping
+dez 12 11:40:33 python celery[1185]:     return self.execute_command("PING", **kwargs)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 559, in execute_command
+dez 12 11:40:33 python celery[1185]:     return self._execute_command(*args, **options)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/client.py", line 565, in _execute_command
+dez 12 11:40:33 python celery[1185]:     conn = self.connection or pool.get_connection(command_name, **options)
+dez 12 11:40:33 python celery[1185]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 1422, in get_connection
+dez 12 11:40:33 python celery[1185]:     connection.connect()
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 363, in connect
+dez 12 11:40:33 python celery[1185]:     raise ConnectionError(self._error_message(e))
+dez 12 11:40:33 python celery[1185]: redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:40:33 python celery[1185]: The above exception was the direct cause of the following exception:
+dez 12 11:40:33 python celery[1185]: Traceback (most recent call last):
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/bin/celery", line 8, in <module>
+dez 12 11:40:33 python celery[1185]:     sys.exit(main())
+dez 12 11:40:33 python celery[1185]:              ^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/__main__.py", line 15, in main
+dez 12 11:40:33 python celery[1185]:     sys.exit(_main())
+dez 12 11:40:33 python celery[1185]:              ^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/celery.py", line 236, in main
+dez 12 11:40:33 python celery[1185]:     return celery(auto_envvar_prefix="CELERY")
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+dez 12 11:40:33 python celery[1185]:     return self.main(*args, **kwargs)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1078, in main
+dez 12 11:40:33 python celery[1185]:     rv = self.invoke(ctx)
+dez 12 11:40:33 python celery[1185]:          ^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+dez 12 11:40:33 python celery[1185]:     return _process_result(sub_ctx.command.invoke(sub_ctx))
+dez 12 11:40:33 python celery[1185]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+dez 12 11:40:33 python celery[1185]:     return ctx.invoke(self.callback, **ctx.params)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+dez 12 11:40:33 python celery[1185]:     return __callback(*args, **kwargs)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/click/decorators.py", line 33, in new_func
+dez 12 11:40:33 python celery[1185]:     return f(get_current_context(), *args, **kwargs)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/base.py", line 135, in caller
+dez 12 11:40:33 python celery[1185]:     return f(ctx, *args, **kwargs)
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/bin/control.py", line 239, in control
+dez 12 11:40:33 python celery[1185]:     replies = ctx.obj.app.control.broadcast(command, timeout=timeout,
+dez 12 11:40:33 python celery[1185]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/celery/app/control.py", line 776, in broadcast
+dez 12 11:40:33 python celery[1185]:     return self.mailbox(conn)._broadcast(
+dez 12 11:40:33 python celery[1185]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/pidbox.py", line 330, in _broadcast
+dez 12 11:40:33 python celery[1185]:     chan = channel or self.connection.default_channel
+dez 12 11:40:33 python celery[1185]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 953, in default_channel
+dez 12 11:40:33 python celery[1185]:     self._ensure_connection(**conn_opts)
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 458, in _ensure_connection
+dez 12 11:40:33 python celery[1185]:     with ctx():
+dez 12 11:40:33 python celery[1185]:   File "/usr/lib/python3.11/contextlib.py", line 155, in __exit__
+dez 12 11:40:33 python celery[1185]:     self.gen.throw(typ, value, traceback)
+dez 12 11:40:33 python celery[1185]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/connection.py", line 476, in _reraise_as_library_errors
+dez 12 11:40:33 python celery[1185]:     raise ConnectionError(str(exc)) from exc
+dez 12 11:40:33 python celery[1185]: kombu.exceptions.OperationalError: Error 111 connecting to localhost:6379. Connection refused.
+dez 12 11:40:33 python systemd[1]: [0;1;39m[0;1;31m[0;1;39mcelery.service: Control process exited, code=exited, status=1/FAILURE[0m
+dez 12 11:40:35 python systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mcelery.service: Failed with result 'exit-code'.[0m
+dez 12 11:40:35 python systemd[1]: celery.service: Consumed 1.700s CPU time.
+dez 12 11:40:40 python systemd[1]: celery.service: Scheduled restart job, restart counter is at 6.
+dez 12 11:40:40 python systemd[1]: Stopped celery.service - Celery Service.
+dez 12 11:40:40 python systemd[1]: celery.service: Consumed 1.700s CPU time.
+dez 12 11:40:40 python systemd[1]: Starting celery.service - Celery Service...
+dez 12 11:40:40 python systemd[1]: Started celery.service - Celery Service.
+dez 12 11:40:47 python celery[1197]: Traceback (most recent call last):
+dez 12 11:40:47 python celery[1197]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/kombu/transport/virtual/base.py", line 951, in create_channel
+dez 12 11:40:47 python celery[1197]:     return self._avail_channels.pop()
+dez 12 11:40:47 python celery[1197]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:47 python celery[1197]: IndexError: pop from empty list
+dez 12 11:40:47 python celery[1197]: During handling of the above exception, another exception occurred:
+dez 12 11:40:47 python celery[1197]: Traceback (most recent call last):
+dez 12 11:40:47 python celery[1197]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 357, in connect
+dez 12 11:40:47 python celery[1197]:     sock = self.retry.call_with_retry(
+dez 12 11:40:47 python celery[1197]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dez 12 11:40:47 python celery[1197]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+dez 12 11:40:47 python celery[1197]:     return do()
+dez 12 11:40:47 python celery[1197]:            ^^^^
+dez 12 11:40:47 python celery[1197]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 358, in <lambda>
+dez 12 11:40:47 python celery[1197]:     lambda: self._connect(), lambda error: self.disconnect(error)
+dez 12 11:40:47 python celery[1197]:             ^^^^^^^^^^^^^^^
+dez 12 11:40:47 python celery[1197]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 730, in _connect
+dez 12 11:40:47 python celery[1197]:     raise err
+dez 12 11:40:47 python celery[1197]:   File "/opt/gestao_documentos/venv/lib/python3.11/site-packages/redis/connection.py", line 718, in _connect
+dez 12 11:40:47 python celery[1197]:     sock.connect(socket_address)
+dez 12 11:40:47 python celery[1197]: ConnectionRefusedError: [Errn

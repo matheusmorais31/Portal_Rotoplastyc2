@@ -1,9 +1,7 @@
-# usuarios/tasks.py
-
-import logging
 from celery import shared_task
 from django.conf import settings
 from ldap3 import Server, Connection, ALL
+import logging
 from usuarios.models import Usuario
 
 logger = logging.getLogger(__name__)
@@ -11,66 +9,50 @@ logger = logging.getLogger(__name__)
 @shared_task
 def sync_ad_users():
     """
-    Sincroniza o status de ativação dos usuários do AD com o portal Django.
+    Sincroniza o status de ativação dos usuários do AD que já existem no Django.
+    Não cria novos usuários.
     """
-    ldap_server = settings.LDAP_SERVER
-    ldap_user = settings.LDAP_USER
-    ldap_password = settings.LDAP_PASSWORD
-    search_base = settings.LDAP_SEARCH_BASE
-
     try:
-        logger.info(f"Conectando ao servidor LDAP: {ldap_server}")
-        server = Server(ldap_server, get_info=ALL)
-        conn = Connection(server, user=ldap_user, password=ldap_password, auto_bind=True)
+        logger.info(f"Conectando ao servidor LDAP: {settings.LDAP_SERVER}")
+        server = Server(settings.LDAP_SERVER, get_info=ALL)
+        conn = Connection(server, user=settings.LDAP_USER, password=settings.LDAP_PASSWORD, auto_bind=True)
         logger.info("Conexão com o LDAP estabelecida com sucesso.")
 
-        # Definir o filtro para buscar todos os usuários
-        search_filter = "(objectClass=user)"
-        attributes = ['sAMAccountName', 'userAccountControl']
+        # Busca todos os usuários do portal que são do AD
+        usuarios_ad = Usuario.objects.filter(is_ad_user=True)
 
-        conn.search(search_base, search_filter, attributes=attributes)
+        for usuario in usuarios_ad:
+            # Filtro para buscar apenas o usuário atual no AD
+            search_filter = f"(sAMAccountName={usuario.username})"
 
-        if not conn.entries:
-            logger.warning("Nenhum usuário encontrado no AD.")
-            return
+            conn.search(
+                search_base=settings.LDAP_SEARCH_BASE,
+                search_filter=search_filter,
+                attributes=["sAMAccountName", "userAccountControl"]
+            )
 
-        # Obter uma lista de todos os usernames no AD
-        ad_usernames = set()
-        
-        # Processar cada usuário encontrado no AD
-        for entry in conn.entries:
-            username = entry.sAMAccountName.value
-            user_account_control = entry.userAccountControl.value
+            if conn.entries:
+                # Usuário encontrado no AD
+                entry = conn.entries[0]
+                user_account_control = entry.userAccountControl.value
+                is_disabled = bool(user_account_control & 0x2)  # ACCOUNTDISABLE = 0x2
 
-            ad_usernames.add(username)
-
-            # Verificar se o usuário está desativado no AD
-            is_disabled = bool(user_account_control & 0x2)  # ACCOUNTDISABLE = 0x2
-
-            try:
-                usuario = Usuario.objects.get(username=username)
-                # Atualizar o campo 'ativo' baseado no status do AD
+                # Atualiza se houver discrepância entre o status do AD e o do Django
                 if usuario.ativo != (not is_disabled):
                     usuario.ativo = not is_disabled
-                    usuario.is_active = usuario.ativo  # Sincronizar is_active com ativo
+                    usuario.is_active = usuario.ativo
                     usuario.save()
                     status = 'ativado' if usuario.ativo else 'inativado'
-                    logger.info(f"Usuário '{username}' foi {status} no portal Django.")
-            except Usuario.DoesNotExist:
-                logger.warning(f"Usuário '{username}' encontrado no AD, mas não existe no portal Django.")
-                # Opcional: Criar o usuário no portal se desejar
-                # Usuario.objects.create(username=username, ativo=not is_disabled, is_ad_user=True)
-
-        # Opcional: Inativar usuários que não estão mais no AD
-        usuarios_no_portal = Usuario.objects.filter(is_ad_user=True)
-        for usuario in usuarios_no_portal:
-            if usuario.username not in ad_usernames:
+                    logger.info(f"Usuário '{usuario.username}' foi {status} no portal Django.")
+            else:
+                # Usuário não foi encontrado no AD => inativar
                 if usuario.ativo:
                     usuario.ativo = False
-                    usuario.is_active = False  # Sincronizar is_active com ativo
+                    usuario.is_active = False
                     usuario.save()
                     logger.info(f"Usuário '{usuario.username}' inativado porque não foi encontrado no AD.")
 
+        conn.unbind()
         logger.info("Sincronização de usuários concluída com sucesso.")
 
     except Exception as e:
