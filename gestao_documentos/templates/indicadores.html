@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+<a href="https://app.powerbi.com/view?r=eyJrIjoiNGEyY2UzMzAtOGRlMC00MjA0LWFlMzQtM2ExMjIyYTZlZGEwIiwidCI6Ijc3Y2I0NmY3LTAzY2QtNDhkYS05MGZiLTA1MGQyMGEwOTgwYyJ9" target="_blank" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/indicadorgeral.png" class="modal-img">
+        <span class="modal-title">Indicadores <p>Gerais</p></span>
+    </div>
+</a>
+
+
+<a href="https://app.powerbi.com/view?r=eyJrIjoiODA1OTE0ZTEtYjZlMC00MjUyLWEwOTctMDE0ZjdmMzUzYWU3IiwidCI6Ijc3Y2I0NmY3LTAzY2QtNDhkYS05MGZiLTA1MGQyMGEwOTgwYyJ9" target="_blank" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/sol.png" class="modal-img">
+        <span class="modal-title"> BI Sol</span>
+    </div>
+</a>
+
+{% endblock %}

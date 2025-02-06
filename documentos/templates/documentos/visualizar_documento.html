@@ -1,4 +1,3 @@
-<!-- documentos/templates/documentos/visualizar_documento.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -8,18 +7,29 @@
 
 {% block content %}
 <div class="container">
+
     <!-- Botão de Voltar -->
     <a href="javascript:history.back()" class="back-button">Voltar</a>
 
     <h1>{{ documento.nome }} - Revisão {{ documento.revisao|default:"N/A" }}</h1>
     <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
-
-    <!-- Detalhes do documento -->
-    <p><strong>Elaborador:</strong> {{ documento.elaborador.get_full_name|default:documento.elaborador.username|default:"Não definido" }}</p>
-    <p><strong>Aprovador:</strong> {{ documento.aprovador1.get_full_name|default:documento.aprovador1.username|default:"Não definido" }}</p>
+    <p><strong>Elaborador:</strong> 
+        {% if documento.elaborador %}
+            {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+        {% else %}
+            Não definido
+        {% endif %}
+    </p>
+    <p><strong>Aprovador:</strong>
+        {% if documento.aprovador1 %}
+            {{ documento.aprovador1.get_full_name|default:documento.aprovador1.username }}
+        {% else %}
+            Não definido
+        {% endif %}
+    </p>
     <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y H:i" }}</p>
 
-    <!-- Botões para ações -->
+    <!-- Botões para ações (caso não esteja bloqueado) -->
     <div class="button-container">
         {% if documento.documento_pdf and not documento.categoria.bloqueada %}
             <a href="{% url 'documentos:baixar_pdf' documento.id %}" class="btn">Baixar PDF</a>
@@ -29,102 +39,148 @@
         {% endif %}
     </div>
 
-    <!-- Contêiner para o PDF renderizado -->
+    <!-- Barra de Zoom -->
+    <div class="zoom-controls">
+        <label for="zoomRange">Zoom:</label>
+        <input type="range" id="zoomRange" min="50" max="200" step="10" value="100">
+        <span id="zoomValue">100%</span>
+    </div>
+
+    <!-- Container do PDF -->
     <div id="pdf-container" class="pdf-container">
         <p class="pdf-message">Carregando PDF...</p>
     </div>
 </div>
 
+{% comment %}
+    Se a categoria estiver bloqueada, bloqueamos Ctrl+P e clique direito
+{% endcomment %}
 {% if documento.categoria.bloqueada %}
-<!-- Bloqueio de impressão e interações -->
 <script>
-    // Bloqueia Ctrl+P ou Cmd+P
-    document.addEventListener("keydown", function (e) {
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
-            e.preventDefault();
-            alert("Impressão desabilitada para este documento.");
-        }
-    });
-
-    // Bloqueia o menu de contexto (botão direito do mouse)
-    document.addEventListener("contextmenu", function (e) {
+document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'p')) {
         e.preventDefault();
-        alert("Ação desabilitada neste documento.");
-    });
+        alert("Impressão desabilitada para este documento.");
+    }
+});
+document.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+    alert("Ação desabilitada neste documento.");
+});
 </script>
 {% endif %}
 
-<!-- Script para carregar e renderizar o PDF -->
+<!-- Import PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const url = "{% url 'documentos:visualizar_pdf' documento.id %}";
-        const pdfContainer = document.getElementById("pdf-container");
-        const printButton = document.getElementById("print-button");
+    // Configura o worker do PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+</script>
 
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const url = "{% url 'documentos:visualizar_pdf' documento.id %}";
+    const pdfContainer = document.getElementById("pdf-container");
+    const zoomRange = document.getElementById("zoomRange");
+    const zoomValue = document.getElementById("zoomValue");
+    const printButton = document.getElementById("print-button");
 
-        // Função para renderizar o PDF
-        const renderPDF = (pdf) => {
-            pdfContainer.innerHTML = ''; // Limpa a mensagem de carregamento
+    let pdfDoc = null;
+    let userZoom = 1.0; // Zoom inicial
 
-            const pagePromises = [];
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                const pagePromise = pdf.getPage(pageNum).then((page) => {
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    pdfContainer.appendChild(canvas);
-
-                    return page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
-                        return new Promise((resolve) => {
-                            const img = new Image();
-                            img.onload = () => resolve(img.src);
-                            img.src = canvas.toDataURL(); // Converte o canvas para imagem
-                        });
-                    });
-                });
-
-                pagePromises.push(pagePromise);
-            }
-
-            return Promise.all(pagePromises); // Aguarda todas as páginas serem renderizadas
-        };
-
-        // Carregar o PDF e renderizar
-        pdfjsLib.getDocument(url).promise.then((pdf) => {
-            renderPDF(pdf).then((pageImages) => {
-                // Adicionar evento de impressão após carregar as imagens
-                if (printButton) {
-                    printButton.onclick = () => printPDF(pageImages);
-                }
-            });
-        }).catch((error) => {
-            pdfContainer.innerHTML = `<p class="pdf-message">Erro ao carregar PDF: ${error.message}</p>`;
-        });
+    // Carrega o PDF
+    pdfjsLib.getDocument(url).promise.then(function(pdf) {
+        pdfDoc = pdf;
+        renderPDF(); // renderiza as páginas
+    }).catch(function(error) {
+        pdfContainer.innerHTML = `<p class="pdf-message">Erro ao carregar PDF: ${error.message}</p>`;
     });
 
-    // Função para imprimir o PDF
-    const printPDF = (pageImages) => {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write('<html><head><title>Imprimir PDF</title></head><body>');
-        pageImages.forEach((imgSrc) => {
-            printWindow.document.write(`<img src="${imgSrc}" style="width: 100%; margin-bottom: 20px;">`);
+    // Função para renderizar todo o PDF
+    function renderPDF() {
+        pdfContainer.innerHTML = ''; // limpa o container
+
+        if (!pdfDoc) return;
+
+        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+            pdfDoc.getPage(pageNum).then(function(page) {
+                // 1) Descobre tamanho natural da página:
+                const viewport = page.getViewport({ scale: 1 });
+
+                // 2) Fit to container (largura)
+                const containerWidth = pdfContainer.clientWidth; 
+                const fitScale = (containerWidth - 20) / viewport.width;
+
+                // 3) Zoom final (fitScale * userZoom)
+                const baseScale = fitScale * userZoom;
+
+                // ----
+                // 4) Cria um "fator de qualidade" (2.0 = dobrar a resolução interna do canvas):
+                const qualityFactor = 2.0;
+                // 5) Para renderizar com mais pixels, multiplicamos:
+                const renderScale = baseScale * qualityFactor;
+                const scaledViewport = page.getViewport({ scale: renderScale });
+
+                // 6) Cria o canvas com resolução maior
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = scaledViewport.width;
+                canvas.height = scaledViewport.height;
+
+                // 7) Reduz o tamanho de exibição via CSS, para ficar “nítido”
+                canvas.style.width = (scaledViewport.width / qualityFactor) + 'px';
+                canvas.style.height = (scaledViewport.height / qualityFactor) + 'px';
+
+                pdfContainer.appendChild(canvas);
+
+                // 8) Renderiza a página
+                page.render({
+                    canvasContext: context,
+                    viewport: scaledViewport
+                });
+            });
+        }
+    }
+
+    // Listener do slider
+    zoomRange.addEventListener("input", function() {
+        userZoom = parseInt(this.value, 10) / 100;
+        zoomValue.textContent = this.value + "%";
+        renderPDF();
+    });
+
+    // Impressão
+    if (printButton) {
+        printButton.addEventListener("click", function() {
+            printPDF();
         });
-        printWindow.document.write('</body></html>');
+    }
+
+    function printPDF() {
+        const canvases = pdfContainer.querySelectorAll("canvas");
+        if (!canvases.length) {
+            alert("Nada para imprimir.");
+            return;
+        }
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write("<html><head><title>Imprimir PDF</title></head><body>");
+
+        canvases.forEach((canvas) => {
+            const dataURL = canvas.toDataURL("image/png");
+            // Define width:100% para usar toda a largura da página de impressão
+            printWindow.document.write(`<img src="${dataURL}" style="width:100%; margin-bottom:20px;">`);
+        });
+
+        printWindow.document.write("</body></html>");
         printWindow.document.close();
-
-        // Adicionar evento para fechar a aba após imprimir ou cancelar
-        printWindow.onafterprint = function () {
-            printWindow.close();
+        printWindow.onload = function() {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.onafterprint = function() {
+                printWindow.close();
+            };
         };
-
-        // Acionar a impressão
-        printWindow.print();
-    };
+    }
+});
 </script>
 {% endblock %}

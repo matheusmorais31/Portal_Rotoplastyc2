@@ -31,7 +31,7 @@
     </div>
 </a>
 <!--DescriÃ§Ã£o de Cargos-->
-<a href="/static/pdfs/Descrição de cargos.pdf" class="modal-content">
+<a href="{% url 'descricao' %}" class="modal-content">
     <div class="modal-container">
         <img src="/static/images/DescricaoCargos.png" class="modal-img">
         <span class="modal-title">Descrição de Cargos</span>
@@ -48,12 +48,20 @@
         <span class="modal-title">Pesquisa de Clima</span>
     </div>
 </a>
-<!--DescriÃ§Ã£o de Cargos-->
+<!--Avaliação de desempenho-->
 <a href="http://vmphp.rotoplastyc.com.br/feedback.html" class="modal-content">
     <div class="modal-container">
         <img src="/static/images/Avaliacao.png" class="modal-img">
         <span class="modal-title">Avaliação de Desempenho</span>
     </div>
 </a>
+<!--Organograma-->
+<a href="/static/pdfs/Organograma Filial.pdf" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/organograma.png" class="modal-img">
+        <span class="modal-title">Organograma Filial</span>
+    </div>
+</a>
+
 
 {% endblock %}

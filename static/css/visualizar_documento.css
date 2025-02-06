@@ -12,19 +12,25 @@ html, body {
 
 /* Contêiner principal */
 .container {
+    /* Antes estava assim (limitava em 1200px, e cortava se o PDF fosse maior): */
+    /* max-width: 1200px; */
+
+    /* Agora, permita crescer livremente: */
+    max-width: none; /* ou simplesmente comente/remova a linha que define max-width */
+
+    /* Demais propriedades continuam as mesmas. */
+    width: 100%;
     background-color: rgba(17, 16, 16, 0.44);
     padding: 20px;
     border-radius: 20px;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
-    width: 100%;
-    max-width: 1200px;
-    margin: 50px auto;
+    margin: 50px auto; 
     color: #ffffff;
     text-align: left;
     position: relative;
 }
 
-/* Botão de Voltar no canto superior direito dentro do container */
+/* Botão de Voltar */
 .back-button {
     position: absolute;
     top: 20px;
@@ -37,7 +43,7 @@ html, body {
     text-decoration: none;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .back-button:hover {
@@ -45,20 +51,20 @@ html, body {
     box-shadow: 0px 0px 10px #2EC2D6;
 }
 
-/* Título da página */
+/* Título */
 h1 {
     font-size: 28px;
     margin-bottom: 20px;
     color: #ffffff;
 }
 
-/* Contêiner dos botões */
+/* Contêiner dos botões (Baixar, Imprimir) */
 .button-container {
     margin-bottom: 20px;
     text-align: center;
 }
 
-/* Estilo geral dos botões */
+/* Botões gerais */
 .btn {
     display: inline-block;
     background-color: #2EC2D6;
@@ -70,6 +76,7 @@ h1 {
     font-size: 16px;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
+    margin: 0 5px;
 }
 
 .btn:hover {
@@ -77,26 +84,63 @@ h1 {
     box-shadow: 0px 0px 15px #2EC2D6;
 }
 
-/* Estilos para as mensagens dentro do pdf-container */
-.pdf-container .pdf-message {
+/* Barra de Zoom */
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.zoom-controls label {
+    font-size: 16px;
+}
+
+.zoom-controls input[type="range"] {
+    width: 150px;
+    cursor: pointer;
+}
+
+.zoom-controls span {
+    font-size: 16px;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Container do PDF */
+.pdf-container {
     width: 100%;
-    background-color: #fff; /* Fundo branco */
-    border: 2px solid #2EC2D6; /* Borda azul */
+    /* AQUI está o segredo: */
+    overflow-x: auto; /* permite rolagem horizontal se o PDF exceder a largura */
+    /* Se quiser rolagem vertical interna, use overflow-y: auto; */
+    
+    background-color: #fff;
     border-radius: 10px;
     padding: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Sombra para destacar */
-    overflow-y: auto;
-    color: #000 !important; /* Texto preto */
-    font-size: 16px; /* Tamanho da fonte */
-    text-align: center; /* Centralizar o texto */
-    font-weight: bold; /* Negrito para destaque */
-    margin-top: 20px; /* Espaçamento superior */
+    box-shadow: 0px 0px 6px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+/* Mensagem de carregamento ou erro */
+.pdf-container .pdf-message {
+    width: 100%;
+    background-color: #fff;
+    border: 2px solid #2EC2D6;
+    border-radius: 10px;
+    padding: 10px;
+    color: #000 !important;
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 20px;
 }
 
 /* Canvas para cada página do PDF */
 canvas {
     display: block;
-    margin: 10px auto;
+    margin: 20px auto;
     border: 1px solid #ddd;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    /* A largura/altura final é atribuída via JS (canvas.style). */
 }
