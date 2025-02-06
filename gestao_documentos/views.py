@@ -165,3 +165,9 @@ def andon(request):
 
 def assinatura(request):
     return render(request, 'assinatura.html')
+
+def descricao(request):
+    return render(request, 'descricao.html')
+
+def indicadores(request):
+    return render(request, 'indicadores.html')

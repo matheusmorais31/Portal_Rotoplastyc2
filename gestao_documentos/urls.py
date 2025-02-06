@@ -21,6 +21,8 @@ urlpatterns = [
     path('manuais/', views.manuais, name='manuais'),
     path('andon/', views.andon, name='andon'),
     path('assinatura/', views.assinatura, name='assinatura'),
+    path('descricao/', views.descricao, name='descricao'),
+    path('indicadores/', views.indicadores, name='indicadores'),
 
     
     # Administração
@@ -37,7 +39,7 @@ urlpatterns = [
     path('notificacoes/', include('notificacoes.urls')),
 
     #BI
-    path('bi/', include('bi.urls', namespace='bi')),  # Inclui as URLs com o namespace 'bi'
+    path('bi/', include('bi.urls', namespace='bi')),  
 ]
 
 # Configuração para servir arquivos de mídia e estáticos em modo de depuração
