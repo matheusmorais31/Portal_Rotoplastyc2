@@ -1,32 +1,28 @@
-# notificacoes/tasks.py
-
+import logging
 from celery import shared_task
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
-import logging
 
-logger = logging.getLogger(__name__)
+# Obter o logger específico para email
+logger = logging.getLogger('email')
 
 @shared_task
 def enviar_notificacao_email_task(notificacao_id):
-    from .models import Notificacao  # Importar aqui para evitar problemas de importação circular
+    from .models import Notificacao  # Import local para evitar import circular
     try:
         notificacao = Notificacao.objects.get(id=notificacao_id)
-        # Verifica se o destinatário tem um e-mail válido
         if notificacao.destinatario.email:
             assunto = 'Nova Notificação: {}'.format(notificacao.mensagem[:50])
             destinatario_email = [notificacao.destinatario.email]
 
-            # Contexto para o template de e-mail
             contexto = {
                 'notificacao': notificacao,
                 'destinatario': notificacao.destinatario,
                 'site_url': settings.SITE_URL,
             }
 
-            # Renderiza o conteúdo do e-mail usando um template
             html_conteudo = render_to_string('notificacoes/email_notificacao.html', contexto)
             texto_conteudo = strip_tags(html_conteudo)
 
@@ -45,3 +41,18 @@ def enviar_notificacao_email_task(notificacao_id):
         logger.error(f"Notificação com ID {notificacao_id} não encontrada.")
     except Exception as e:
         logger.error(f"Erro ao enviar e-mail de notificação: {e}", exc_info=True)
+
+@shared_task
+def enviar_email_interno_task(assunto, mensagem):
+    logger.info("Iniciando envio de e-mail interno.")
+    try:
+        send_mail(
+            assunto,
+            mensagem,
+            settings.DEFAULT_FROM_EMAIL,
+            ["interno@rotoplastyc.com.br"],
+            fail_silently=False,
+        )
+        logger.info(f"E-mail interno enviado com sucesso para interno@rotoplastyc.com.br. Assunto: {assunto}")
+    except Exception as e:
+        logger.error(f"Erro ao enviar e-mail interno: {e}", exc_info=True)

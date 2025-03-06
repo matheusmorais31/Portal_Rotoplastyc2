@@ -33,7 +33,7 @@ a {
 
 
 .modal-container {
-    background-color: #2a2a2c;
+    background-color: rgb(23, 23, 24, 0.9);
     width: 145px;
     height: 145px;
     display: flex;
@@ -43,6 +43,8 @@ a {
     align-items: center;
     text-align: center;
     transition: 0.2s ease-in-out;
+    border: 1px solid #8d8989;
+    box-shadow: 0px 0px 17px #000000;
     border-radius: 10px;
 }
 

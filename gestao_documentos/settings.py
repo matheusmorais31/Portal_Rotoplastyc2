@@ -12,9 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = [
-    '172.16.44.12'    
+    'portal.rotoplastyc.com.br',
+    '172.16.44.11',       
 ]
 
 # Application definition
@@ -155,7 +156,15 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR / 'django.log',
-            'maxBytes': 1024*1024*5,  # 5MB
+            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_email': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'email.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5MB
             'backupCount': 5,
             'formatter': 'verbose',
         },
@@ -170,10 +179,15 @@ LOGGING = {
             'handlers': ['file'],
             'level': 'DEBUG',
         },
-        'bi': {  # Logger para o aplicativo 'bi'
+        'bi': {
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'email': {
+            'handlers': ['file_email'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }
@@ -255,4 +269,3 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 #Gravar sessão
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-

@@ -327,7 +327,7 @@ def listar_aprovacoes_pendentes(request):
 
 #Função para listar os documentos aprovados
 @login_required
-@permission_required('documentos.can_add_documento', raise_exception=True)
+@permission_required('documentos.view_documentos', raise_exception=True)
 def listar_documentos_aprovados(request):
     # Ordena os documentos primeiro pela categoria, depois pelo nome e revisão
     documentos = Documento.objects.filter(status='aprovado', is_active=True)\
