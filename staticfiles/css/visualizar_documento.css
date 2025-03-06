@@ -1,72 +1,61 @@
-/* documentos/static/css/visualizar_documento.css */
+/* ----- Estilos básicos (desktop) ----- */
 
-/* Estilo básico para o corpo da página */
 html, body {
-    height: 100%;
     margin: 0;
     padding: 0;
+    height: 100%;
     background-color: #38393F;
     color: #fff;
     font-family: Arial, sans-serif;
 }
 
-/* Contêiner principal */
 .container {
-    /* Antes estava assim (limitava em 1200px, e cortava se o PDF fosse maior): */
-    /* max-width: 1200px; */
-
-    /* Agora, permita crescer livremente: */
-    max-width: none; /* ou simplesmente comente/remova a linha que define max-width */
-
-    /* Demais propriedades continuam as mesmas. */
     width: 100%;
-    background-color: rgba(17, 16, 16, 0.44);
+    max-width: none;
+    background-color: rgba(17,16,16,0.44);
     padding: 20px;
     border-radius: 20px;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
-    margin: 50px auto; 
-    color: #ffffff;
-    text-align: left;
+    margin: 50px auto;
+    box-shadow: 0 0 4px rgba(0,0,0,0.3);
     position: relative;
 }
 
-/* Botão de Voltar */
+/* Botão de Voltar (desktop) */
 .back-button {
     position: absolute;
     top: 20px;
     right: 20px;
     background-color: #2EC2D6;
-    color: white;
+    color: #fff;
     padding: 10px 20px;
-    border: none;
     border-radius: 5px;
     text-decoration: none;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
-
 .back-button:hover {
     background-color: #1EB2C1;
-    box-shadow: 0px 0px 10px #2EC2D6;
+    box-shadow: 0 0 10px #2EC2D6;
 }
 
-/* Título */
+/* Título e textos do cabeçalho */
 h1 {
     font-size: 28px;
     margin-bottom: 20px;
-    color: #ffffff;
+    color: #fff;
+}
+p {
+    font-size: 16px;
+    margin: 6px 0;
 }
 
-/* Contêiner dos botões (Baixar, Imprimir) */
+/* Botões */
 .button-container {
     margin-bottom: 20px;
     text-align: center;
 }
-
-/* Botões gerais */
 .btn {
-    display: inline-block;
     background-color: #2EC2D6;
     color: white;
     padding: 10px 20px;
@@ -74,17 +63,16 @@ h1 {
     border-radius: 5px;
     text-decoration: none;
     font-size: 16px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     margin: 0 5px;
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
-
 .btn:hover {
     background-color: #1EB2C1;
-    box-shadow: 0px 0px 15px #2EC2D6;
+    box-shadow: 0 0 10px #2EC2D6;
 }
 
-/* Barra de Zoom */
+/* Zoom controls (desktop) */
 .zoom-controls {
     display: flex;
     align-items: center;
@@ -92,55 +80,69 @@ h1 {
     margin-bottom: 20px;
     gap: 10px;
 }
-
-.zoom-controls label {
-    font-size: 16px;
-}
-
-.zoom-controls input[type="range"] {
-    width: 150px;
-    cursor: pointer;
-}
-
+.zoom-controls label,
 .zoom-controls span {
     font-size: 16px;
-    min-width: 50px;
-    text-align: center;
 }
 
-/* Container do PDF */
+/* PDF container (desktop) */
 .pdf-container {
     width: 100%;
-    /* AQUI está o segredo: */
-    overflow-x: auto; /* permite rolagem horizontal se o PDF exceder a largura */
-    /* Se quiser rolagem vertical interna, use overflow-y: auto; */
-    
     background-color: #fff;
     border-radius: 10px;
     padding: 10px;
-    box-shadow: 0px 0px 6px rgba(0,0,0,0.5);
-    position: relative;
+    box-shadow: 0 0 6px rgba(0,0,0,0.5);
+    color: #000;
+    overflow-x: auto; /* rolagem horizontal se necessário */
 }
 
-/* Mensagem de carregamento ou erro */
+/* Mensagem de "Carregando PDF" ou erro */
 .pdf-container .pdf-message {
-    width: 100%;
     background-color: #fff;
     border: 2px solid #2EC2D6;
     border-radius: 10px;
     padding: 10px;
-    color: #000 !important;
     font-size: 16px;
     text-align: center;
     font-weight: bold;
     margin-top: 20px;
 }
 
-/* Canvas para cada página do PDF */
+/* Canvas (cada página do PDF) */
 canvas {
     display: block;
     margin: 20px auto;
     border: 1px solid #ddd;
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    /* A largura/altura final é atribuída via JS (canvas.style). */
+}
+
+/* ----- Mobile (max-width: 768px) ----- */
+@media (max-width: 768px) {
+
+    /* Oculta o botão de voltar */
+    .back-button {
+        display: none;
+    }
+
+    /* Remove margens, bordas e fundo do container para PDF ocupar toda a área */
+    .container {
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background-color: transparent; /* se quiser tirar o fundo cinza */
+    }
+
+    /* Remove bordas e padding do .pdf-container */
+    .pdf-container {
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    /* Canvas sem margens e bordas */
+    canvas {
+        margin: 0 auto;
+        border: none;
+    }
 }

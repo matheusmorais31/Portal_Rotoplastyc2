@@ -1,5 +1,3 @@
-# notificacoes/signals.py
-
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -9,8 +7,9 @@ from notificacoes.models import Notificacao
 from django.contrib.auth.models import Permission
 from django.db.models import Q
 import logging
+from django.conf import settings
 
-from .tasks import enviar_notificacao_email_task  # Importe a tarefa do Celery
+from .tasks import enviar_notificacao_email_task, enviar_email_interno_task
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +33,6 @@ def armazenar_status_anterior(sender, instance, **kwargs):
 def notificar_eventos_documento(sender, instance, created, **kwargs):
     """
     Envia notificações com base nas mudanças de status do documento.
-    Inclui o elaborador e a revisão do documento nas mensagens.
     """
     try:
         old_status = getattr(instance, '_old_status', None)
@@ -43,13 +41,11 @@ def notificar_eventos_documento(sender, instance, created, **kwargs):
         # 1. Quando um documento é criado e está aguardando análise
         if created and new_status == 'aguardando_analise':
             try:
-                # Obter a permissão 'can_analyze'
                 permission = Permission.objects.get(codename='can_analyze')
             except Permission.DoesNotExist:
                 logger.error("Permissão 'can_analyze' não encontrada.")
-                return  # Não pode notificar sem permissão definida
+                return
 
-            # Obter todos os usuários que têm essa permissão diretamente ou via grupo
             analistas = User.objects.filter(
                 Q(user_permissions=permission) | Q(groups__permissions=permission),
                 is_active=True
@@ -68,7 +64,6 @@ def notificar_eventos_documento(sender, instance, created, **kwargs):
                     ),
                     link=reverse('documentos:listar_documentos_para_analise')
                 )
-                # Enfileira a tarefa assíncrona para enviar o e-mail
                 enviar_notificacao_email_task.delay(notificacao.id)
 
         # 2. Após a análise ser concluída, notificar o elaborador que está aguardando aprovação
@@ -105,51 +100,20 @@ def notificar_eventos_documento(sender, instance, created, **kwargs):
             if created:
                 enviar_notificacao_email_task.delay(notificacao.id)
 
-        # 4. Após aprovação do aprovador, notificar todos os usuários sobre o novo documento aprovado
+        # 4. Após aprovação do aprovador, notificar sobre o novo documento aprovado
+        # Alterado para enviar um único email para interno@rotoplastyc.com.br
         elif old_status != 'aprovado' and new_status == 'aprovado' and not instance.reprovado:
-            # Notificar todos os usuários, exceto o elaborador e o aprovador
-            usuarios = User.objects.exclude(id__in=[instance.elaborador.id, instance.aprovador1.id]).distinct()
-            logger.debug(f"Notificando {usuarios.count()} usuários sobre a aprovação do documento.")
-
-            for usuario in usuarios:
-                notificacao, created = Notificacao.objects.get_or_create(
-                    destinatario=usuario,
-                    documento=instance,
-                    mensagem=(
-                        f"Informamos que o novo documento \"{instance.nome}\" Revisão {instance.revisao:02d} criado por {instance.elaborador.get_full_name()} foi publicado."
-                    ),
-                    defaults={
-                        'link': reverse('documentos:listar_documentos_aprovados')
-                    }
-                )
-                if created:
-                    enviar_notificacao_email_task.delay(notificacao.id)
-
-            # Notificar também o elaborador e o aprovador
-            notificacoes_para_criar = [
-                {
-                    'destinatario': instance.elaborador,
-                    'mensagem': f"Seu documento \"{instance.nome}\" (Revisão {instance.revisao:02d}) foi aprovado e publicado.",
-                    'link': reverse('documentos:listar_documentos_aprovados')
-                },
-                {
-                    'destinatario': instance.aprovador1,
-                    'mensagem': f"Você aprovou o documento \"{instance.nome}\" (Revisão {instance.revisao:02d}) que agora foi publicado.",
-                    'link': reverse('documentos:listar_documentos_aprovados')
-                }
-            ]
-
-            for notificacao_data in notificacoes_para_criar:
-                notificacao, created = Notificacao.objects.get_or_create(
-                    destinatario=notificacao_data['destinatario'],
-                    documento=instance,
-                    mensagem=notificacao_data['mensagem'],
-                    defaults={
-                        'link': notificacao_data['link']
-                    }
-                )
-                if created:
-                    enviar_notificacao_email_task.delay(notificacao.id)
+            assunto = f"Documento Publicado: {instance.nome} (Revisão {instance.revisao:02d})"
+            link = reverse('documentos:listar_documentos_aprovados')
+            mensagem = (
+                f"Olá,\n\n"
+                f"O documento \"{instance.nome}\" (Revisão {instance.revisao:02d}) criado por {instance.elaborador.get_full_name()} "
+                f"foi aprovado e publicado.\n"
+                f"Acesse o documento pelo link: {settings.SITE_URL}{link}\n\n"
+                f"Atenciosamente,\n"
+                f"Equipe Rotoplastyc"
+            )
+            enviar_email_interno_task.delay(assunto, mensagem)
 
         # 5. Se o documento for reprovado, notificar o elaborador
         elif old_status != 'reprovado' and new_status == 'reprovado' and instance.elaborador:
@@ -169,9 +133,6 @@ def notificar_eventos_documento(sender, instance, created, **kwargs):
 
     except Exception as e:
         logger.error(f"Erro ao notificar eventos para documento {instance.id}: {e}", exc_info=True)
-
-# Remova o sinal antigo que enviava e-mails diretamente e ajuste para apenas criar a notificação
-# O envio do e-mail agora é tratado no sinal abaixo
 
 @receiver(post_save, sender=Notificacao)
 def enviar_notificacao_email(sender, instance, created, **kwargs):

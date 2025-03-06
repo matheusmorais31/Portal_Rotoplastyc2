@@ -2,15 +2,17 @@
 {% load static %}
 
 {% block extra_css %}
+<!-- Link para o CSS personalizado -->
 <link rel="stylesheet" href="{% static 'css/visualizar_documento.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container">
 
-    <!-- Botão de Voltar -->
+    <!-- Botão de Voltar (visível só em desktop) -->
     <a href="javascript:history.back()" class="back-button">Voltar</a>
 
+    <!-- Cabeçalho do documento (desktop). Se quiser esconder no mobile, coloque em .header-info e use display:none. -->
     <h1>{{ documento.nome }} - Revisão {{ documento.revisao|default:"N/A" }}</h1>
     <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
     <p><strong>Elaborador:</strong> 
@@ -91,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Carrega o PDF
     pdfjsLib.getDocument(url).promise.then(function(pdf) {
         pdfDoc = pdf;
-        renderPDF(); // renderiza as páginas
+        renderPDF();
     }).catch(function(error) {
         pdfContainer.innerHTML = `<p class="pdf-message">Erro ao carregar PDF: ${error.message}</p>`;
     });
@@ -99,41 +101,35 @@ document.addEventListener("DOMContentLoaded", function() {
     // Função para renderizar todo o PDF
     function renderPDF() {
         pdfContainer.innerHTML = ''; // limpa o container
-
         if (!pdfDoc) return;
 
         for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
             pdfDoc.getPage(pageNum).then(function(page) {
-                // 1) Descobre tamanho natural da página:
+                // Calcula "fit" para a largura do container
                 const viewport = page.getViewport({ scale: 1 });
-
-                // 2) Fit to container (largura)
-                const containerWidth = pdfContainer.clientWidth; 
+                const containerWidth = pdfContainer.clientWidth;
                 const fitScale = (containerWidth - 20) / viewport.width;
 
-                // 3) Zoom final (fitScale * userZoom)
+                // Aplica o zoom do usuário
                 const baseScale = fitScale * userZoom;
 
-                // ----
-                // 4) Cria um "fator de qualidade" (2.0 = dobrar a resolução interna do canvas):
+                // Aumenta a qualidade (2x)
                 const qualityFactor = 2.0;
-                // 5) Para renderizar com mais pixels, multiplicamos:
                 const renderScale = baseScale * qualityFactor;
                 const scaledViewport = page.getViewport({ scale: renderScale });
 
-                // 6) Cria o canvas com resolução maior
+                // Cria canvas
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 canvas.width = scaledViewport.width;
                 canvas.height = scaledViewport.height;
 
-                // 7) Reduz o tamanho de exibição via CSS, para ficar “nítido”
+                // Ajuste via CSS para exibir em tamanho final
                 canvas.style.width = (scaledViewport.width / qualityFactor) + 'px';
                 canvas.style.height = (scaledViewport.height / qualityFactor) + 'px';
 
                 pdfContainer.appendChild(canvas);
 
-                // 8) Renderiza a página
                 page.render({
                     canvasContext: context,
                     viewport: scaledViewport
@@ -142,14 +138,14 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Listener do slider
+    // Slider de zoom
     zoomRange.addEventListener("input", function() {
         userZoom = parseInt(this.value, 10) / 100;
         zoomValue.textContent = this.value + "%";
         renderPDF();
     });
 
-    // Impressão
+    // Botão de impressão
     if (printButton) {
         printButton.addEventListener("click", function() {
             printPDF();
@@ -167,8 +163,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
         canvases.forEach((canvas) => {
             const dataURL = canvas.toDataURL("image/png");
-            // Define width:100% para usar toda a largura da página de impressão
-            printWindow.document.write(`<img src="${dataURL}" style="width:100%; margin-bottom:20px;">`);
+            printWindow.document.write(
+                `<img src="${dataURL}" style="width:100%; margin-bottom:20px;">`
+            );
         });
 
         printWindow.document.write("</body></html>");
