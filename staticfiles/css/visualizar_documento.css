@@ -1,5 +1,4 @@
 /* ----- Estilos básicos (desktop) ----- */
-
 html, body {
     margin: 0;
     padding: 0;
@@ -9,6 +8,7 @@ html, body {
     font-family: Arial, sans-serif;
 }
 
+/* Container principal */
 .container {
     width: 100%;
     max-width: none;
@@ -20,7 +20,7 @@ html, body {
     position: relative;
 }
 
-/* Botão de Voltar (desktop) */
+/* Botão de Voltar */
 .back-button {
     position: absolute;
     top: 20px;
@@ -39,7 +39,7 @@ html, body {
     box-shadow: 0 0 10px #2EC2D6;
 }
 
-/* Título e textos do cabeçalho */
+/* Título e textos */
 h1 {
     font-size: 28px;
     margin-bottom: 20px;
@@ -50,7 +50,7 @@ p {
     margin: 6px 0;
 }
 
-/* Botões */
+/* Botões de ação */
 .button-container {
     margin-bottom: 20px;
     text-align: center;
@@ -72,20 +72,48 @@ p {
     box-shadow: 0 0 10px #2EC2D6;
 }
 
-/* Zoom controls (desktop) */
-.zoom-controls {
+/* Container fixo para Zoom e Instrução */
+.fixed-controls {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 0, 0, 0.519);
+    padding: 10px 15px;
+    border-radius: 8px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
+    flex-direction: column;
     gap: 10px;
-}
-.zoom-controls label,
-.zoom-controls span {
-    font-size: 16px;
+    z-index: 999999;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* PDF container (desktop) */
+.fixed-controls .zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.fixed-controls .zoom-controls input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 120px;
+    height: 6px;
+    background: #2EC2D6;
+    border-radius: 5px;
+    outline: none;
+    opacity: 0.9;
+    transition: opacity .15s ease-in-out;
+}
+.fixed-controls .zoom-controls input[type="range"]:hover {
+    opacity: 1;
+}
+.fixed-controls .zoom-controls span {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* PDF Container */
 .pdf-container {
     width: 100%;
     background-color: #fff;
@@ -93,10 +121,9 @@ p {
     padding: 10px;
     box-shadow: 0 0 6px rgba(0,0,0,0.5);
     color: #000;
-    overflow-x: auto; /* rolagem horizontal se necessário */
+    overflow-x: auto;
 }
 
-/* Mensagem de "Carregando PDF" ou erro */
 .pdf-container .pdf-message {
     background-color: #fff;
     border: 2px solid #2EC2D6;
@@ -116,33 +143,67 @@ canvas {
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 
-/* ----- Mobile (max-width: 768px) ----- */
+/* Camada de Texto (sobreposição) */
+.textLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    color: transparent;
+}
+.textLayer span {
+    position: absolute;
+    white-space: pre;
+    transform-origin: 0 0;
+    color: transparent;
+}
+
+/* ----- Responsivo para Mobile (max-width: 768px) ----- */
 @media (max-width: 768px) {
 
-    /* Oculta o botão de voltar */
+    /* Esconde o botão de voltar (opcional) */
     .back-button {
         display: none;
     }
 
-    /* Remove margens, bordas e fundo do container para PDF ocupar toda a área */
+    /* Container ocupa toda a tela */
     .container {
         margin: 0;
         padding: 0;
         border-radius: 0;
         box-shadow: none;
-        background-color: transparent; /* se quiser tirar o fundo cinza */
+        background-color: transparent;
     }
 
-    /* Remove bordas e padding do .pdf-container */
+    /* PDF Container sem bordas extras */
     .pdf-container {
         border-radius: 0;
         box-shadow: none;
         padding: 0;
     }
 
-    /* Canvas sem margens e bordas */
+    /* Canvas sem bordas */
     canvas {
         margin: 0 auto;
         border: none;
     }
+
+    /* Ajuste da Barra de Zoom para Mobile: fixa na parte inferior */
+    .fixed-controls {
+        top: auto;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.9);
+        padding: 8px 12px;
+        border-radius: 6px;
+        z-index: 999999;
+    }
+    .fixed-controls .zoom-controls input[type="range"] {
+        width: 100px;
+    }
 }
+
+

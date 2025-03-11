@@ -12,10 +12,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = [
-    'portal.rotoplastyc.com.br',
-    '172.16.44.11',       
+    '172.16.44.12',       
 ]
 
 # Application definition
@@ -109,7 +108,8 @@ LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False
+
 
 LOCALE_PATHS = [
     BASE_DIR / 'locale',

@@ -3,9 +3,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import GroupAdmin
 from django.contrib.sessions.models import Session
 from django.utils import timezone
-from django.utils.timezone import localtime
-
-
+from django.utils.timezone import localtime, is_naive
 
 from usuarios.models import Usuario
 
@@ -65,6 +63,9 @@ class SessionAdmin(admin.ModelAdmin):
         return "Sem usuário (sessão anônima)"
 
     def expire_date_local(self, obj):
+        # Se expire_date for naive, formata sem conversão; caso contrário, converte para horário local
+        if is_naive(obj.expire_date):
+            return obj.expire_date.strftime("%Y-%m-%d %H:%M:%S")
         return localtime(obj.expire_date).strftime("%Y-%m-%d %H:%M:%S")
     
     expire_date_local.short_description = "Expira em"

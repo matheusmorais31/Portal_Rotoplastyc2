@@ -117,25 +117,35 @@
                                         <img src="{% static 'images/download-icon.png' %}" alt="Baixar Editável" class="download-icon">
                                         <span class="tooltip-text">Baixar</span>
                                     </a>
+                                    {% if perms.documentos.delete_documento %}
+                                    <form method="post" action="{% url 'documentos:deletar_documento' documento.id %}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja deletar a revisão atual deste documento?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="action-icon" title="Deletar Documento">
+                                            <img src="{% static 'images/deletar.png' %}" alt="Deletar" class="delete-icon">
+                                            <span class="tooltip-text">Deletar</span>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    
                                 {% elif documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet'%}
-                                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
+                                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon" title=" Ver PDF">
                                         <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
                                         <span class="tooltip-text">Visualizar</span>
                                     </a>
                                     {% if perms.documentos.can_add_documento %}
-                                        <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon">
+                                        <a href="{% url 'documentos:nova_revisao' documento.id %}" class="action-icon" title="Criar Nova Revisão">
                                             <img src="{% static 'images/versao.png' %}" alt="Nova Revisão" class="revision-icon">
                                             <span class="tooltip-text">Nova Revisão</span>
                                         </a> 
                                     {% endif %}
                                     {% if perms.documentos.view_acessos_documento %}
-                                        <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon">
+                                        <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon" title="Acessos ao Documento">
                                             <img src="{% static 'images/acessou.png' %}" alt="Visualizar Acessos" class="view-access-icon">
                                             <span class="tooltip-text">Acessos</span>
                                         </a>
                                     {% endif %}
                                     {% if perms.documentos.can_view_revisions %}
-                                        <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
+                                        <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon" title="Histórico de Revisões">
                                             <img src="{% static 'images/revision-icon.png' %}" alt="Histórico" class="view-access-icon">
                                             <span class="tooltip-text">Histórico</span>
                                         </a>
@@ -151,7 +161,17 @@
                                             {% endif %}
                                         </form>
                                     {% endif %}
+                                    {% if perms.documentos.delete_documento %}
+                                    <form method="post" action="{% url 'documentos:deletar_documento' documento.id %}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja deletar a revisão atual deste documento?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="action-icon" title="Deletar Documento">
+                                            <img src="{% static 'images/deletar.png' %}" alt="Deletar" class="delete-icon">
+                                            <span class="tooltip-text">Deletar</span>
+                                        </button>
+                                    </form>
+                                    {% endif %}
                                 {% endif %}
+                                
                             </div>
                         </div>
                     </div>

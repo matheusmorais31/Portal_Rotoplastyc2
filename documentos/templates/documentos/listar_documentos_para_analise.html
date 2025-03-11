@@ -18,6 +18,17 @@
         {% for documento in documentos %}
         <div class="document-container">
             <div class="document-item">
+                <!-- Ícone do documento -->
+                <div class="document-status">
+                    {% if documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet' %}
+                        <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
+                    {% elif documento.document_type == 'spreadsheet' %}
+                        <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
+                    {% else %}
+                        <img src="{% static 'images/default-icon.png' %}" alt="Documento" class="status-icon">
+                    {% endif %}
+                </div>
+
                 <!-- Informações do documento -->
                 <div class="document-info">
                     <div class="document-grid">
@@ -32,7 +43,8 @@
                             {% endif %}
                         </div>
                         <div><strong>Status:</strong> {{ documento.get_status_display }}</div>
-                        <div><strong>Tipo:</strong> {{ documento.get_document_type_display }}</div>
+                        <div><strong>Tipo:</strong> {{ documento.get_document_type_display }}
+                        </div>
                     </div>
                 </div>
 
@@ -82,15 +94,15 @@
                         </button>
                     </form>
                     {% endif %}
-                                        
 
-                    <!-- Botão para aprovar o documento -->
-                    <form method="post" action="{% url 'documentos:aprovar_documento' documento.id %}" style="display:inline;" onsubmit="disableApproveButton(this)">
+                    <!-- Botão para aprovar a análise SEM precisar de upload -->
+                    <form method="post" action="{% url 'documentos:listar_documentos_para_analise' %}" style="display:inline;" onsubmit="disableApproveButton(this)">
                         {% csrf_token %}
                         <input type="hidden" name="documento_id" value="{{ documento.id }}">
-                        <button type="submit" class="action-icon approve-button" title="Aprovar Documento">
+                        <input type="hidden" name="action" value="aprovar_analise">
+                        <button type="submit" class="action-icon approve-button" title="Aprovar Análise">
                             <img src="{% static 'images/approve-icon.png' %}" alt="Aprovar" class="approve-icon">
-                            <span class="tooltip-text">Aprovar</span>
+                            <span class="tooltip-text">Aprovar Análise</span>
                         </button>
                     </form>
 
@@ -130,6 +142,46 @@
 
 <!-- Scripts -->
 <script>
+    // Filtragem por busca (campo searchInput)
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const documentContainers = document.querySelectorAll('.document-container');
+        const documentList = document.getElementById('documentList');
+
+        function filterDocuments() {
+            const searchTerm = searchInput.value.toLowerCase();
+            let visibleCount = 0;
+
+            documentContainers.forEach(function(container) {
+                const docName = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
+                if (docName.includes(searchTerm)) {
+                    container.style.display = '';
+                    visibleCount++;
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0) {
+                if (!document.getElementById('noResultsMessage')) {
+                    const noResults = document.createElement('p');
+                    noResults.id = 'noResultsMessage';
+                    noResults.textContent = 'Nenhum documento encontrado.';
+                    noResults.style.color = '#fff';
+                    noResults.style.marginTop = '20px';
+                    documentList.appendChild(noResults);
+                }
+            } else {
+                const noResults = document.getElementById('noResultsMessage');
+                if (noResults) {
+                    noResults.remove();
+                }
+            }
+        }
+
+        searchInput.addEventListener('keyup', filterDocuments);
+    });
+
     // Função para mostrar o modal de reprovação
     function showRejectionModal(documentoId) {
         document.getElementById('rejectionModal').style.display = 'flex';
@@ -140,6 +192,14 @@
     function closeRejectionModal() {
         document.getElementById('rejectionModal').style.display = 'none';
         document.getElementById('rejectionForm').reset();
+    }
+
+    // Fechar o modal ao clicar fora do conteúdo
+    window.onclick = function(event) {
+        const modal = document.getElementById('rejectionModal');
+        if (event.target == modal) {
+            closeRejectionModal();
+        }
     }
 
     // Função de upload do documento revisado original
@@ -166,14 +226,6 @@
         const button = form.querySelector('button');
         button.disabled = true;
         button.innerHTML = '<div class="loading-spinner" title="Processando..."></div>';
-    }
-
-    // Fechar o modal ao clicar fora do conteúdo
-    window.onclick = function(event) {
-        const modal = document.getElementById('rejectionModal');
-        if (event.target == modal) {
-            closeRejectionModal();
-        }
     }
 </script>
 {% endblock %}
