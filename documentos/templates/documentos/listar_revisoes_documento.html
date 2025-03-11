@@ -1,5 +1,4 @@
-<!-- documentos/templates/documentos/listar_revisoes_documento.html -->
-
+<!-- templates/documentos/listar_revisoes_documento.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -14,9 +13,9 @@
     <!-- Informações do Documento Atual -->
     <div class="document-container">
         <div class="document-item">
+            <!-- Ícone do documento atual -->
             <div class="document-status">
-                {% if documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet' %}
-
+                {% if documento_atual.document_type == 'pdf' or documento_atual.document_type == 'pdf_spreadsheet' %}
                     <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
                 {% elif documento_atual.document_type == 'spreadsheet' %}
                     <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
@@ -38,8 +37,8 @@
                         {% endif %}
                     </div>
                     <div><strong>Aprovador:</strong> 
-                        {% if revisao.aprovador1 %}
-                            {{ revisao.aprovador1.get_full_name|default:revisao.aprovador1.username }}
+                        {% if documento_atual.aprovador1 %}
+                            {{ documento_atual.aprovador1.get_full_name|default:documento_atual.aprovador1.username }}
                         {% else %}
                             Não disponível
                         {% endif %}
@@ -64,16 +63,11 @@
         {% for revisao in revisoes %}
         <div class="document-container">
             <div class="document-item">
-                <!-- Ícone do documento -->
+                <!-- Ícone da revisão (variável `revisao`) -->
                 <div class="document-status">
-                    {% comment %}
-                        Supondo que cada revisão (`revisao`) está relacionada a um documento (`documento_atual`).
-                        Se a revisão estiver relacionada a um documento diferente, ajuste a referência conforme necessário.
-                    {% endcomment %}
-                    {% if documento.document_type == 'pdf' or documento.document_type == 'pdf_spreadsheet' %}
-
+                    {% if revisao.document_type == 'pdf' or revisao.document_type == 'pdf_spreadsheet' %}
                         <img src="{% static 'images/pdf.png' %}" alt="PDF" class="status-icon">
-                    {% elif documento_atual.document_type == 'spreadsheet' %}
+                    {% elif revisao.document_type == 'spreadsheet' %}
                         <img src="{% static 'images/spreadsheet.png' %}" alt="Planilha" class="status-icon">
                     {% else %}
                         <img src="{% static 'images/default-icon.png' %}" alt="Documento" class="status-icon">
@@ -128,6 +122,7 @@
         documentContainers.forEach(function(container) {
             var revisionNumber = container.querySelector('.document-grid div:nth-child(1)').innerText.toLowerCase();
             var status = container.querySelector('.document-grid div:nth-child(3)').innerText.toLowerCase();
+
             if (revisionNumber.includes(searchTerm) || status.includes(searchTerm)) {
                 container.style.display = '';
                 hasResults = true;

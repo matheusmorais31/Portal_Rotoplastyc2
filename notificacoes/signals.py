@@ -101,10 +101,14 @@ def notificar_eventos_documento(sender, instance, created, **kwargs):
                 enviar_notificacao_email_task.delay(notificacao.id)
 
         # 4. Após aprovação do aprovador, notificar sobre o novo documento aprovado
-        # Alterado para enviar um único email para interno@rotoplastyc.com.br
         elif old_status != 'aprovado' and new_status == 'aprovado' and not instance.reprovado:
+            # Se o documento for PDF ou PDF da planilha, utiliza o link de visualização
+            if instance.document_type in ['pdf', 'pdf_spreadsheet']:
+                link = reverse('documentos:visualizar_documento', args=[instance.id])
+            else:
+                link = reverse('documentos:listar_documentos_aprovados')
+
             assunto = f"Documento Publicado: {instance.nome} (Revisão {instance.revisao:02d})"
-            link = reverse('documentos:listar_documentos_aprovados')
             mensagem = (
                 f"Olá,\n\n"
                 f"O documento \"{instance.nome}\" (Revisão {instance.revisao:02d}) criado por {instance.elaborador.get_full_name()} "

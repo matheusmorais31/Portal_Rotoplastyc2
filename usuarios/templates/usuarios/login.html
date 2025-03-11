@@ -9,8 +9,7 @@
     <title>Login - Portal Rotoplastyc</title>
     <!-- Referência ao CSS de login -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
-    <link rel="shortcut icon" href="/static/images/favicon.png">
-
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
     <div class="login-container">
@@ -38,8 +37,10 @@
         <!-- Formulário de login -->
         <form method="post">
             {% csrf_token %}
+            <!-- Campo oculto para manter o parâmetro "next" -->
+            <input type="hidden" name="next" value="{{ next }}">
             <div class="input-group">
-                {{ form.username.label_tag }} 
+                {{ form.username.label_tag }}
                 {{ form.username }}
             </div>
             <div class="input-group">

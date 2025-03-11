@@ -120,6 +120,9 @@
                     {% if perms.documentos.view_documentos_ina%}
                     <li><a href="{% url 'documentos:listar_documentos_inativos' %}">Documentos Inativos</a></li>
                     {% endif %}
+                    {% if perms.documentos.monitor_documents%}
+                    <li><a href="{% url 'documentos:monitorar_pendentes' %}">Monitorar documentos</a></li>
+                    {% endif %}
                 </ul>
             </li>
 

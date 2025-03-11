@@ -36,6 +36,8 @@ logger = logging.getLogger(__name__)
 def login_usuario(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
+        # Captura o parâmetro "next" enviado como campo hidden no formulário
+        next_url = request.POST.get('next') or 'home'
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -47,13 +49,12 @@ def login_usuario(request):
                 if user.is_active:
                     login(request, user)
                     logger.info(f"Usuário {username} autenticado com sucesso.")
-                    return redirect('home')
+                    return redirect(next_url)
                 else:
                     logger.warning(f"Usuário {username} está inativo e tentou realizar login.")
                     form.add_error(None, 'Sua conta está inativa. Por favor, entre em contato com o administrador.')
             else:
                 logger.warning(f"Falha na autenticação do usuário {username}. Tentando verificar status da conta.")
-                # Verificação adicional para conta inativa
                 User = get_user_model()
                 try:
                     user = User.objects.get(username=username)
@@ -70,12 +71,13 @@ def login_usuario(request):
 
         else:
             logger.error(f"Erros no formulário de login: {form.errors}")
-            # Os erros do formulário já estão sendo exibidos no template
 
-        return render(request, 'usuarios/login.html', {'form': form})
+        return render(request, 'usuarios/login.html', {'form': form, 'next': next_url})
     else:
         form = AuthenticationForm(request)
-        return render(request, 'usuarios/login.html', {'form': form})
+        # Captura o parâmetro "next" da URL (caso exista)
+        next_url = request.GET.get('next', '')
+        return render(request, 'usuarios/login.html', {'form': form, 'next': next_url})
     
 # Função para registrar usuários locais no banco de dados
 @login_required

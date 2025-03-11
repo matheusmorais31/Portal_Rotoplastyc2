@@ -37,6 +37,10 @@ urlpatterns = [
     path('nova_revisao/<int:documento_id>/', views.nova_revisao, name='nova_revisao'),
     path('editaveis/', views.listar_documentos_editaveis, name='listar_documentos_editaveis'),
     path('revisoes/<int:documento_id>/', views.listar_revisoes_documento, name='listar_revisoes_documento'),
+    path('monitorar_pendentes/', views.monitorar_documentos_pendentes, name='monitorar_pendentes'),
+    path('deletar/<int:documento_id>/', views.deletar_documento, name='deletar_documento'),
+
+
 
     
 
