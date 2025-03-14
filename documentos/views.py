@@ -105,10 +105,11 @@ def listar_documentos_para_analise(request):
     Lista documentos em status 'aguardando_analise'.
     Permite:
     - Upload de arquivo revisado (action='upload')
-    - Aprovar a análise sem upload (action='aprovar_analise') -> que muda para 'aguardando_elaborador'
+    - Aprovar a análise sem upload (action='aprovar_analise') -> muda status p/ 'aguardando_elaborador'
     - Fazer upload manual de PDF para planilhas (action='upload_pdf_spreadsheet')
     - Reprovar o documento (action='reprovar')
     """
+    # Filtramos apenas documentos cujo status seja 'aguardando_analise'
     documentos = Documento.objects.filter(status='aguardando_analise')
 
     if request.method == 'POST':
@@ -116,21 +117,21 @@ def listar_documentos_para_analise(request):
         action = request.POST.get('action')
         documento = get_object_or_404(Documento, id=documento_id, status='aguardando_analise')
 
-        # 1) Upload de arquivo revisado (ex.: doc, docx, odt, xls, xlsx, ods)
+        # (1) Upload de arquivo revisado (.doc, .docx, .odt, .xls, .xlsx, .ods)
         if action == 'upload':
             form = AnaliseDocumentoForm(request.POST, request.FILES, instance=documento)
             if form.is_valid():
                 try:
                     with transaction.atomic():
                         documento = form.save(commit=False)
-                        # Registra o analista e a data de análise, mas mantém o status
+                        # Registra analista e data de análise, mas mantém 'aguardando_analise'
                         documento.analista = request.user
                         documento.data_analise = timezone.now()
-                        # O status permanece como 'aguardando_analise'
                         documento.save()
                         messages.success(
                             request,
-                            f'Documento "{documento.nome}" revisado carregado com sucesso! O documento continua aguardando análise.'
+                            f'Documento "{documento.nome}" revisado carregado com sucesso! '
+                            'O documento continua aguardando análise.'
                         )
                         return redirect('documentos:listar_documentos_para_analise')
                 except Exception as e:
@@ -139,7 +140,7 @@ def listar_documentos_para_analise(request):
             else:
                 messages.error(request, 'Erro ao fazer upload do documento revisado.')
 
-        # 2) Aprovar a análise sem upload – muda status para 'aguardando_elaborador'
+        # (2) Aprovar a análise sem upload – muda status para 'aguardando_elaborador'
         elif action == 'aprovar_analise':
             try:
                 with transaction.atomic():
@@ -147,6 +148,10 @@ def listar_documentos_para_analise(request):
                     documento.data_analise = timezone.now()
                     documento.status = 'aguardando_elaborador'
                     documento.save()
+                    
+                    # IMPORTANTE: Aqui chamamos a conversão para PDF
+                    documento.gerar_pdf()
+
                     messages.success(
                         request,
                         f'Documento "{documento.nome}" aprovado na análise e aguardando aprovação do elaborador.'
@@ -156,7 +161,7 @@ def listar_documentos_para_analise(request):
                 logger.error(f"Erro ao aprovar análise do documento {documento_id}: {e}", exc_info=True)
                 messages.error(request, 'Erro ao aprovar a análise do documento.')
 
-        # 3) Upload manual de PDF para planilhas
+        # (3) Upload manual de PDF para planilhas
         elif action == 'upload_pdf_spreadsheet':
             pdf_file = request.FILES.get('pdf_upload')
             if pdf_file:
@@ -164,22 +169,23 @@ def listar_documentos_para_analise(request):
                 if ext == '.pdf':
                     try:
                         with transaction.atomic():
-                            # Exclui o PDF anterior, se houver
-                            if documento.documento_pdf and documento.documento_pdf.storage.exists(documento.documento_pdf.name):
+                            # Exclui PDF anterior, se houver
+                            if (documento.documento_pdf 
+                                and documento.documento_pdf.storage.exists(documento.documento_pdf.name)):
                                 documento.documento_pdf.delete(save=False)
+                            # Salva o novo PDF para planilha
                             safe_nome = slugify(documento.nome)
                             desired_pdf_filename = f"{safe_nome}_v{documento.revisao}.pdf"
                             documento.documento_pdf.save(desired_pdf_filename, pdf_file)
                             documento.document_type = 'pdf_spreadsheet'
-                            # Registra o analista e a data de análise
+                            # Mantém status aguardando análise, mas atualiza analista e data
                             documento.analista = request.user
                             documento.data_analise = timezone.now()
-                            # Importante: NÃO altera o status para 'aguardando_elaborador'
-                            # O status continua 'aguardando_analise'
                             documento.save()
                             messages.success(
                                 request,
-                                f'PDF da planilha "{documento.nome}" enviado com sucesso! O documento continua aguardando análise.'
+                                f'PDF da planilha "{documento.nome}" enviado com sucesso! '
+                                'O documento continua aguardando análise.'
                             )
                             return redirect('documentos:listar_documentos_para_analise')
                     except Exception as e:
@@ -190,7 +196,7 @@ def listar_documentos_para_analise(request):
             else:
                 messages.error(request, 'Nenhum arquivo PDF enviado.')
 
-        # 4) Reprovar o documento
+        # (4) Reprovar o documento (solicita motivo de reprovação)
         elif action == 'reprovar':
             motivo = request.POST.get('motivo_reprovacao')
             if motivo:
