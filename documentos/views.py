@@ -15,13 +15,12 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from django.utils import timezone
-from django.db import models
+import pandas as pd
 
-
-
-logger = logging.getLogger('django')
+# Alterado para usar o logger "documentos"
+logger = logging.getLogger('documentos')
 User = get_user_model()
-
+logging
 # Função para listar as categorias
 @login_required
 @permission_required('documentos.view_categoria', raise_exception=True)
@@ -107,9 +106,9 @@ def listar_documentos_para_analise(request):
     - Upload de arquivo revisado (action='upload')
     - Aprovar a análise sem upload (action='aprovar_analise') -> muda status p/ 'aguardando_elaborador'
     - Fazer upload manual de PDF para planilhas (action='upload_pdf_spreadsheet')
+    - Fazer upload manual de PDF para documentos do tipo PDF (action='upload_pdf_manual')
     - Reprovar o documento (action='reprovar')
     """
-    # Filtramos apenas documentos cujo status seja 'aguardando_analise'
     documentos = Documento.objects.filter(status='aguardando_analise')
 
     if request.method == 'POST':
@@ -124,7 +123,6 @@ def listar_documentos_para_analise(request):
                 try:
                     with transaction.atomic():
                         documento = form.save(commit=False)
-                        # Registra analista e data de análise, mas mantém 'aguardando_analise'
                         documento.analista = request.user
                         documento.data_analise = timezone.now()
                         documento.save()
@@ -148,10 +146,8 @@ def listar_documentos_para_analise(request):
                     documento.data_analise = timezone.now()
                     documento.status = 'aguardando_elaborador'
                     documento.save()
-                    
-                    # IMPORTANTE: Aqui chamamos a conversão para PDF
+                    # Chama a conversão para PDF (se não houver PDF manual, conforme o gerar_pdf() modificado)
                     documento.gerar_pdf()
-
                     messages.success(
                         request,
                         f'Documento "{documento.nome}" aprovado na análise e aguardando aprovação do elaborador.'
@@ -169,16 +165,12 @@ def listar_documentos_para_analise(request):
                 if ext == '.pdf':
                     try:
                         with transaction.atomic():
-                            # Exclui PDF anterior, se houver
-                            if (documento.documento_pdf 
-                                and documento.documento_pdf.storage.exists(documento.documento_pdf.name)):
+                            if documento.documento_pdf and documento.documento_pdf.storage.exists(documento.documento_pdf.name):
                                 documento.documento_pdf.delete(save=False)
-                            # Salva o novo PDF para planilha
                             safe_nome = slugify(documento.nome)
                             desired_pdf_filename = f"{safe_nome}_v{documento.revisao}.pdf"
                             documento.documento_pdf.save(desired_pdf_filename, pdf_file)
                             documento.document_type = 'pdf_spreadsheet'
-                            # Mantém status aguardando análise, mas atualiza analista e data
                             documento.analista = request.user
                             documento.data_analise = timezone.now()
                             documento.save()
@@ -196,7 +188,38 @@ def listar_documentos_para_analise(request):
             else:
                 messages.error(request, 'Nenhum arquivo PDF enviado.')
 
-        # (4) Reprovar o documento (solicita motivo de reprovação)
+        # (4) Upload manual de PDF para documentos do tipo PDF
+        elif action == 'upload_pdf_manual':
+            pdf_file = request.FILES.get('pdf_upload')
+            if pdf_file:
+                ext = os.path.splitext(pdf_file.name)[1].lower()
+                if ext == '.pdf':
+                    try:
+                        with transaction.atomic():
+                            if documento.documento_pdf and documento.documento_pdf.storage.exists(documento.documento_pdf.name):
+                                documento.documento_pdf.delete(save=False)
+                            safe_nome = slugify(documento.nome)
+                            desired_pdf_filename = f"{safe_nome}_v{documento.revisao}.pdf"
+                            documento.documento_pdf.save(desired_pdf_filename, pdf_file)
+                            # Caso seja PDF manual, mantenha o tipo "pdf" para evitar geração automática
+                            documento.document_type = 'pdf'
+                            documento.analista = request.user
+                            documento.data_analise = timezone.now()
+                            documento.save()
+                            messages.success(
+                                request,
+                                f'PDF manual para "{documento.nome}" enviado com sucesso! Geração automática ignorada.'
+                            )
+                            return redirect('documentos:listar_documentos_para_analise')
+                    except Exception as e:
+                        logger.error(f"Erro ao fazer upload manual do PDF do documento {documento_id}: {e}", exc_info=True)
+                        messages.error(request, 'Erro ao fazer upload manual do PDF.')
+                else:
+                    messages.error(request, 'Formato inválido. Envie um arquivo PDF.')
+            else:
+                messages.error(request, 'Nenhum arquivo PDF enviado.')
+
+        # (5) Reprovar o documento (solicita motivo de reprovação)
         elif action == 'reprovar':
             motivo = request.POST.get('motivo_reprovacao')
             if motivo:
@@ -558,7 +581,6 @@ def listar_revisoes_documento(request, documento_id):
 @login_required
 @permission_required('documentos.monitor_documents', raise_exception=True)
 def monitorar_documentos_pendentes(request):
-    # Verifica o parâmetro GET para definir o filtro
     filter_status = request.GET.get('status', 'pendentes')
     
     if filter_status == 'aprovado':
@@ -568,15 +590,12 @@ def monitorar_documentos_pendentes(request):
         pendentes_por_status = {'Aprovado': documentos}
         total = documentos.count()
     elif filter_status in ['aguardando_analise', 'analise_concluida', 'aguardando_elaborador', 'aguardando_aprovador1']:
-        # Filtra somente o status selecionado dentre os pendentes
         documentos = Documento.objects.filter(status=filter_status).select_related(
             'categoria', 'elaborador', 'aprovador1', 'analista'
         )
-        # Criamos um dicionário para manter a estrutura original, com uma única chave
         pendentes_por_status = {filter_status.replace('_', ' ').title(): documentos}
         total = documentos.count()
     else:
-        # Caso o filtro não seja definido ou seja "pendentes", traz todos os status pendentes
         documentos = Documento.objects.filter(
             status__in=[
                 'aguardando_analise',
@@ -600,9 +619,6 @@ def monitorar_documentos_pendentes(request):
     }
     return render(request, 'documentos/monitorar_pendentes.html', contexto)
 
-
-
-
 @login_required
 @permission_required('documentos.delete_documento', raise_exception=True)
 def deletar_documento(request, documento_id):
@@ -614,15 +630,13 @@ def deletar_documento(request, documento_id):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Registrar no log a deleção do documento
                 DocumentoDeletado.objects.create(
                     usuario=request.user,
                     documento_nome=documento.nome,
                     revisao=documento.revisao,
-                    data_hora=timezone.now()  # opcional, já que o default é usado
+                    data_hora=timezone.now()
                 )
 
-                # Remove os arquivos físicos, se existirem
                 if documento.documento and os.path.isfile(documento.documento.path):
                     os.remove(documento.documento.path)
                 if documento.documento_pdf and os.path.isfile(documento.documento_pdf.path):
@@ -638,6 +652,22 @@ def deletar_documento(request, documento_id):
     messages.error(request, "A deleção deve ser feita via POST.")
     return redirect('documentos:listar_documentos_aprovados')
 
+@login_required
+def visualizar_documento_pdfjs(request, id):
+    """
+    Exibe o PDF em um iframe utilizando o viewer oficial do PDF.js.
+    A categoria bloqueada impede o download e impressão, mas permite visualização.
+    """
+    documento = get_object_or_404(Documento, id=id)
 
+    if documento.categoria.bloqueada:
+        messages.info(request, "Este documento é bloqueado para download e impressão, mas pode ser visualizado.")
 
+    pdfjs_viewer_url = request.build_absolute_uri('/static/pdfjs/web/viewer.html')
+    pdf_file_url = request.build_absolute_uri(reverse('documentos:visualizar_pdf', args=[documento.id]))
 
+    return render(request, 'documentos/visualizar_documento_pdfjs.html', {
+        'documento': documento,
+        'pdfjs_viewer_url': pdfjs_viewer_url,
+        'pdf_file_url': pdf_file_url
+    })

@@ -47,9 +47,11 @@
                 <!-- Botões de ação -->
                 <div class="document-actions">
                     <!-- Botão para visualizar o documento (PDF) -->
-                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
-                        <span class="tooltip-text">Visualizar</span>
+                    <a href="{% url 'documentos:visualizar_documento_pdfjs' documento.id %}"
+                        class="action-icon"
+                        title="Visualizar PDF.js">
+                            <img src="{% static 'images/view-icon.png' %}" alt="Visualizar PDF.js" class="view-icon">
+                            <span class="tooltip-text">Visualizar (PDF.js)</span>
                     </a>
                     <!-- Botão para aprovar o documento -->
                     <form method="post" style="display:inline;">

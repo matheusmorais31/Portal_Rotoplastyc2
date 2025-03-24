@@ -104,7 +104,7 @@ def notificar_eventos_documento(sender, instance, created, **kwargs):
         elif old_status != 'aprovado' and new_status == 'aprovado' and not instance.reprovado:
             # Se o documento for PDF ou PDF da planilha, utiliza o link de visualização
             if instance.document_type in ['pdf', 'pdf_spreadsheet']:
-                link = reverse('documentos:visualizar_documento', args=[instance.id])
+                link = reverse('documentos:visualizar_documento_pdfjs', args=[instance.id])
             else:
                 link = reverse('documentos:listar_documentos_aprovados')
 

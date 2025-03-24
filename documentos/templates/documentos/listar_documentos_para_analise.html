@@ -43,8 +43,7 @@
                             {% endif %}
                         </div>
                         <div><strong>Status:</strong> {{ documento.get_status_display }}</div>
-                        <div><strong>Tipo:</strong> {{ documento.get_document_type_display }}
-                        </div>
+                        <div><strong>Tipo:</strong> {{ documento.get_document_type_display }}</div>
                     </div>
                 </div>
 
@@ -52,9 +51,11 @@
                 <div class="document-actions">
                     <!-- Botão para visualizar o documento (PDF), se existir -->
                     {% if documento.documento_pdf %}
-                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
-                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
-                        <span class="tooltip-text">Visualizar</span>
+                    <a href="{% url 'documentos:visualizar_documento_pdfjs' documento.id %}"
+                        class="action-icon"
+                        title="Visualizar PDF.js">
+                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar PDF.js" class="view-icon">
+                        <span class="tooltip-text">Visualizar (PDF.js)</span>
                     </a>
                     {% endif %}
 
@@ -76,21 +77,30 @@
                         </button>
                     </form>
 
-                    <!-- Se for planilha (spreadsheet) e não tiver PDF, permitir upload manual de PDF -->
+                    <!-- Upload manual de PDF para planilhas -->
                     {% if documento.document_type == 'spreadsheet' or documento.document_type == 'pdf_spreadsheet' %}
                     <form method="post" enctype="multipart/form-data" action="{% url 'documentos:listar_documentos_para_analise' %}" style="display:inline;">
                         {% csrf_token %}
                         <input type="hidden" name="documento_id" value="{{ documento.id }}">
                         <input type="hidden" name="action" value="upload_pdf_spreadsheet">
-
-                        <!-- Input de arquivo oculto -->
-                        <input type="file" name="pdf_upload" id="pdfInput-{{ documento.id }}" accept=".pdf" style="display:none;" 
-                            onchange="this.form.submit();">
-
-                        <!-- Botão que aciona o input de arquivo ao ser clicado -->
+                        <input type="file" name="pdf_upload" id="pdfInput-{{ documento.id }}" accept=".pdf" style="display:none;" onchange="this.form.submit();">
                         <button type="button" class="action-icon" title="Upload PDF da Planilha" onclick="document.getElementById('pdfInput-{{ documento.id }}').click();">
                             <img src="{% static 'images/upload_pdf.png' %}" alt="Upload PDF" class="upload-icon">
                             <span class="tooltip-text">Upar PDF</span>
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <!-- Upload manual de PDF para documentos do tipo PDF -->
+                    {% if documento.document_type == 'pdf' %}
+                    <form method="post" enctype="multipart/form-data" action="{% url 'documentos:listar_documentos_para_analise' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="documento_id" value="{{ documento.id }}">
+                        <input type="hidden" name="action" value="upload_pdf_manual">
+                        <input type="file" name="pdf_upload" id="pdfInputManual-{{ documento.id }}" accept=".pdf" style="display:none;" onchange="this.form.submit();">
+                        <button type="button" class="action-icon" title="Upload PDF Manual" onclick="document.getElementById('pdfInputManual-{{ documento.id }}').click();">
+                            <img src="{% static 'images/upload_pdf.png' %}" alt="Upload PDF Manual" class="upload-icon">
+                            <span class="tooltip-text">Upar PDF Manual</span>
                         </button>
                     </form>
                     {% endif %}
@@ -200,7 +210,7 @@
         if (event.target == modal) {
             closeRejectionModal();
         }
-    }
+    };
 
     // Função de upload do documento revisado original
     function handleFileUpload(documentoId) {
@@ -211,7 +221,6 @@
             const file = fileInput.files[0];
             // Aceita doc, docx, odt, xls, xlsx, ods
             const allowedExtensions = /\.(doc|docx|odt|xls|xlsx|ods)$/i;
-
             if (file && allowedExtensions.test(file.name)) {
                 document.getElementById(`uploadForm-${documentoId}`).submit();
             } else {

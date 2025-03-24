@@ -140,7 +140,7 @@ SOFFICE_PATH = os.getenv('SOFFICE_PATH', SOFFICE_PATH)
 # Logging configuration with log rotation
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': False,  # Preserva os loggers já existentes
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {message}',
@@ -152,11 +152,19 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
+        'file_django': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'django.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'filename': BASE_DIR / 'logs' / 'django.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_documentos': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'documentos.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,
             'formatter': 'verbose',
         },
@@ -164,33 +172,43 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR / 'logs' / 'email.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_bi': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'bi.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['file_django'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'documentos': {
-            'handlers': ['file'],
+            'handlers': ['file_documentos'],
             'level': 'DEBUG',
-        },
-        'bi': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
         'email': {
             'handlers': ['file_email'],
             'level': 'INFO',
             'propagate': False,
         },
+        'bi': {
+            'handlers': ['file_bi'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
+
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
