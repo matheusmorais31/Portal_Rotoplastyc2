@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/visualizar_documento.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+  <!-- Botão de Voltar -->
+  <a href="javascript:history.back()" class="back-button">Voltar</a>
+
+  <!-- Dados do Documento -->
+  <h1>{{ documento.nome }} - Revisão {{ documento.revisao|default:"N/A" }}</h1>
+  <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
+  <p><strong>Elaborador:</strong>
+    {% if documento.elaborador %}
+      {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+    {% else %}
+      Não definido
+    {% endif %}
+  </p>
+  <p><strong>Aprovador:</strong>
+    {% if documento.aprovador1 %}
+      {{ documento.aprovador1.get_full_name|default:documento.aprovador1.username }}
+    {% else %}
+      Não definido
+    {% endif %}
+  </p>
+  <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y H:i" }}</p>
+
+
+
+  <div class="button-container">
+    {% if documento.documento_pdf and not documento.categoria.bloqueada %}
+        <a href="{% url 'documentos:baixar_pdf' documento.id %}" class="btn">Baixar PDF</a>
+        <button id="print-button" class="btn">Imprimir</button>
+    {% elif documento.documento_pdf and documento.categoria.bloqueada %}
+        <p><em>Download e impressão estão desabilitados para este documento.</em></p>
+    {% endif %}
+  </div>
+
+  <hr>
+
+  <!-- IFRAME do Viewer PDF.js com o parâmetro disablePrint se bloqueado -->
+  <div style="margin-top: 20px;">
+    <iframe
+      src="{{ pdfjs_viewer_url }}?file={{ pdf_file_url|urlencode }}{% if documento.categoria.bloqueada %}&disablePrint=true{% endif %}"
+      width="100%"
+      height="800"
+      style="border: none;"
+      allowfullscreen
+    ></iframe>
+  </div>
+</div>
+
+{% if not documento.categoria.bloqueada %}
+<!-- Script para tratar o clique do botão de impressão (quando permitido) -->
+<script>
+  document.getElementById("print-button").addEventListener("click", function() {
+    const iframe = document.querySelector("iframe");
+    if (!iframe) {
+      alert("Visualizador não encontrado.");
+      return;
+    }
+    function executePrint() {
+      const printButtonInternal = iframe.contentWindow.document.getElementById("print");
+      if (printButtonInternal) {
+        printButtonInternal.click();
+      } else {
+        iframe.contentWindow.print();
+      }
+    }
+    if (iframe.contentWindow.document.readyState === "complete") {
+      executePrint();
+    } else {
+      iframe.addEventListener("load", executePrint);
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}

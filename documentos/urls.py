@@ -30,6 +30,11 @@ urlpatterns = [
     # URLs para Visualização de Documentos e PDFs
     path('visualizar/<int:id>/', views.visualizar_documento, name='visualizar_documento'),
     path('visualizar_pdf/<int:id>/', views.visualizar_pdf, name='visualizar_pdf'),
+    path('visualizar_pdfjs/<int:id>/', views.visualizar_documento_pdfjs, name='visualizar_documento_pdfjs'),
+ 
+
+
+
     path('baixar_pdf/<int:id>/', views.baixar_pdf, name='baixar_pdf'),
     path('acessos/<int:id>/', views.visualizar_acessos_documento, name='visualizar_acessos_documento'),
 

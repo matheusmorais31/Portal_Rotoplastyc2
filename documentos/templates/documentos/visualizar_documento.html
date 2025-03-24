@@ -2,20 +2,20 @@
 {% load static %}
 
 {% block extra_css %}
-<!-- Link para o CSS personalizado -->
 <link rel="stylesheet" href="{% static 'css/visualizar_documento.css' %}">
 <style>
-  /* ----- Estilos para a página e PDF ----- */
+  /* ----- Estilos de página e PDF ----- */
   .pageContainer {
       position: relative;
       margin-bottom: 20px;
   }
+  /* Camada de texto do PDF.js */
   .textLayer {
       position: absolute;
       top: 0;
       left: 0;
-      height: 100%;
       width: 100%;
+      height: 100%;
       pointer-events: none;
       color: transparent;
   }
@@ -26,23 +26,68 @@
       color: transparent;
   }
 
+  /* Camada para os highlights da busca */
+  .highlightLayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+  }
+  .highlight-box {
+      position: absolute;
+      background-color: yellow;
+      opacity: 0.4;
+  }
+  .highlight-box.current-match {
+      background-color: orange;
+      opacity: 0.5;
+  }
+
   /* ----- Container Fixo (arrastável) para Zoom, Navegação, etc. ----- */
   .fixed-controls {
       position: fixed;
       top: 6%;
       left: 50%;
       transform: translateX(-50%);
-      /* Padding normal para o estado maximizado */
       padding: 50px 15px 10px 15px;
       border-radius: 8px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 8px;
       z-index: 999999;
       color: white;
       background-color: rgba(0, 0, 0, 0.41);
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-      cursor: move; /* Indica que o container pode ser arrastado */
+      cursor: move;
+  }
+  /* Barra de busca */
+  .search-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+  }
+  .search-row input[type="text"] {
+      width: 120px;
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      color: #000; /* texto escuro no input */
+  }
+  .search-row button {
+      background-color: #2EC2D6;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+  }
+  .search-row button:hover {
+      background-color: #1EB2C1;
   }
 
   /* Zoom Row */
@@ -111,12 +156,12 @@
   }
 
   /* Instruções */
-  .fixed-controls .instructions {
+  .instructions {
       color: red;
       font-size: 14px;
   }
-  .fixed-controls .instructionsmobile {
-      color: rgb(255, 255, 0);
+  .instructionsmobile {
+      color: yellow;
       font-size: 14px;
   }
 
@@ -127,7 +172,7 @@
           bottom: 10px;
           left: 50%;
           transform: translateX(-50%);
-          padding: 50px 12px 10px 12px; /* Ajustar também no mobile */
+          padding: 50px 12px 10px 12px;
           border-radius: 6px;
       }
       .zoom-row input[type="range"] {
@@ -135,26 +180,23 @@
       }
   }
 
-  /* ----- Botão Minimizar (circular) ----- */
+  /* Botão Minimizar (circular) */
   .minimize-button {
       position: absolute;
       top: 5px; 
-      left: 5px; /* Ou right: 5px; se preferir */
+      left: 5px;
       background-color: #2EC2D6;
       color: #fff;
       border: none;
       font-size: 20px;
       cursor: pointer;
       z-index: 1000000;
-
       border-radius: 50%;
       width: 32px;
       height: 32px;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
   }
   .minimize-button:hover {
@@ -162,32 +204,25 @@
       box-shadow: 0 0 6px #2EC2D6;
   }
 
-  /* ----- Estado Minimizado (Floating Action Button) ----- */
+  /* Estado Minimizado (Floating Action Button) */
   .fixed-controls.minimized {
-      /* Torna o container inteiro um círculo */
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background-color: #1c1c1c; /* Fundo escuro ou cor de sua preferência */
+      background-color: #1c1c1c;
       padding: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
   }
-
-  /* Esconde o conteúdo interno (Zoom, Navegação, etc.) */
   .fixed-controls.minimized .zoom-row,
   .fixed-controls.minimized .page-navigation,
   .fixed-controls.minimized .instructions,
-  .fixed-controls.minimized .instructionsmobile {
+  .fixed-controls.minimized .instructionsmobile,
+  .fixed-controls.minimized .search-row {
       display: none;
   }
-
-  /* Ajusta o botão ao estado minimizado:
-     - Remove o position absolute
-     - Aumenta tamanho para destaque
-     - Centraliza no círculo */
   .fixed-controls.minimized .minimize-button {
       position: static;
       width: 48px;
@@ -201,7 +236,7 @@
       transform: scale(1.1);
   }
 
-  /* ----- Container do PDF ----- */
+  /* Container do PDF */
   .pdf-container {
       width: 100%;
       background-color: #fff;
@@ -226,7 +261,6 @@
 
 {% block content %}
 <div class="container">
-
   <!-- Botão de Voltar -->
   <a href="javascript:history.back()" class="back-button">Voltar</a>
 
@@ -259,47 +293,56 @@
       {% endif %}
   </div>
 
-  <!-- Container fixo (arrastável) para controles -->
+  <!-- Controles Fixos (barra arrastável) -->
   <div class="fixed-controls" id="fixedControls">
 
-      <!-- Botão Minimizar/Maximizar -->
-      <button id="toggleMinimize" class="minimize-button">
-          <span id="minimizeIcon">–</span>
-      </button>
+    <!-- Botão Minimizar/Maximizar -->
+    <button id="toggleMinimize" class="minimize-button">
+        <span id="minimizeIcon">–</span>
+    </button>
 
-      <!-- Zoom -->
-      <div class="zoom-row">
-          <label for="zoomRange">Zoom:</label>
-          <button id="zoomOut">–</button>
-          <input type="range" id="zoomRange" min="50" max="400" step="10" value="100">
-          <button id="zoomIn">+</button>
-          <span id="zoomValue">100%</span>
-          <button id="zoomReset">Redefinir</button>
-      </div>
+    <!-- Zoom -->
+    <div class="zoom-row">
+      <label for="zoomRange">Zoom:</label>
+      <button id="zoomOut">–</button>
+      <input type="range" id="zoomRange" min="50" max="400" step="10" value="100">
+      <button id="zoomIn">+</button>
+      <span id="zoomValue">100%</span>
+      <button id="zoomReset">Redefinir</button>
+    </div>
 
-      <!-- Navegação de páginas -->
-      <div class="page-navigation">
-          <label for="pageNumber">Página:</label>
-          <input type="number" id="pageNumber" value="1" min="1">
-          <span id="pageCount">/ 1</span>
-      </div>
+    <!-- Barra de Busca -->
+    <div class="search-row">
+      <label for="searchInput">Buscar:</label>
+      <input type="text" id="searchInput" placeholder="Digite...">
+      <button id="searchBtn">Buscar</button>
+      <button id="prevMatchBtn">&uarr;</button>
+      <button id="nextMatchBtn">&darr;</button>
+      <span id="matchCount">0/0</span>
+    </div>
 
-      <!-- Instruções -->
-      <div class="instructions">
-         <p>Para movimentar o PDF para os lados, clique e segure o botão de rolagem do mouse e arraste.</p>
-      </div>
-      <div class="instructionsmobile">
-        <p>(Mobile) Use o gesto de pinça para ampliar ou reduzir. Recomenda-se também minimizar a barra de zoom.</p>
-     </div>
+    <!-- Navegação de páginas -->
+    <div class="page-navigation">
+      <label for="pageNumber">Página:</label>
+      <input type="number" id="pageNumber" value="1" min="1">
+      <span id="pageCount">/ 1</span>
+    </div>
+
+    <!-- Instruções -->
+    <div class="instructions">
+       <p>Para movimentar o PDF para os lados, clique e segure o botão de rolagem do mouse e arraste.</p>
+    </div>
+    <div class="instructionsmobile">
+      <p>(Mobile) Use o gesto de pinça para ampliar ou reduzir. Recomenda-se também minimizar a barra de zoom.</p>
+    </div>
   </div>
 
-  <!-- Container onde o PDF será renderizado -->
+  <!-- Container do PDF -->
   <div id="pdf-container" class="pdf-container">
-      <p class="pdf-message">Carregando PDF...</p>
+    <p class="pdf-message">Carregando PDF...</p>
   </div>
 </div>
 
-<!-- Se a categoria estiver bloqueada, impedir impressão e clique direito -->
 {% if documento.categoria.bloqueada %}
 <script>
   document.addEventListener("keydown", function (e) {
@@ -315,268 +358,400 @@
 </script>
 {% endif %}
 
-<!-- Importa PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script>
-  // Configura o worker do PDF.js
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 </script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const url = "{% url 'documentos:visualizar_pdf' documento.id %}";
-    const pdfContainer = document.getElementById("pdf-container");
+  const url = "{% url 'documentos:visualizar_pdf' documento.id %}";
+  const pdfContainer = document.getElementById("pdf-container");
 
-    // Zoom
-    const zoomRange = document.getElementById("zoomRange");
-    const zoomValue = document.getElementById("zoomValue");
-    const zoomInBtn = document.getElementById("zoomIn");
-    const zoomOutBtn = document.getElementById("zoomOut");
-    const zoomResetBtn = document.getElementById("zoomReset");
+  // Zoom
+  const zoomRange = document.getElementById("zoomRange");
+  const zoomValue = document.getElementById("zoomValue");
+  const zoomInBtn = document.getElementById("zoomIn");
+  const zoomOutBtn = document.getElementById("zoomOut");
+  const zoomResetBtn = document.getElementById("zoomReset");
 
-    // Navegação de Páginas
-    const pageNumberInput = document.getElementById("pageNumber");
-    const pageCountSpan = document.getElementById("pageCount");
+  // Paginação
+  const pageNumberInput = document.getElementById("pageNumber");
+  const pageCountSpan = document.getElementById("pageCount");
 
-    // Impressão
-    const printButton = document.getElementById("print-button");
-    const fixedControls = document.getElementById("fixedControls");
+  // Impressão
+  const printButton = document.getElementById("print-button");
+  const fixedControls = document.getElementById("fixedControls");
 
-    let pdfDoc = null;
-    let userZoom = 1.0; // Zoom inicial
-    const defaultZoom = 1.0;
+  // Busca
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const prevMatchBtn = document.getElementById("prevMatchBtn");
+  const nextMatchBtn = document.getElementById("nextMatchBtn");
+  const matchCountSpan = document.getElementById("matchCount");
 
-    // Para navegação
-    let currentPage = 1;
+  let pdfDoc = null;
+  let userZoom = 1.0;
+  const defaultZoom = 1.0;
+  let currentPage = 1;
 
-    /* ==========================
-       FUNÇÃO: Renderizar PDF
-    ========================== */
-    function renderPDF() {
-        // Salva a posição de rolagem atual
-        const scrollY = window.scrollY || window.pageYOffset;
-        pdfContainer.innerHTML = ''; // Limpa o container
+  // Cache dos spans por página (para a busca)
+  // pageSpans[pageNum] = [{span, pageNum}, ...]
+  let pageSpans = {};
 
-        let pagesRendered = 0;
+  // Resultados da busca atual
+  // matches = [{span, pageNum, highlightDiv}, ...]
+  let matches = [];
+  let currentMatchIndex = 0;
 
-        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-            pdfDoc.getPage(pageNum).then(function(page) {
-                // Cria o contêiner para a página
-                const pageContainer = document.createElement("div");
-                pageContainer.className = "pageContainer";
-                pdfContainer.appendChild(pageContainer);
+  /* ============================
+     CARREGAR O PDF
+  ============================ */
+  pdfjsLib.getDocument(url).promise.then(function(pdf) {
+      pdfDoc = pdf;
+      pageCountSpan.textContent = `/ ${pdfDoc.numPages}`;
+      renderAllPages();
+  }).catch(function(error) {
+      pdfContainer.innerHTML = `<p class="pdf-message">Erro ao carregar PDF: ${error.message}</p>`;
+  });
 
-                // Cria o canvas
-                const canvas = document.createElement("canvas");
-                const context = canvas.getContext("2d");
-                pageContainer.appendChild(canvas);
+  /* ============================
+     RENDERIZAR TODAS AS PÁGINAS
+  ============================ */
+  function renderAllPages() {
+      pdfContainer.innerHTML = "";
+      pageSpans = {};
+      matches = [];
+      updateMatchCount();
 
-                // 1) Viewport básico
-                const viewport = page.getViewport({ scale: 1 });
+      const scrollY = window.scrollY || window.pageYOffset;
+      let pagesRendered = 0;
 
-                // 2) Ajuste para caber na largura do container
-                const containerWidth = pdfContainer.clientWidth;
-                const fitScale = (containerWidth - 20) / viewport.width;
+      for (let p = 1; p <= pdfDoc.numPages; p++) {
+          pdfDoc.getPage(p).then((page) => {
+              renderPage(page, p);
+              pagesRendered++;
+              if (pagesRendered === pdfDoc.numPages) {
+                  window.scrollTo(0, scrollY);
+              }
+          });
+      }
+  }
 
-                // 3) Combine com o zoom do usuário
-                let baseScale = fitScale * userZoom;
+  function renderPage(page, pageNum) {
+      // Container da página
+      const pageContainer = document.createElement("div");
+      pageContainer.className = "pageContainer";
+      pdfContainer.appendChild(pageContainer);
 
-                // 4) Multiplique pelo devicePixelRatio para mais nitidez
-                const devicePixelRatio = window.devicePixelRatio || 1;
-                const renderScale = baseScale * devicePixelRatio;
+      // Canvas
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      pageContainer.appendChild(canvas);
 
-                // 5) Cria o viewport escalado
-                const scaledViewport = page.getViewport({ scale: renderScale });
+      // Viewport base
+      const viewport = page.getViewport({ scale: 1 });
+      // Ajusta para caber
+      const containerWidth = pdfContainer.clientWidth;
+      const fitScale = (containerWidth - 20) / viewport.width;
+      const finalScale = fitScale * userZoom;
+      const scaledViewport = page.getViewport({ scale: finalScale });
 
-                // 6) Ajuste dimensões internas (alta resolução)
-                canvas.width = scaledViewport.width;
-                canvas.height = scaledViewport.height;
+      canvas.width = scaledViewport.width;
+      canvas.height = scaledViewport.height;
+      canvas.style.width = scaledViewport.width + "px";
+      canvas.style.height = scaledViewport.height + "px";
 
-                // 7) Ajuste o tamanho visual final do canvas
-                canvas.style.width = (scaledViewport.width / devicePixelRatio) + "px";
-                canvas.style.height = (scaledViewport.height / devicePixelRatio) + "px";
+      // Render PDF no canvas
+      page.render({
+          canvasContext: ctx,
+          viewport: scaledViewport
+      });
 
-                // Renderiza a página
-                page.render({
-                    canvasContext: context,
-                    viewport: scaledViewport
-                });
+      // textLayer
+      const textLayerDiv = document.createElement("div");
+      textLayerDiv.className = "textLayer";
+      textLayerDiv.style.width = canvas.style.width;
+      textLayerDiv.style.height = canvas.style.height;
+      pageContainer.appendChild(textLayerDiv);
 
-                // Camada de texto
-                const textLayerDiv = document.createElement("div");
-                textLayerDiv.className = "textLayer";
-                textLayerDiv.style.width = canvas.style.width;
-                textLayerDiv.style.height = canvas.style.height;
-                pageContainer.appendChild(textLayerDiv);
+      // highlightLayer
+      const highlightLayerDiv = document.createElement("div");
+      highlightLayerDiv.className = "highlightLayer";
+      highlightLayerDiv.style.width = canvas.style.width;
+      highlightLayerDiv.style.height = canvas.style.height;
+      pageContainer.appendChild(highlightLayerDiv);
 
-                // Extrai e renderiza o texto
-                page.getTextContent().then(function(textContent) {
-                    pdfjsLib.renderTextLayer({
-                        textContent: textContent,
-                        container: textLayerDiv,
-                        viewport: scaledViewport,
-                        textDivs: []
-                    });
-                });
+      // Extrai texto e renderiza a textLayer
+      page.getTextContent().then((textContent) => {
+          pdfjsLib.renderTextLayer({
+              textContent: textContent,
+              container: textLayerDiv,
+              viewport: scaledViewport,
+              textDivs: []
+          });
 
-                // Conta páginas renderizadas
-                pagesRendered++;
-                if (pagesRendered === pdfDoc.numPages) {
-                    window.scrollTo(0, scrollY);
-                }
-            });
-        }
+          // Após um pequeno delay, capturamos os spans
+          setTimeout(() => {
+              const spans = textLayerDiv.querySelectorAll("span");
+              pageSpans[pageNum] = [];
+              spans.forEach(sp => {
+                  pageSpans[pageNum].push({ span: sp, pageNum: pageNum });
+              });
+          }, 50);
+      });
+  }
+
+  /* ============================
+     PAGINAÇÃO
+  ============================ */
+  pageNumberInput.addEventListener("change", function() {
+      let desiredPage = parseInt(this.value, 10);
+      scrollToPage(desiredPage);
+  });
+  function scrollToPage(num) {
+      if(!pdfDoc) return;
+      if(num < 1) num = 1;
+      if(num > pdfDoc.numPages) num = pdfDoc.numPages;
+      currentPage = num;
+      pageNumberInput.value = num;
+
+      const pages = pdfContainer.querySelectorAll(".pageContainer");
+      if(pages[num-1]) {
+          pages[num-1].scrollIntoView({ behavior: 'smooth' });
+      }
+  }
+
+  /* ============================
+     ZOOM
+  ============================ */
+  zoomRange.addEventListener("input", function() {
+      userZoom = parseInt(this.value, 10)/100;
+      zoomValue.textContent = this.value + "%";
+      renderAllPages();
+  });
+  zoomInBtn.addEventListener("click", function(){
+      let val = parseInt(zoomRange.value, 10);
+      if(val < 400){
+          val += 10;
+          zoomRange.value = val;
+          zoomValue.textContent = val + "%";
+          userZoom = val/100;
+          renderAllPages();
+      }
+  });
+  zoomOutBtn.addEventListener("click", function(){
+      let val = parseInt(zoomRange.value, 10);
+      if(val > 50){
+          val -= 10;
+          zoomRange.value = val;
+          zoomValue.textContent = val + "%";
+          userZoom = val/100;
+          renderAllPages();
+      }
+  });
+  zoomResetBtn.addEventListener("click", function() {
+      zoomRange.value = 100;
+      userZoom = defaultZoom;
+      zoomValue.textContent = "100%";
+      renderAllPages();
+  });
+
+  /* ============================
+     IMPRESSÃO
+  ============================ */
+  if(printButton){
+    printButton.addEventListener("click", function(){
+      printPDF();
+    });
+  }
+  function printPDF(){
+    const pages = pdfContainer.querySelectorAll(".pageContainer");
+    if(!pages.length){
+      alert("Nada para imprimir.");
+      return;
+    }
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write("<html><head><title>Imprimir PDF</title></head><body>");
+    pages.forEach(pg => {
+      const canvas = pg.querySelector("canvas");
+      if(canvas){
+        const dataURL = canvas.toDataURL("image/png");
+        printWindow.document.write(
+          `<img src="${dataURL}" style="width:100%; margin-bottom:20px;">`
+        );
+      }
+    });
+    printWindow.document.write("</body></html>");
+    printWindow.document.close();
+    printWindow.onload = function(){
+      printWindow.focus();
+      printWindow.print();
+      printWindow.onafterprint = function(){
+        printWindow.close();
+      };
+    };
+  }
+
+  /* ============================
+     DRAG DA BARRA (fixed-controls)
+  ============================ */
+  let isDragging = false;
+  let offset = { x: 0, y: 0 };
+
+  fixedControls.addEventListener("mousedown", function(e) {
+      if(e.target.closest("input") || e.target.closest("button") || e.target.closest("label")){
+          return;
+      }
+      isDragging = true;
+      offset.x = e.clientX - fixedControls.getBoundingClientRect().left;
+      offset.y = e.clientY - fixedControls.getBoundingClientRect().top;
+  });
+  document.addEventListener("mousemove", function(e){
+      if(isDragging){
+          fixedControls.style.left = (e.clientX - offset.x)+"px";
+          fixedControls.style.top = (e.clientY - offset.y)+"px";
+          fixedControls.style.transform = "none";
+      }
+  });
+  document.addEventListener("mouseup", function(){
+      isDragging = false;
+  });
+
+  /* ============================
+     Minimizar/Maximizar (FAB)
+  ============================ */
+  const toggleMinimizeBtn = document.getElementById("toggleMinimize");
+  const minimizeIcon = document.getElementById("minimizeIcon");
+  let isMinimized = false;
+  toggleMinimizeBtn.addEventListener("click", function() {
+      isMinimized = !isMinimized;
+      if(isMinimized){
+          fixedControls.classList.add("minimized");
+          minimizeIcon.textContent = "+";
+      } else {
+          fixedControls.classList.remove("minimized");
+          minimizeIcon.textContent = "–";
+      }
+  });
+
+  /* ============================
+     BUSCA PRÓPRIA
+  ============================ */
+  searchBtn.addEventListener("click", doSearch);
+  nextMatchBtn.addEventListener("click", () => jumpMatch(+1));
+  prevMatchBtn.addEventListener("click", () => jumpMatch(-1));
+
+  function doSearch(){
+    clearAllHighlights();
+    matches = [];
+    currentMatchIndex = 0;
+
+    const query = searchInput.value.trim().toLowerCase();
+    if(!query) {
+      updateMatchCount();
+      return;
     }
 
-    /* ==========================
-       Rolar até Página
-    ========================== */
-    function scrollToPage(page) {
-        if (page < 1) page = 1;
-        if (page > pdfDoc.numPages) page = pdfDoc.numPages;
+    // Percorre cada página e cada span
+    for(let p=1; p<= (pdfDoc?.numPages || 0); p++){
+      const arr = pageSpans[p] || [];
+      arr.forEach(item => {
+        const sp = item.span;
+        const text = (sp.textContent||"").toLowerCase();
+        if(text.includes(query)){
+          // Precisamos criar um highlight
+          const pageContainers = pdfContainer.querySelectorAll('.pageContainer');
+          const pageDiv = pageContainers[p-1];
+          if(!pageDiv) return;
+          const highlightLayer = pageDiv.querySelector('.highlightLayer');
+          if(!highlightLayer) return;
 
-        currentPage = page;
-        pageNumberInput.value = currentPage;
+          // Pega boundingClientRect do span
+          const spanRect = sp.getBoundingClientRect();
+          const layerRect = highlightLayer.getBoundingClientRect();
 
-        const containers = pdfContainer.querySelectorAll(".pageContainer");
-        if (containers.length >= currentPage) {
-            containers[currentPage - 1].scrollIntoView({ behavior: 'smooth' });
+          // Calcula posição relativa ao highlightLayer
+          const left = spanRect.left - layerRect.left;
+          const top = spanRect.top - layerRect.top;
+
+          // Cria a div highlight
+          const hlDiv = document.createElement("div");
+          hlDiv.className = "highlight-box";
+          hlDiv.style.left = left + "px";
+          hlDiv.style.top = top + "px";
+          hlDiv.style.width = sp.offsetWidth + "px";
+          hlDiv.style.height = sp.offsetHeight + "px";
+          highlightLayer.appendChild(hlDiv);
+
+          matches.push({
+            span: sp,
+            pageNum: p,
+            highlightDiv: hlDiv
+          });
         }
-    }
-    pageNumberInput.addEventListener("change", function() {
-        let desiredPage = parseInt(this.value, 10);
-        scrollToPage(desiredPage);
-    });
-
-    /* ==========================
-       CONTROLES DE ZOOM
-    ========================== */
-    zoomRange.addEventListener("input", function() {
-        userZoom = parseInt(this.value, 10) / 100;
-        zoomValue.textContent = this.value + "%";
-        renderPDF();
-    });
-    zoomInBtn.addEventListener("click", function() {
-        let current = parseInt(zoomRange.value, 10);
-        if (current < parseInt(zoomRange.max, 10)) {
-            current += parseInt(zoomRange.step, 10);
-            zoomRange.value = current;
-            userZoom = current / 100;
-            zoomValue.textContent = current + "%";
-            renderPDF();
-        }
-    });
-    zoomOutBtn.addEventListener("click", function() {
-        let current = parseInt(zoomRange.value, 10);
-        if (current > parseInt(zoomRange.min, 10)) {
-            current -= parseInt(zoomRange.step, 10);
-            zoomRange.value = current;
-            userZoom = current / 100;
-            zoomValue.textContent = current + "%";
-            renderPDF();
-        }
-    });
-    zoomResetBtn.addEventListener("click", function() {
-        zoomRange.value = 100;
-        userZoom = defaultZoom;
-        zoomValue.textContent = "100%";
-        renderPDF();
-    });
-
-    /* ==========================
-       IMPRESSÃO
-    ========================== */
-    if (printButton) {
-        printButton.addEventListener("click", function() {
-            printPDF();
-        });
-    }
-    function printPDF() {
-        const pageContainers = pdfContainer.querySelectorAll(".pageContainer");
-        if (!pageContainers.length) {
-            alert("Nada para imprimir.");
-            return;
-        }
-        const printWindow = window.open("", "_blank");
-        printWindow.document.write("<html><head><title>Imprimir PDF</title></head><body>");
-
-        pageContainers.forEach((pageContainer) => {
-            const canvas = pageContainer.querySelector("canvas");
-            if (canvas) {
-                const dataURL = canvas.toDataURL("image/png");
-                printWindow.document.write(
-                  `<img src="${dataURL}" style="width:100%; margin-bottom:20px;">`
-                );
-            }
-        });
-
-        printWindow.document.write("</body></html>");
-        printWindow.document.close();
-        printWindow.onload = function() {
-            printWindow.focus();
-            printWindow.print();
-            printWindow.onafterprint = function() {
-                printWindow.close();
-            };
-        };
+      });
     }
 
-    /* ==========================
-       DRAG DO CONTAINER
-    ========================== */
-    let isDragging = false;
-    let offset = { x: 0, y: 0 };
+    if(matches.length > 0){
+      currentMatchIndex = 0;
+      updateMatchAppearance();
+      updateMatchCount();
+      scrollToMatch(currentMatchIndex);
+    }else{
+      updateMatchCount();
+      alert("Nenhuma ocorrência encontrada.");
+    }
+  }
 
-    fixedControls.addEventListener("mousedown", function(e) {
-        // Evita drag ao clicar em inputs, botões, etc.
-        if (e.target.closest("input") || e.target.closest("button") || e.target.closest("label")) {
-            return;
-        }
-        isDragging = true;
-        offset.x = e.clientX - fixedControls.getBoundingClientRect().left;
-        offset.y = e.clientY - fixedControls.getBoundingClientRect().top;
+  function clearAllHighlights(){
+    const layers = pdfContainer.querySelectorAll('.highlightLayer');
+    layers.forEach(ly => {
+      ly.innerHTML = "";
     });
-    document.addEventListener("mousemove", function(e) {
-        if (isDragging) {
-            fixedControls.style.left = e.clientX - offset.x + "px";
-            fixedControls.style.top = e.clientY - offset.y + "px";
-            fixedControls.style.transform = "none"; // Remove a centralização
-        }
-    });
-    document.addEventListener("mouseup", function() {
-        isDragging = false;
-    });
+  }
 
-    /* ==========================
-       Minimizar/Maximizar (FAB)
-    ========================== */
-    const toggleMinimizeBtn = document.getElementById("toggleMinimize");
-    const minimizeIcon = document.getElementById("minimizeIcon");
-    let isMinimized = false;
-
-    toggleMinimizeBtn.addEventListener("click", function() {
-        isMinimized = !isMinimized;
-        if (isMinimized) {
-            fixedControls.classList.add("minimized");
-            minimizeIcon.textContent = "+"; // Ícone de "maximizar"
-        } else {
-            fixedControls.classList.remove("minimized");
-            minimizeIcon.textContent = "–"; // Ícone de "minimizar"
-        }
+  function updateMatchAppearance(){
+    if(matches.length === 0) return;
+    matches.forEach((m, i) => {
+      m.highlightDiv.classList.remove("current-match");
     });
+    matches[currentMatchIndex].highlightDiv.classList.add("current-match");
+  }
 
-    /* ==========================
-       CARREGANDO O PDF
-    ========================== */
-    pdfjsLib.getDocument(url).promise.then(function(pdf) {
-        pdfDoc = pdf;
-        // Mostra total de páginas
-        pageCountSpan.textContent = `/ ${pdfDoc.numPages}`;
-        // Renderiza PDF
-        renderPDF();
-    }).catch(function(error) {
-        pdfContainer.innerHTML = `<p class="pdf-message">Erro ao carregar PDF: ${error.message}</p>`;
-    });
+  function updateMatchCount(){
+    if(matches.length === 0){
+      matchCountSpan.textContent = "0/0";
+    } else {
+      matchCountSpan.textContent = (currentMatchIndex+1)+"/"+matches.length;
+    }
+  }
+
+  function jumpMatch(direction){
+    if(matches.length === 0) return;
+    // remove highlights e reconstrói
+    clearAllHighlights();
+    doSearch();
+    // move índice
+    if(direction > 0){
+      currentMatchIndex = (currentMatchIndex+1) % matches.length;
+    }else{
+      currentMatchIndex = (currentMatchIndex-1 + matches.length) % matches.length;
+    }
+    updateMatchAppearance();
+    updateMatchCount();
+    scrollToMatch(currentMatchIndex);
+  }
+
+  function scrollToMatch(idx){
+    if(idx < 0 || idx >= matches.length) return;
+    const match = matches[idx];
+    const pageContainers = pdfContainer.querySelectorAll(".pageContainer");
+    if(pageContainers[match.pageNum - 1]){
+      pageContainers[match.pageNum - 1].scrollIntoView({behavior: "smooth"});
+    }
+  }
+
 });
 </script>
 {% endblock %}

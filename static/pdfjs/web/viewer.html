@@ -35,7 +35,31 @@ See https://github.com/adobe-type-tools/cmap-resources
 
   <script src="viewer.js"></script>
   </head>
-
+  <script>
+    (function() {
+      var urlParams = new URLSearchParams(window.location.search);
+      if(urlParams.get('disablePrint') === 'true'){
+          // Bloqueia o atalho Ctrl+P
+          window.addEventListener("keydown", function(e) {
+              if ((e.ctrlKey || e.metaKey) && (e.key && e.key.toLowerCase() === "p")) {
+                  e.preventDefault();
+                  e.stopImmediatePropagation();
+                  alert("Impressão desabilitada para este documento.");
+              }
+          }, true);
+          // Bloqueia o clique com o botão direito
+          window.addEventListener("contextmenu", function(e) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              alert("Ação desabilitada neste documento.");
+          }, true);
+          // Sobrescreve a função de impressão nativa
+          window.print = function() {
+              alert("Impressão desabilitada para este documento.");
+          };
+      }
+    })();
+  </script>
   <body tabindex="1">
     <div id="outerContainer">
 
@@ -441,3 +465,5 @@ See https://github.com/adobe-type-tools/cmap-resources
     <input type="file" id="fileInput" class="hidden">
   </body>
 </html>
+
+  

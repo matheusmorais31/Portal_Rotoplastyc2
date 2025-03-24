@@ -1,5 +1,3 @@
-# models.py
-
 from django.db import models, transaction
 from django.contrib.auth import get_user_model
 from django.core.files.storage import FileSystemStorage
@@ -14,11 +12,10 @@ import os
 import shutil
 from django.utils import timezone
 
-
-logger = logging.getLogger('django')
+# Usa o logger "django" ou, se preferir, altere para "documentos" se desejar unificar os logs
+logger = logging.getLogger('documentos')
 User = get_user_model()
 
-# Classe de armazenamento personalizada para sobrescrever arquivos existentes
 class OverwriteStorage(FileSystemStorage):
     def get_available_name(self, name, max_length=None):
         if self.exists(name):
@@ -29,7 +26,6 @@ class OverwriteStorage(FileSystemStorage):
                 logger.error(f"[OverwriteStorage] Falha ao remover o arquivo existente {name}: {e}")
         return name
 
-# Armazenamento protegido para PDFs (sem base_url para acesso direto)
 protected_storage = FileSystemStorage(
     location=os.path.join(settings.MEDIA_ROOT),
     base_url=None
@@ -44,7 +40,6 @@ def pdf_upload_path(instance, filename):
 def spreadsheet_upload_path(instance, filename):
     return Path('documentos') / 'spreadsheet' / filename
 
-# Modelo Categoria
 class Categoria(models.Model):
     nome = models.CharField(max_length=100, unique=True)
     bloqueada = models.BooleanField(
@@ -55,7 +50,6 @@ class Categoria(models.Model):
     def __str__(self):
         return self.nome
 
-# Modelo Documento
 class Documento(models.Model):
     DOCUMENT_TYPE_CHOICES = [
         ('pdf', 'PDF'),
@@ -175,6 +169,14 @@ class Documento(models.Model):
     def gerar_pdf(self):
         logger.debug(f"[gerar_pdf] Iniciando processo para o documento '{self.nome}' (ID: {self.id}) com tipo '{self.document_type}'.")
         try:
+            # Para documentos do tipo PDF: se já houver PDF manual, ignora a conversão automática.
+            if self.document_type == 'pdf':
+                if self.documento_pdf and os.path.exists(self.documento_pdf.path):
+                    logger.info(f"[gerar_pdf] PDF manual encontrado em: {self.documento_pdf.path}. Geração automática ignorada.")
+                    return self.documento_pdf.path
+                else:
+                    logger.debug("[gerar_pdf] Nenhum PDF manual encontrado, prosseguindo com a conversão automática.")
+
             if self.document_type == 'pdf_spreadsheet':
                 if self.documento_pdf and os.path.exists(self.documento_pdf.path):
                     logger.info(f"[gerar_pdf] Documento PDF já disponível em: {self.documento_pdf.path}")
@@ -205,7 +207,8 @@ class Documento(models.Model):
                 logger.info(f"[gerar_pdf] Planilha atualizada e salva no campo documento_pdf: {self.documento_pdf.path}")
                 return self.documento_pdf.path
             elif self.document_type == 'pdf':
-                logger.debug("[gerar_pdf] Tipo de documento é PDF. Iniciando conversão para PDF.")
+                # Se não houver PDF manual, converte o documento editável em PDF automaticamente
+                logger.debug("[gerar_pdf] Iniciando conversão automática para PDF.")
                 documento_path = self.documento.path
                 logger.debug(f"[gerar_pdf] Caminho do documento editável: {documento_path}")
                 if not os.path.exists(documento_path):
@@ -278,7 +281,6 @@ class Documento(models.Model):
             logger.error(f"[gerar_pdf] Erro ao gerar ou salvar o documento_pdf: {e}", exc_info=True)
             raise
 
-# Modelo Acesso
 class Acesso(models.Model):
     documento = models.ForeignKey(Documento, on_delete=models.CASCADE)
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -286,7 +288,6 @@ class Acesso(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.documento.nome}"
-
 
 class DocumentoDeletado(models.Model):
     usuario = models.ForeignKey(
