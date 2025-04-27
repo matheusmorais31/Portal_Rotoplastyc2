@@ -1,0 +1,286 @@
+/* ia/static/css/api_cost_monitor.css */
+
+/* --- Reset Básico e Fontes --- */
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    color: #343a40; /* Cor de texto principal mais escura */
+   
+    line-height: 1.6;
+    margin: 0; /* Remove margem padrão do body */
+}
+
+/* --- Container Principal --- */
+.cost-monitor-container {
+    padding: 30px;
+    max-width: 1300px; /* Aumenta um pouco a largura máxima */
+    margin: 30px auto;
+    background-color: rgba(33, 32, 32, 0.265); /* Fundo branco para o conteúdo principal */
+    border-radius: 8px; /* Bordas arredondadas */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
+    border: 1px solid #bdbcbc;
+
+}
+
+/* --- Títulos --- */
+h1, h2, h3 {
+    color: #ffffff; /* Cor mais escura para títulos */
+    border-bottom: 1px solid #dee2e6; /* Linha divisória mais sutil */
+    padding-bottom: 12px;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 2em; /* Tamanho maior para o título principal */
+    text-align: center; /* Centraliza H1 */
+    margin-bottom: 10px;
+    border-bottom: none; /* Remove linha do H1 */
+}
+
+h3 {
+    font-size: 14px;
+    margin-top: 45px; /* Mais espaço antes dos títulos das tabelas */
+    color: #ff0000; /* Cor um pouco mais suave para H2 */
+    text-align: center; /* Centraliza H1 */
+
+}
+
+h2 {
+    font-size: 1.5em;
+    margin-top: 45px; /* Mais espaço antes dos títulos das tabelas */
+    color: #ffffff; /* Cor um pouco mais suave para H2 */
+}
+
+/* --- Formulário de Filtros --- */
+.filter-form-container {
+    margin-bottom: 35px;
+    background-color: rgb(23, 23, 24, 0.9);
+    padding: 25px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.filter-form {
+    display: grid; /* Usa Grid para melhor controle */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Colunas responsivas */
+    gap: 20px; /* Espaço entre os elementos do grid */
+    align-items: flex-end;
+}
+
+.filter-form .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-form label {
+    margin-bottom: 6px; /* Mais espaço abaixo do label */
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.filter-form input[type="date"],
+.filter-form select {
+    padding: 9px 12px; /* Padding ajustado */
+    border: 1px solid #ced4da;
+    border-radius: 5px; /* Bordas um pouco mais arredondadas */
+    font-size: 0.95em;
+    height: 40px; /* Altura consistente */
+    box-sizing: border-box;
+    background-color: #fff; /* Garante fundo branco */
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.filter-form input[type="date"]:focus,
+.filter-form select:focus {
+    border-color: #80bdff; /* Cor da borda ao focar */
+    outline: 0;
+    box-shadow: 0 0 3px rgba(30, 178, 193, 0.6);
+}
+
+.filter-form button[type="submit"] {
+    padding: 0 22px;
+    cursor: pointer;
+    background-color: #2EC2D6; /* Verde sucesso Bootstrap */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    height: 40px;
+    font-size: 1em; /* Tamanho um pouco maior */
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    white-space: nowrap; /* Impede quebra de linha no botão */
+    /* Alinha o botão com os outros grupos no grid se necessário */
+    /* grid-column: span 1; */ /* Pode precisar ajustar dependendo do número de filtros */
+}
+
+.filter-form button[type="submit"]:hover {
+    background-color: #2a7d88; /* Verde mais escuro */
+    transform: translateY(-1px); /* Leve efeito ao passar o mouse */
+}
+
+.filter-form button[type="submit"]:active {
+     transform: translateY(0px); /* Remove efeito ao clicar */
+}
+
+
+.clear-filter-link {
+    /* Posiciona ao lado do botão */
+    /* margin-left: 10px; */ /* Removido pois o gap do grid cuida disso */
+    padding: 0 15px;
+    font-size: 0.9em;
+    color: #dc3545; /* Vermelho perigo Bootstrap */
+    text-decoration: none;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dc3545;
+    border-radius: 5px;
+    background-color: #fff;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+.clear-filter-link:hover {
+    background-color: #dc3545;
+    color: #fff;
+    text-decoration: none;
+}
+
+.filter-summary {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #ffffff;
+    border-top: 1px solid #e9ecef; /* Linha divisória mais clara */
+    padding-top: 15px;
+}
+
+/* Esconde grupo se input for hidden */
+.form-group-user.hidden {
+    display: none;
+}
+
+/* --- Mensagem de Filtro de Usuário --- */
+.user-filter-notice {
+    background-color: #e2f3ff; /* Azul claro */
+    border: 1px solid #b8daff;
+    color: #004085; /* Azul escuro */
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+    font-size: 0.95em;
+}
+
+/* --- Custo Total --- */
+.total-cost {
+    font-size: 1.7em; /* Maior */
+    font-weight: bold;
+    margin-bottom: 40px;
+    border: none; /* Remove borda padrão */
+    padding: 25px;
+    background-color: #2EC2D6; /* Roxo Bootstrap */
+    color: #fff; /* Texto branco */
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.total-cost .cost-brl {
+    color: #fff; /* Branco */
+    display: block;
+    margin-bottom: 8px; /* Mais espaço */
+    font-size: 1.1em; /* Ligeiramente maior */
+}
+
+.total-cost .cost-usd {
+    font-size: 0.65em; /* Menor */
+    font-weight: normal;
+    color: #ffffff; /* Roxo bem claro */
+    opacity: 0.9;
+}
+
+/* --- Tabelas --- */
+table {
+    width: 100%;
+    border-collapse: separate; /* Permite border-radius nas células */
+    border-spacing: 0;
+    margin-bottom: 40px;
+    font-size: 0.9em;
+    background: rgb(23, 23, 24, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    border-radius: 6px; /* Arredonda a tabela toda */
+    overflow: hidden; /* Necessário para border-radius funcionar com background */
+    border: 1px solid #dee2e6;
+}
+
+th, td {
+    border: none; /* Remove bordas individuais */
+    border-bottom: 1px solid #dee2e6; /* Linha horizontal entre linhas */
+    padding: 12px 15px; /* Padding interno */
+    text-align: left;
+    color: #ffff;
+    vertical-align: middle;
+}
+/* Remove borda inferior da última linha */
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+th {
+    background-color: #2EC2D6; /* Cinza claro para cabeçalho */
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    border-bottom-width: 2px; /* Linha mais grossa abaixo do header */
+     border-color: #ced4da; /* Cor da linha mais escura */
+}
+
+
+tbody tr:nth-child(even) { /* Inverte zebra striping */
+    background-color: #525354;
+}
+
+tbody tr:hover {
+    background-color: #363738; /* Cinza mais escuro no hover */
+}
+
+td.numeric, th.numeric {
+    text-align: right;
+}
+
+td.cost {
+    font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* Fontes monoespaçadas */
+    white-space: nowrap;
+    font-size: 0.95em; /* Ligeiramente maior para custos */
+}
+
+td.cost .cost-brl {
+    font-weight: 600; /* Bold para BRL */
+    color: #202124; /* Cor principal do texto */
+}
+
+td.cost .cost-usd {
+    color: #5f6368; /* Cinza Google */
+    font-size: 0.9em; /* Ligeiramente menor */
+}
+
+td[colspan] {
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+    padding: 25px; /* Mais padding para mensagem vazia */
+    background-color: #f8f9fa;
+}
+
+/* --- Ajustes Responsivos Básicos --- */
+@media (max-width: 768px) {
+    h1 { font-size: 1.6em; }
+    h2 { font-size: 1.3em; }
+    .filter-form { grid-template-columns: 1fr; /* Uma coluna em telas menores */ }
+    .filter-form button[type="submit"], .clear-filter-link { width: 100%; margin-top: 10px; justify-content: center;} /* Botões ocupam largura total */
+    .clear-filter-link { margin-left: 0; }
+    th, td { padding: 8px 10px; }
+    .cost-monitor-container { padding: 15px; }
+    .total-cost { font-size: 1.4em; padding: 20px; }
+}

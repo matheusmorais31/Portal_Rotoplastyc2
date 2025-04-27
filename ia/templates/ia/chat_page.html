@@ -1,0 +1,824 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chat IA{% endblock %}
+
+{% block extra_css %}
+{# Inclusão de bibliotecas CSS e CSS customizado #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-dark.min.css">
+<link rel="stylesheet" type="text/css" href="{% static 'css/chat_page.css' %}">
+{% endblock %}
+
+{% block content %}
+{# Estrutura principal da aplicação de chat #}
+<div class="app-container">
+    {# Menu Lateral: Nova conversa, Seletor de Modelo, Lista de Chats #}
+    <div class="side-menu">
+        <button id="new-chat-btn">Nova Conversa</button>
+
+        {# Container do Seletor de Modelo (agora com custom dropdown) #}
+        <div class="model-selector-container">
+            <label for="model-select">Modelo:</label> {# Label ainda aponta para o select original por semântica #}
+
+            {# --- Dropdown Customizado --- #}
+            <div id="custom-model-select" class="custom-select-container">
+                <div class="custom-select-display" tabindex="0"> {# tabindex para focar #}
+                    <span class="selected-text">Carregando...</span>
+                    <span class="custom-select-arrow">▼</span>
+                </div>
+                <div class="custom-select-options">
+                    {# As opções serão preenchidas pelo JavaScript #}
+                </div>
+            </div>
+            {# --- Fim Dropdown Customizado --- #}
+
+            {# Select original escondido (fonte de dados e valor) (Usando opções da sua versão antiga) #}
+            <select id="model-select" style="display: none;">
+                <option value="gemini-1.5-pro" title="Potente e versátil para diversas tarefas. Ótimo equilíbrio.">Gemini 1.5 Pro</option>
+                <option value="gemini-2.0-flash" title="Rápido e eficiente para tarefas mais simples e respostas ágeis.">Gemini 2.0 Flash</option>
+                <option value="gemini-2.0-flash-lite" selected title="Versão ainda mais leve e rápida do Flash.">Gemini 2.0 Flash-Lite</option>
+                <option value="gemini-1.5-flash" title="Rápido e otimizado para velocidade e custo.">Gemini 1.5 Flash</option>
+                <option value="gemini-2.5-flash" title="Versão leve e veloz, focada em respostas rápidas com menor custo computacional.">Gemini 2.5 Flash</option>
+                 {% if perms.ia.model_2_5_pro %} {# Mantendo sua condicional original #}
+                 <option value="gemini-2.5-pro" title="Prévia do próximo modelo Pro, com capacidades avançadas.">Gemini 2.5 Pro</option>
+                 {% endif %}
+            </select>
+        </div>
+        {# Fim Container Seletor #}
+
+        <div id="chat-list">
+            <div class="no-chats-message">Carregando chats...</div>
+        </div>
+    </div>
+
+    {# Área Principal do Chat: Cabeçalho, Mensagens, Preview (antes de enviar), Input #}
+    <div class="chat-area">
+        <div id="chat-header">
+            <span id="chat-title">Selecione ou crie um chat</span>
+        </div>
+        <div id="messages-container">
+            {# Placeholder inicial #}
+            <div class="message ai-message" id="initial-placeholder-message">
+                <div class="message-content">
+                    <div class="message-text">Olá! Selecione uma conversa na lista ou crie uma nova para começar.</div>
+                </div>
+            </div>
+        </div>
+
+        {# ================================================ #}
+        {# == ÁREA PARA MOSTRAR PREVIEWS ANTES DE ENVIAR == #}
+        {# ================================================ #}
+        <div id="upload-preview-area" class="hidden">
+            <div id="upload-preview-content">
+                {# Miniaturas/Ícones (antes de enviar) serão adicionados aqui pelo JS #}
+            </div>
+            <button id="cancel-upload-btn" title="Cancelar envio de arquivos">Cancelar</button>
+        </div>
+        {# ================================================ #}
+
+        {# Área de Input: Botão de anexo, Textarea, Botão de Envio #}
+        <div id="chat-input-area">
+            {# Input de arquivo escondido, ativado pelo botão #}
+            <input type="file" id="file-upload-input" multiple style="display: none;">
+            <button id="file-upload-btn" title="Anexar arquivos" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-paperclip" viewBox="0 0 16 16">
+                    <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z"/>
+                </svg>
+            </button>
+            <textarea id="prompt-input" placeholder="Digite sua mensagem ou cole arquivos..." rows="1" disabled></textarea>
+            <button id="send-btn" disabled>Enviar</button>
+        </div>
+
+        <div id="ai-scroll-buttons-container" class="ai-scroll-buttons">
+             <button id="scroll-ai-top-btn" title="Ir para o início da resposta da IA">↑</button>
+             <button id="scroll-ai-bottom-btn" title="Ir para o fim da resposta da IA">↓</button>
+         </div>
+        </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# Inclusão de Bibliotecas JavaScript #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{# Inclusão de linguagens específicas para Highlight.js #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/django.min.js"></script>
+
+{# Código JavaScript Principal da Aplicação de Chat #}
+<script>
+    // ===========================================================================
+    // == URLs e Configurações Globais ==
+    // ===========================================================================
+    const CREATE_CHAT_URL     = "{% url 'ia:create_chat' %}";
+    const LIST_CHATS_URL      = "{% url 'ia:list_chats' %}";
+    const GET_CHAT_URL        = (chatId) => `/ia/chats/${chatId}/`;
+    const DELETE_CHAT_URL     = (chatId) => `/ia/chats/${chatId}/delete/`;
+    const EDIT_MSG_URL        = (chatId, msgId) => `/ia/chats/${chatId}/messages/${msgId}/edit/`;
+    const SEND_MESSAGE_URL    = (chatId) => `/ia/chats/${chatId}/send_message/`;
+    const THINKING_INDICATOR_ID = 'thinking-indicator';
+
+    // --- Leitura do CSRF Token ---
+    let csrftokenValue = null;
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    csrftokenValue = getCookie('csrftoken');
+    if (!csrftokenValue) { console.error("CSRF Token não encontrado..."); }
+    console.log("App IA Inicializado. CSRF Token:", csrftokenValue ? 'OK (encontrado)' : 'FALHA (não encontrado)');
+
+    function checkCsrfToken() {
+        if (!csrftokenValue) {
+            console.error("Operação cancelada: CSRF Token não está disponível!");
+            alert("Erro crítico: Falha na configuração de segurança (CSRF)...");
+            return false;
+        }
+        return true;
+    }
+
+    // ===========================================================================
+    // == Estado da Aplicação e Elementos DOM ==
+    // ===========================================================================
+    let currentChatId = null;
+    let filesToUpload = [];
+    let isSending = false;
+
+    // --- CORRIGIDO: Adicionado chatInputArea ---
+    const el = {
+        appContainer: document.querySelector('.app-container'),
+        chatList : document.getElementById('chat-list'),
+        chatTitle: document.getElementById('chat-title'),
+        newBtn   : document.getElementById('new-chat-btn'),
+        sendBtn  : document.getElementById('send-btn'),
+        modelSel : document.getElementById('model-select'),
+        customModelSelectContainer: document.getElementById('custom-model-select'),
+        customModelSelectDisplay: document.querySelector('#custom-model-select .custom-select-display'),
+        customModelSelectOptions: document.querySelector('#custom-model-select .custom-select-options'),
+        customModelSelectSelectedText: document.querySelector('#custom-model-select .selected-text'),
+        prompt       : document.getElementById('prompt-input'),
+        msgs         : document.getElementById('messages-container'),
+        fileUploadBtn: document.getElementById('file-upload-btn'),
+        fileInput    : document.getElementById('file-upload-input'),
+        uploadPreviewArea: document.getElementById('upload-preview-area'),
+        uploadPreviewContent: document.getElementById('upload-preview-content'),
+        cancelUploadBtn : document.getElementById('cancel-upload-btn'),
+        chatInputArea: document.getElementById('chat-input-area'), // Referência adicionada
+        // NOVOS ELEMENTOS PARA OS BOTÕES DE SCROLL
+        aiScrollButtonsContainer: document.getElementById('ai-scroll-buttons-container'),
+        scrollAiTopBtn: document.getElementById('scroll-ai-top-btn'),
+        scrollAiBottomBtn: document.getElementById('scroll-ai-bottom-btn')
+    };
+    // --- FIM CORREÇÃO ---
+
+    // ===========================================================================
+    // == Lógica do Dropdown Customizado ==
+    // ===========================================================================
+    function initializeCustomSelect() {
+        if (!el.modelSel || !el.customModelSelectContainer || !el.customModelSelectOptions || !el.customModelSelectDisplay || !el.customModelSelectSelectedText) {
+             console.error("Elementos do dropdown customizado não encontrados!"); return;
+        }
+        el.customModelSelectOptions.innerHTML = '';
+        Array.from(el.modelSel.options).forEach(originalOption => {
+            const customOption = document.createElement('div'); customOption.classList.add('custom-select-option'); customOption.dataset.value = originalOption.value;
+            const nameSpan = document.createElement('span'); nameSpan.classList.add('option-name'); nameSpan.textContent = originalOption.textContent;
+            const descriptionSpan = document.createElement('span'); descriptionSpan.classList.add('option-description'); descriptionSpan.textContent = originalOption.title;
+            customOption.appendChild(nameSpan); customOption.appendChild(descriptionSpan);
+            customOption.addEventListener('click', () => {
+                 if (el.customModelSelectContainer.classList.contains('disabled')) return;
+                 el.modelSel.value = originalOption.value; el.customModelSelectSelectedText.textContent = originalOption.textContent;
+                 el.customModelSelectOptions.querySelectorAll('.custom-select-option.selected').forEach(opt => opt.classList.remove('selected')); customOption.classList.add('selected');
+                 el.customModelSelectContainer.classList.remove('active'); el.modelSel.dispatchEvent(new Event('change')); console.log("Modelo selecionado (custom):", el.modelSel.value);
+            });
+            el.customModelSelectOptions.appendChild(customOption);
+            if (originalOption.selected) { el.customModelSelectSelectedText.textContent = originalOption.textContent; customOption.classList.add('selected'); }
+        });
+        el.customModelSelectDisplay.addEventListener('click', (e) => { e.stopPropagation(); if (!el.customModelSelectContainer.classList.contains('disabled')) el.customModelSelectContainer.classList.toggle('active'); });
+        document.addEventListener('click', (e) => { if (el.customModelSelectContainer && !el.customModelSelectContainer.contains(e.target)) { el.customModelSelectContainer.classList.remove('active'); } });
+        el.customModelSelectDisplay.addEventListener('keydown', (e) => { if (e.key === 'Escape') el.customModelSelectContainer.classList.remove('active'); });
+        console.log("Dropdown customizado inicializado.");
+    }
+    function setCustomSelectDisabled(isDisabled) {
+        if (!el.customModelSelectContainer || !el.customModelSelectDisplay || !el.modelSel) return;
+        if (isDisabled) { el.customModelSelectContainer.classList.add('disabled'); el.customModelSelectDisplay.removeAttribute('tabindex'); }
+        else { el.customModelSelectContainer.classList.remove('disabled'); el.customModelSelectDisplay.setAttribute('tabindex', '0'); }
+        el.modelSel.disabled = isDisabled;
+    }
+
+    // ===========================================================================
+    // == Funções Auxiliares e de UI (Restantes) ==
+    // ===========================================================================
+    function setLoadingState(isLoading, message = "Processando...") {
+        const chatSelected = !!currentChatId;
+        const hasText = el.prompt.value.trim() !== '';
+        const hasFiles = filesToUpload.length > 0;
+        const canSend = chatSelected && (hasText || hasFiles);
+
+        const baseDisabled = isLoading || !chatSelected;
+        if(el.prompt) el.prompt.disabled = baseDisabled;
+        if(el.newBtn) el.newBtn.disabled = isLoading;
+        setCustomSelectDisabled(baseDisabled);
+        if(el.fileUploadBtn) el.fileUploadBtn.disabled = baseDisabled;
+        if(el.cancelUploadBtn) el.cancelUploadBtn.disabled = isLoading || !hasFiles;
+        if(el.sendBtn) el.sendBtn.disabled = isLoading || !canSend;
+
+        if(el.appContainer) el.appContainer.classList.toggle('app-loading', isLoading);
+
+        if (isLoading) {
+            if(el.sendBtn) el.sendBtn.textContent = message.substring(0, 10) + '...';
+            if(el.prompt) el.prompt.placeholder = "Aguarde...";
+            if(el.uploadPreviewArea) el.uploadPreviewArea.classList.add('hidden');
+            if(el.aiScrollButtonsContainer) el.aiScrollButtonsContainer.classList.remove('visible');
+        } else {
+            const currentFiles = filesToUpload.length > 0;
+            if (currentFiles) {
+                const fileCountText = filesToUpload.length === 1 ? '1 Arquivo' : `${filesToUpload.length} Arquivos`;
+                if(el.sendBtn) el.sendBtn.textContent = `Enviar ${fileCountText}`;
+                if(el.prompt) el.prompt.placeholder = `${fileCountText} pronto(s). Adicione texto (opcional)...`;
+                if(el.uploadPreviewArea) el.uploadPreviewArea.classList.remove('hidden');
+            } else {
+                if(el.sendBtn) el.sendBtn.textContent = "Enviar";
+                if(el.prompt) el.prompt.placeholder = chatSelected ? "Digite sua mensagem ou cole arquivos..." : "Selecione ou crie uma conversa";
+                if(el.uploadPreviewArea) el.uploadPreviewArea.classList.add('hidden');
+            }
+             if(el.sendBtn) el.sendBtn.disabled = baseDisabled || (el.prompt.value.trim() === '' && !currentFiles);
+            removeThinkingIndicator();
+            updateScrollButtonsVisibility();
+        }
+    }
+
+    function enableInputArea(enabled) {
+        const isDisabled = !enabled || !currentChatId;
+        if(el.prompt) el.prompt.disabled = isDisabled;
+        if(el.fileUploadBtn) el.fileUploadBtn.disabled = isDisabled;
+        setCustomSelectDisabled(isDisabled);
+        if(el.prompt) el.prompt.placeholder = enabled && currentChatId ? "Digite sua mensagem ou cole arquivos..." : "Selecione ou crie uma conversa";
+        if (!enabled) { clearFileUploads(); }
+        if(el.appContainer) setLoadingState(el.appContainer.classList.contains('app-loading'));
+        if(isDisabled && el.aiScrollButtonsContainer) {
+            el.aiScrollButtonsContainer.classList.remove('visible');
+        } else {
+            updateScrollButtonsVisibility();
+        }
+    }
+
+    function autoGrowTextarea() {
+        if(!el.prompt) return;
+        const maxHeight = 200;
+        el.prompt.style.height = 'auto';
+        const newHeight = Math.min(el.prompt.scrollHeight, maxHeight);
+        el.prompt.style.height = (newHeight + 2) + 'px';
+        el.prompt.style.overflowY = (el.prompt.scrollHeight > maxHeight) ? 'auto' : 'hidden';
+        if(el.appContainer) setLoadingState(el.appContainer.classList.contains('app-loading'));
+    }
+
+    function scrollToBottom(force = false) {
+        const tolerance = 50;
+        if (!el.msgs) return;
+        const isScrolledToBottom = el.msgs.scrollHeight - el.msgs.clientHeight <= el.msgs.scrollTop + tolerance;
+
+        let scrollHappened = false;
+        let scrollBehavior = 'smooth';
+
+        if (force || isScrolledToBottom) {
+            scrollBehavior = (force || document.getElementById(THINKING_INDICATOR_ID)) ? 'instant' : 'smooth';
+            el.msgs.scrollTo({ top: el.msgs.scrollHeight, behavior: scrollBehavior });
+            scrollHappened = true;
+        }
+
+        if (scrollHappened) {
+            const timeoutDelay = (scrollBehavior === 'smooth') ? 300 : 50;
+            setTimeout(updateScrollButtonsVisibility, timeoutDelay);
+        }
+    }
+
+    function escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    marked.setOptions({
+        pedantic: false, gfm: true, breaks: true, sanitize: false, smartypants: false, xhtml: false,
+        highlight: function(code, lang) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            try {
+                return hljs.highlight(code, { language, ignoreIllegals: true }).value;
+            } catch (e) {
+                console.warn("Erro no Highlight.js:", e, "Linguagem:", lang);
+                return hljs.highlight(code, { language: 'plaintext', ignoreIllegals: true }).value;
+            }
+        }
+    });
+
+    function addThinkingIndicator() {
+        removeThinkingIndicator();
+        if (!el.msgs) return;
+        const indicatorDiv = document.createElement('div');
+        indicatorDiv.className = 'message ai-message thinking';
+        indicatorDiv.id = THINKING_INDICATOR_ID;
+        indicatorDiv.innerHTML = `<div class="message-content"><div class="thinking-animation"><span>.</span><span>.</span><span>.</span></div></div>`;
+        el.msgs.appendChild(indicatorDiv);
+        scrollToBottom(true);
+    }
+
+    function removeThinkingIndicator() {
+        const indicator = document.getElementById(THINKING_INDICATOR_ID);
+        indicator?.remove();
+        updateScrollButtonsVisibility();
+    }
+
+    // ===========================================================================
+    // == Funções de Manipulação de Arquivos ==
+    // ===========================================================================
+    function handleFilesSelected(fileList) {
+        if (!currentChatId || !el.fileInput) return;
+        const MAX_FILES = 5; const MAX_SIZE_MB = 15; const currentFileCount = filesToUpload.length;
+        if (currentFileCount >= MAX_FILES) { alert(`Limite de ${MAX_FILES} arquivos atingido.`); return; }
+        let addedCount = 0;
+        for (let i = 0; i < fileList.length; i++) {
+            if (filesToUpload.length >= MAX_FILES) { alert(`Limite de ${MAX_FILES} arquivos atingido. ${fileList.length - i} não adicionados.`); break; }
+            const file = fileList[i];
+            if (file.size > MAX_SIZE_MB * 1024 * 1024) { alert(`Arquivo "${file.name}" excede limite de ${MAX_SIZE_MB}MB.`); continue; }
+            if (filesToUpload.some(f => f.name === file.name && f.size === file.size)) { console.log(`Arquivo duplicado "${file.name}" ignorado.`); continue; }
+            filesToUpload.push(file); addPreviewItem(file); addedCount++;
+        }
+        if (addedCount > 0) { setLoadingState(false); }
+        el.fileInput.value = '';
+    }
+
+    function addPreviewItem(file) {
+        if (!el.uploadPreviewContent || !el.uploadPreviewArea) return;
+        const previewId = `preview-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const itemDiv = document.createElement('div'); itemDiv.className = 'preview-item'; itemDiv.id = previewId; itemDiv.dataset.fileName = file.name; itemDiv.title = `${file.name} (${(file.size / (1024*1024)).toFixed(2)} MB)`;
+        const isImage = file.type.startsWith('image/');
+
+        if (isImage) {
+             const placeholder = document.createElement('span');
+             placeholder.textContent = file.name.split('.').pop()?.toUpperCase() || '?';
+             placeholder.className = 'preview-placeholder image-loading';
+             itemDiv.appendChild(placeholder);
+
+            const reader = new FileReader();
+            reader.onload = (e) => { try { const img = document.createElement('img'); img.src = e.target.result; img.alt = file.name; img.onload = () => { if(itemDiv.contains(placeholder)) { itemDiv.removeChild(placeholder); } itemDiv.insertBefore(img, itemDiv.firstChild); }; img.onerror = () => { console.warn(`Falha preview ${file.name}`); if(itemDiv.contains(placeholder)) { placeholder.textContent = 'Erro'; placeholder.classList.add('error'); } } } catch (imgError) { console.error("Erro preview img:", imgError); } };
+            reader.onerror = (e) => console.error(`Erro leitura preview ${file.name}:`, e);
+            try { reader.readAsDataURL(file); } catch (readError) { console.error("Erro iniciar leitura preview:", readError); }
+        } else {
+            const fileInfoDiv = document.createElement('div'); fileInfoDiv.className = 'preview-file-info';
+            const iconSpan = document.createElement('span'); iconSpan.className = 'preview-file-icon';
+            const ext = file.name.split('.').pop()?.toLowerCase() || ''; let icon = '📄';
+            if (['pdf'].includes(ext)) icon = 'PDF'; else if (['doc', 'docx', 'odt'].includes(ext)) icon = 'W'; else if (['xls', 'xlsx', 'ods'].includes(ext)) icon = 'X'; else if (['ppt', 'pptx', 'odp'].includes(ext)) icon = 'P'; else if (['txt', 'md', 'csv', 'rtf', 'py', 'js', 'css', 'html'].includes(ext)) icon = '{;}'; else if (['zip', 'rar', 'gz', '7z'].includes(ext)) icon = '📦';
+            iconSpan.textContent = icon;
+            const nameSpan = document.createElement('span'); nameSpan.className = 'preview-file-name'; nameSpan.textContent = file.name;
+            fileInfoDiv.appendChild(iconSpan); fileInfoDiv.appendChild(nameSpan);
+            itemDiv.appendChild(fileInfoDiv);
+        }
+        itemDiv.appendChild(createRemoveButton(previewId, file.name));
+        el.uploadPreviewContent.appendChild(itemDiv);
+        el.uploadPreviewArea.classList.remove('hidden');
+        // Update button position when preview is shown/changed
+        updateScrollButtonsVisibility();
+    }
+
+    function createRemoveButton(previewId, fileName) {
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-preview';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.title = 'Remover este arquivo';
+        removeBtn.type = 'button';
+        removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            removeFileFromUpload(previewId, fileName);
+        };
+        return removeBtn;
+    }
+
+    function removeFileFromUpload(previewId, fileName) {
+        try {
+            filesToUpload = filesToUpload.filter(file => file.name !== fileName);
+            document.getElementById(previewId)?.remove();
+            setLoadingState(false);
+            if(filesToUpload.length === 0 && el.prompt && !el.prompt.disabled) {
+                el.prompt.focus();
+                // Hide preview area if empty
+                if (el.uploadPreviewArea && !el.uploadPreviewContent.hasChildNodes()) {
+                    el.uploadPreviewArea.classList.add('hidden');
+                }
+            }
+            // Update button position after removing a file and potentially hiding preview
+            updateScrollButtonsVisibility();
+        } catch (removeError) { console.error("Erro ao remover arquivo do preview:", removeError); }
+    }
+
+    function clearFileUploads() {
+        try {
+            filesToUpload = [];
+            if (el.uploadPreviewContent) { el.uploadPreviewContent.innerHTML = ''; }
+            if (el.fileInput) { el.fileInput.value = ''; }
+            if (el.uploadPreviewArea) { el.uploadPreviewArea.classList.add('hidden'); }
+            setLoadingState(false);
+            // Update button position after clearing uploads and hiding preview
+            updateScrollButtonsVisibility();
+        } catch (clearError) { console.error("Erro ao limpar uploads:", clearError); }
+    }
+
+    async function handlePaste(event) {
+        if (!currentChatId || !el.prompt || el.prompt.disabled) return;
+        try {
+            const clipboardData = event.clipboardData || window.clipboardData; if (!clipboardData) return;
+            const items = clipboardData.items; const filesToAdd = [];
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file') {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        const extension = file.type.split('/')[1] || 'bin';
+                        const fileName = file.name || `colado-${Date.now()}-${i}.${extension}`;
+                        const namedFile = new File([file], fileName, { type: file.type });
+                        filesToAdd.push(namedFile);
+                    }
+                }
+            }
+            if (filesToAdd.length > 0) {
+                event.preventDefault();
+                handleFilesSelected(filesToAdd); // This calls addPreviewItem which calls updateScrollButtonsVisibility
+            }
+        } catch (pasteError) { console.error("Erro ao processar dados colados:", pasteError); }
+    }
+
+
+    // ===========================================================================
+    // == Funções de Manipulação de Mensagens ==
+    // ===========================================================================
+    function addMessageDOM(m, isOptimistic = false) {
+        if (!el.msgs) { console.error("#messages-container não encontrado."); return; }
+        try {
+             if (!isOptimistic) { removeThinkingIndicator(); }
+             const shouldScroll = el.msgs.scrollHeight - el.msgs.clientHeight <= el.msgs.scrollTop + 50;
+             const div = document.createElement('div');
+             const isError = m.sender === 'ai' && (m.text?.startsWith('(Erro:') || m.text?.startsWith(' Erro:'));
+             div.className = `message ${m.sender === 'user' ? 'user-message' : 'ai-message'} ${isError ? 'error-message' : ''}`;
+             if (m.id && !isOptimistic) div.dataset.messageId = m.id; else if (isOptimistic && m.id) div.dataset.messageId = m.id;
+             if (isOptimistic) div.style.opacity = '0.7';
+
+             const messageContentDiv = document.createElement('div'); messageContentDiv.className = 'message-content';
+             let hasRenderedContent = false;
+
+             // Renderiza Anexos
+             if (m.attachments && m.attachments.length > 0) {
+                 const attachmentsContainer = document.createElement('div');
+                 attachmentsContainer.className = 'message-attachments-preview';
+                 m.attachments.forEach(att => {
+                     const attDiv = document.createElement('div');
+                     attDiv.className = 'message-attachment-item';
+
+                     const isImage = att.filename?.match(/\.(jpeg|jpg|gif|png|webp|heic|heif)$/i);
+                     const fileUrl = (isOptimistic && att.url?.startsWith('blob:')) ? att.url : att.url;
+
+                     if (isImage && fileUrl) {
+                         const imgLink = document.createElement('a'); imgLink.href = att.url; imgLink.target = '_blank'; imgLink.rel = 'noopener noreferrer'; imgLink.title = `Ver ${att.filename || 'imagem completa'}`;
+                         const img = document.createElement('img'); img.src = fileUrl; img.alt = att.filename || 'Anexo'; img.className = 'attachment-thumbnail';
+                         img.onerror = () => { imgLink.innerHTML = `<span class="attachment-error">${escapeHtml(att.filename || 'Erro img')}</span>`; };
+                         if (!isOptimistic && img.src.startsWith('blob:')) { img.onload = () => URL.revokeObjectURL(img.src); }
+                         imgLink.appendChild(img); attDiv.appendChild(imgLink);
+                     } else if (att.url && att.filename) {
+                         const fileLink = document.createElement('a'); fileLink.href = att.url; fileLink.target = '_blank'; fileLink.rel = 'noopener noreferrer'; fileLink.title = `Abrir/Baixar ${att.filename}`; fileLink.className = 'attachment-file-link';
+                         const iconSpan = document.createElement('span'); iconSpan.className = 'attachment-file-icon';
+                         const ext = att.filename.split('.').pop()?.toLowerCase() || ''; let icon = '📎';
+                         if (['pdf'].includes(ext)) icon = '📄'; else if (['doc', 'docx', 'odt'].includes(ext)) icon = '📝'; else if (['xls', 'xlsx', 'ods'].includes(ext)) icon = '📊'; else if (['ppt', 'pptx', 'odp'].includes(ext)) icon = '🖥️'; else if (['zip', 'rar', 'gz', '7z'].includes(ext)) icon = '📦'; else if (['py','js','html','css','json','xml','md','rtf','csv','txt'].includes(ext)) icon = '{;}';
+                         iconSpan.textContent = icon + ' ';
+                         const nameSpan = document.createElement('span'); nameSpan.className = 'attachment-file-name'; nameSpan.textContent = att.filename;
+                         fileLink.appendChild(iconSpan); fileLink.appendChild(nameSpan); attDiv.appendChild(fileLink);
+                     }
+                     if (attDiv.hasChildNodes()) { attachmentsContainer.appendChild(attDiv); hasRenderedContent = true; }
+                 });
+                 if (attachmentsContainer.hasChildNodes()) { messageContentDiv.appendChild(attachmentsContainer); }
+             }
+
+             // Renderiza Texto
+             const rawText = m.text || '';
+             if (rawText) {
+                 const messageTextDiv = document.createElement('div'); messageTextDiv.className = 'message-text';
+
+                 if (m.sender === 'ai' && !isError) {
+                     try {
+                         messageTextDiv.innerHTML = marked.parse(rawText);
+                         messageTextDiv.querySelectorAll('pre code[class*="language-"]').forEach((codeEl) => {
+                             if (!codeEl.closest('.code-block-wrapper')) {
+                                 const pre = codeEl.parentElement;
+                                 const language = codeEl.className.match(/language-(\w+)/)?.[1] || 'plaintext';
+                                 const codeBlockId = `code-${m.id || 'optimistic'}-${Math.random().toString(16).slice(2)}`;
+                                 codeEl.id = codeBlockId;
+                                 const wrapper = document.createElement('div'); wrapper.className = 'code-block-wrapper';
+                                 const header = document.createElement('div'); header.className = 'code-block-header';
+                                 const langTag = document.createElement('span'); langTag.className = 'language-tag'; langTag.textContent = language;
+                                 const actions = document.createElement('div'); actions.className = 'code-actions';
+                                 const copyBtn = document.createElement('button'); copyBtn.className = 'copy-code-btn'; copyBtn.dataset.target = codeBlockId; copyBtn.title = 'Copiar código'; copyBtn.textContent = 'Copiar'; copyBtn.type = 'button';
+                                 copyBtn.addEventListener('click', (e) => {
+                                     const button = e.target; const targetId = button.dataset.target; const targetCodeElement = document.getElementById(targetId);
+                                     if(targetCodeElement){ navigator.clipboard.writeText(targetCodeElement.textContent).then(()=>{ button.textContent='Copiado!'; button.disabled=true; setTimeout(()=>{button.textContent='Copiar'; button.disabled=false;},1500); }).catch(err => { console.error('Falha copiar código:', err); button.textContent='Erro'; setTimeout(()=>{button.textContent='Copiar';},1500); }); } else { console.error('Elemento de código não encontrado para cópia:', targetId); }
+                                 });
+                                 actions.appendChild(copyBtn); header.appendChild(langTag); header.appendChild(actions);
+                                 pre.parentNode.insertBefore(wrapper, pre); wrapper.appendChild(header); wrapper.appendChild(pre);
+                             }
+                         });
+                     } catch (e) {
+                         console.error("Erro ao processar Markdown:", e);
+                         messageTextDiv.textContent = rawText;
+                     }
+                 } else {
+                     messageTextDiv.textContent = rawText;
+                 }
+
+                 // Botão Editar
+                 const canEdit = m.sender === 'user' && m.id && !isOptimistic && (!m.attachments || m.attachments.length === 0);
+                 if(canEdit) {
+                     const editBtn = document.createElement('span'); editBtn.className = 'edit-btn'; editBtn.dataset.messageId = m.id; editBtn.title = 'Editar mensagem'; editBtn.textContent = 'Editar'; messageContentDiv.appendChild(editBtn);
+                     const editArea = document.createElement('div'); editArea.className = 'edit-area hidden'; const textArea = document.createElement('textarea'); textArea.value = rawText; textArea.rows = Math.max(2, rawText.split('\n').length); textArea.addEventListener('input', () => { textArea.style.height = 'auto'; textArea.style.height = `${textArea.scrollHeight + 2}px`; });
+                     const buttonGroup = document.createElement('div'); buttonGroup.className = 'edit-buttons'; const saveBtn = document.createElement('button'); saveBtn.textContent = 'Salvar'; saveBtn.className = 'save-edit-btn'; saveBtn.type = 'button'; const cancelBtn = document.createElement('button'); cancelBtn.textContent = 'Cancelar'; cancelBtn.className = 'cancel-edit-btn'; cancelBtn.type = 'button'; buttonGroup.appendChild(saveBtn); buttonGroup.appendChild(cancelBtn); editArea.appendChild(textArea); editArea.appendChild(buttonGroup); messageContentDiv.appendChild(editArea);
+                     let originalTextContent = rawText;
+                     editBtn.addEventListener('click', (e) => { e.stopPropagation(); const currentTextDiv = div.querySelector('.message-text'); originalTextContent = currentTextDiv ? currentTextDiv.textContent : rawText; textArea.value = originalTextContent; textArea.style.height = 'auto'; textArea.style.height = `${textArea.scrollHeight + 2}px`; if(currentTextDiv) currentTextDiv.classList.add('hidden'); editBtn.classList.add('hidden'); editArea.classList.remove('hidden'); textArea.focus(); });
+                     saveBtn.addEventListener('click', async (e) => { e.stopPropagation(); const newText = textArea.value.trim(); if (newText && newText !== originalTextContent) { await callEditApi(m.id, newText); } else { const currentTextDiv = div.querySelector('.message-text'); if(currentTextDiv) currentTextDiv.classList.remove('hidden'); editBtn.classList.remove('hidden'); editArea.classList.add('hidden'); } });
+                     cancelBtn.addEventListener('click', (e) => { e.stopPropagation(); const currentTextDiv = div.querySelector('.message-text'); if(currentTextDiv) currentTextDiv.classList.remove('hidden'); editBtn.classList.remove('hidden'); editArea.classList.add('hidden'); });
+                 }
+                 messageContentDiv.appendChild(messageTextDiv);
+                 hasRenderedContent = true;
+             }
+
+             if (hasRenderedContent) { div.appendChild(messageContentDiv); el.msgs.appendChild(div); }
+             else { console.warn("Mensagem sem conteúdo visível:", m); }
+
+             // Scroll e Opacidade
+             if (!isOptimistic) { el.msgs.querySelectorAll('.message[style*="opacity"]').forEach(opMsg => { if(opMsg !== div) { opMsg.style.removeProperty('opacity'); } }); }
+             if (shouldScroll || !isOptimistic) { scrollToBottom(!isOptimistic); }
+
+             // Highlight.js
+             if (typeof hljs !== 'undefined') {
+                 try {
+                     div.querySelectorAll('pre code').forEach((block) => {
+                         hljs.highlightElement(block);
+                     });
+                 } catch (hljsError) {
+                     console.error("Erro ao executar highlight.js:", hljsError);
+                 }
+             } else {
+                 console.warn("Highlight.js (hljs) não definido.");
+             }
+
+             // Update scroll buttons visibility
+             setTimeout(updateScrollButtonsVisibility, 50);
+
+        } catch (domError) { console.error("Erro addMessageDOM:", domError, "Mensagem:", m); }
+    }
+
+    async function callEditApi(messageId, newText) {
+        if (!checkCsrfToken() || !currentChatId) return;
+        console.log(`Editando mensagem ${messageId} no chat ${currentChatId}...`);
+        const messageDiv = el.msgs?.querySelector(`.message[data-message-id="${messageId}"]`);
+        const saveBtn = messageDiv?.querySelector('.save-edit-btn'); const cancelBtn = messageDiv?.querySelector('.cancel-edit-btn');
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Salvando...'; } if (cancelBtn) cancelBtn.disabled = true;
+        try {
+             const resp = await fetch(EDIT_MSG_URL(currentChatId, messageId), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftokenValue }, body: JSON.stringify({ new_text: newText, model: el.modelSel.value }) });
+             const data = await resp.json();
+             if (!resp.ok && resp.status !== 207) { throw new Error(data.error || data.warning || `Erro ${resp.status} ao editar.`); }
+             console.log(`Mensagem ${messageId} editada. Status backend: ${data.status}`);
+             await loadMessages();
+             if(resp.status === 207 && data.warning) { alert(`Aviso: ${data.warning}`); }
+        } catch (err) { console.error("Erro API Edição:", err); alert(`Falha ao editar: ${err.message}`); await loadMessages(); }
+    }
+
+
+    async function sendMessage() {
+        if (isSending || !checkCsrfToken() || !currentChatId || !el.sendBtn || el.sendBtn.disabled) return;
+        const text = el.prompt?.value.trim() || ''; const files = filesToUpload;
+        if (!text && files.length === 0) { console.log("Envio vazio."); return; }
+        isSending = true; console.log(`Enviando para Chat ${currentChatId}. Texto: ${text?'S':'N'}, Arquivos: ${files.length}`); scrollToBottom(true);
+        const optimisticId = `optimistic-${Date.now()}`; const optimisticAttachmentsPreview = files.map(file => ({ url: URL.createObjectURL(file), filename: file.name }));
+        addMessageDOM({ sender: 'user', text: text, id: optimisticId, attachments: optimisticAttachmentsPreview }, true);
+        const promptValueBeforeSend = text; if(el.prompt) el.prompt.value = ''; autoGrowTextarea();
+        addThinkingIndicator(); setLoadingState(true, "Enviando...");
+        const formData = new FormData(); formData.append('prompt', promptValueBeforeSend); formData.append('model', el.modelSel.value); files.forEach(file => { formData.append('arquivo', file, file.name); });
+        let response;
+        try {
+             response = await fetch(SEND_MESSAGE_URL(currentChatId), { method: 'POST', headers: { 'X-CSRFToken': csrftokenValue }, body: formData });
+             let responseData = {}; try { responseData = await response.json(); console.log("Resposta JSON:", responseData); } catch (jsonError) { console.error("Falha parse JSON:", jsonError); const responseText = await response.text(); console.error("Resposta Texto:", responseText); throw new Error(`Erro ${response.status}: Resposta não JSON.`); }
+             removeThinkingIndicator();
+             if (!response.ok && response.status !== 207) { throw new Error(responseData.error || `Erro ${response.status}.`); }
+             const optimisticElement = el.msgs?.querySelector(`[data-message-id="${optimisticId}"]`); if (optimisticElement) { optimisticElement.querySelectorAll('img[src^="blob:"]').forEach(img => { URL.revokeObjectURL(img.src); }); optimisticElement.remove(); }
+             if (responseData.user_message_id) { addMessageDOM({ sender: 'user', text: promptValueBeforeSend, id: responseData.user_message_id, attachments: responseData.user_attachments || [] }); } else { console.warn("Backend não retornou user_message_id."); }
+             if (responseData.ai_message_id) { addMessageDOM({ sender: 'ai', text: responseData.response, id: responseData.ai_message_id }); } else if (responseData.response) { addMessageDOM({ sender: 'ai', text: responseData.response, id: `ai-fallback-${Date.now()}`}); }
+             if (responseData.new_title && el.chatTitle && responseData.new_title !== el.chatTitle.textContent) { el.chatTitle.textContent = responseData.new_title; const chatListItem = el.chatList?.querySelector(`.chat-list-item[data-chat-id="${currentChatId}"]`); if (chatListItem) { const titleSpan = chatListItem.querySelector('.chat-item-title'); if (titleSpan) titleSpan.textContent = responseData.new_title; chatListItem.title = `Chat: ${responseData.new_title}\nAtualizado: ${new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}`; } }
+             if (responseData.upload_errors?.length > 0) { let errorMsg = "Atenção: Alguns arquivos não foram processados:\n"; responseData.upload_errors.forEach(err => { errorMsg += `- ${err.filename || '?'}: ${err.error || '?'}\n`; }); alert(errorMsg); }
+             scrollToBottom(true);
+        } catch (err) {
+             console.error("ERRO sendMessage:", err); removeThinkingIndicator();
+             const optimisticElement = el.msgs?.querySelector(`[data-message-id="${optimisticId}"]`); if (optimisticElement) { optimisticElement.querySelectorAll('img[src^="blob:"]').forEach(img => { URL.revokeObjectURL(img.src); }); optimisticElement.remove(); }
+             addMessageDOM({ sender: 'ai', text: `(Erro: ${escapeHtml(err.message || 'Falha na comunicação')})`, id: `error-${Date.now()}` });
+             scrollToBottom(true);
+        } finally { isSending = false; clearFileUploads(); setLoadingState(false); try { if(el.prompt && !el.prompt.disabled) el.prompt.focus(); } catch(e) { /* Ignora */ } }
+    }
+
+    async function loadMessages() {
+        if (!el.msgs || !el.chatTitle) return;
+        if (!currentChatId) {
+             el.msgs.innerHTML = '<div class="message ai-message" id="initial-placeholder-message"><div class="message-content"><div class="message-text">Selecione ou crie uma nova conversa.</div></div></div>';
+             el.chatTitle.textContent = "Nenhum chat selecionado";
+             enableInputArea(false);
+             setLoadingState(false);
+             return;
+        }
+        console.log(`Carregando chat ${currentChatId}`); document.getElementById('initial-placeholder-message')?.remove(); el.msgs.innerHTML = '<div class="loading-messages">Carregando mensagens...</div>'; setLoadingState(true, "Carregando...");
+        try {
+             const response = await fetch(GET_CHAT_URL(currentChatId)); if (!response.ok) { let eT = `Erro ${response.status}`; try{ const d=await response.json(); eT=d.error||eT; } catch(e){} throw new Error(eT); } const data = await response.json(); console.log("Dados chat:", data);
+             el.msgs.innerHTML = '';
+             if (!data.messages || data.messages.length === 0) { el.msgs.innerHTML = '<div class="message ai-message empty-chat-message"><div class="message-content"><div class="message-text">Conversa vazia. Envie sua primeira mensagem!</div></div></div>'; }
+             else { data.messages.forEach(msg => addMessageDOM(msg)); }
+             el.chatTitle.textContent = data.title || `Chat ${currentChatId}`;
+             scrollToBottom(true);
+             enableInputArea(true);
+              if (data.model && el.modelSel) { const modelExists = el.modelSel.querySelector(`option[value="${data.model}"]`); if(modelExists) { el.modelSel.value = data.model; const selText = el.modelSel.options[el.modelSel.selectedIndex]?.textContent; if (selText && el.customModelSelectSelectedText) { el.customModelSelectSelectedText.textContent = selText; } if(el.customModelSelectOptions) { el.customModelSelectOptions.querySelectorAll('.custom-select-option.selected').forEach(opt => opt.classList.remove('selected')); const customOpt = el.customModelSelectOptions.querySelector(`.custom-select-option[data-value="${data.model}"]`); if (customOpt) customOpt.classList.add('selected'); } } else { console.warn(`Modelo ${data.model} não encontrado.`); const currentSelText = el.modelSel.options[el.modelSel.selectedIndex]?.textContent; if (currentSelText && el.customModelSelectSelectedText) { el.customModelSelectSelectedText.textContent = currentSelText; } } } else { const currentSelText = el.modelSel.options[el.modelSel.selectedIndex]?.textContent; if (currentSelText && el.customModelSelectSelectedText) { el.customModelSelectSelectedText.textContent = currentSelText; } }
+        } catch (err) { console.error("Erro loadMessages:", err); el.msgs.innerHTML = `<div class="message ai-message error-message"><div class="message-content"><div class="message-text">Erro carregar mensagens: ${escapeHtml(err.message)}</div></div></div>`; el.chatTitle.textContent = "Erro"; enableInputArea(false); }
+        finally { setLoadingState(false); if (currentChatId && el.prompt && !el.prompt.disabled) { try { setTimeout(() => el.prompt.focus(), 100); } catch(e){ /* ignora */ } } }
+    }
+
+    async function createChat() {
+        if (!checkCsrfToken() || !el.newBtn || el.newBtn.disabled || !el.modelSel) return; console.log("Criando chat..."); setLoadingState(true, "Criando...");
+        try { const response = await fetch(CREATE_CHAT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftokenValue }, body: JSON.stringify({ title: '', model: el.modelSel.value }) }); const data = await response.json(); if (!response.ok) { throw new Error(data.error || `Erro ${response.status}`); } console.log("Novo chat:", data); el.chatList?.querySelector('.no-chats-message')?.remove(); addChatToListDOM(data, true); } catch (err) { alert('Falha criar chat:\n' + err.message); console.error("Erro criar chat:", err); setLoadingState(false); }
+    }
+
+    async function deleteChat(idToDelete) {
+        if (!checkCsrfToken() || !idToDelete || el.appContainer?.classList.contains('app-loading')) return; const chatItem = el.chatList?.querySelector(`.chat-list-item[data-chat-id="${idToDelete}"]`); const chatTitle = chatItem?.querySelector('.chat-item-title')?.textContent || `ID: ${idToDelete}`; if (!confirm(`Excluir conversa?\n"${chatTitle}"`)) return;
+        console.log(`Excluindo chat ${idToDelete}`); setLoadingState(true, "Excluindo...");
+        const wasCurrentChat = (String(currentChatId) === String(idToDelete));
+        try { const response = await fetch(DELETE_CHAT_URL(idToDelete), { method: 'DELETE', headers: { 'X-CSRFToken': csrftokenValue } }); let data = {}; try { data = await response.json(); } catch(e) { /* Ignora */ } if (!response.ok) { throw new Error(data.error || `Erro ${response.status}`); } console.log("Chat excluído:", data.message || "Sucesso"); chatItem?.remove();
+             if (wasCurrentChat) { currentChatId = null; const nextChatItem = el.chatList?.querySelector('.chat-list-item'); if (nextChatItem) { const nextId = nextChatItem.dataset.chatId; const nextTitle = nextChatItem.querySelector('.chat-item-title')?.textContent; const nextModel = nextChatItem.dataset.chatModel; console.log(`Selecionando próximo: ${nextId}`); setTimeout(() => selectChat(nextId, nextTitle || `Chat ${nextId}`, nextModel), 50); } else { console.log(`Nenhum outro chat.`); if (el.chatTitle) el.chatTitle.textContent = 'Nenhuma conversa'; if (el.msgs) el.msgs.innerHTML = '<div class="message ai-message" id="initial-placeholder-message"><div class="message-content"><div class="message-text">Crie uma nova conversa.</div></div></div>'; enableInputArea(false); if (el.chatList) el.chatList.innerHTML = '<div class="no-chats-message">Nenhuma conversa. Crie uma!</div>'; setLoadingState(false); } } else { setLoadingState(false); }
+             if (el.chatList && el.chatList.children.length === 0 && !el.chatList.querySelector('.no-chats-message')) { el.chatList.innerHTML = '<div class="no-chats-message">Nenhuma conversa. Crie uma!</div>'; }
+        } catch (err) { alert('Erro excluir chat:\n' + err.message); console.error("Erro exclusão:", err); setLoadingState(false); }
+    }
+
+    function addChatToListDOM(chatData, selectIt = false) {
+        if(!el.chatList) return;
+        try {
+            if (!chatData || typeof chatData.id === 'undefined') { console.error("Dados inválidos addChatToListDOM:", chatData); return; }
+            el.chatList.querySelector(`.chat-list-item[data-chat-id="${chatData.id}"]`)?.remove();
+            const item = document.createElement('div'); item.className = 'chat-list-item'; item.dataset.chatId = chatData.id;
+            const updatedDate = chatData.updated_at ? new Date(chatData.updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short'}) : 'Recente';
+            const titleText = chatData.title || `Chat ${chatData.id}`; item.title = `Chat: ${titleText}\nAtualizado: ${updatedDate}`;
+            if (chatData.model) { item.dataset.chatModel = chatData.model; }
+            const titleSpan = document.createElement('span'); titleSpan.className = 'chat-item-title'; titleSpan.textContent = titleText;
+            const deleteBtn = document.createElement('button'); deleteBtn.className = 'chat-item-delete-btn'; deleteBtn.innerHTML = '&times;'; deleteBtn.title = 'Excluir conversa'; deleteBtn.dataset.chatId = chatData.id; deleteBtn.type='button';
+            item.appendChild(titleSpan); item.appendChild(deleteBtn);
+            el.chatList.querySelector('.no-chats-message')?.remove(); el.chatList.prepend(item);
+            if (selectIt) { setTimeout(() => selectChat(chatData.id, titleText, chatData.model), 50); }
+        } catch (domError) { console.error("Erro addChatToListDOM:", domError); }
+    }
+
+    function selectChat(id, title, model = null) {
+        if (!el.chatTitle || !el.modelSel || !el.chatList) return;
+        if (String(currentChatId) === String(id) && !el.appContainer?.classList.contains('app-loading')) {
+             console.log(`Chat ${id} já selecionado.`);
+             const currentTargetModel = model || el.chatList.querySelector(`.chat-list-item[data-chat-id="${id}"]`)?.dataset.chatModel || el.modelSel.value;
+             if (el.modelSel.value !== currentTargetModel && el.modelSel.querySelector(`option[value="${currentTargetModel}"]`)) {
+                 console.log(`Corrigindo modelo para ${currentTargetModel} (chat já ativo ${id})`);
+                 el.modelSel.value = currentTargetModel;
+                 const selectedOptionText = el.modelSel.options[el.modelSel.selectedIndex]?.textContent; if (selectedOptionText && el.customModelSelectSelectedText) { el.customModelSelectSelectedText.textContent = selectedOptionText; } if(el.customModelSelectOptions) { el.customModelSelectOptions.querySelectorAll('.custom-select-option.selected').forEach(opt => opt.classList.remove('selected')); const customOption = el.customModelSelectOptions.querySelector(`.custom-select-option[data-value="${currentTargetModel}"]`); if (customOption) customOption.classList.add('selected'); }
+             }
+             updateScrollButtonsVisibility();
+             return;
+        }
+        console.log(`Selecionando chat ${id}: "${title}" (Modelo sugerido: ${model || 'N/A'})`); currentChatId = id; el.chatTitle.textContent = title || `Chat ${id}`; clearFileUploads(); enableInputArea(false);
+        document.querySelectorAll('.chat-list-item.active').forEach(activeItem => activeItem.classList.remove('active')); const selectedItem = el.chatList.querySelector(`.chat-list-item[data-chat-id="${id}"]`); if (selectedItem) selectedItem.classList.add('active');
+        const targetModel = model || selectedItem?.dataset.chatModel || el.modelSel.value;
+        const targetOption = el.modelSel.querySelector(`option[value="${targetModel}"]`);
+        if (targetOption) { if (el.modelSel.value !== targetModel) { console.log(`Definindo modelo ${targetModel}`); el.modelSel.value = targetModel; } else { console.log(`Modelo ${targetModel} já selecionado.`); } } else { console.warn(`Modelo "${targetModel}" não encontrado.`); }
+        loadMessages();
+    }
+
+    async function initializeChat() {
+        if (!el.chatList || !el.chatTitle || !el.modelSel) return;
+        console.log("Inicializando chat..."); enableInputArea(false); setLoadingState(true, "Iniciando...");
+        try {
+             const response = await fetch(LIST_CHATS_URL); if (!response.ok) { let eT = `Erro ${response.status}`; try{ const d=await response.json(); eT=d.error||eT; } catch(e){} throw new Error(`Falha listar chats: ${eT}`); } const chats = await response.json(); console.log("Chats iniciais:", chats);
+             el.chatList.innerHTML = '';
+             if (Array.isArray(chats) && chats.length > 0) {
+                 chats.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+                 chats.forEach(chat => addChatToListDOM(chat, false));
+                 if (chats[0]) { setTimeout(() => selectChat(chats[0].id, chats[0].title || `Chat ${chats[0].id}`, chats[0].model), 50); }
+                 else { setLoadingState(false); }
+             } else {
+                 console.log("Nenhum chat."); el.chatList.innerHTML = '<div class="no-chats-message">Nenhuma conversa. Crie uma!</div>'; el.chatTitle.textContent = 'Crie uma nova conversa'; enableInputArea(false); setLoadingState(false);
+                 const selectedOptionText = el.modelSel.options[el.modelSel.selectedIndex]?.textContent; if (selectedOptionText && el.customModelSelectSelectedText) { el.customModelSelectSelectedText.textContent = selectedOptionText; } if(el.customModelSelectOptions) { el.customModelSelectOptions.querySelectorAll('.custom-select-option.selected').forEach(opt => opt.classList.remove('selected')); const defaultOption = el.customModelSelectOptions.querySelector(`.custom-select-option[data-value="${el.modelSel.value}"]`); if(defaultOption) defaultOption.classList.add('selected'); }
+             }
+        } catch (err) { console.error("Erro crítico inicialização:", err); el.chatList.innerHTML = `<div class="error-loading-chats">Erro carregar conversas: ${escapeHtml(err.message)}</div>`; el.chatTitle.textContent = 'Erro Inicialização'; enableInputArea(false); setLoadingState(false); }
+    }
+
+
+    function updateScrollButtonsVisibility() {
+
+        if (!el.aiScrollButtonsContainer || !el.msgs || !el.chatInputArea || !el.uploadPreviewArea || !currentChatId || el.appContainer?.classList.contains('app-loading')) {
+             if(el.aiScrollButtonsContainer) el.aiScrollButtonsContainer.classList.remove('visible');
+             return;
+        }
+
+        const lastAiMsg = el.msgs.querySelector('.message.ai-message:last-of-type:not(.thinking)'); // Ignora o indicador "pensando"
+
+        if (!lastAiMsg) {
+             el.aiScrollButtonsContainer.classList.remove('visible');
+             return;
+        }
+
+        const containerRect = el.msgs.getBoundingClientRect();
+        const lastAiMsgRect = lastAiMsg.getBoundingClientRect();
+
+
+        const isPartiallyVisible = lastAiMsgRect.top < containerRect.top || lastAiMsgRect.bottom > containerRect.bottom;
+
+        if (isPartiallyVisible) {
+
+            const inputAreaHeight = el.chatInputArea.offsetHeight;
+            const previewAreaHeight = el.uploadPreviewArea.classList.contains('hidden') ? 0 : el.uploadPreviewArea.offsetHeight;
+            const marginBottom = 10; 
+            const totalOffset = inputAreaHeight + previewAreaHeight + marginBottom;
+            el.aiScrollButtonsContainer.style.bottom = `${totalOffset}px`;
+
+
+            el.aiScrollButtonsContainer.classList.add('visible');
+        } else {
+            el.aiScrollButtonsContainer.classList.remove('visible');
+
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM carregado.");
+        const essentialElements = { ...el };
+        const missingElements = Object.entries(essentialElements).filter(([key, value]) => !value);
+
+        if (missingElements.length > 0) {
+             console.error("ERRO CRÍTICO: Elementos da UI faltando!", missingElements.map(e => e[0]));
+             document.body.innerHTML = `<div style="color: red; padding: 20px;">Erro fatal na UI. Elementos faltando: ${missingElements.map(e => e[0]).join(', ')}. Verifique o console (F12).</div>`;
+             return;
+        }
+
+        initializeCustomSelect();
+        el.newBtn.onclick = createChat;
+        el.sendBtn.onclick = sendMessage;
+        el.prompt.addEventListener('input', autoGrowTextarea);
+        el.prompt.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !el.sendBtn.disabled) { e.preventDefault(); sendMessage(); } });
+        el.prompt.addEventListener('paste', handlePaste);
+        el.fileUploadBtn.addEventListener('click', () => { if (!el.fileUploadBtn.disabled) el.fileInput.click(); });
+        el.fileInput.addEventListener('change', (event) => { if (event.target.files?.length > 0) handleFilesSelected(event.target.files); });
+        el.cancelUploadBtn.addEventListener('click', clearFileUploads);
+        el.chatList.addEventListener('click', event => {
+             const target = event.target;
+             if (target.classList.contains('chat-item-delete-btn')) { event.stopPropagation(); const id = target.dataset.chatId; if(id) deleteChat(id); }
+             else { const listItem = target.closest('.chat-list-item'); if(listItem){ const id = listItem.dataset.chatId; const title = listItem.querySelector('.chat-item-title')?.textContent; const model = listItem.dataset.chatModel; if(id && title !== null && typeof title !== 'undefined') { selectChat(id, title, model); } else if (id) { console.warn(`Título não encontrado ID: ${id}.`); selectChat(id, `Chat ${id}`, model); } } }
+        });
+
+      
+        el.msgs.addEventListener('scroll', updateScrollButtonsVisibility);
+
+        el.scrollAiTopBtn.addEventListener('click', () => {
+            const lastAiMsg = el.msgs.querySelector('.message.ai-message:last-of-type:not(.thinking)');
+            if (lastAiMsg) {
+                lastAiMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(updateScrollButtonsVisibility, 350); 
+            }
+        });
+
+        el.scrollAiBottomBtn.addEventListener('click', () => {
+            const lastAiMsg = el.msgs.querySelector('.message.ai-message:last-of-type:not(.thinking)');
+            if (lastAiMsg) {
+                lastAiMsg.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                 setTimeout(updateScrollButtonsVisibility, 350); 
+            }
+        });
+
+
+ 
+        const resizeObserver = new ResizeObserver(() => {
+            updateScrollButtonsVisibility();
+        });
+        if(el.chatInputArea) resizeObserver.observe(el.chatInputArea);
+        if(el.uploadPreviewArea) resizeObserver.observe(el.uploadPreviewArea);
+
+
+        initializeChat();
+    });
+
+</script>
+{% endblock %}

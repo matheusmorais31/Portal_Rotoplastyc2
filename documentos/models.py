@@ -132,6 +132,7 @@ class Documento(models.Model):
             ('can_active', 'Pode ativar/inativar documentos'),
             ('view_acessos_documento', 'Visualizar Acessos Documentos'),
             ('can_view_revisions', 'Visualizar revisões de Documentos'),
+            ('replace_document', 'Substituir PDF'),
             ('view_documentos_ina', 'Listar Documentos Inativos'),
             ('list_pending_approvals', 'Aprovações Pendentes'),
             ('list_reproaches', 'Lista Reprovações'),
@@ -144,6 +145,7 @@ class Documento(models.Model):
             ('add_categoria', 'Adicionar Categoria'),
             ('change_categoria', 'Editar Categoria'),
             ('delete_categoria', 'Deletar Categoria'),
+
         ]
 
     def __str__(self):

@@ -117,11 +117,13 @@
                                     <span class="tooltip-text">Baixar</span>
                                 </a>
                                 
-                                    <a href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon">
-                                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+                                <a href="{% url 'documentos:visualizar_documento_pdfjs' documento.id %}"
+                                    class="action-icon"
+                                    title="Visualizar PDF.js">
+                                        <img src="{% static 'images/view-icon.png' %}" alt="Visualizar PDF.js" class="view-icon">
                                         <span class="tooltip-text">Visualizar</span>
-                                    </a>
-                                    
+                                </a>
+                                        
                                   
                                     {% if perms.documentos.view_acessos_documento %}
                                         <a href="{% url 'documentos:visualizar_acessos_documento' documento.id %}" class="action-icon">

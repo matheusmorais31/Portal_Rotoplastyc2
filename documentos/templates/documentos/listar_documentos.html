@@ -92,6 +92,14 @@
                 <span class="tooltip-text">Nova Revisão</span>
             </a> 
         {% endif %}
+
+        {% if perms.documentos.replace_document %}
+            <a href="{% url 'documentos:substituir_pdf' documento.id %}" class="action-icon">
+            <img src="{% static 'images/substitute_icon.png' %}" alt="Substituir PDF" class="substitute-icon">
+            <span class="tooltip-text">Substituir PDF</span>
+            </a>
+        {% endif %}
+        
         {% if perms.documentos.can_view_revisions %}
             <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
                 <img src="{% static 'images/revision-icon.png' %}" alt="Histórico" class="view-access-icon">
@@ -135,14 +143,14 @@
         <!--href="{% url 'documentos:visualizar_documento' documento.id %}" class="action-icon" title=" Ver PDF">
             <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
             <span class="tooltip-text">Visualizar</span>
-        </a> >
+        </a> > -->
 
-        <!-- EXEMPLO: Botão para Visualizar no Viewer PDF.js (se você tiver uma rota 'visualizar_documento_pdfjs') -->
+        
         <a href="{% url 'documentos:visualizar_documento_pdfjs' documento.id %}"
             class="action-icon"
             title="Visualizar PDF.js">
                 <img src="{% static 'images/view-icon.png' %}" alt="Visualizar PDF.js" class="view-icon">
-                <span class="tooltip-text">Visualizar (PDF.js)</span>
+                <span class="tooltip-text">Visualizar</span>
             </a>
 
         {% if perms.documentos.can_add_documento %}
@@ -183,6 +191,12 @@
             </button>
         </form>
         {% endif %}
+    {% endif %}
+    {% if perms.documentos.replace_document %}
+    <a href="{% url 'documentos:substituir_pdf' documento.id %}" class="action-icon">
+       <img src="{% static 'images/substitute_icon.png' %}" alt="Substituir PDF" class="substitute-icon">
+       <span class="tooltip-text">Substituir PDF</span>
+    </a>
     {% endif %}
 </div>
                         </div>
