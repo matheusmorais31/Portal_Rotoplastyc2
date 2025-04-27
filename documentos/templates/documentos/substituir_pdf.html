@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/registrar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Substituir PDF do documento: {{ documento.nome }}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="novo_pdf">Selecione o novo arquivo PDF:</label>
+            <input type="file" name="novo_pdf" id="novo_pdf" accept="application/pdf">
+        </div>
+        <div class="form-buttons">
+            <a href="{% url 'documentos:listar_documentos_aprovados' %}">
+                <button type="button">Cancelar</button>
+            </a>
+            <button type="submit">OK</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: 'resolve',
+            language: 'pt-BR'
+        });
+    });
+
+    // Desativa o botão de envio após a submissão do formulário
+    $('form').on('submit', function() {
+        var isValid = true;
+        {% if form.errors %}
+            isValid = false;
+        {% endif %}
+
+        if (isValid) {
+            $('button[type="submit"]').attr('disabled', 'disabled').text('Enviando...');
+        }
+    });
+</script>
+{% endblock %}

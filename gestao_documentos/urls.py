@@ -39,7 +39,11 @@ urlpatterns = [
     path('notificacoes/', include('notificacoes.urls')),
 
     #BI
-    path('bi/', include('bi.urls', namespace='bi')),  
+    path('bi/', include('bi.urls', namespace='bi')),
+
+    #IA
+    path('ia/', include('ia.urls', namespace='ia')),
+
 ]
 
 # Configuração para servir arquivos de mídia e estáticos em modo de depuração

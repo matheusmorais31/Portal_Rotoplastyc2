@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load humanize %} {# Certifique-se que 'django.contrib.humanize' está em INSTALLED_APPS #}
+{% load static %} {# Adicionado load static se ainda não estava #}
+
+{% block title %}Monitor de Custos da API{% endblock %}
+
+{% block extra_css %}
+{# Link para o CSS externo (assumindo que ele existe e está configurado) #}
+<link rel="stylesheet" href="{% static 'css/api_cost_monitor.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cost-monitor-container">
+    <h1>Monitor de Custos da API</h1>
+    <h3>Preços da API do Gemini atualizado em 24/04/2025 - Cotação do dolar utilizada R$5,67</h3>
+
+    {# === Formulário de Filtros === #}
+    <div class="filter-form-container">
+        <form method="get" class="filter-form">
+            {# Datas #}
+            <div class="form-group">
+                <label for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}</label>
+                {{ form.start_date }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}</label>
+                {{ form.end_date }}
+            </div>
+
+            {# Usuário - Mostra apenas se tiver permissão E o campo existir #}
+            {% if can_view_all and form.user %}
+            <div class="form-group form-group-user {% if form.user.is_hidden %}hidden{% endif %}">
+                <label for="{{ form.user.id_for_label }}">{{ form.user.label }}</label>
+                {{ form.user }}
+            </div>
+            {% endif %}
+
+             {# Modelo #}
+            {% if form.model_name %}
+            <div class="form-group">
+                <label for="{{ form.model_name.id_for_label }}">{{ form.model_name.label }}</label>
+                {{ form.model_name }}
+            </div>
+            {% endif %}
+
+            <button type="submit">Filtrar</button>
+             {% if selected_start_date or selected_end_date or selected_user_filter or selected_model_filter %}
+                <a href="{% url 'ia:api_cost_monitor' %}" class="clear-filter-link">Limpar Filtros</a>
+             {% endif %}
+        </form>
+
+        {# Resumo dos Filtros Aplicados #}
+        <div class="filter-summary">
+            <i>Exibindo resultados:
+            {% if selected_start_date %} De <strong>{{ selected_start_date|date:"d/m/Y" }}</strong>{% endif %}
+            {% if selected_end_date %} Até <strong>{{ selected_end_date|date:"d/m/Y" }}</strong>{% endif %}
+            {% if selected_user_filter %} Para Usuário: <strong>{{ selected_user_filter.username }}</strong>{% elif can_view_all %} Para: <strong>Todos os Usuários</strong>{% endif %}
+            {% if selected_model_filter %} Para Modelo: <strong>{{ selected_model_filter }}</strong>{% else %} Para: <strong>Todos os Modelos</strong>{% endif %}
+            .</i>
+        </div>
+    </div>
+    {# === Fim Formulário === #}
+
+
+    {% if not can_view_all and selected_user_filter %}
+    {# Mensagem específica para usuário sem permissão #}
+    <div class="user-filter-notice">
+        Exibindo custos apenas para você (<strong>{{ selected_user_filter.username }}</strong>).
+    </div>
+    {% endif %}
+
+    <div class="total-cost">
+        Custo Total Estimado no Período:<br>
+        {# ★★★ Arredondado para 2 casas ★★★ #}
+        <span class="cost-brl">R$ {{ summary.total_cost_brl|floatformat:2|intcomma }}</span>
+        <small class="cost-usd">(USD ${{ summary.total_cost_usd|floatformat:2|intcomma }})</small> {# ★★★ Arredondado para 2 casas ★★★ #}
+    </div>
+
+    {# Tabela: Custo por Usuário #}
+    {% if can_view_all and not selected_user_filter and summary.cost_by_user %}
+    <h2>Custo por Usuário</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th class="numeric">Requisições</th>
+                <th class="numeric">Custo Total (BRL)</th>
+                <th class="numeric">Custo Total (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in summary.cost_by_user %}
+            <tr>
+                <td>{{ item.user__username|default:"Desconhecido" }}</td>
+                <td class="numeric">{{ item.total_requests|intcomma }}</td>
+                {# ★★★ Arredondado para 2 casas ★★★ #}
+                <td class="numeric cost cost-brl">R$ {{ item.total_cost_brl|floatformat:2|intcomma }}</td>
+                <td class="numeric cost cost-usd"><small>${{ item.total_cost_usd|floatformat:2|intcomma }}</small></td> {# ★★★ Arredondado para 2 casas ★★★ #}
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Nenhum dado de custo por usuário encontrado para os filtros aplicados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {# Tabela: Custo por Modelo #}
+     {% if not selected_model_filter and summary.cost_by_model %}
+    <h2>Custo por Modelo</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Modelo</th>
+                <th class="numeric">Requisições</th>
+                <th class="numeric">Custo Total (BRL)</th>
+                <th class="numeric">Custo Total (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in summary.cost_by_model %}
+            <tr>
+                <td>{{ item.model_name }}</td>
+                <td class="numeric">{{ item.total_requests|intcomma }}</td>
+                {# ★★★ Arredondado para 2 casas ★★★ #}
+                <td class="numeric cost cost-brl">R$ {{ item.total_cost_brl|floatformat:2|intcomma }}</td>
+                <td class="numeric cost cost-usd"><small>${{ item.total_cost_usd|floatformat:2|intcomma }}</small></td> {# ★★★ Arredondado para 2 casas ★★★ #}
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Nenhum dado de custo por modelo encontrado para os filtros aplicados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {# Tabela: Detalhado por Usuário e Modelo #}
+    {% if summary.cost_by_user_model %}
+    <h2>Registros Detalhados de Uso {% if selected_user_filter or selected_model_filter %}(Filtro Aplicado){% endif %}</h2>
+    <table>
+        <thead>
+            <tr>
+                {% if can_view_all %}<th>Usuário</th>{% endif %}
+                <th>Modelo</th>
+                <th class="numeric">Requisições</th>
+                <th class="numeric">Tokens Entrada</th>
+                <th class="numeric">Tokens Saída</th>
+                <th class="numeric">Imagens</th>
+                <th class="numeric">Custo Total (BRL)</th>
+                <th class="numeric">Custo Total (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in summary.cost_by_user_model %}
+            <tr>
+                 {% if can_view_all %}<td>{{ item.user__username|default:"Desconhecido" }}</td>{% endif %}
+                <td>{{ item.model_name }}</td>
+                <td class="numeric">{{ item.total_requests|intcomma }}</td>
+                <td class="numeric">{{ item.total_input_tokens|intcomma }}</td>
+                <td class="numeric">{{ item.total_output_tokens|intcomma }}</td>
+                <td class="numeric">{{ item.total_images|intcomma }}</td>
+                 {# ★★★ Arredondado para 2 casas ★★★ #}
+                <td class="numeric cost cost-brl">R$ {{ item.total_cost_brl|floatformat:2|intcomma }}</td>
+                <td class="numeric cost cost-usd"><small>${{ item.total_cost_usd|floatformat:2|intcomma }}</small></td> {# ★★★ Arredondado para 2 casas ★★★ #}
+            </tr>
+            {% empty %}
+            <tr><td colspan="{% if can_view_all %}8{% else %}7{% endif %}">Nenhum dado detalhado encontrado para os filtros aplicados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+</div>
+{% endblock %}

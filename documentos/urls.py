@@ -19,6 +19,8 @@ urlpatterns = [
     path('upload_revisado/<int:documento_id>/', views.upload_documento_revisado, name='upload_documento_revisado'),
     path('documento/<int:documento_id>/toggle-active/', views.toggle_documento_active_status, name='toggle_active_status'),
     path('documentos/inativos/', views.listar_documentos_inativos, name='listar_documentos_inativos'),
+    path('substituir_pdf/<int:documento_id>/', views.substituir_pdf, name='substituir_pdf'),
+
 
 
 

@@ -654,11 +654,12 @@ def deletar_documento(request, documento_id):
 
 @login_required
 def visualizar_documento_pdfjs(request, id):
-    """
-    Exibe o PDF em um iframe utilizando o viewer oficial do PDF.js.
-    A categoria bloqueada impede o download e impressão, mas permite visualização.
-    """
     documento = get_object_or_404(Documento, id=id)
+
+    # Registra o acesso, semelhante ao que acontece em visualizar_documento
+    if request.user.is_authenticated:
+        Acesso.objects.create(documento=documento, usuario=request.user)
+        logger.debug(f"Acesso registrado via PDF.js para o usuário {request.user.username} no documento {documento.nome}")
 
     if documento.categoria.bloqueada:
         messages.info(request, "Este documento é bloqueado para download e impressão, mas pode ser visualizado.")
@@ -671,3 +672,40 @@ def visualizar_documento_pdfjs(request, id):
         'pdfjs_viewer_url': pdfjs_viewer_url,
         'pdf_file_url': pdf_file_url
     })
+
+
+
+@login_required
+@permission_required('documentos.replace_document', raise_exception=True)
+def substituir_pdf(request, documento_id):
+    documento = get_object_or_404(Documento, id=documento_id)
+    if request.method == 'POST' and request.FILES.get('novo_pdf'):
+        novo_pdf = request.FILES['novo_pdf']
+        ext = os.path.splitext(novo_pdf.name)[1].lower()
+        if ext != '.pdf':
+            messages.error(request, 'Formato inválido. Envie um arquivo PDF.')
+            return redirect('documentos:substituir_pdf', documento_id=documento_id)
+
+        try:
+            with transaction.atomic():
+                # Se já houver um PDF, exclua-o
+                if documento.documento_pdf and documento.documento_pdf.storage.exists(documento.documento_pdf.name):
+                    os.remove(documento.documento_pdf.path)
+                    documento.documento_pdf.delete(save=False)
+                safe_nome = slugify(documento.nome)
+                desired_pdf_filename = f"{safe_nome}_v{documento.revisao}.pdf"
+                documento.documento_pdf.save(desired_pdf_filename, novo_pdf)
+                
+                # Se o documento não estiver aprovado, pode ajustar o status, 
+                # mas se já estiver 'aprovado' podemos manter o status.
+                if documento.status != 'aprovado':
+                    documento.status = 'aguardando_analise'
+                
+                documento.save()
+                messages.success(request, 'PDF substituído com sucesso.')
+        except Exception as e:
+            logger.error(f"Erro ao substituir PDF do documento {documento_id}: {e}", exc_info=True)
+            messages.error(request, 'Erro ao substituir o PDF.')
+        return redirect('documentos:listar_documentos_aprovados')
+    
+    return render(request, 'documentos/substituir_pdf.html', {'documento': documento})

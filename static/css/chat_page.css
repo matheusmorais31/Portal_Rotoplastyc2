@@ -1,0 +1,633 @@
+/* ... (Estilos anteriores: body, .app-container, .side-menu, #new-chat-btn, #chat-list, etc. permanecem iguais) ... */
+body {
+   margin: 0;
+   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+   background-color: #202020;
+   color: #e0e0e0;
+}
+
+.app-container {
+   margin-top: 3%;
+   display: flex;
+   height: 90vh;
+   overflow: hidden;
+   background: #202020;
+   color: #e0e0e0;
+}
+
+/* --- Menu Lateral --- */
+.side-menu {
+   width: 300px;
+   min-width: 300px;
+   background: #181818;
+   border-right: 1px solid #333;
+   display: flex;
+   flex-direction: column;
+   padding: 15px;
+   box-sizing: border-box;
+   transition: width 0.3s ease;
+}
+
+/* --- Container Seletor Modelo --- */
+.model-selector-container {
+   margin-bottom: 15px;
+   display: flex;
+   flex-direction: column; /* Label acima do select customizado */
+   gap: 5px; /* Espaço entre label e select */
+}
+
+.model-selector-container label {
+   font-size: .9em;
+   color: #bbb;
+   display: block; /* Garante que fique em linha própria */
+   margin-bottom: 3px;
+}
+
+/* --- Estilos Dropdown Customizado --- */
+.custom-select-container {
+    position: relative;
+    width: 100%;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.9em;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-select-container:focus-within, /* Estilo quando o display ou uma opção interna tem foco */
+.custom-select-container.active {
+    border-color: #1EB2C1;
+    box-shadow: 0 0 3px rgba(30, 178, 193, 0.6);
+}
+
+.custom-select-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    outline: none; /* Remove outline padrão do foco, usamos o do container */
+}
+
+.custom-select-display .selected-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+    padding-right: 5px;
+}
+
+.custom-select-arrow {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+}
+
+.custom-select-container.active .custom-select-arrow {
+    transform: rotate(180deg);
+}
+
+.custom-select-options {
+    display: none; /* Escondido por padrão */
+    position: absolute;
+    top: calc(100% + 2px); /* Abaixo do display */
+    left: 0;
+    right: 0;
+    background: #383838;
+    border: 1px solid #555;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 250px; /* Altura máxima com scroll */
+    overflow-y: auto;
+    z-index: 10; /* Para ficar sobre outros elementos */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    scrollbar-width: thin;
+    scrollbar-color: #555 #303030;
+}
+.custom-select-options::-webkit-scrollbar { width: 6px; }
+.custom-select-options::-webkit-scrollbar-track { background: #303030; }
+.custom-select-options::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+.custom-select-options::-webkit-scrollbar-thumb:hover { background: #666; }
+
+
+.custom-select-container.active .custom-select-options {
+    display: block; /* Mostra quando ativo */
+}
+
+.custom-select-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #4a4a4a;
+}
+.custom-select-option:last-child {
+    border-bottom: none;
+}
+
+
+.custom-select-option:hover {
+    background-color: #4f4f4f;
+}
+
+.custom-select-option.selected {
+    background-color: #4a90e2; /* Cor de fundo para item selecionado */
+    color: #fff;
+    font-weight: 500;
+}
+
+/* Estilos para nome e descrição dentro da opção */
+.custom-select-option .option-name {
+    display: block; /* Nome em linha própria */
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.custom-select-option .option-description {
+    display: block; /* Descrição em linha própria */
+    font-size: 0.85em;
+    color: #1EB2C1;
+    line-height: 1.3;
+}
+
+.custom-select-option.selected .option-description {
+    color: #e0e0e0; /* Cor da descrição quando selecionado */
+}
+
+/* Estilo para estado desabilitado */
+.custom-select-container.disabled {
+    background-color: #444;
+    color: #888;
+    cursor: not-allowed;
+   
+    border-color: #555;
+    box-shadow: none;
+}
+
+.custom-select-container.disabled .custom-select-display {
+    pointer-events: none; /* Impede clique no display */
+}
+/* --- Fim Estilos Dropdown Customizado --- */
+
+#new-chat-btn {
+   width: 100%;
+   padding: 10px 12px;
+   margin-bottom: 15px;
+   background: #1EB2C1;
+   border: none;
+   color: #fff;
+   border-radius: 6px;
+   font-weight: 600;
+   cursor: pointer;
+   font-size: 0.95em;
+   text-align: center;
+   transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#new-chat-btn:hover {
+   background: #29c6d6;
+   box-shadow: 0 0 5px rgba(41, 198, 214, 0.5);
+}
+
+#new-chat-btn:disabled {
+   background: #444;
+   color: #888;
+   cursor: not-allowed;
+   box-shadow: none;
+}
+
+
+#chat-list {
+   flex-grow: 1;
+   overflow-y: auto;
+   border-top: 1px solid #383838;
+   padding-top: 10px;
+   margin-top: 15px; /* Aumentei um pouco a margem para compensar o select customizado */
+}
+
+/* ... (Estilos da lista de chat: #chat-list scrollbar, .chat-list-item, etc. permanecem iguais) ... */
+#chat-list::-webkit-scrollbar { width: 6px; }
+#chat-list::-webkit-scrollbar-track { background: #2a2a2e; }
+#chat-list::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+#chat-list::-webkit-scrollbar-thumb:hover { background: #666; }
+#chat-list { scrollbar-width: thin; scrollbar-color: #555 #2a2a2e; }
+.chat-list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 8px 12px; margin-bottom: 6px; background: #2c2c2c; border: 1px solid #383838; border-radius: 5px; user-select: none; transition: background-color 0.2s ease, border-color 0.2s ease; font-size: 0.9em; color: #ccc; gap: 5px; }
+
+.chat-list-item:hover { background: #3a3a3a; border-color: #555; color: #eee;}
+.chat-list-item.active { background: #444;  color: #fff; font-weight: 500; }
+.chat-list-item.active:hover { border-color: #1EB2C1; background-color: #444; box-shadow: 0 0 5px rgba(30, 178, 193, 0.5); }
+.chat-item-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.chat-item-delete-btn { background: none; border: none; color: #aaa; font-size: 1.3em; font-weight: bold; cursor: pointer; padding: 0 5px; margin-left: 5px; line-height: 1; border-radius: 4px; transition: color 0.2s ease, background-color 0.2s ease; flex-shrink: 0; }
+.chat-list-item:hover .chat-item-delete-btn { color: #ddd; }
+.chat-item-delete-btn:hover { color: #fff; background-color: #e74c3c; }
+.chat-list-item.active .chat-item-delete-btn { color: #c0dffc; }
+.chat-list-item.active:hover .chat-item-delete-btn { color: #fff; }
+.chat-list-item.active .chat-item-delete-btn:hover { color: #fff; background-color: #e74c3c; }
+.no-chats-message, .error-loading-chats { text-align: center; color: #888; font-size: 0.9em; padding: 15px; }
+.error-loading-chats { color: #e74c3c; font-weight: bold; }
+
+
+/* --- Área do Chat Principal --- */
+.chat-area {
+   display: flex;
+   flex-direction: column;
+   flex-grow: 1;
+   overflow: hidden;
+   background: #262626;
+   position: relative;
+}
+
+#chat-header {
+   padding: 12px 20px;
+   background: #181818;
+   border-bottom: 1px solid #333;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   font-weight: 600;
+   flex-shrink: 0;
+}
+
+#chat-title {
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   flex-grow: 1;
+   font-size: 1.1em;
+   color: #eee;
+}
+
+/* --- Container de Mensagens --- */
+#messages-container {
+   margin-top: 0;
+   flex-grow: 1;
+   overflow-y: auto;
+   padding: 20px 15px;
+   scrollbar-width: thin;
+   scrollbar-color: #555 #2a2a2e;
+}
+/* ... (Estilos das mensagens, scrollbar, etc. permanecem iguais) ... */
+#messages-container::-webkit-scrollbar { width: 8px; }
+#messages-container::-webkit-scrollbar-track { background: #2a2a2e; }
+#messages-container::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+#messages-container::-webkit-scrollbar-thumb:hover { background: #666; }
+.message { margin-bottom: 15px; padding: 0; max-width: 85%; position: relative; line-height: 1.5; display: flex; clear: both; }
+.user-message { margin-left: auto; flex-direction: row-reverse; }
+.ai-message { margin-right: auto; }
+.message>.message-content { border-radius: 12px; padding: 10px 15px; display: flex; flex-direction: column; }
+.user-message>.message-content { background: #1d1d1d; color: #fff; border-radius: 12px 0 12px 12px; }
+.ai-message>.message-content { background: #333; color: #f1f1f1; border-radius: 0 12px 12px 12px; }
+.ai-message.error-message>.message-content { background: #e74c3c; color: white; }
+.message-text { white-space: pre-wrap; word-wrap: break-word; }
+.message-text p:first-child { margin-top: 0; }
+.message-text p:last-child { margin-bottom: 0; }
+.message-text p { margin-top: 0; margin-bottom: 0.5em; }
+.message-text ul, .message-text ol { margin-top: 0.5em; margin-bottom: 0.5em; padding-left: 25px; }
+.message-text li { margin-bottom: 0.2em; }
+.message-text a { color: #8ab4f8; text-decoration: underline; }
+.message-text code:not([class*="language-"]) { background-color: rgba(255, 255, 255, 0.1); padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
+.edit-btn { font-size: .75em; opacity: .6; cursor: pointer; color: rgba(255, 255, 255, 0.7); align-self: flex-end; margin-top: 5px; margin-left: 8px; padding: 1px 5px; border-radius: 3px; background: rgba(0, 0, 0, .3); transition: opacity 0.2s ease, color 0.2s ease; }
+.user-message:hover .edit-btn { opacity: 1; color: #fff; background: rgba(0, 0, 0, .5); }
+.edit-btn.hidden { display: none; }
+.edit-area { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; }
+.edit-area.hidden { display: none; }
+.edit-area textarea { background: #404040; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 5px 8px; resize: vertical; min-height: 60px; font-family: inherit; font-size: 1em; line-height: 1.4; outline: none; }
+.edit-area textarea:focus { border-color: #1EB2C1; }
+.edit-buttons { display: flex; justify-content: flex-end; gap: 8px; }
+.edit-area button { background: #1EB2C1; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+.edit-area button.cancel-edit-btn { background: #666; }
+.edit-area button:hover { filter: brightness(110%); }
+
+
+/* --- Área de Input --- */
+#chat-input-area {
+   display: flex;
+   align-items: flex-end;
+   padding: 10px 15px;
+   background: #333;
+   border-top: 1px solid #4a4a4a;
+   flex-shrink: 0;
+   gap: 8px;
+}
+/* ... (Estilos da área de input: #prompt-input, botões, etc. permanecem iguais) ... */
+#prompt-input { flex-grow: 1; padding: 10px 12px; border: 1px solid #555; background: #404040; color: #fff; border-radius: 6px; resize: none; min-height: 42px; max-height: 200px; overflow-y: auto; box-sizing: border-box; font-family: inherit; font-size: 1em; line-height: 1.45; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+#prompt-input:focus { border-color: #1EB2C1; background-color: #444; box-shadow: 0 0 5px rgba(30, 178, 193, 0.5); }
+#prompt-input::placeholder { color: #888; }
+#file-upload-btn { background: #555; border: none; color: #ccc; border-radius: 6px; cursor: pointer; flex-shrink: 0; transition: background-color 0.2s ease, color 0.2s ease; height: 42px; width: 42px; padding: 0; display: flex; align-items: center; justify-content: center; }
+#file-upload-btn:hover { background: #666; color: #fff; }
+#file-upload-btn:disabled { background: #444; color: #888; cursor: not-allowed; opacity: 0.7; }
+#file-upload-btn svg { width: 20px; height: 20px; }
+#send-btn { padding: 0 15px; height: 42px; background: #1EB2C1; color: #fff; border: none; font-weight: 500; border-radius: 6px; cursor: pointer; flex-shrink: 0; transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease; min-width: 80px; text-align: center; }
+#send-btn:hover { background: #29c6d6; box-shadow: 0 0 5px rgba(41, 198, 214, 0.5); }
+#send-btn:disabled { background: #555; color: #aaa; cursor: not-allowed; box-shadow: none; opacity: 0.7; }
+
+
+/* --- Área de Preview de Upload --- */
+#upload-preview-area {
+   background: #3a3a3a;
+   border-top: 1px dashed #555;
+   padding: 8px 15px;
+   flex-shrink: 0;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   max-height: 100px;
+   overflow: hidden;
+}
+/* ... (Estilos do preview: #upload-preview-content, .preview-item, etc. permanecem iguais) ... */
+#upload-preview-area.hidden { display: none; }
+#upload-preview-content { display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; overflow-y: hidden; flex-grow: 1; scrollbar-width: thin; scrollbar-color: #555 #3a3a3a; }
+#upload-preview-content::-webkit-scrollbar { height: 6px; }
+#upload-preview-content::-webkit-scrollbar-track { background: #3a3a3a; }
+#upload-preview-content::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+#upload-preview-content::-webkit-scrollbar-thumb:hover { background: #666; }
+.preview-item { position: relative; border: 1px solid #555; border-radius: 4px; overflow: hidden; height: 60px; width: 60px; flex-shrink: 0; background-color: #444; display: flex; align-items: center; justify-content: center; color: #ccc; }
+.preview-item img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.preview-item .remove-preview { position: absolute; top: 2px; right: 2px; background-color: rgba(200, 50, 50, 0.7); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 12px; line-height: 18px; text-align: center; cursor: pointer; font-weight: bold; padding: 0; opacity: 0; transition: opacity 0.2s ease, background-color 0.2s ease; z-index: 1; }
+.preview-item:hover .remove-preview { opacity: 1; }
+.preview-item .remove-preview:hover { background-color: rgba(231, 76, 60, 1.0); }
+#cancel-upload-btn { background: #a50101; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; flex-shrink: 0; transition: background-color 0.2s ease; }
+#cancel-upload-btn:hover { background: #ff0000; }
+#cancel-upload-btn:disabled { background: #555; color: #aaa; cursor: not-allowed; opacity: 0.7; }
+
+
+/* --- Estilos de Código (Highlight.js) --- */
+/* ... (Estilos de código permanecem iguais) ... */
+.code-block-wrapper { margin: 1em 0; }
+.code-block-header { display: flex; justify-content: space-between; align-items: center; background-color: #2d2d2d; padding: 5px 12px; border: 1px solid #3a3a3a; border-bottom: none; border-radius: 6px 6px 0 0; }
+.language-tag { font-size: 0.8em; color: #aaa; font-family: sans-serif; text-transform: lowercase; }
+.code-actions button { background: #4f4f4f; border: 1px solid #666; color: #ccc; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75em; margin-left: 5px; transition: background-color 0.2s ease, color 0.2s ease; }
+.code-actions button:hover { background: #5a5a5a; color: #fff; }
+.code-actions button:disabled { background: #3a3a3a; color: #888; cursor: default; opacity: 0.7; }
+.code-block-wrapper pre { margin: 0; border: 1px solid #3a3a3a; border-top: none; border-radius: 0 0 6px 6px; background-color: #1e1e1e; padding: 12px; overflow-x: auto; white-space: pre; word-wrap: normal; font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; font-size: .9em; color: #d4d4d4; }
+.code-block-wrapper pre code { display: block; padding: 0; margin: 0; background: none; white-space: inherit; word-wrap: inherit; color: inherit; overflow-x: visible; }
+
+/* --- Estados Visuais (Loading, Placeholders) --- */
+/* Atualiza seletor para desabilitar o custom select durante o loading */
+.app-loading #prompt-input,
+.app-loading #send-btn,
+.app-loading #new-chat-btn,
+.app-loading .custom-select-container, /* <<< Alvo é o container customizado */
+.app-loading .chat-list-item,
+.app-loading .edit-btn,
+.app-loading .copy-code-btn,
+.app-loading #file-upload-btn,
+.app-loading #cancel-upload-btn {
+   opacity: 0.6;
+   cursor: wait !important;
+   pointer-events: none; /* Impede interação */
+}
+/* ... (Estilos de loading-messages, empty-chat, anexos, etc. permanecem iguais) ... */
+.loading-messages { text-align: center; padding: 20px; color: #888; font-style: italic; }
+.empty-chat-message .message-text { color: #aaa; font-style: italic; }
+.message-attachment-info { padding: 8px; background-color: rgba(0, 0, 0, 0.15); border-radius: 6px; margin-bottom: 8px; font-size: 0.9em; color: #ddd; border: 1px solid rgba(255, 255, 255, 0.1); }
+.message-attachment-info i { font-style: normal; }
+.message-attachment-info svg { vertical-align: middle; margin-right: 5px; }
+.message-attachment-info hr { border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 5px 0; }
+.message-attachments-preview { margin-bottom: 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; max-width: 250px; }
+.user-message .message-attachments-preview { align-items: flex-end; }
+.attachment-thumbnail { max-width: 100%; max-height: 200px; height: auto; border-radius: 8px; display: block; cursor: pointer; background-color: #555; }
+.message-attachments-preview a { display: block; line-height: 0; border-radius: 8px; overflow: hidden; }
+.message-attachments-preview:last-child { margin-bottom: 0; }
+.message-attachments-preview+.message-text { margin-top: 8px; }
+.message-attachments-preview+.message-text:empty { display: none; }
+.preview-placeholder { font-size: 1.2em; font-weight: bold; }
+
+
+/* ===== SUBSTITUA ESTA PARTE no seu chat_page.css ===== */
+
+/* Animação de pulo VERTICAL */
+@keyframes thinking-vertical-bounce {
+    0%, 60%, 100% { /* Define que em 0%, 60% e 100% do tempo, o ponto está na base */
+      transform: translateY(0);
+      /* ease-in-out faz a subida e descida serem suaves */
+    }
+    30% { /* No meio do pulo (30% do tempo) */
+      transform: translateY(-6px); /* Move 6 pixels para CIMA (valor negativo) */
+      /* Você pode ajustar o valor -6px para controlar a altura do pulo */
+    }
+  }
+  
+  .thinking-animation span {
+    display: inline-block;
+    width: 7px; /* Tamanho do ponto */
+    height: 7px;
+    background-color: rgba(236, 236, 241, 0.7); /* Cor dos pontos */
+    border-radius: 50%;
+    margin: 0 2px; /* Espaço entre os pontos */
+  
+    /* >>> AQUI USAMOS A NOVA ANIMAÇÃO <<< */
+    animation: thinking-vertical-bounce 1.4s infinite ease-in-out both;
+    /*
+       1.4s: duração total da animação
+       infinite: repete para sempre
+       ease-in-out: suaviza o início e o fim do movimento
+       both: aplica os estilos da animação antes dela começar e depois de terminar (importante com delays)
+    */
+  }
+  
+  /* Os delays continuam os mesmos para os pontos não pularem juntos */
+  .thinking-animation span:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+  
+  .thinking-animation span:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+  
+/* Estilo para o container do item de preview genérico (dentro de .preview-item) */
+.preview-file-info {
+    display: flex;
+    flex-direction: column; /* Ícone acima do nome */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 5px; /* Espaçamento interno */
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Evita que conteúdo estoure */
+    box-sizing: border-box;
+  }
+  
+  /* Estilo para o ícone no preview */
+  .preview-file-icon {
+    font-size: 1.8em; /* Tamanho maior para o ícone */
+    margin-bottom: 4px;
+    line-height: 1; /* Ajusta altura da linha */
+    color: #a0a0a0; /* Cor do ícone */
+  }
+  
+  /* Estilo para o nome do arquivo no preview */
+  .preview-file-name {
+    font-size: 0.7em; /* Fonte pequena para o nome */
+    line-height: 1.2;
+    max-height: 2.4em; /* Limita a aprox. 2 linhas */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Força quebra de palavra se necessário */
+    word-break: break-all;
+     /* Para reticências em múltiplas linhas (pode não funcionar em todos os navegadores) */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    color: #ccc; /* Cor do nome */
+  }
+  
+  /* Ajuste opcional no .preview-item para não ter fundo cinza em não-imagens */
+  .preview-item:not(:has(img)) { /* Seletor :has pode não ser suportado em navegadores muito antigos */
+      background-color: transparent; /* Ou uma cor de fundo diferente */
+      border-color: #666; /* Borda um pouco mais visível */
+  }
+  
+  
+  /* --- 2. Anexos na Mensagem (Dentro da Bolha de Chat) --- */
+  
+  /* Container geral para todos os anexos de uma mensagem */
+  .message-attachments {
+    margin-top: 8px; /* Espaço acima se houver texto antes */
+    margin-bottom: 8px; /* Espaço abaixo se houver texto depois */
+    display: flex;
+    flex-direction: column; /* Empilha anexos verticalmente */
+    gap: 6px; /* Espaço entre múltiplos anexos */
+    align-items: flex-start; /* Alinha à esquerda por padrão (AI) */
+  }
+  
+  /* Alinha anexos à direita para mensagens do usuário */
+  .user-message .message-attachments {
+      align-items: flex-end;
+  }
+  
+  /* Container para um único anexo (seja imagem ou link de arquivo) */
+  .message-attachment-item {
+    max-width: 90%; /* Limita a largura para não ocupar a bolha toda */
+    /* Outros estilos se necessário */
+  }
+  
+  /* Estilo para o link de arquivos não-imagem */
+  .attachment-file-link {
+    display: inline-flex; /* Alinha ícone e texto na mesma linha */
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2); /* Fundo sutil */
+    padding: 6px 12px;
+    border-radius: 15px; /* Bordas arredondadas (estilo "pill") */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #d0d0d0; /* Cor do texto do link */
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    max-width: 100%; /* Garante que caiba no item */
+  
+    /* Evita que o link quebre linha e controla estouro */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .user-message .attachment-file-link {
+      background-color: rgba(0, 132, 255, 0.15); /* Cor diferente para links do usuário */
+      border-color: rgba(0, 132, 255, 0.3);
+      color: #e0e0e0;
+  }
+  
+  
+  .attachment-file-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+  .user-message .attachment-file-link:hover {
+      background-color: rgba(0, 132, 255, 0.3);
+  }
+  
+  /* Estilo para o ícone dentro do link */
+  .attachment-file-icon {
+    margin-right: 6px; /* Espaço entre ícone e nome */
+    font-size: 1.1em; /* Tamanho do ícone */
+    /* Opcional: Ajuste vertical se necessário */
+    vertical-align: middle;
+    /* display: inline-block; */ /* Pode ajudar no alinhamento */
+  }
+  
+  /* Estilo para o nome do arquivo dentro do link */
+  .attachment-file-name {
+     /* Garante que reticências apareçam se o link pai cortar */
+     overflow: hidden;
+     text-overflow: ellipsis;
+     white-space: nowrap; /* Redundante se já está no link, mas seguro */
+  }
+  
+  /* Estilo para erro ao carregar thumbnail de imagem (já existia, mas revisado) */
+  .attachment-error {
+      color: #ff9a9a;
+      font-style: italic;
+      font-size: 0.85em;
+      border: 1px dashed #ff9a9a;
+      padding: 8px;
+      display: inline-block;
+      border-radius: 4px;
+      background-color: rgba(255, 0, 0, 0.1);
+  }
+  
+  
+  /* Garante espaço entre bloco de anexos e texto da mensagem, se ambos existirem */
+  .message-attachments + .message-text {
+      margin-top: 10px;
+  }
+  
+  /* Garante que texto vazio não ocupe espaço se só houver anexo */
+  .message-text:empty {
+      display: none;
+  }
+
+
+
+
+  /* Container para os botões de scroll da IA */
+.ai-scroll-buttons {
+  position: absolute; /* Posicionamento relativo a .chat-area */
+  bottom: 75px;       /* Acima da área de input (ajuste conforme necessário) */
+  right: 15px;        /* No canto inferior direito (ajuste conforme necessário) */
+  display: flex;
+  flex-direction: column; /* Botões empilhados verticalmente */
+  gap: 8px;           /* Espaço entre os botões */
+  z-index: 10;        /* Para garantir que fiquem sobre as mensagens */
+
+  /* Inicialmente escondidos e sem interação */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out; /* Transição suave */
+}
+
+/* Classe para mostrar os botões */
+.ai-scroll-buttons.visible {
+  opacity: 1;
+  pointer-events: auto; /* Permite cliques quando visível */
+}
+
+/* Estilo individual dos botões */
+.ai-scroll-buttons button {
+  background-color: rgba(50, 50, 50, 0.75); /* Fundo semi-transparente */
+  color: #e0e0e0;
+  border: 1px solid rgba(120, 120, 120, 0.8);
+  border-radius: 50%; /* Botões redondos */
+  width: 36px;        /* Tamanho */
+  height: 36px;
+  font-size: 20px;    /* Tamanho da seta */
+  font-weight: bold;
+  line-height: 34px;  /* Ajuste para centralizar a seta verticalmente */
+  text-align: center;
+  cursor: pointer;
+  padding: 0;         /* Remove padding padrão */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Efeito ao passar o mouse */
+.ai-scroll-buttons button:hover {
+  background-color: rgba(80, 80, 80, 0.9);
+}
+
+/* Efeito ao clicar */
+.ai-scroll-buttons button:active {
+  transform: scale(0.95); /* Leve encolhida ao clicar */
+}

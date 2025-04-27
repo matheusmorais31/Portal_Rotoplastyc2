@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = True
 ALLOWED_HOSTS = [
-    '172.16.44.12',       
+    '172.16.44.12', 'localhost'    
 ]
 
 # Application definition
@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'dirtyfields',
     'django_celery_beat',
     'bi',
+    'ia',
     
 ]
 
@@ -287,3 +288,15 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 #Gravar sessão
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+
+# CHAVE IA
+GEMINI_API_KEY = config('GEMINI_API_KEY', default=None)
+
+
+
+
+# Taxa de Câmbio (Exemplo - Atualize com um valor recente ou use uma API)
+# Use Decimal para precisão financeira
+from decimal import Decimal
+USD_TO_BRL_RATE = Decimal("5.678")

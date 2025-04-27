@@ -126,25 +126,24 @@
                 </ul>
             </li>
 
-            <!-- Menu BI
-            <li> 
-                
+            <li>
+                {% if perms.ia %}
                 <a href="#" onclick="toggleSubmenu(event, this)">
-                    <img src="{% static 'images/indicador.png' %}" alt="Documentos">
-                    <span class="menu-label">BI</span>
+                    <img src="{% static 'images/ia.png' %}" alt="Administração">
+                    <span class="menu-label">IA</span>
                 </a>
-                
+                {% endif %}
                 <ul class="submenu">
-                    
-                    <li><a href="{% url 'bi:my_bi_report_list' %}">Lista de BI's</a></li>
-                    
-
-                    {% if perms.bi.view_bi %}
-                    <li><a href="{% url 'bi:bi_report_list' %}">Lista geral de BI's</a></li>
+                    {% if perms.ia.chat_pag %}
+                    <li><a href="{% url 'ia:chat_page' %}">Chat IA</a></li>
                     {% endif %}
-
+                    {% if perms.ia.cost_monitor %}
+                    <li><a href="{% url 'ia:api_cost_monitor' %}">Custos IA</a></li>
+                    {% endif %}
+                    
+                    
                 </ul>
-            </li> -->
+            </li>
 
 
             <!-- Menu Adiministração -->
