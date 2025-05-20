@@ -1,4 +1,4 @@
 .env
 settings.py
 django.log
-media/
+media/venv/
