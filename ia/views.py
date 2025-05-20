@@ -18,6 +18,8 @@ from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from django import forms
 from .models import Chat, ChatMessage, ChatAttachment, ApiUsageLog
+from ia.retrieval import find_relevant_document_chunks
+
 
 # --- Imports das bibliotecas de extração ---
 # Guardados por try-except para não quebrar se não instalados
@@ -189,7 +191,15 @@ def extract_text_from_file(filename, file_content_bytes):
             except Exception as pdf_err: # Captura erros específicos do fitz ou gerais na leitura
                 logger.error(f"Erro ao processar PDF '{filename}' com PyMuPDF (fitz): {pdf_err}", exc_info=True) # <-- LOG DE ERRO IMPORTANTE
                 error_message = f"(Erro ao tentar processar o arquivo PDF '{filename}')"
+        
+        elif ext == ".xls":
+            import xlrd
+            workbook = xlrd.open_workbook(file_contents=file_content_bytes)
+            # percorre sheets/células…
 
+        elif ext == ".ods":
+            import pyexcel_ods
+            data = pyexcel_ods.get_data(io.BytesIO(file_content_bytes))
 
         # --- ODT (Usando odfpy) ---
         elif ext == '.odt':
@@ -464,6 +474,25 @@ def send_message_view(request, chat_id):
     if not prompt_user_typed and prompt_raw:
         logger.warning(f"Prompt para chat {chat.id} continha apenas emojis e foi removido.")
 
+    # --- 4A  Recuperação automática se usuário NÃO anexou arquivos ---
+    if prompt_user_typed and not request.FILES.getlist('arquivo'):  # Verifica se há arquivos anexados
+        try:
+            # troque a chamada se preferir vector_search
+            retrieved = find_relevant_document_chunks(user, prompt_user_typed, top_k=600)
+            if retrieved:
+                prompt_user_typed += "\n\n--- Documentos Relacionados ---\n"
+                for r in retrieved:
+                    prompt_user_typed += (
+                        f"\n[Doc: {r['doc'].nome} rev {r['doc'].revisao:02d} "
+                        f"(Cat: {r['doc'].categoria.nome})]\n{r['snippet']}\n"
+                        f"[Fim Doc]\n"
+                    )
+                prompt_user_typed += "\n--- Fim Docs ---"
+
+        except Exception as retr_err:
+            logger.error(f"Falha na recuperação de docs p/ chat {chat.id}: {retr_err}", exc_info=True)
+
+
     # ───────── 2. Processar Arquivos (Imagens e Documentos do FormData) ─────────
     image_parts_for_api = []
     saved_attachments = []
@@ -508,7 +537,7 @@ def send_message_view(request, chat_id):
 
                 # Tipo não suportado
                 else:
-                     raise ValueError(f"Tipo de arquivo (ext: {file_ext}, mime: {mime_type or 'desconhecido'}) não é suportado.")
+                    raise ValueError(f"Tipo de arquivo (ext: {file_ext}, mime: {mime_type or 'desconhecido'}) não é suportado.")
 
                 # Salva o anexo (se for imagem ou documento extraível)
                 attachment = ChatAttachment(chat=chat, file=uploaded_file)
@@ -526,12 +555,12 @@ def send_message_view(request, chat_id):
                         # <-- LOG 2: Verifica se os bytes foram lidos -->
                         logger.debug(f"Bytes lidos para '{original_filename}': {len(file_content_bytes)} bytes.")
                         if file_content_bytes:
-                             # Chama a função de extração atualizada
-                             extracted_text = extract_text_from_file(original_filename, file_content_bytes) # A chamada acontece aqui
-                             extracted_content[original_filename] = extracted_text
+                            # Chama a função de extração atualizada
+                            extracted_text = extract_text_from_file(original_filename, file_content_bytes)  # A chamada acontece aqui
+                            extracted_content[original_filename] = extracted_text
                         else:
-                             logger.warning(f"Não foi possível ler bytes de '{original_filename}' antes da extração.")
-                             extracted_content[original_filename] = f"(Erro ao ler o arquivo '{original_filename}' antes da extração)"
+                            logger.warning(f"Não foi possível ler bytes de '{original_filename}' antes da extração.")
+                            extracted_content[original_filename] = f"(Erro ao ler o arquivo '{original_filename}' antes da extração)"
 
                     except Exception as extraction_error:
                         logger.error(f"Erro crítico durante chamada de extração para {original_filename}: {extraction_error}", exc_info=True)
@@ -544,9 +573,11 @@ def send_message_view(request, chat_id):
                 logger.error(f"Erro inesperado ao processar arquivo '{original_filename}' para chat {chat.id}: {file_proc_err}", exc_info=True)
                 upload_errors.append({'filename': original_filename, 'error': 'Erro interno ao processar o arquivo.'})
                 if attachment and attachment.pk:
-                    try: attachment.delete(); logger.warning(f"Anexo {attachment.pk} removido devido a erro.")
-                    except Exception as del_err: logger.error(f"Erro adicional ao remover anexo {attachment.pk}: {del_err}")
-
+                    try:
+                        attachment.delete()
+                        logger.warning(f"Anexo {attachment.pk} removido devido a erro.")
+                    except Exception as del_err:
+                        logger.error(f"Erro adicional ao remover anexo {attachment.pk}: {del_err}")
 
     # ───────── 3. Validação Mínima e Salvamento da Mensagem + Associação de Anexos ─────────
     if not prompt_user_typed and not image_parts_for_api and not saved_attachments:
@@ -583,7 +614,7 @@ def send_message_view(request, chat_id):
         for msg in previous_messages:
             history_for_api.append({
                 "role": "user" if msg.sender == "user" else "model",
-                "parts": [{"text": msg.text or ""}] # Apenas texto do histórico
+                "parts": [{"text": msg.text or ""}]  # Apenas texto do histórico
             })
         logger.debug(f"Histórico anterior ({len(history_for_api)} turnos) montado para chat {chat.id}.")
     except Exception as e:
@@ -600,13 +631,12 @@ def send_message_view(request, chat_id):
     if extracted_content:
         final_text_for_api += "\n\n--- Conteúdo dos Arquivos Anexados ---\n"
         for filename, content in extracted_content.items():
-            if content: # Inclui texto extraído ou mensagem de erro da extração
+            if content:  # Inclui texto extraído ou mensagem de erro da extração
                 final_text_for_api += f"\n[Conteúdo de: {filename}]\n{content}\n[Fim de: {filename}]\n"
             else:
                 # Informa que não foi possível extrair texto deste arquivo específico
-                 final_text_for_api += f"\n[Não foi possível extrair texto de: {filename}]\n"
+                final_text_for_api += f"\n[Não foi possível extrair texto de: {filename}]\n"
         final_text_for_api += "\n--- Fim do Conteúdo dos Arquivos ---"
-
 
     # Adiciona a parte de texto final (mesmo se vazia, se não houver imagens/outros)
     if final_text_for_api or not current_prompt_parts:
@@ -614,10 +644,11 @@ def send_message_view(request, chat_id):
 
     # Verifica se há algo para enviar
     if not current_prompt_parts:
-         logger.error(f"Erro crítico: Nenhuma parte para enviar no turno atual (Chat {chat.id}). Texto final era '{final_text_for_api}'. Imagens API: {len(image_parts_for_api)}")
-         # Adiciona uma mensagem de erro suave se tudo falhar
-         current_prompt_parts.append({"text": "(Não foi possível processar o conteúdo enviado)"})
-         # Não retorna erro aqui, tenta enviar essa mensagem fallback
+        logger.error(
+            f"Erro crítico: Nenhuma parte para enviar no turno atual (Chat {chat.id}). Texto final era '{final_text_for_api}'. Imagens API: {len(image_parts_for_api)}")
+        # Adiciona uma mensagem de erro suave se tudo falhar
+        current_prompt_parts.append({"text": "(Não foi possível processar o conteúdo enviado)"})
+        # Não retorna erro aqui, tenta enviar essa mensagem fallback
 
     history_for_api.append({"role": "user", "parts": current_prompt_parts})
 
@@ -627,21 +658,21 @@ def send_message_view(request, chat_id):
         if history_for_api and history_for_api[-1].get("role") == "user":
             parts = history_for_api[-1].get("parts", [])
             text_part_index = -1
-            for i in range(len(parts) -1, -1, -1):
+            for i in range(len(parts) - 1, -1, -1):
                 if "text" in parts[i]:
                     text_part_index = i
                     break
             if text_part_index != -1:
-                 original_text = parts[text_part_index].get("text", "") or ""
-                 parts[text_part_index]["text"] = f"{original_text}\n\n(Instrução: {system_instruction})"
-                 logger.debug(f"Instrução adicionada ao text part existente.")
+                original_text = parts[text_part_index].get("text", "") or ""
+                parts[text_part_index]["text"] = f"{original_text}\n\n(Instrução: {system_instruction})"
+                logger.debug(f"Instrução adicionada ao text part existente.")
             else:
-                 parts.append({"text": f"(Instrução: {system_instruction})"})
-                 logger.debug(f"Instrução adicionada como novo text part.")
-        else: logger.warning("Não foi possível adicionar instrução: Histórico vazio ou último turno não é do usuário.")
+                parts.append({"text": f"(Instrução: {system_instruction})"})
+                logger.debug(f"Instrução adicionada como novo text part.")
+        else:
+            logger.warning("Não foi possível adicionar instrução: Histórico vazio ou último turno não é do usuário.")
     except Exception as instr_err:
         logger.error(f"Erro ao tentar adicionar instrução de sistema: {instr_err}")
-
 
     # ───────── 5. Mapear Modelo e Chamar API Gemini ─────────
     selected_model_key = request.POST.get("model", DEFAULT_GEMINI_MODEL_KEY)
@@ -669,7 +700,6 @@ def send_message_view(request, chat_id):
         # Log mais detalhado do payload (cuidado com dados sensíveis)
         # logger.debug(f"Payload (histórico) para Gemini (simplificado): {json.dumps(history_for_api, indent=2, ensure_ascii=False)}")
 
-
         # <<< CHAMA A API >>>
         gemini_resp = model.generate_content(
             history_for_api,
@@ -683,39 +713,39 @@ def send_message_view(request, chat_id):
                 ai_text_raw = gemini_resp.text.strip()
             elif hasattr(gemini_resp, 'candidates') and gemini_resp.candidates and hasattr(gemini_resp.candidates[0], 'content') and gemini_resp.candidates[0].content.parts:
                 # Tenta obter texto da estrutura de 'candidates' se .text falhar
-                 ai_text_raw = "".join(part.text for part in gemini_resp.candidates[0].content.parts if hasattr(part, 'text')).strip()
-                 if not ai_text_raw: # Verifica se ainda assim ficou vazio
+                ai_text_raw = "".join(part.text for part in gemini_resp.candidates[0].content.parts if hasattr(part, 'text')).strip()
+                if not ai_text_raw:  # Verifica se ainda assim ficou vazio
                     if gemini_resp.prompt_feedback and gemini_resp.prompt_feedback.block_reason:
-                         block_reason = gemini_resp.prompt_feedback.block_reason.name
-                         logger.warning(f"Resposta da IA bloqueada (Chat {chat.id}). Razão: {block_reason}")
-                         ai_text_raw = f"(A resposta foi bloqueada por segurança: {block_reason})"
+                        block_reason = gemini_resp.prompt_feedback.block_reason.name
+                        logger.warning(f"Resposta da IA bloqueada (Chat {chat.id}). Razão: {block_reason}")
+                        ai_text_raw = f"(A resposta foi bloqueada por segurança: {block_reason})"
                     else:
-                         logger.warning(f"Resposta da IA via 'candidates' vazia (Chat {chat.id}). Resposta completa: {gemini_resp}")
-                         ai_text_raw = "(A IA retornou uma resposta vazia ou inválida.)"
+                        logger.warning(f"Resposta da IA via 'candidates' vazia (Chat {chat.id}). Resposta completa: {gemini_resp}")
+                        ai_text_raw = "(A IA retornou uma resposta vazia ou inválida.)"
 
             elif gemini_resp.prompt_feedback and gemini_resp.prompt_feedback.block_reason:
-                 block_reason = gemini_resp.prompt_feedback.block_reason.name
-                 logger.warning(f"Resposta da IA bloqueada (Chat {chat.id}). Razão: {block_reason}")
-                 ai_text_raw = f"(A resposta foi bloqueada por segurança: {block_reason})"
+                block_reason = gemini_resp.prompt_feedback.block_reason.name
+                logger.warning(f"Resposta da IA bloqueada (Chat {chat.id}). Razão: {block_reason}")
+                ai_text_raw = f"(A resposta foi bloqueada por segurança: {block_reason})"
             else:
-                 logger.warning(f"Resposta da IA vazia ou sem texto/candidates válidos (Chat {chat.id}). Resposta: {gemini_resp}")
-                 ai_text_raw = "(A IA retornou uma resposta vazia ou inválida.)"
+                logger.warning(f"Resposta da IA vazia ou sem texto/candidates válidos (Chat {chat.id}). Resposta: {gemini_resp}")
+                ai_text_raw = "(A IA retornou uma resposta vazia ou inválida.)"
 
             ai_text = remove_emojis(ai_text_raw)
             if not ai_text and ai_text_raw:
                 logger.warning(f"Resposta da IA para chat {chat.id} continha apenas emojis e foi removida.")
                 ai_text = "(A resposta da IA continha apenas emojis.)"
-            elif not ai_text: # Se remove_emojis resultou em vazio
-                ai_text = "(A IA retornou uma resposta vazia.)" # Mantém a mensagem de vazio
+            elif not ai_text:  # Se remove_emojis resultou em vazio
+                ai_text = "(A IA retornou uma resposta vazia.)"  # Mantém a mensagem de vazio
 
-        except ValueError as ve: # Captura erro de bloqueio se response.text falhar
+        except ValueError as ve:  # Captura erro de bloqueio se response.text falhar
             logger.warning(f"ValueError ao processar resposta da IA (provável bloqueio) para chat {chat.id}: {ve}. Feedback: {getattr(gemini_resp, 'prompt_feedback', 'N/A')}")
             ai_text_raw = f"(A resposta foi bloqueada ou interrompida: {ve})"
-            ai_text = ai_text_raw # Mantém a mensagem de erro
+            ai_text = ai_text_raw  # Mantém a mensagem de erro
         except Exception as generic_resp_err:
             logger.error(f"Erro genérico ao processar a resposta da IA para chat {chat.id}: {generic_resp_err}", exc_info=True)
             ai_text_raw = f"(Erro interno ao processar a resposta da IA: {type(generic_resp_err).__name__})"
-            ai_text = ai_text_raw # Mantém a mensagem de erro
+            ai_text = ai_text_raw  # Mantém a mensagem de erro
 
     except Exception as api_err:
         logger.error(f"Falha crítica na chamada da API Gemini (Chat {chat.id}, modelo: {model_name}): {api_err}", exc_info=True)
@@ -726,10 +756,10 @@ def send_message_view(request, chat_id):
             "error": ai_text,
             "user_message_id": user_msg.id if user_msg else None,
             "user_attachments": user_attachments_data,
-            "response": ai_text, # Retorna o erro aqui também
+            "response": ai_text,  # Retorna o erro aqui também
             "ai_message_id": None,
             "upload_errors": upload_errors
-        }, status=502) # Bad Gateway or 503 Service Unavailable
+        }, status=502)  # Bad Gateway or 503 Service Unavailable
 
     # ───────── 6. Salvar Resposta da IA E LOGAR USO ─────────
     try:
@@ -738,15 +768,15 @@ def send_message_view(request, chat_id):
 
         # LOGAR USO DA API
         if gemini_resp and hasattr(gemini_resp, 'usage_metadata'):
-             log_api_usage(
-                 user=user,
-                 model_name=model_name,
-                 ai_message=ai_msg,
-                 usage_metadata=gemini_resp.usage_metadata,
-                 image_count=image_count_for_log # Loga apenas imagens enviadas à API
-             )
+            log_api_usage(
+                user=user,
+                model_name=model_name,
+                ai_message=ai_msg,
+                usage_metadata=gemini_resp.usage_metadata,
+                image_count=image_count_for_log  # Loga apenas imagens enviadas à API
+            )
         elif gemini_resp:
-             logger.warning(f"Resposta Gemini para msg {ai_msg.id} não continha 'usage_metadata'. Custo não registrado.")
+            logger.warning(f"Resposta Gemini para msg {ai_msg.id} não continha 'usage_metadata'. Custo não registrado.")
 
     except Exception as e:
         logger.error(f"Erro ao salvar mensagem da IA ou logar uso para chat {chat.id}: {e}", exc_info=True)
@@ -755,8 +785,8 @@ def send_message_view(request, chat_id):
             'error': 'Erro interno ao salvar a resposta da IA ou registrar uso.',
             'user_message_id': user_msg.id if user_msg else None,
             'user_attachments': user_attachments_data,
-            'response': ai_text, # Retorna o texto que deveria ter sido salvo
-            'ai_message_id': None, # Indica que não foi salvo
+            'response': ai_text,  # Retorna o texto que deveria ter sido salvo
+            'ai_message_id': None,  # Indica que não foi salvo
             "upload_errors": upload_errors
         }, status=500)
 
@@ -768,20 +798,21 @@ def send_message_view(request, chat_id):
 
         # Tenta gerar título a partir do texto do usuário se for a primeira msg real
         if message_count <= 2 and is_default_title and prompt_user_typed:
-             logger.info(f"Tentando gerar título via fallback para chat {chat.id}.")
-             words = prompt_user_typed.split()
-             fallback_title_raw = " ".join(words[:5])
-             if fallback_title_raw:
-                 fallback_title_cleaned = re.sub(r"[.!?,;:]$", "", fallback_title_raw).strip().strip('"\'')
-                 fallback_title = remove_emojis(fallback_title_cleaned)
-                 if fallback_title and len(fallback_title) > 1:
-                     generated_title = fallback_title[0].upper() + fallback_title[1:]
-                     logger.info(f"Título fallback gerado para chat {chat.id}: '{generated_title}'")
-                 else: logger.warning(f"Título fallback gerado para chat {chat.id} resultou vazio.")
-             else: logger.warning(f"Não foi possível gerar título fallback para chat {chat.id}.")
+            logger.info(f"Tentando gerar título via fallback para chat {chat.id}.")
+            words = prompt_user_typed.split()
+            fallback_title_raw = " ".join(words[:5])
+            if fallback_title_raw:
+                fallback_title_cleaned = re.sub(r"[.!?,;:]$", "", fallback_title_raw).strip().strip('"\'')
+                fallback_title = remove_emojis(fallback_title_cleaned)
+                if fallback_title and len(fallback_title) > 1:
+                    generated_title = fallback_title[0].upper() + fallback_title[1:]
+                    logger.info(f"Título fallback gerado para chat {chat.id}: '{generated_title}'")
+                else:
+                    logger.warning(f"Título fallback gerado para chat {chat.id} resultou vazio.")
+            else:
+                logger.warning(f"Não foi possível gerar título fallback para chat {chat.id}.")
     except Exception as title_err:
         logger.error(f"Erro durante a geração de título fallback para chat {chat.id}: {title_err}", exc_info=True)
-
 
     # ───────── 8. Atualizar Chat e Preparar Resposta Final ─────────
     fields_to_update = ["updated_at"]
@@ -809,7 +840,6 @@ def send_message_view(request, chat_id):
     final_status_code = 207 if upload_errors else 200
     logger.info(f"Processamento concluído para chat {chat.id}. Status: {final_status_code}. Anexos user: {len(user_attachments_data)}. Erros upload: {len(upload_errors)}")
     return JsonResponse(resp_data, status=final_status_code)
-
 # ==============================================================================
 # == FIM DA VIEW COMBINADA ==
 # ==============================================================================

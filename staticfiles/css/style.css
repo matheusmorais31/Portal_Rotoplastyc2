@@ -5,10 +5,30 @@
     box-sizing: border-box;
 }
 
+:root {
+    --neon-cyan: #1EB2C1;
+    --neon-cyan-darker: #18909F;
+    --neon-cyan-glow: rgba(30, 178, 193, 0.5);
+    --dark-bg1: #0D0F12; /* Fundo principal mais escuro */
+    --dark-bg2: #13161A; /* Para elementos um pouco acima */
+    --dark-bg3: #1A1E24; /* Para elementos ainda mais acima, como dropdowns */
+    --text-primary: #EAEAEA;
+    --text-secondary: #A0A0A0;
+    --border-color: #282C34; /* Bordas sutis */
+    --border-color-light: rgba(55, 65, 81, 0.5);
+    --glass-bg: rgba(26, 30, 36, 0.7);
+
+    /* Variáveis RGB para uso em rgba() */
+    --dark-bg2-rgb: 19,22,26; /* Cor #13161A em RGB */
+    --neon-cyan-rgb: 30,178,193; /* Cor #1EB2C1 em RGB */
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #38393F;
-    color: #ffffff;
+    font-family: 'Inter', Arial, sans-serif;
+    background: #0f1e24 url("/static/images/fundo2.png") center/100% 100% no-repeat fixed;
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
 }
 
 /* Barra superior */
@@ -17,52 +37,55 @@ body {
     top: 0;
     width: 100%;
     height: 50px;
-    background-color: #000000;
+    background-color: #0000001a;
+    backdrop-filter: blur(5px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-    z-index: 1000;
-    border-bottom: 2px solid #7c7c7c;
+    z-index: 9999;
+    box-shadow: 0px 0px 2px #000000;
     border-radius: 5px;
 }
 
-/* Agrupando notificações e perfil à direita */
 .top-bar-right {
     display: flex;
     align-items: center;
-    gap: 20px;
-    /* Espaço entre as notificações e o perfil */
+    gap: 22px;
 }
 
-/* Ícone do menu superior */
 .menu-icon {
-    font-size: 24px;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--text-secondary);
+    transition: color 0.2s ease, filter 0.2s ease;
 }
-
+.menu-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.5;
+}
 .menu-icon:hover {
-    color: #1EB2C1;
+    color: var(--neon-cyan);
+    filter: drop-shadow(0 0 4px var(--neon-cyan-glow));
 }
 
-/* Barra lateral */
+/* Barra lateral - Correções de Alinhamento */
 .side-bar {
     position: fixed;
     top: 50px;
     left: 0;
     width: 60px;
     height: calc(100% - 50px);
-    background-color: #000;
+    background-color: #00000009;
+    backdrop-filter: blur(5px);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding-top: 10px;
-    z-index: 1000;
+    z-index: 999;
     transition: width 0.3s;
-    border-right: 2px solid #7c7c7c;
+    box-shadow: 0px 0px 2px #000000;
 }
-
 .side-bar.expanded {
     width: 250px;
 }
@@ -71,12 +94,10 @@ body {
     list-style-type: none;
     width: 100%;
 }
-
 .side-bar ul li {
     margin: 10px 0;
     position: relative;
 }
-
 .side-bar ul li a {
     color: white;
     text-decoration: none;
@@ -88,27 +109,73 @@ body {
     height: 40px;
 }
 
-.side-bar ul li a:hover {
-    background-color: #333;
+.side-bar ul li a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 4px;
+    height: 65%;
+    background-color: var(--neon-cyan);
+    border-radius: 0 2px 2px 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    opacity: 0;
+    box-shadow: 0 0 10px var(--neon-cyan-glow);
+}
+.side-bar ul li a:hover::before,
+.side-bar ul li a.active::before {
+    transform: translateY(-50%) scaleY(1);
+    opacity: 1;
 }
 
-.side-bar ul li a img {
-    width: 30px;
-    margin-right: 10px;
+.side-bar ul li a:hover,
+.side-bar ul li a.active {
+    background-color: rgba(30, 178, 193, 0.1);
+    color: var(--text-primary);
+}
+.side-bar ul li a:hover .menu-label,
+.side-bar ul li a.active .menu-label {
+    color: var(--text-primary);
+}
+.side-bar ul li a:hover img,
+.side-bar ul li a.active img,
+.side-bar ul li a:hover svg,
+.side-bar ul li a.active svg {
+    filter: brightness(0) saturate(100%) invert(69%) sepia(53%)
+            saturate(4787%) hue-rotate(141deg) brightness(100%) contrast(90%);
+    opacity: 1;
+    color: var(--neon-cyan);
+}
+
+.side-bar ul li a img,
+.side-bar ul li a svg {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    object-fit: contain;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    color: #fff;
+    margin: 0;
+}
+.side-bar.expanded ul li a img,
+.side-bar.expanded ul li a svg {
+    margin-right: 18px;
+}
+.side-bar:not(.expanded) ul li a img,
+.side-bar:not(.expanded) ul li a svg {
+    margin-right: 0;
 }
 
 .menu-label {
-    margin-left: 5px;
+    font-size: 0.92em;
+    font-weight: 400;
     opacity: 0;
     white-space: nowrap;
-    transition: opacity 0.3s, visibility 0.3s;
+    transition: opacity 0.2s 0.08s ease, visibility 0.2s 0.08s ease;
     visibility: hidden;
+    color: var(--text-secondary);
 }
-
-.side-bar.expanded ul li a img {
-    margin-left: 20px;
-}
-
 .side-bar.expanded .menu-label {
     opacity: 1;
     visibility: visible;
@@ -116,77 +183,66 @@ body {
 
 .submenu {
     display: none;
-    position: absolute;
-    background-color: #141414;
-    border: 1px solid #141313;
-    padding: 0;
-    z-index: 1001;
-    min-width: 220px;
-    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(-5px) scale(0.98);
+    transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease-out;
+    background-color: #0000003d;
+    backdrop-filter: blur(5px);
+    max-height: 0;
+    overflow: hidden;
+    transform-origin: top center;
 }
-
 .side-bar:not(.expanded) .submenu {
-    top: 0;
+    position: absolute;
     left: 100%;
+    top: -5px;
+    min-width: 230px;
+    background: rgba(20, 37, 42, 0.682);
+    backdrop-filter: blur(50px);
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.45);
+    border: 1px solid var(--border-color-light);
+    padding: 8px 0;
+    transform-origin: top left;
 }
-
 .side-bar.expanded .submenu {
-    top: 100%;
-    left: 0;
+    position: static;
+    padding-left: 35px;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
 }
+.submenu.open { display: block; opacity: 1; transform: translateY(0) scale(1); max-height: 500px; }
+.side-bar:not(.expanded) ul li:hover > .submenu { display: block; opacity: 1; transform: translateY(0) scale(1); max-height: 500px; }
+.submenu li a { font-size: 0.88em; padding: 10px 20px; color: var(--text-secondary); }
+.submenu li a:hover { color: var(--neon-cyan); background-color: rgba(30, 178, 193, 0.15); }
+.submenu li a::before { display: none; }
 
-.submenu.open {
-    display: block;
-}
+/* Conteúdo Principal */
+.main-content { margin-left: 65px; padding-top: 80px; min-height: 100vh; padding: 25px 30px; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.side-bar.expanded ~ .main-content { margin-left: 250px; }
 
-.submenu li {
-    padding: 0;
-}
-
-.submenu li a {
-    color: #fff;
-    text-decoration: none;
-    display: block;
-    padding: 10px 20px;
-    white-space: nowrap;
-}
-
-.submenu li a:hover {
-    background-color: #333;
-}
-
-.side-bar:not(.expanded) ul li:hover .submenu {
-    display: block;
-}
-
-/* Ajuste de margem para o conteúdo principal quando o menu lateral está expandido */
-.main-content {
-    margin-left: 60px;
-    padding-top: 50px;
-    min-height: 100vh;
-    padding: 20px;
-    transition: margin-left 0.3s ease;
-}
-
-.side-bar.expanded~.main-content {
-    margin-left: 250px;
-}
-
-/* Estilos para o ícone do perfil */
 .profile-icon {
     display: flex;
     align-items: center;
 }
 
-.profile-icon img {
-    width: 40px;
-    height: 40px;
+.profile-icon img { /* Renomeado no HTML para 'profile-photo', mas vamos manter 'profile-icon img' para o wrapper e 'profile-photo' para a imagem específica se necessário */
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     object-fit: cover;
-    /* Garante que a imagem seja proporcional */
     aspect-ratio: 1 / 1;
-    /* Mantém a imagem sempre quadrada */
+    cursor: pointer;
+    border: 1px solid var(--border-color-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.profile-icon img:hover { /* Estilo de hover para a imagem do perfil */
+    transform: scale(1.05);
+    box-shadow: 0 0 8px var(--neon-cyan-glow);
+}
+
 
 /* Ajustando a posição da foto dentro da barra superior */
 .top-bar-right .profile-icon {
@@ -203,16 +259,26 @@ body {
     display: none;
     position: absolute;
     right: 0;
-    top: 100%;
-    background-color: #141313;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 250px;
-    z-index: 100;
-    border: 0.1px solid #fffcfc;
+    top: calc(100% + 10px);
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.45), 0 0 0 1px var(--border-color-light);
+    width: 260px;
+    z-index: 10000;
+    border-radius: 8px;
+    border: 1px solid var(--border-color-light);
+    overflow: hidden;
 }
 
 .profile-menu.open {
     display: block;
+    animation: fadeInDropdown 0.2s ease-out;
+}
+
+@keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .profile-menu ul {
@@ -221,25 +287,39 @@ body {
     margin: 0;
 }
 
-.profile-menu ul li {
-    padding: 10px;
-}
 
 .profile-menu ul li a {
     text-decoration: none;
-    color: #ffffff;
+    color: var(--text-primary);
     display: block;
+    padding: 12px 20px;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.profile-menu ul li a:hover {
+    background-color: var(--neon-cyan-glow);
+    color: #ffffff;
 }
 
 .profile-info {
-    padding: 10px;
-    background-color: #000000;
+    padding: 15px 20px;
+    background-color: rgba(0,0,0,0.2);
     text-align: center;
+    border-bottom: 1px solid var(--border-color-light);
 }
 
 .profile-info p {
-    margin: 5px 0;
-    font-size: 14px;
+    margin: 4px 0;
+    font-size: 0.95em;
+}
+.profile-info p:first-child {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.profile-info p:last-child {
+    font-size: 0.8em;
+    color: var(--text-secondary);
 }
 
 
@@ -250,43 +330,67 @@ body {
     margin-right: -5px;
 }
 
-.bell-icon {
-    width: 30px;
+.bell-icon { /* Aplicado à tag <img> diretamente no HTML */
+    width: 28px;
+    height: 28px;
     cursor: pointer;
+    /* A cor do ícone (sino) é inerente à imagem .png. Para SVGs, 'color' ou 'fill' funcionariam. */
+    /* Para aplicar filtros, pode-se usar o 'filter' property. */
+    transition: filter 0.2s ease, transform 0.2s ease;
 }
+.notification-bell a:hover .bell-icon, /* Supondo que o <a> envolve a <img> */
+.notification-bell a.active .bell-icon {
+    /* filter: drop-shadow(0 0 4px var(--neon-cyan-glow)); -- O drop-shadow pode ser muito forte em .png com transparência */
+    transform: scale(1.05); /* Efeito de hover sutil */
+}
+
 
 .notification-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #ff0000;
-    box-shadow: 0px 0px 15px #ff0000;
-    color: white;
+    top: -6px;
+    right: -8px;
+    background-color: var(--neon-cyan);
+    box-shadow: 0px 0px 10px var(--neon-cyan-glow);
+    color: var(--dark-bg1);
     border-radius: 50%;
-    padding: 5px 7px;
-    font-size: 12px;
+    padding: 3px 6px;
+    font-size: 10px;
     font-weight: bold;
+    border: 1px solid var(--dark-bg1);
 }
 
-/* Ajustando a altura máxima para o dropdown de notificações */
+/* Dropdown de notificações */
 .notification-dropdown {
-    display: none;
+    display: none; /* Alterado para flex quando open */
     position: absolute;
-    top: 25px;
+    top: calc(100% + 10px);
     right: 0;
-    background-color: #333;
-    color: white;
-    width: 500px;
-    border-radius: 20px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    border: 2px solid rgb(184, 180, 180);
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-primary);
+    width: 450px;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.45), 0 0 0 1px var(--border-color-light);
+    z-index: 10000;
+    border: 1px solid var(--border-color-light);
     max-height: 400px;
-    overflow-y: auto;
+    flex-direction: column; /* Adicionado para .notification-dropdown */
 }
 
 .notification-dropdown.open {
-    display: block;
+    display: flex; /* Alterado de block para flex */
+    animation: fadeInDropdown 0.2s ease-out;
+}
+
+.notification-dropdown-header {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color-light);
+}
+
+.notification-list-body {
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 .notification-dropdown ul {
@@ -298,42 +402,42 @@ body {
 /* Estilos para o botão "Limpar Todas" */
 .clear-all-button {
     width: 100%;
-    padding: 10px;
-    background-color: #1EB2C1;
-    color: white;
+    padding: 10px 15px;
+    background-color: var(--neon-cyan);
+    color: #ffffff;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
-    margin-bottom: 10px;
-    transition: background-color 0.3s;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.9em;
 }
 
 .clear-all-button:hover {
-    background-color: #2EC2D6;
-    box-shadow: 0px 0px 10px #2EC2D6;
-}
-
-/* Ajuste para espaçamento entre o botão e a lista de notificações */
-.notification-dropdown ul {
-    padding: 10px;
-    margin: 0;
+    background-color: var(--neon-cyan-darker);
+    box-shadow: 0px 0px 12px var(--neon-cyan-glow);
 }
 
 /* Ajuste para a lista de notificações */
 .notification-dropdown ul li {
     position: relative;
-    /* Necessário para posicionar o botão de fechar */
-    padding: 15px 10px 10px 10px;
-    /* Espaçamento interno */
-    background-color: #202020;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    border: 0.5px solid rgb(145, 142, 142);
+    padding: 12px 15px;
+    background-color: rgba(var(--dark-bg2-rgb), 0.5); /* Usando RGBa */
+    /* background-color: var(--dark-bg2); */ /* Alternativa sólida */
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    /* Alinha o conteúdo verticalmente */
     align-items: flex-start;
+    transition: background-color 0.2s ease;
+}
+.notification-dropdown ul li:last-child {
+    margin-bottom: 0;
+}
+
+.notification-dropdown ul li:hover {
+    background-color: rgba(var(--neon-cyan-rgb), 0.1);
 }
 
 /* Estilos para o container de controles da notificação */
@@ -341,113 +445,162 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    /* Centraliza os itens horizontalmente */
+    align-items: flex-start;
 }
 
-/* Ajuste para centralizar o botão de fechar e garantir que não sobreponha o texto */
+/* Botão de fechar notificação individual */
 .notification-dropdown ul li .close-notification {
     position: absolute;
-    top: 0.5px;
-    right: 5px;
+    top: 8px;
+    right: 10px;
     background-color: transparent;
     border: none;
-    color: rgb(255, 0, 0);
+    color: var(--text-secondary);
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
+    padding: 2px;
+    line-height: 1;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.close-notification:hover {
-    transform: scale(1.2);
-    text-shadow: 0px 0px 20px #ff0000;
+.notification-dropdown ul li .close-notification:hover {
+    color: #ff4d4d;
+    transform: scale(1.1);
 }
 
-/* Ajuste da mensagem da notificação */
+/* Mensagem da notificação */
 .notification-message {
     display: flex;
     align-items: center;
-    flex-grow: 1;
-    width: 100%;
-    /* Garante que o conteúdo ocupe a largura completa */
-    margin-bottom: 10px;
-    /* Espaço entre a mensagem e o link "Ir para" */
+    width: calc(100% - 20px); /* Deixar espaço para o botão de fechar */
+    margin-bottom: 8px;
 }
 
-.notification-message img {
-    width: 50px;
-    height: 50px;
+.notification-message img.user-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
     aspect-ratio: 1 / 1;
-    margin-right: 10px;
-    border: 0.5px solid rgb(145, 142, 142);
+    margin-right: 12px;
+    border: 1px solid var(--border-color-light);
+    transition: transform 0.2s ease;
 }
 
-.notification-message img:hover {
-    transform: scale(1.5);
+.notification-message img.user-avatar:hover {
+    transform: scale(1.05);
 }
 
 .notification-message p {
     margin: 0;
-    font-size: 14px;
-    color: white;
+    font-size: 0.88em;
+    color: var(--text-primary);
     flex-grow: 1;
+    line-height: 1.4;
 }
 
-/* Estilos para os controles da notificação */
+/* Controles da notificação (botão "Ir para") */
 .notification-controls {
     width: 100%;
     display: flex;
-    justify-content: center;
-    /* Centraliza horizontalmente */
+    justify-content: flex-end;
+    margin-top: 5px;
 }
 
-/* Estilos para o botão "Ir para" */
 .notification-action {
-    color: #1EB2C1;
-    font-size: 14px;
+    color: var(--neon-cyan);
+    font-size: 0.85em;
     text-decoration: none;
-    display: inline-block;
-    margin-top: 1px;
-    padding: 5px 10px;
-    /* Adicione padding para melhor aparência */
-
+    padding: 6px 12px;
     border-radius: 5px;
-    /* Opcional: borda arredondada */
-    transition: all 0.3s;
+    transition: background-color 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+    font-weight: 500;
 }
 
 .notification-action:hover {
-    text-shadow: 0px 0px 10px #2EC2D6;
-    transform: scale(1.05);
-    /* Redução de escala para melhor efeito */
-
+    background-color: var(--neon-cyan-glow);
+    /* color: var(--neon-cyan); -- Mantido pelo text-shadow */
+    text-shadow: 0px 0px 8px var(--neon-cyan-glow);
+    transform: none;
 }
 
 /* Estilo para quando não há notificações */
 .no-notifications {
     text-align: center;
-    padding: 20px;
-    font-size: 16px;
-    color: #cccccc;
+    padding: 25px 20px;
+    font-size: 0.95em;
+    color: var(--text-secondary);
+    background-color: transparent !important;
+    border: none !important;
+}
+.no-notifications:hover {
+    background-color: transparent !important;
 }
 
-@media (max-width: 650px) {
-    .notification-dropdown {
-        width: 400px;
-    }
-
+/* Cards de Conteúdo (Exemplo) */
+.content-card {
+    background-color: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    padding: 25px; border-radius: 12px; border: 1px solid var(--border-color-light); margin-bottom: 30px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(55,65,81,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.content-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 15px var(--neon-cyan-glow), 0 0 0 1px var(--border-color-light); }
+.content-card h2 {
+    color: var(--text-primary); border-bottom: 1px solid var(--neon-cyan); padding-bottom: 15px;
+    margin: -25px -25px 25px -25px; padding-left: 25px; padding-top: 22px;
+    background-color: rgba(30,178,193,0.08); border-radius: 12px 12px 0 0;
+    font-size: 1.3em; font-weight: 500; text-shadow: 0 0 5px rgba(30,178,193,0.2);
 }
 
-@media (max-width: 550px) {
-    .notification-dropdown {
-        right: -180%;
-        z-index: 9999;
-    }
+/* Responsividade */
+@media (max-width: 992px) {
+    .side-bar.expanded { width: 230px; }
+    .side-bar.expanded ~ .main-content { margin-left: 230px; }
+    .notification-dropdown { width: 380px; }
 }
-
-@media (max-width: 480px){
-    .notification-dropdown {
-        width: 250px;
+@media (max-width: 768px) {
+    .top-bar { padding: 0 20px; height: 55px; }
+    .side-bar { top: 55px; width: 60px; height: calc(100% - 55px); }
+    .side-bar.expanded { width: 220px; }
+    .main-content { margin-left: 60px; padding: 20px; padding-top: 75px; }
+    .side-bar.expanded ~ .main-content { margin-left: 220px; }
+    .notification-dropdown { width: 340px; }
+    .profile-menu { width: 260px; } /* Mantido, pode ser ajustado aqui também se necessário */
+    .content-card { padding: 20px; border-radius: 10px; }
+    .content-card h2 { font-size: 1.2em; margin: -20px -20px 20px -20px; padding-left: 20px; padding-top: 18px;}
+}
+@media (max-width: 480px) {
+    .top-bar-right { gap: 12px; }
+    .profile-icon img.profile-photo, /* Se usar .profile-photo especificamente */
+    .profile-icon img { /* Aplica a ambas as imagens de perfil */
+      width: 32px;
+      height: 32px;
     }
+    .bell-icon {
+      width: 26px;
+      height: 26px;
+    }
+
+    .notification-dropdown, .profile-menu {
+        /* width: calc(100vw - 24px); -- Removido para usar max-width e right/left específicos */
+        top: calc(100% + 5px);
+        right: 10px;
+        left: 10px; /* Adicionado para centralizar em telas muito pequenas se desejado */
+        transform: none;
+        transform-origin: top center; /* Alterado para centralizar a origem */
+        width: auto; /* Para que left e right definam a largura */
+        max-width: calc(100vw - 20px); /* Garante que não ultrapasse a tela */
+    }
+    /* Ajuste específico se quiser larguras diferentes para cada dropdown em mobile */
+    .profile-menu {
+      width: auto; /* Deixa o left/right definir */
+      max-width: 240px; /* Limita o profile menu */
+      left: auto; /* Prioriza o 'right: 10px' */
+    }
+    .notification-dropdown {
+      max-width: calc(100vw - 20px); /* Permite que o notification dropdown seja mais largo */
+    }
+
+    .content-card { padding: 15px; border-radius: 8px; }
+    .content-card h2 { font-size: 1.1em; margin: -15px -15px 15px -15px; padding-left: 15px; padding-top: 15px;}
 }

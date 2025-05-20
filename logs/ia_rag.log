@@ -1,0 +1,15 @@
+INFO 2025-04-29 15:03:38,375 ia.vector_store vector_store 8442 139660936856256 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:03:42,542 ia.vector_store vector_store 8467 139660936856256 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:10:54,265 ia.vector_store vector_store 8512 140591866847936 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:10:55,390 ia.vector_store vector_store 8546 139762444616384 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:10:56,715 ia.views views 8546 139762444616384 API Key do Gemini configurada com sucesso.
+INFO 2025-04-29 15:34:59,344 ia.vector_store vector_store 8723 140192303534784 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:35:00,265 ia.vector_store vector_store 8747 140244329915072 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:35:00,998 ia views 8747 140244329915072 API Key do Gemini configurada globalmente.
+INFO 2025-04-29 15:39:27,971 ia.vector_store vector_store 8948 140317923390144 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:39:28,872 ia views 8948 140317923390144 API Key do Gemini configurada globalmente.
+INFO 2025-04-29 15:39:48,705 ia.vector_store vector_store 9009 139861223076544 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:39:49,532 ia views 9009 139861223076544 API Key do Gemini configurada globalmente.
+INFO 2025-04-29 15:41:36,628 ia.vector_store vector_store 9083 140269033804480 Cliente ChromaDB inicializado. Persistência em: /opt/Portal_Rotoplastyc/chroma_db_persist
+INFO 2025-04-29 15:41:37,784 ia.views views 9083 140269033804480 API Key do Gemini configurada com sucesso.
+INFO 2025-04-29 15:42:27,536 ia.views views 9173 139727728726720 API Key do Gemini configurada com sucesso.

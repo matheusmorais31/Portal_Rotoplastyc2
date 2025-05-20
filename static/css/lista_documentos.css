@@ -9,7 +9,7 @@ ul {
 /* Estilo básico */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #38393F;
+    
     color: #fff;
     margin: 0;
     padding: 0;
@@ -97,8 +97,9 @@ h1 {
 /* Lista de Documentos */
 .document-container {
     margin-top: 2%;
-    background-color: rgba(33, 32, 32, 0.265); /* Leve transparência para destaque */
+    background-color: rgba(33, 32, 32, 0); /* Leve transparência para destaque */
     margin-bottom: 20px;
+    backdrop-filter: blur(5px);
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #bdbcbc;

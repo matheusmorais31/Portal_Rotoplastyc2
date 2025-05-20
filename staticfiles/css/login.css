@@ -1,84 +1,249 @@
-/* Estilo exclusivo para a tela de login */
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #1c1c1c;
-    background-image: url("/static/images/login.png");
-    background-size: 100% 100%; /* Ajusta a imagem para cobrir toda a tela */
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
+/* -------------------------------------------------
+    LOGIN – Portal Rotoplastyc
+    ------------------------------------------------- */
 
-/* Estilo do contêiner */
-.login-container {
-    background-color: rgba(0, 0, 0, 0.8); /* Fundo semi-transparente preto */
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0px 0px 15px #000000;
-    width: 300px; /* Largura fixa do contêiner */
-    max-width: 90%;
-    text-align: center;
-}
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #0f1e24 url("/static/images/login.png") center/100% 100% no-repeat fixed;
+        color-scheme: dark; /* Mantido para informar ao navegador a preferência por tema escuro */
+    }
+    
+    /* ------------ Container ------------ */
+    .login-container {
+        background: rgba(215, 215, 215, 0.037); /* Fundo do container levemente transparente */
+        backdrop-filter: blur(5px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 0 15px #082f37;
+        width: 350px;
+        max-width: 90%;
+        text-align: center;
+    }
+    
+    /* ------------ Título (Substituindo Logo Imagem) ------------ */
+    .title-container {
+        margin-bottom: 30px; /* Espaçamento abaixo do título */
+        text-align: center;
+    }
+    
+    .portal-title {
+        color: #ffffff;
+        font-family: Arial, sans-serif; /* Ou uma fonte mais estilizada se preferir */
+        font-size: 2.0em;  /* Ajuste este valor para o tamanho desejado */
+        font-weight: bold; /* Ou 'normal' se preferir mais leve */
+        margin: 0; /* Remove margens padrão do h1 */
+        line-height: 1.2;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2); 
+    }
+    
+    /* ------------ Inputs ------------ */
+    input[type=text],
+    input[type=password] {
+        --bg: rgba(255,255,255,.07); /* cor base do "vidro" para estado normal */
+        width: 100%; /* Inputs ocupam 100% do seu container pai */
+        padding: 10px;
+        margin: 10px 0; /* Margem vertical entre label e input, ou entre inputs */
+        border: none;
+        border-radius: 10px;
+        background: var(--bg);
+        backdrop-filter: blur(4px);
+        color: #fff;
+        font-size: 16px;
+        box-shadow: inset 0 0 5px rgba(0,0,0,.63); /* Sombra interna sutil */
+        box-sizing: border-box; /* Padding e border não aumentam a largura total */
+    }
+    
+    input:focus {
+        outline: none; /* Remove o outline padrão no foco */
+    }
 
-/* Estilo da imagem do título */
-.logo img {
-    width: 100%;
-    max-width: 300px; /* Limitar a largura máxima da imagem do título */
-    margin-bottom: 20px;
-}
+    /* Container para o input de senha e o ícone de alternância */
+    .password-input-container {
+        position: relative;
+        display: flex; 
+        align-items: center;
+        width: 100%; /* O container deve ocupar a largura do .input-group */
+    }
 
-/* Estilo dos campos de input */
-input[type="text"], input[type="password"] {
-    width: 260px;
-    padding: 10px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 10px;
-    background-color: #d3d3d3;
-    font-size: 16px;
-    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.63);
-}
+    /* Ajusta o input de senha (e texto quando visível) dentro do novo container */
+    .password-input-container input[type=password],
+    .password-input-container input[type=text] {
+        padding-right: 45px; /* Espaço para o ícone à direita. Ajuste conforme necessário. */
+        margin: 0; /* Remove a margem do input em si, pois .input-group já tem */
+        /* A largura de 100% já é herdada de input[type=password] e input[type=text] ou definida abaixo */
+    }
 
-/* Estilo do botão de login */
-button {
-    width: 100px;
-    padding: 10px;
-    margin-top: 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    cursor: pointer;
-    background-color: #2EC2D6;
-    color: white;
-    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.63);
-    transition: background-color 0.3s;
-}
+    /* Estilo para o ícone de alternância de senha */
+    .toggle-password {
+        position: absolute;
+        right: 15px; /* Posição do ícone a partir da direita. Ajuste para alinhar bem. */
+        top: 50%;
+        transform: translateY(-50%); /* Centraliza verticalmente */
+        cursor: pointer;
+        color: #ccc; /* Cor do ícone */
+        user-select: none; /* Impede que o ícone seja selecionado como texto */
+        font-size: 1.1em; /* Tamanho do ícone, ajuste conforme necessário */
+        z-index: 2; /* Para garantir que fique sobre o input, se necessário */
+    }
 
-button:hover {
-    background-color: #1ca3af;
-    box-shadow:  0px 0px 15px #2EC2D6
-}
+    .toggle-password:hover {
+        color: #fff; /* Cor do ícone ao passar o mouse */
+    }
+    
+    /* ------------ Botão ------------ */
+    button {
+        width: 100px; /* Ajuste a largura conforme necessário, ou use padding para definir o tamanho */
+        padding: 10px 15px; /* Adicionado padding horizontal para melhor aparência */
+        margin-top: 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        background: #ffffff;
+        color: #000000;
+        box-shadow: inset 0 0 5px rgba(0,0,0,.63);
+        transition: background 0.3s, box-shadow .3s, color 0.3s;
+    }
+    
+    button:hover {
+        background: #1ca3af;
+        box-shadow: 0 0 15px #2EC2D6, inset 0 0 1px rgba(0,0,0,.63);
+        color:#ffffff;
+    }
+    
+    /* ------------ Mensagens & Labels ------------ */
+    .error-messages {
+        color: #ff5555;
+        background: rgba(255,85,85,.1);
+        border: 1px solid #ff5555;
+        border-radius: 10px;
+        box-shadow: inset 0 0 5px rgba(243,2,2,.63);
+        padding: 10px;
+        margin-bottom: 15px; /* Espaço abaixo da caixa de erro */
+        margin-top: -10px; /* Aproxima a caixa de erro do título ou do campo anterior */
+        font-size: 14px;
+        text-align: left;
+    }
+    
+    .error-messages ul {
+        margin: 0;
+        padding-left: 20px; /* Indentação para os itens da lista */
+    }
+    
+    label { /* Estilização para os labels "Usuário:" e "Senha:" do Django form */
+        display: block; /* Faz o label ocupar a linha inteira */
+        font-size: 16px; /* Tamanho da fonte do label */
+        color: #ffffff; /* Cor mais suave para o label */
+        text-align: center; /* Alinha o texto do label à esquerda, acima do input */
+        margin-bottom: 5px; /* Espaço entre o label e o input */
+        padding-left: 5px; /* Pequeno padding para alinhar com o input se necessário */
+    }
+    
+    /* Container para cada grupo de label + input */
+    .input-group {
+        margin-bottom: 15px; /* Espaçamento entre os grupos de input (ex: usuário e senha) */
+    }
 
-/* Estilo das mensagens de erro */
-.error-messages {
-    color: #ff5555; /* Cor vermelha para chamar atenção */
-    background-color: rgba(255, 85, 85, 0.1); /* Fundo semi-transparente */
-    border: 1px solid #ff5555;
-    box-shadow: inset 0px 0px 5px rgba(243, 2, 2, 0.63);
-    border-radius: 10px;
-    padding: 5px;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
-label {
-    display: block; /* Garante que os rótulos ocupem uma linha inteira */
-    font-size: 18px;
-    color: #ffffff; /* Cor do texto dos rótulos */
-    text-align: center; /* Centraliza os rótulos */
-}
+    /* Se os inputs do Django renderizam dentro de um <p> ou similar, pode precisar ajustar */
+    .input-group p {
+        margin: 0; /* Remove margens de parágrafos que o Django pode adicionar */
+    }
+
+    /* Garante que os inputs (ou o container do input de senha) ocupem a largura do .input-group */
+    .input-group input[type="text"], /* Para o campo de usuário */
+    .input-group .password-input-container { /* Para o container do campo de senha */
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Para os inputs diretamente dentro do .input-group (como username) 
+       e para os inputs dentro do password-input-container, 
+       garantir que a margem vertical seja aplicada ao input em si se não for o de senha, 
+       ou resetada se for o de senha (já que o .input-group e label cuidam do espaçamento) */
+    .input-group > input[type="text"] { /* Apenas para inputs diretos, como username */
+         margin: 0; /* Resetar margem se label já dá espaço. Ou mantenha 10px 0 se preferir mais espaço */
+    }
+    /* O CSS para input[type=text] e input[type=password] já define margin: 10px 0;
+       O .password-input-container input já tem margin: 0; */
+
+    
+    /* -------------------------------------------------
+        Autofill Killer – cobre TODOS os estados
+        ------------------------------------------------- */
+    
+    :root {
+        /* Cor que o box-shadow usará para simular o fundo "vidro" no autofill */
+        --autofill-visual-bg: rgba(255,255,255,.07);
+        --autofill-text-color: #ffffff;
+    }
+    
+    input[data-autofill="true"], /* Usar o atributo data para maior controle */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active,
+    input:autofill, /* Adicionado para compatibilidade mais ampla */
+    input:autofill:hover,
+    input:autofill:focus,
+    input:autofill:active {
+        /* O box-shadow é quem vai simular a cor de fundo "vidro" */
+        -webkit-box-shadow: 0 0 0 1000px var(--autofill-visual-bg) inset !important;
+        box-shadow: 0 0 0 1000px var(--autofill-visual-bg) inset !important;
+        
+        /* Faça o background-color real do input ser transparente para o backdrop-filter funcionar corretamente */
+        background-color: transparent !important;
+        background-image: none !important; /* Remove qualquer gradiente UA */
+        
+        /* Cor do texto */
+        -webkit-text-fill-color: var(--autofill-text-color) !important;
+        color: var(--autofill-text-color) !important; /* Fallback */
+        caret-color: var(--autofill-text-color) !important;
+    
+        /* Transição longa para tentar "congelar" os estilos */
+        transition: background-color 600000s 0s, color 600000s 0s !important;
+        
+        /* Mantenha o backdrop-filter para o efeito de vidro */
+        backdrop-filter: blur(4px) !important;
+        
+        /* Garante consistência da fonte */
+        font-size: 16px !important; 
+        font-family: Arial, sans-serif !important; /* Adicionado para consistência da família da fonte */
+    }
+    
+    /* Animação para tentar resetar o "flash" do autofill do Chrome */
+    @keyframes autofill-reset-fix {
+        0% {
+            opacity: 1; 
+        }
+        100% {
+            background-color: transparent !important; 
+            -webkit-text-fill-color: var(--autofill-text-color) !important;
+            color: var(--autofill-text-color) !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--autofill-visual-bg) inset !important;
+            box-shadow: 0 0 0 1000px var(--autofill-visual-bg) inset !important;
+            backdrop-filter: blur(4px) !important;
+            background-image: none !important; 
+            opacity: 1; 
+        }
+    }
+    
+    input:-webkit-autofill {
+        animation-name: autofill-reset-fix !important;
+        animation-duration: 0.02s !important; 
+        animation-timing-function: ease-out !important;
+        animation-fill-mode: forwards !important;
+        animation-delay: 0s !important; 
+    }
+    
+    /* Adicional: Consistência de fonte para pseudo-elementos, se aplicável */
+    input:-webkit-autofill::first-line {
+        font-family: Arial, sans-serif !important;
+        font-size: 16px !important;
+        color: var(--autofill-text-color) !important;
+    }

@@ -22,7 +22,7 @@ body {
 }
 
 /* --- Títulos --- */
-h1, h2 {
+h1, h2, h3 {
     color: #ffffff; /* Cor mais escura para títulos */
     border-bottom: 1px solid #dee2e6; /* Linha divisória mais sutil */
     padding-bottom: 12px;
@@ -32,8 +32,16 @@ h1, h2 {
 h1 {
     font-size: 2em; /* Tamanho maior para o título principal */
     text-align: center; /* Centraliza H1 */
-    margin-bottom: 35px;
+    margin-bottom: 10px;
     border-bottom: none; /* Remove linha do H1 */
+}
+
+h3 {
+    font-size: 14px;
+    margin-top: 45px; /* Mais espaço antes dos títulos das tabelas */
+    color: #ff0000; /* Cor um pouco mais suave para H2 */
+    text-align: center; /* Centraliza H1 */
+
 }
 
 h2 {
@@ -187,7 +195,7 @@ h2 {
 .total-cost .cost-usd {
     font-size: 0.65em; /* Menor */
     font-weight: normal;
-    color: #e0d6f5; /* Roxo bem claro */
+    color: #ffffff; /* Roxo bem claro */
     opacity: 0.9;
 }
 

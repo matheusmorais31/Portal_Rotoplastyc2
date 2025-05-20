@@ -97,8 +97,9 @@ h1 {
 /* Estilos da Lista de Usuários */
 .user-container {
     margin-top: 2%;
-    background-color: rgba(33, 32, 32, 0.265); /* Leve transparência para destaque */
+    background-color: rgba(33, 32, 32, 0.119); /* Leve transparência para destaque */
     margin-bottom: 20px;
+    backdrop-filter: blur(5px);
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #bdbcbc;

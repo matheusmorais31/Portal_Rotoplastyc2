@@ -213,8 +213,10 @@ body {
 #chat-list::-webkit-scrollbar-thumb:hover { background: #666; }
 #chat-list { scrollbar-width: thin; scrollbar-color: #555 #2a2a2e; }
 .chat-list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 8px 12px; margin-bottom: 6px; background: #2c2c2c; border: 1px solid #383838; border-radius: 5px; user-select: none; transition: background-color 0.2s ease, border-color 0.2s ease; font-size: 0.9em; color: #ccc; gap: 5px; }
-.chat-list-item:hover { background: #3a3a3a; border-color: #555; color: #eee; }
-.chat-list-item.active { background: #4a90e2; border-color: #6eb1f5; color: #fff; font-weight: 500; }
+
+.chat-list-item:hover { background: #3a3a3a; border-color: #555; color: #eee;}
+.chat-list-item.active { background: #444;  color: #fff; font-weight: 500; }
+.chat-list-item.active:hover { border-color: #1EB2C1; background-color: #444; box-shadow: 0 0 5px rgba(30, 178, 193, 0.5); }
 .chat-item-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .chat-item-delete-btn { background: none; border: none; color: #aaa; font-size: 1.3em; font-weight: bold; cursor: pointer; padding: 0 5px; margin-left: 5px; line-height: 1; border-radius: 4px; transition: color 0.2s ease, background-color 0.2s ease; flex-shrink: 0; }
 .chat-list-item:hover .chat-item-delete-btn { color: #ddd; }
@@ -233,11 +235,12 @@ body {
    flex-grow: 1;
    overflow: hidden;
    background: #262626;
+   position: relative;
 }
 
 #chat-header {
    padding: 12px 20px;
-   background: #1e1e1e;
+   background: #181818;
    border-bottom: 1px solid #333;
    display: flex;
    justify-content: space-between;
@@ -344,8 +347,8 @@ body {
 .preview-item .remove-preview { position: absolute; top: 2px; right: 2px; background-color: rgba(200, 50, 50, 0.7); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 12px; line-height: 18px; text-align: center; cursor: pointer; font-weight: bold; padding: 0; opacity: 0; transition: opacity 0.2s ease, background-color 0.2s ease; z-index: 1; }
 .preview-item:hover .remove-preview { opacity: 1; }
 .preview-item .remove-preview:hover { background-color: rgba(231, 76, 60, 1.0); }
-#cancel-upload-btn { background: #777; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; flex-shrink: 0; transition: background-color 0.2s ease; }
-#cancel-upload-btn:hover { background: #888; }
+#cancel-upload-btn { background: #a50101; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; flex-shrink: 0; transition: background-color 0.2s ease; }
+#cancel-upload-btn:hover { background: #ff0000; }
 #cancel-upload-btn:disabled { background: #555; color: #aaa; cursor: not-allowed; opacity: 0.7; }
 
 
@@ -433,3 +436,198 @@ body {
     animation-delay: -0.16s;
   }
   
+/* Estilo para o container do item de preview genérico (dentro de .preview-item) */
+.preview-file-info {
+    display: flex;
+    flex-direction: column; /* Ícone acima do nome */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 5px; /* Espaçamento interno */
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Evita que conteúdo estoure */
+    box-sizing: border-box;
+  }
+  
+  /* Estilo para o ícone no preview */
+  .preview-file-icon {
+    font-size: 1.8em; /* Tamanho maior para o ícone */
+    margin-bottom: 4px;
+    line-height: 1; /* Ajusta altura da linha */
+    color: #a0a0a0; /* Cor do ícone */
+  }
+  
+  /* Estilo para o nome do arquivo no preview */
+  .preview-file-name {
+    font-size: 0.7em; /* Fonte pequena para o nome */
+    line-height: 1.2;
+    max-height: 2.4em; /* Limita a aprox. 2 linhas */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Força quebra de palavra se necessário */
+    word-break: break-all;
+     /* Para reticências em múltiplas linhas (pode não funcionar em todos os navegadores) */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    color: #ccc; /* Cor do nome */
+  }
+  
+  /* Ajuste opcional no .preview-item para não ter fundo cinza em não-imagens */
+  .preview-item:not(:has(img)) { /* Seletor :has pode não ser suportado em navegadores muito antigos */
+      background-color: transparent; /* Ou uma cor de fundo diferente */
+      border-color: #666; /* Borda um pouco mais visível */
+  }
+  
+  
+  /* --- 2. Anexos na Mensagem (Dentro da Bolha de Chat) --- */
+  
+  /* Container geral para todos os anexos de uma mensagem */
+  .message-attachments {
+    margin-top: 8px; /* Espaço acima se houver texto antes */
+    margin-bottom: 8px; /* Espaço abaixo se houver texto depois */
+    display: flex;
+    flex-direction: column; /* Empilha anexos verticalmente */
+    gap: 6px; /* Espaço entre múltiplos anexos */
+    align-items: flex-start; /* Alinha à esquerda por padrão (AI) */
+  }
+  
+  /* Alinha anexos à direita para mensagens do usuário */
+  .user-message .message-attachments {
+      align-items: flex-end;
+  }
+  
+  /* Container para um único anexo (seja imagem ou link de arquivo) */
+  .message-attachment-item {
+    max-width: 90%; /* Limita a largura para não ocupar a bolha toda */
+    /* Outros estilos se necessário */
+  }
+  
+  /* Estilo para o link de arquivos não-imagem */
+  .attachment-file-link {
+    display: inline-flex; /* Alinha ícone e texto na mesma linha */
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2); /* Fundo sutil */
+    padding: 6px 12px;
+    border-radius: 15px; /* Bordas arredondadas (estilo "pill") */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #d0d0d0; /* Cor do texto do link */
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    max-width: 100%; /* Garante que caiba no item */
+  
+    /* Evita que o link quebre linha e controla estouro */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .user-message .attachment-file-link {
+      background-color: rgba(0, 132, 255, 0.15); /* Cor diferente para links do usuário */
+      border-color: rgba(0, 132, 255, 0.3);
+      color: #e0e0e0;
+  }
+  
+  
+  .attachment-file-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+  .user-message .attachment-file-link:hover {
+      background-color: rgba(0, 132, 255, 0.3);
+  }
+  
+  /* Estilo para o ícone dentro do link */
+  .attachment-file-icon {
+    margin-right: 6px; /* Espaço entre ícone e nome */
+    font-size: 1.1em; /* Tamanho do ícone */
+    /* Opcional: Ajuste vertical se necessário */
+    vertical-align: middle;
+    /* display: inline-block; */ /* Pode ajudar no alinhamento */
+  }
+  
+  /* Estilo para o nome do arquivo dentro do link */
+  .attachment-file-name {
+     /* Garante que reticências apareçam se o link pai cortar */
+     overflow: hidden;
+     text-overflow: ellipsis;
+     white-space: nowrap; /* Redundante se já está no link, mas seguro */
+  }
+  
+  /* Estilo para erro ao carregar thumbnail de imagem (já existia, mas revisado) */
+  .attachment-error {
+      color: #ff9a9a;
+      font-style: italic;
+      font-size: 0.85em;
+      border: 1px dashed #ff9a9a;
+      padding: 8px;
+      display: inline-block;
+      border-radius: 4px;
+      background-color: rgba(255, 0, 0, 0.1);
+  }
+  
+  
+  /* Garante espaço entre bloco de anexos e texto da mensagem, se ambos existirem */
+  .message-attachments + .message-text {
+      margin-top: 10px;
+  }
+  
+  /* Garante que texto vazio não ocupe espaço se só houver anexo */
+  .message-text:empty {
+      display: none;
+  }
+
+
+
+
+  /* Container para os botões de scroll da IA */
+.ai-scroll-buttons {
+  position: absolute; /* Posicionamento relativo a .chat-area */
+  bottom: 75px;       /* Acima da área de input (ajuste conforme necessário) */
+  right: 15px;        /* No canto inferior direito (ajuste conforme necessário) */
+  display: flex;
+  flex-direction: column; /* Botões empilhados verticalmente */
+  gap: 8px;           /* Espaço entre os botões */
+  z-index: 10;        /* Para garantir que fiquem sobre as mensagens */
+
+  /* Inicialmente escondidos e sem interação */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out; /* Transição suave */
+}
+
+/* Classe para mostrar os botões */
+.ai-scroll-buttons.visible {
+  opacity: 1;
+  pointer-events: auto; /* Permite cliques quando visível */
+}
+
+/* Estilo individual dos botões */
+.ai-scroll-buttons button {
+  background-color: rgba(50, 50, 50, 0.75); /* Fundo semi-transparente */
+  color: #e0e0e0;
+  border: 1px solid rgba(120, 120, 120, 0.8);
+  border-radius: 50%; /* Botões redondos */
+  width: 36px;        /* Tamanho */
+  height: 36px;
+  font-size: 20px;    /* Tamanho da seta */
+  font-weight: bold;
+  line-height: 34px;  /* Ajuste para centralizar a seta verticalmente */
+  text-align: center;
+  cursor: pointer;
+  padding: 0;         /* Remove padding padrão */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Efeito ao passar o mouse */
+.ai-scroll-buttons button:hover {
+  background-color: rgba(80, 80, 80, 0.9);
+}
+
+/* Efeito ao clicar */
+.ai-scroll-buttons button:active {
+  transform: scale(0.95); /* Leve encolhida ao clicar */
+}

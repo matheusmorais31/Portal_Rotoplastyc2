@@ -104,7 +104,7 @@ def obter_previsao_15_dias(cidade_id, api_key, intervalo_cache=3600):
 @login_required
 def home(request):
     cidade_id = 5585  # Carazinho, RS
-    api_key = '5f713c18b31aee4d7a93df6a3220cfb8'  # Substitua pela sua chave de API
+    api_key = '5f713c18b31aee4d7a93df6a3220cfb8'
 
     # Obter clima atual e previsão com cache
     clima_atual = obter_clima_atual(cidade_id, api_key)

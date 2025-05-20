@@ -1,0 +1,455 @@
+WARNING 2025-05-19 13:56:14,557 views 2430 139853625804480 VIEWS.PY: Usuário matheus.oliveira tentou acessar o relatório 'PRODUÇÃO_NOVO' (PK: 62) sem permissão.
+INFO 2025-05-19 13:56:57,513 views 2430 139853634197184 Relatório 'PRODUÇÃO_NOVO' editado com sucesso por matheus.oliveira.
+WARNING 2025-05-19 13:56:59,636 views 2430 139853634197184 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 13:56:59,637 utils 2430 139853634197184 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 13:59:47,028 views 2430 139853634197184 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 13:59:47,030 utils 2430 139853634197184 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 13:59:48,161 views 2430 139853634197184 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 13:59:48,163 utils 2430 139853634197184 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 13:59:59,160 views 2430 139853634197184 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 13:59:59,162 utils 2430 139853634197184 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 14:00:00,061 views 2430 139853634197184 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:00:00,063 utils 2430 139853634197184 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 14:00:00,928 views 2430 139853634197184 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:00:00,929 utils 2430 139853634197184 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 14:00:01,195 views 2430 139853625804480 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:00:01,196 utils 2430 139853625804480 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 14:00:11,758 views 2430 139853625804480 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:00:11,760 utils 2430 139853625804480 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 14:03:19,817 views 2430 139853625804480 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:03:19,819 utils 2430 139853625804480 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 14:03:20,899 views 2430 139853625804480 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:03:20,900 utils 2430 139853625804480 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+WARNING 2025-05-19 14:08:41,435 views 2876 140282086553280 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:08:41,436 utils 2876 140282086553280 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:08:41,722 utils 2876 140282086553280 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:08:42,255 utils 2876 140282086553280 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: 90d73e5c-5f6b-4b81-bd0a-2ec5af781a00 Correlation ID: e1657cc9-5f8f-469b-90a1-54952dc254b5 Timestamp: 2025-05-19 17:08:42Z
+ERROR 2025-05-19 14:08:42,255 utils 2876 140282086553280 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:08:42,255 views 2876 140282086553280 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:08:48,011 views 2876 140282078160576 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:08:48,012 utils 2876 140282078160576 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:08:48,253 utils 2876 140282078160576 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:08:48,737 utils 2876 140282078160576 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: 6558c588-5fe5-4786-8baf-d2e8d88b1800 Correlation ID: 9e845deb-c5df-4830-afe1-a3235b9d7728 Timestamp: 2025-05-19 17:08:48Z
+ERROR 2025-05-19 14:08:48,737 utils 2876 140282078160576 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:08:48,737 views 2876 140282078160576 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:09:11,056 views 2876 140282078160576 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:09:11,058 utils 2876 140282078160576 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:09:11,289 utils 2876 140282078160576 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:09:11,826 utils 2876 140282078160576 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: 7102bc81-81e6-43b6-a543-7c25ebcc1b00 Correlation ID: 1e4ae2a6-577d-4aec-9a13-994c4d8a3ef1 Timestamp: 2025-05-19 17:09:11Z
+ERROR 2025-05-19 14:09:11,827 utils 2876 140282078160576 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:09:11,827 views 2876 140282078160576 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:11:05,096 views 3039 139967078594240 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:11:05,099 utils 3039 139967078594240 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:11:05,359 utils 3039 139967078594240 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:11:05,845 utils 3039 139967078594240 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: 1e6b508d-7b9e-4187-9e5b-d955dca61700 Correlation ID: bf9e6f30-1343-45a4-87f6-a9b8160c1254 Timestamp: 2025-05-19 17:11:05Z
+ERROR 2025-05-19 14:11:05,845 utils 3039 139967078594240 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:11:05,845 views 3039 139967078594240 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:19:51,601 views 3157 139790906287808 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:19:51,603 utils 3157 139790906287808 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:19:51,882 utils 3157 139790906287808 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:19:52,370 utils 3157 139790906287808 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: 7b5f8c0d-21f5-4036-b063-9094cd061e00 Correlation ID: f691ec4f-51be-4779-86cd-0e52ffa55c78 Timestamp: 2025-05-19 17:19:52Z
+ERROR 2025-05-19 14:19:52,370 utils 3157 139790906287808 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:19:52,371 views 3157 139790906287808 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:22:25,014 views 1606 140391265330880 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:22:25,016 utils 1606 140391265330880 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:22:25,304 utils 1606 140391265330880 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:22:25,805 utils 1606 140391265330880 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: 2dae88a4-f685-4bc1-ac7d-f078b6571c00 Correlation ID: 7d18a86d-d3d9-4872-9b5b-eecdc7e0606e Timestamp: 2025-05-19 17:22:25Z
+ERROR 2025-05-19 14:22:25,806 utils 1606 140391265330880 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:22:25,806 views 1606 140391265330880 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:43:39,539 views 1606 140391246448320 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:43:39,541 utils 1606 140391246448320 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:43:39,793 utils 1606 140391246448320 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:43:40,335 utils 1606 140391246448320 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: a109f486-caf3-4c16-abfd-9f51816a1b00 Correlation ID: 9d013c7e-6158-4450-ac40-49c20430a780 Timestamp: 2025-05-19 17:43:40Z
+ERROR 2025-05-19 14:43:40,335 utils 1606 140391246448320 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:43:40,336 views 1606 140391246448320 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:43:56,711 views 1606 140391246448320 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:43:56,713 utils 1606 140391246448320 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:43:56,971 utils 1606 140391246448320 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+ERROR 2025-05-19 14:43:57,521 utils 1606 140391246448320 UTILS.PY: Falha ao adquirir token de acesso ROPC. Erro: invalid_client. Descrição: AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'. Trace ID: 7e119341-44d4-49a1-bbb4-6c66dcb21c00 Correlation ID: 5d82df20-4b55-4660-b85d-0c4d38ab26f6 Timestamp: 2025-05-19 17:43:57Z
+ERROR 2025-05-19 14:43:57,522 utils 1606 140391246448320 UTILS.PY: Falha ao obter token AAD via ROPC. Não é possível prosseguir.
+ERROR 2025-05-19 14:43:57,522 views 1606 140391246448320 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:43:58,722 views 1606 140391238055616 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:43:58,724 utils 1606 140391238055616 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:43:58,950 utils 1606 140391238055616 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+WARNING 2025-05-19 14:43:59,514 utils 1606 140391238055616 UTILS.PY: Token de acesso ROPC adquirido. LEMBRE-SE: ESTE MÉTODO É INSEGURO E NÃO RECOMENDADO PARA PRODUÇÃO.
+DEBUG 2025-05-19 14:43:59,515 utils 1606 140391238055616 UTILS.PY: Requisitando detalhes do relatório: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:44:04,953 utils 1606 140391238055616 UTILS.PY: Erro ao obter detalhes do relatório com token ROPC: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d. Resposta: 
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/bi/utils.py", line 81, in get_powerbi_embed_params_ropc_unsafe
+    report_response.raise_for_status()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:44:04,955 views 1606 140391238055616 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:44:07,249 views 1606 140391238055616 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:44:07,250 utils 1606 140391238055616 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:44:07,530 utils 1606 140391238055616 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+WARNING 2025-05-19 14:44:08,006 utils 1606 140391238055616 UTILS.PY: Token de acesso ROPC adquirido. LEMBRE-SE: ESTE MÉTODO É INSEGURO E NÃO RECOMENDADO PARA PRODUÇÃO.
+DEBUG 2025-05-19 14:44:08,006 utils 1606 140391238055616 UTILS.PY: Requisitando detalhes do relatório: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:44:08,222 utils 1606 140391238055616 UTILS.PY: Erro ao obter detalhes do relatório com token ROPC: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d. Resposta: 
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/bi/utils.py", line 81, in get_powerbi_embed_params_ropc_unsafe
+    report_response.raise_for_status()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:44:08,223 views 1606 140391238055616 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:44:16,680 views 1973 140644461835968 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:44:16,683 utils 1973 140644461835968 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:44:16,941 utils 1973 140644461835968 UTILS.PY: Tentando adquirir token ROPC para usuário ti@rotoplastyc.com.br com Client ID ROPC 5b8416fa-32a5-4b22-8aae-3f49ba451973
+WARNING 2025-05-19 14:44:17,441 utils 1973 140644461835968 UTILS.PY: Token de acesso ROPC adquirido. LEMBRE-SE: ESTE MÉTODO É INSEGURO E NÃO RECOMENDADO PARA PRODUÇÃO.
+DEBUG 2025-05-19 14:44:17,442 utils 1973 140644461835968 UTILS.PY: Requisitando detalhes do relatório: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:44:17,636 utils 1973 140644461835968 UTILS.PY: Erro ao obter detalhes do relatório com token ROPC: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d. Resposta: 
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/bi/utils.py", line 81, in get_powerbi_embed_params_ropc_unsafe
+    report_response.raise_for_status()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:44:17,637 views 1973 140644461835968 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:45:47,994 views 2101 140093451925184 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:45:47,998 utils 2101 140093451925184 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:45:47,999 utils 2101 140093451925184 UTILS.PY: Usando PublicClientApplication (nenhum segredo definido).
+INFO 2025-05-19 14:45:48,277 utils 2101 140093451925184 UTILS.PY: Tentando adquirir token ROPC para ti@rotoplastyc.com.br
+WARNING 2025-05-19 14:45:48,916 utils 2101 140093451925184 UTILS.PY: Token ROPC adquirido com sucesso (⚠️  ROPC continua inseguro para produção).
+DEBUG 2025-05-19 14:45:48,917 utils 2101 140093451925184 UTILS.PY: Requisitando detalhes do relatório: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:45:49,208 utils 2101 140093451925184 UTILS.PY: Erro ao obter detalhes do relatório com token ROPC: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d. Resposta: 
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/bi/utils.py", line 148, in get_powerbi_embed_params_ropc_unsafe
+    report_response.raise_for_status()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:45:49,209 views 2101 140093451925184 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:45:51,556 views 2101 140093443532480 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: PRODUÇÃO_NOVO
+WARNING 2025-05-19 14:45:51,558 utils 2101 140093443532480 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: e5f8fa4e-8786-4d1c-bc12-8d941d50863d. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:45:51,559 utils 2101 140093443532480 UTILS.PY: Usando PublicClientApplication (nenhum segredo definido).
+INFO 2025-05-19 14:45:51,791 utils 2101 140093443532480 UTILS.PY: Tentando adquirir token ROPC para ti@rotoplastyc.com.br
+WARNING 2025-05-19 14:45:52,339 utils 2101 140093443532480 UTILS.PY: Token ROPC adquirido com sucesso (⚠️  ROPC continua inseguro para produção).
+DEBUG 2025-05-19 14:45:52,340 utils 2101 140093443532480 UTILS.PY: Requisitando detalhes do relatório: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:45:52,538 utils 2101 140093443532480 UTILS.PY: Erro ao obter detalhes do relatório com token ROPC: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d. Resposta: 
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/bi/utils.py", line 148, in get_powerbi_embed_params_ropc_unsafe
+    report_response.raise_for_status()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e5f8fa4e-8786-4d1c-bc12-8d941d50863d
+ERROR 2025-05-19 14:45:52,539 views 2101 140093443532480 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+INFO 2025-05-19 14:46:03,022 views 2101 140093443532480 Relatório 'TI' editado com sucesso por matheus.oliveira.
+WARNING 2025-05-19 14:46:05,308 views 2101 140093443532480 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: TI
+WARNING 2025-05-19 14:46:05,309 utils 2101 140093443532480 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: 429f3b7f-05ec-4c0a-a28b-9277e00ae134. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:46:05,310 utils 2101 140093443532480 UTILS.PY: Usando PublicClientApplication (nenhum segredo definido).
+INFO 2025-05-19 14:46:05,558 utils 2101 140093443532480 UTILS.PY: Tentando adquirir token ROPC para ti@rotoplastyc.com.br
+WARNING 2025-05-19 14:46:06,178 utils 2101 140093443532480 UTILS.PY: Token ROPC adquirido com sucesso (⚠️  ROPC continua inseguro para produção).
+DEBUG 2025-05-19 14:46:06,179 utils 2101 140093443532480 UTILS.PY: Requisitando detalhes do relatório: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 14:46:06,480 utils 2101 140093443532480 UTILS.PY: Erro ao obter detalhes do relatório com token ROPC: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134. Resposta: 
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/bi/utils.py", line 148, in get_powerbi_embed_params_ropc_unsafe
+    report_response.raise_for_status()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 14:46:06,481 views 2101 140093443532480 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:46:22,640 views 2230 140056760153792 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: TI
+WARNING 2025-05-19 14:46:22,642 utils 2230 140056760153792 UTILS.PY: Iniciando get_powerbi_embed_params_ropc_unsafe para Report ID: 429f3b7f-05ec-4c0a-a28b-9277e00ae134. MÉTODO NÃO SEGURO!
+INFO 2025-05-19 14:46:22,642 utils 2230 140056760153792 UTILS.PY: Usando PublicClientApplication (nenhum segredo definido).
+INFO 2025-05-19 14:46:22,894 utils 2230 140056760153792 UTILS.PY: Tentando adquirir token ROPC para ti@rotoplastyc.com.br
+WARNING 2025-05-19 14:46:23,412 utils 2230 140056760153792 UTILS.PY: Token ROPC adquirido com sucesso (⚠️  ROPC continua inseguro para produção).
+DEBUG 2025-05-19 14:46:23,413 utils 2230 140056760153792 UTILS.PY: Requisitando detalhes do relatório: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 14:46:23,599 utils 2230 140056760153792 UTILS.PY: Erro ao obter detalhes do relatório com token ROPC: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134. Resposta: 
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/bi/utils.py", line 148, in get_powerbi_embed_params_ropc_unsafe
+    report_response.raise_for_status()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 14:46:23,600 views 2230 140056760153792 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:49:15,736 views 2334 140098297390784 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: TI
+WARNING 2025-05-19 14:49:15,738 utils 2334 140098297390784 UTILS: iniciando embed via ROPC (NÃO seguro) – relatório 429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 14:49:15,738 utils 2334 140098297390784 UTILS: usando PublicClientApplication (sem segredo).
+WARNING 2025-05-19 14:49:16,535 utils 2334 140098297390784 UTILS: token ROPC adquirido (⚠️ uso não recomendado em produção).
+ERROR 2025-05-19 14:49:16,872 utils 2334 140098297390784 UTILS: erro ao buscar detalhes do relatório: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134 – 
+ERROR 2025-05-19 14:49:16,873 views 2334 140098297390784 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:49:48,801 views 2334 140098305783488 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: TI
+WARNING 2025-05-19 14:49:48,803 utils 2334 140098305783488 UTILS: iniciando embed via ROPC (NÃO seguro) – relatório 429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 14:49:48,804 utils 2334 140098305783488 UTILS: usando PublicClientApplication (sem segredo).
+WARNING 2025-05-19 14:49:49,634 utils 2334 140098305783488 UTILS: token ROPC adquirido (⚠️ uso não recomendado em produção).
+ERROR 2025-05-19 14:49:49,882 utils 2334 140098305783488 UTILS: erro ao buscar detalhes do relatório: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134 – 
+ERROR 2025-05-19 14:49:49,883 views 2334 140098305783488 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:49:51,107 views 2334 140098288998080 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: TI
+WARNING 2025-05-19 14:49:51,109 utils 2334 140098288998080 UTILS: iniciando embed via ROPC (NÃO seguro) – relatório 429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 14:49:51,109 utils 2334 140098288998080 UTILS: usando PublicClientApplication (sem segredo).
+WARNING 2025-05-19 14:49:51,874 utils 2334 140098288998080 UTILS: token ROPC adquirido (⚠️ uso não recomendado em produção).
+ERROR 2025-05-19 14:49:52,050 utils 2334 140098288998080 UTILS: erro ao buscar detalhes do relatório: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134 – 
+ERROR 2025-05-19 14:49:52,051 views 2334 140098288998080 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:51:12,371 views 2334 140098288998080 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: TI
+WARNING 2025-05-19 14:51:12,374 utils 2334 140098288998080 UTILS: iniciando embed via ROPC (NÃO seguro) – relatório 429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 14:51:12,374 utils 2334 140098288998080 UTILS: usando PublicClientApplication (sem segredo).
+WARNING 2025-05-19 14:51:13,143 utils 2334 140098288998080 UTILS: token ROPC adquirido (⚠️ uso não recomendado em produção).
+ERROR 2025-05-19 14:51:13,385 utils 2334 140098288998080 UTILS: erro ao buscar detalhes do relatório: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134 – 
+ERROR 2025-05-19 14:51:13,385 views 2334 140098288998080 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+WARNING 2025-05-19 14:51:14,587 views 2334 140098297390784 VIEWS.PY: Tentando obter parâmetros de embed via ROPC (NÃO SEGURO) para o relatório: TI
+WARNING 2025-05-19 14:51:14,588 utils 2334 140098297390784 UTILS: iniciando embed via ROPC (NÃO seguro) – relatório 429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 14:51:14,589 utils 2334 140098297390784 UTILS: usando PublicClientApplication (sem segredo).
+WARNING 2025-05-19 14:51:15,322 utils 2334 140098297390784 UTILS: token ROPC adquirido (⚠️ uso não recomendado em produção).
+ERROR 2025-05-19 14:51:15,510 utils 2334 140098297390784 UTILS: erro ao buscar detalhes do relatório: 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134 – 
+ERROR 2025-05-19 14:51:15,510 views 2334 140098297390784 VIEWS.PY: Não foi possível obter os parâmetros de embed via ROPC (NÃO SEGURO).
+INFO 2025-05-19 14:59:22,403 utils 2592 139979660457664 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 14:59:23,338 utils 2592 139979660457664 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 15:03:18,873 utils 2662 140342497113792 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 15:03:56,429 utils 2741 140416471000768 PBI-Auth: ROPC inicial (username+password).
+ERROR 2025-05-19 15:03:57,241 utils 2741 140416471000768 PBI-Auth: falha ROPC – invalid_client | AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '5b8416fa-32a5-4b22-8aae-3f49ba451973'. Trace ID: 7c5f27a9-2d50-42e3-89e3-5c4639870100 Correlation ID: 4fcf6be6-2357-4002-ab73-7db906d4c967 Timestamp: 2025-05-19 18:03:57Z
+INFO 2025-05-19 15:03:58,175 utils 2741 140416479393472 PBI-Auth: ROPC inicial (username+password).
+ERROR 2025-05-19 15:03:58,974 utils 2741 140416479393472 PBI-Auth: falha ROPC – invalid_client | AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '5b8416fa-32a5-4b22-8aae-3f49ba451973'. Trace ID: 82ad2dbf-a159-40a3-ac2c-bd18b48f1a00 Correlation ID: eeb67cde-3c6e-4c37-82b4-ed717034d9c5 Timestamp: 2025-05-19 18:03:58Z
+INFO 2025-05-19 15:04:09,337 utils 2792 139698001405632 PBI-Auth: ROPC inicial (username+password).
+ERROR 2025-05-19 15:04:10,121 utils 2792 139698001405632 PBI-Auth: falha ROPC – invalid_client | AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '5b8416fa-32a5-4b22-8aae-3f49ba451973'. Trace ID: 2a8aaa1e-bb89-4417-9f7f-5b67a1d01b00 Correlation ID: 538b05ca-cdaf-47c0-8d5d-04fe0dbe1f7d Timestamp: 2025-05-19 18:04:10Z
+INFO 2025-05-19 15:05:20,219 utils 2792 139698009798336 PBI-Auth: ROPC inicial (username+password).
+ERROR 2025-05-19 15:05:21,357 utils 2792 139698009798336 PBI-Auth: falha ROPC – invalid_client | AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '5b8416fa-32a5-4b22-8aae-3f49ba451973'. Trace ID: 51697b63-f97d-4831-9a84-8fe57ed80100 Correlation ID: e49cbd67-8659-48b8-a5cc-fda52deaef29 Timestamp: 2025-05-19 18:05:21Z
+INFO 2025-05-19 15:05:30,493 utils 2885 139671809029824 PBI-Auth: ROPC inicial (username+password).
+ERROR 2025-05-19 15:05:32,017 utils 2885 139671809029824 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 15:07:17,813 utils 2979 140577798616768 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 15:07:18,069 utils 2979 140577790224064 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 15:07:18,315 utils 2979 140577781831360 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 15:07:18,530 utils 2979 140577567930048 PBI-Auth: ROPC inicial (username+password).
+ERROR 2025-05-19 15:07:18,856 utils 2979 140577798616768 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:19,396 utils 2979 140577790224064 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:19,480 utils 2979 140577567930048 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:19,505 utils 2979 140577781831360 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:20,628 utils 2979 140577567930048 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:21,738 utils 2979 140577542751936 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:22,556 utils 2979 140577542751936 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:23,383 utils 2979 140577551144640 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:24,259 utils 2979 140577551144640 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:25,151 utils 2979 140577551144640 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:07:26,009 utils 2979 140577559537344 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:14:09,625 utils 2979 140577299494592 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:14:10,736 utils 2979 140577299494592 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:14:55,795 utils 2979 140577299494592 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:16:38,147 utils 2979 140577299494592 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:19:04,604 utils 2979 140577517573824 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:19:05,698 utils 2979 140577517573824 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:19:17,205 utils 2979 140577517573824 PBI: erro ao obter embedUrl – 401 Client Error: Unauthorized for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 15:20:05,883 utils 3386 139930107901632 PBI-Auth: ROPC inicial (username+password).
+ERROR 2025-05-19 15:20:07,151 utils 3386 139930107901632 PBI: erro ao obter embedUrl – 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+ERROR 2025-05-19 15:22:46,126 utils 3386 139930107901632 PBI: erro ao obter embedUrl – 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/429f3b7f-05ec-4c0a-a28b-9277e00ae134
+INFO 2025-05-19 15:35:54,630 utils 968 140429815423680 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 15:40:49,085 utils 1740 139666928944832 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 16:29:10,448 tasks 2621 139813178028736 Tarefa BI: começando sincronização.
+INFO 2025-05-19 16:29:10,448 utils 2621 139813178028736 PBI-Auth: ROPC inicial (username+password).
+DEBUG 2025-05-19 16:29:11,900 tasks 2621 139813178028736 Tarefa BI: Criado PRODUÇÃO_NOVO
+DEBUG 2025-05-19 16:29:11,908 tasks 2621 139813178028736 Tarefa BI: Criado QUALIDADE
+DEBUG 2025-05-19 16:29:11,914 tasks 2621 139813178028736 Tarefa BI: Criado FATURAMENTO MENSAL
+DEBUG 2025-05-19 16:29:11,921 tasks 2621 139813178028736 Tarefa BI: Criado PLANO MESTRE
+DEBUG 2025-05-19 16:29:11,926 tasks 2621 139813178028736 Tarefa BI: Criado GCC
+DEBUG 2025-05-19 16:29:11,932 tasks 2621 139813178028736 Tarefa BI: Criado SOL
+DEBUG 2025-05-19 16:29:11,940 tasks 2621 139813178028736 Tarefa BI: Criado Acompanhamento Comercial - OEM
+DEBUG 2025-05-19 16:29:11,945 tasks 2621 139813178028736 Tarefa BI: Criado Acompanhamento Comercial RP
+DEBUG 2025-05-19 16:29:11,952 tasks 2621 139813178028736 Tarefa BI: Criado COMPRAS
+DEBUG 2025-05-19 16:29:11,957 tasks 2621 139813178028736 Tarefa BI: Criado COMPRAS_NOVO
+DEBUG 2025-05-19 16:29:11,964 tasks 2621 139813178028736 Tarefa BI: Criado ESTOQUE
+DEBUG 2025-05-19 16:29:11,970 tasks 2621 139813178028736 Tarefa BI: Criado ESTRUTURA
+DEBUG 2025-05-19 16:29:11,975 tasks 2621 139813178028736 Tarefa BI: Criado INDICADORES GERAL
+DEBUG 2025-05-19 16:29:11,982 tasks 2621 139813178028736 Tarefa BI: Criado MODELAGEM_FINANCEIRA
+DEBUG 2025-05-19 16:29:11,988 tasks 2621 139813178028736 Tarefa BI: Criado ORDENS_EXCEDENTES
+DEBUG 2025-05-19 16:29:11,994 tasks 2621 139813178028736 Tarefa BI: Criado PCP_APONTAMENTO
+DEBUG 2025-05-19 16:29:12,001 tasks 2621 139813178028736 Tarefa BI: Criado PEDIDOS_PCP
+DEBUG 2025-05-19 16:29:12,006 tasks 2621 139813178028736 Tarefa BI: Criado POLIETILENO
+DEBUG 2025-05-19 16:29:12,013 tasks 2621 139813178028736 Tarefa BI: Criado POS VENDAS
+DEBUG 2025-05-19 16:29:12,020 tasks 2621 139813178028736 Tarefa BI: Criado PRODUCAO
+DEBUG 2025-05-19 16:29:12,026 tasks 2621 139813178028736 Tarefa BI: Criado PROGRAMAÇÃO PCP
+DEBUG 2025-05-19 16:29:12,030 tasks 2621 139813178028736 Tarefa BI: Criado RELATORIO ENTRADA LOCAL 3
+DEBUG 2025-05-19 16:29:12,037 tasks 2621 139813178028736 Tarefa BI: Criado RELATORIO PCP
+DEBUG 2025-05-19 16:29:12,044 tasks 2621 139813178028736 Tarefa BI: Criado REMESSAS_NOVO
+DEBUG 2025-05-19 16:29:12,051 tasks 2621 139813178028736 Tarefa BI: Criado SGQ
+DEBUG 2025-05-19 16:29:12,058 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_MANUFATURA
+DEBUG 2025-05-19 16:29:12,064 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_RH
+DEBUG 2025-05-19 16:29:12,071 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_QUALIDADE
+DEBUG 2025-05-19 16:29:12,078 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_TI
+DEBUG 2025-05-19 16:29:12,087 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_GERAL
+DEBUG 2025-05-19 16:29:12,098 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_SUPRIMENTOS
+DEBUG 2025-05-19 16:29:12,105 tasks 2621 139813178028736 Tarefa BI: Criado S&OP_PCP
+DEBUG 2025-05-19 16:29:12,114 tasks 2621 139813178028736 Tarefa BI: Criado S&OP_COMERCIAL
+DEBUG 2025-05-19 16:29:12,119 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_COMERCIAL_RP
+DEBUG 2025-05-19 16:29:12,125 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_ENGENHARIA_OEM
+DEBUG 2025-05-19 16:29:12,131 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_ENGENHARIA_RP
+DEBUG 2025-05-19 16:29:12,138 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_COMERCIAL_OEM
+DEBUG 2025-05-19 16:29:12,142 tasks 2621 139813178028736 Tarefa BI: Criado ORCAMENTOS_MARKETING
+DEBUG 2025-05-19 16:29:12,147 tasks 2621 139813178028736 Tarefa BI: Criado S&OP
+DEBUG 2025-05-19 16:29:12,152 tasks 2621 139813178028736 Tarefa BI: Criado TI
+INFO 2025-05-19 16:29:12,152 tasks 2621 139813178028736 Tarefa BI: 40 relatórios sincronizados.
+INFO 2025-05-19 16:29:12,157 tasks 2621 139813178028736 Tarefa BI: começando sincronização.
+DEBUG 2025-05-19 16:29:12,393 tasks 2621 139813178028736 Tarefa BI: Atualizado PRODUÇÃO_NOVO
+DEBUG 2025-05-19 16:29:12,398 tasks 2621 139813178028736 Tarefa BI: Atualizado QUALIDADE
+DEBUG 2025-05-19 16:29:12,402 tasks 2621 139813178028736 Tarefa BI: Atualizado FATURAMENTO MENSAL
+DEBUG 2025-05-19 16:29:12,405 tasks 2621 139813178028736 Tarefa BI: Atualizado PLANO MESTRE
+DEBUG 2025-05-19 16:29:12,409 tasks 2621 139813178028736 Tarefa BI: Atualizado GCC
+DEBUG 2025-05-19 16:29:12,414 tasks 2621 139813178028736 Tarefa BI: Atualizado SOL
+DEBUG 2025-05-19 16:29:12,428 tasks 2621 139813178028736 Tarefa BI: Atualizado Acompanhamento Comercial - OEM
+DEBUG 2025-05-19 16:29:12,432 tasks 2621 139813178028736 Tarefa BI: Atualizado Acompanhamento Comercial RP
+DEBUG 2025-05-19 16:29:12,437 tasks 2621 139813178028736 Tarefa BI: Atualizado COMPRAS
+DEBUG 2025-05-19 16:29:12,442 tasks 2621 139813178028736 Tarefa BI: Atualizado COMPRAS_NOVO
+DEBUG 2025-05-19 16:29:12,473 tasks 2621 139813178028736 Tarefa BI: Atualizado ESTOQUE
+DEBUG 2025-05-19 16:29:12,486 tasks 2621 139813178028736 Tarefa BI: Atualizado ESTRUTURA
+DEBUG 2025-05-19 16:29:12,509 tasks 2621 139813178028736 Tarefa BI: Atualizado INDICADORES GERAL
+DEBUG 2025-05-19 16:29:12,529 tasks 2621 139813178028736 Tarefa BI: Atualizado MODELAGEM_FINANCEIRA
+DEBUG 2025-05-19 16:29:12,542 tasks 2621 139813178028736 Tarefa BI: Atualizado ORDENS_EXCEDENTES
+DEBUG 2025-05-19 16:29:12,569 tasks 2621 139813178028736 Tarefa BI: Atualizado PCP_APONTAMENTO
+DEBUG 2025-05-19 16:29:12,585 tasks 2621 139813178028736 Tarefa BI: Atualizado PEDIDOS_PCP
+DEBUG 2025-05-19 16:29:12,601 tasks 2621 139813178028736 Tarefa BI: Atualizado POLIETILENO
+DEBUG 2025-05-19 16:29:12,613 tasks 2621 139813178028736 Tarefa BI: Atualizado POS VENDAS
+DEBUG 2025-05-19 16:29:12,628 tasks 2621 139813178028736 Tarefa BI: Atualizado PRODUCAO
+DEBUG 2025-05-19 16:29:12,641 tasks 2621 139813178028736 Tarefa BI: Atualizado PROGRAMAÇÃO PCP
+DEBUG 2025-05-19 16:29:12,657 tasks 2621 139813178028736 Tarefa BI: Atualizado RELATORIO ENTRADA LOCAL 3
+DEBUG 2025-05-19 16:29:12,673 tasks 2621 139813178028736 Tarefa BI: Atualizado RELATORIO PCP
+DEBUG 2025-05-19 16:29:12,691 tasks 2621 139813178028736 Tarefa BI: Atualizado REMESSAS_NOVO
+DEBUG 2025-05-19 16:29:12,698 tasks 2621 139813178028736 Tarefa BI: Atualizado SGQ
+DEBUG 2025-05-19 16:29:12,710 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_MANUFATURA
+DEBUG 2025-05-19 16:29:12,727 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_RH
+DEBUG 2025-05-19 16:29:12,739 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_QUALIDADE
+DEBUG 2025-05-19 16:29:12,752 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_TI
+DEBUG 2025-05-19 16:29:12,757 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_GERAL
+DEBUG 2025-05-19 16:29:12,764 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_SUPRIMENTOS
+DEBUG 2025-05-19 16:29:12,771 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP_PCP
+DEBUG 2025-05-19 16:29:12,776 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP_COMERCIAL
+DEBUG 2025-05-19 16:29:12,783 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_RP
+DEBUG 2025-05-19 16:29:12,789 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_OEM
+DEBUG 2025-05-19 16:29:12,796 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_RP
+DEBUG 2025-05-19 16:29:12,802 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_OEM
+DEBUG 2025-05-19 16:29:12,807 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_MARKETING
+DEBUG 2025-05-19 16:29:12,812 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP
+DEBUG 2025-05-19 16:29:12,819 tasks 2621 139813178028736 Tarefa BI: Atualizado TI
+INFO 2025-05-19 16:29:12,820 tasks 2621 139813178028736 Tarefa BI: 40 relatórios sincronizados.
+INFO 2025-05-19 16:29:12,830 tasks 2621 139813178028736 Tarefa BI: começando sincronização.
+DEBUG 2025-05-19 16:29:13,206 tasks 2621 139813178028736 Tarefa BI: Atualizado PRODUÇÃO_NOVO
+DEBUG 2025-05-19 16:29:13,210 tasks 2621 139813178028736 Tarefa BI: Atualizado QUALIDADE
+DEBUG 2025-05-19 16:29:13,215 tasks 2621 139813178028736 Tarefa BI: Atualizado FATURAMENTO MENSAL
+DEBUG 2025-05-19 16:29:13,220 tasks 2621 139813178028736 Tarefa BI: Atualizado PLANO MESTRE
+DEBUG 2025-05-19 16:29:13,225 tasks 2621 139813178028736 Tarefa BI: Atualizado GCC
+DEBUG 2025-05-19 16:29:13,229 tasks 2621 139813178028736 Tarefa BI: Atualizado SOL
+DEBUG 2025-05-19 16:29:13,232 tasks 2621 139813178028736 Tarefa BI: Atualizado Acompanhamento Comercial - OEM
+DEBUG 2025-05-19 16:29:13,238 tasks 2621 139813178028736 Tarefa BI: Atualizado Acompanhamento Comercial RP
+DEBUG 2025-05-19 16:29:13,245 tasks 2621 139813178028736 Tarefa BI: Atualizado COMPRAS
+DEBUG 2025-05-19 16:29:13,249 tasks 2621 139813178028736 Tarefa BI: Atualizado COMPRAS_NOVO
+DEBUG 2025-05-19 16:29:13,257 tasks 2621 139813178028736 Tarefa BI: Atualizado ESTOQUE
+DEBUG 2025-05-19 16:29:13,261 tasks 2621 139813178028736 Tarefa BI: Atualizado ESTRUTURA
+DEBUG 2025-05-19 16:29:13,270 tasks 2621 139813178028736 Tarefa BI: Atualizado INDICADORES GERAL
+DEBUG 2025-05-19 16:29:13,274 tasks 2621 139813178028736 Tarefa BI: Atualizado MODELAGEM_FINANCEIRA
+DEBUG 2025-05-19 16:29:13,281 tasks 2621 139813178028736 Tarefa BI: Atualizado ORDENS_EXCEDENTES
+DEBUG 2025-05-19 16:29:13,286 tasks 2621 139813178028736 Tarefa BI: Atualizado PCP_APONTAMENTO
+DEBUG 2025-05-19 16:29:13,298 tasks 2621 139813178028736 Tarefa BI: Atualizado PEDIDOS_PCP
+DEBUG 2025-05-19 16:29:13,303 tasks 2621 139813178028736 Tarefa BI: Atualizado POLIETILENO
+DEBUG 2025-05-19 16:29:13,307 tasks 2621 139813178028736 Tarefa BI: Atualizado POS VENDAS
+DEBUG 2025-05-19 16:29:13,311 tasks 2621 139813178028736 Tarefa BI: Atualizado PRODUCAO
+DEBUG 2025-05-19 16:29:13,317 tasks 2621 139813178028736 Tarefa BI: Atualizado PROGRAMAÇÃO PCP
+DEBUG 2025-05-19 16:29:13,321 tasks 2621 139813178028736 Tarefa BI: Atualizado RELATORIO ENTRADA LOCAL 3
+DEBUG 2025-05-19 16:29:13,325 tasks 2621 139813178028736 Tarefa BI: Atualizado RELATORIO PCP
+DEBUG 2025-05-19 16:29:13,330 tasks 2621 139813178028736 Tarefa BI: Atualizado REMESSAS_NOVO
+DEBUG 2025-05-19 16:29:13,337 tasks 2621 139813178028736 Tarefa BI: Atualizado SGQ
+DEBUG 2025-05-19 16:29:13,342 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_MANUFATURA
+DEBUG 2025-05-19 16:29:13,346 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_RH
+DEBUG 2025-05-19 16:29:13,349 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_QUALIDADE
+DEBUG 2025-05-19 16:29:13,353 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_TI
+DEBUG 2025-05-19 16:29:13,357 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_GERAL
+DEBUG 2025-05-19 16:29:13,360 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_SUPRIMENTOS
+DEBUG 2025-05-19 16:29:13,379 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP_PCP
+DEBUG 2025-05-19 16:29:13,390 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP_COMERCIAL
+DEBUG 2025-05-19 16:29:13,405 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_RP
+DEBUG 2025-05-19 16:29:13,416 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_OEM
+DEBUG 2025-05-19 16:29:13,423 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_RP
+DEBUG 2025-05-19 16:29:13,434 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_OEM
+DEBUG 2025-05-19 16:29:13,445 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_MARKETING
+DEBUG 2025-05-19 16:29:13,452 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP
+DEBUG 2025-05-19 16:29:13,466 tasks 2621 139813178028736 Tarefa BI: Atualizado TI
+INFO 2025-05-19 16:29:13,467 tasks 2621 139813178028736 Tarefa BI: 40 relatórios sincronizados.
+INFO 2025-05-19 16:29:33,562 utils 2163 140067003692736 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-19 16:32:22,809 tasks 2621 139813178028736 Tarefa BI: começando sincronização.
+DEBUG 2025-05-19 16:32:23,135 tasks 2621 139813178028736 Tarefa BI: Atualizado PRODUÇÃO_NOVO
+DEBUG 2025-05-19 16:32:23,138 tasks 2621 139813178028736 Tarefa BI: Atualizado QUALIDADE
+DEBUG 2025-05-19 16:32:23,141 tasks 2621 139813178028736 Tarefa BI: Atualizado FATURAMENTO MENSAL
+DEBUG 2025-05-19 16:32:23,144 tasks 2621 139813178028736 Tarefa BI: Atualizado PLANO MESTRE
+DEBUG 2025-05-19 16:32:23,148 tasks 2621 139813178028736 Tarefa BI: Atualizado GCC
+DEBUG 2025-05-19 16:32:23,151 tasks 2621 139813178028736 Tarefa BI: Atualizado SOL
+DEBUG 2025-05-19 16:32:23,155 tasks 2621 139813178028736 Tarefa BI: Atualizado Acompanhamento Comercial - OEM
+DEBUG 2025-05-19 16:32:23,158 tasks 2621 139813178028736 Tarefa BI: Atualizado Acompanhamento Comercial RP
+DEBUG 2025-05-19 16:32:23,161 tasks 2621 139813178028736 Tarefa BI: Atualizado COMPRAS
+DEBUG 2025-05-19 16:32:23,164 tasks 2621 139813178028736 Tarefa BI: Atualizado COMPRAS_NOVO
+DEBUG 2025-05-19 16:32:23,168 tasks 2621 139813178028736 Tarefa BI: Atualizado ESTOQUE
+DEBUG 2025-05-19 16:32:23,170 tasks 2621 139813178028736 Tarefa BI: Atualizado ESTRUTURA
+DEBUG 2025-05-19 16:32:23,173 tasks 2621 139813178028736 Tarefa BI: Atualizado INDICADORES GERAL
+DEBUG 2025-05-19 16:32:23,176 tasks 2621 139813178028736 Tarefa BI: Atualizado MODELAGEM_FINANCEIRA
+DEBUG 2025-05-19 16:32:23,178 tasks 2621 139813178028736 Tarefa BI: Atualizado ORDENS_EXCEDENTES
+DEBUG 2025-05-19 16:32:23,180 tasks 2621 139813178028736 Tarefa BI: Atualizado PCP_APONTAMENTO
+DEBUG 2025-05-19 16:32:23,184 tasks 2621 139813178028736 Tarefa BI: Atualizado PEDIDOS_PCP
+DEBUG 2025-05-19 16:32:23,188 tasks 2621 139813178028736 Tarefa BI: Atualizado POLIETILENO
+DEBUG 2025-05-19 16:32:23,190 tasks 2621 139813178028736 Tarefa BI: Atualizado POS VENDAS
+DEBUG 2025-05-19 16:32:23,193 tasks 2621 139813178028736 Tarefa BI: Atualizado PRODUCAO
+DEBUG 2025-05-19 16:32:23,197 tasks 2621 139813178028736 Tarefa BI: Atualizado PROGRAMAÇÃO PCP
+DEBUG 2025-05-19 16:32:23,200 tasks 2621 139813178028736 Tarefa BI: Atualizado RELATORIO ENTRADA LOCAL 3
+DEBUG 2025-05-19 16:32:23,204 tasks 2621 139813178028736 Tarefa BI: Atualizado RELATORIO PCP
+DEBUG 2025-05-19 16:32:23,207 tasks 2621 139813178028736 Tarefa BI: Atualizado REMESSAS_NOVO
+DEBUG 2025-05-19 16:32:23,211 tasks 2621 139813178028736 Tarefa BI: Atualizado SGQ
+DEBUG 2025-05-19 16:32:23,215 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_MANUFATURA
+DEBUG 2025-05-19 16:32:23,218 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_RH
+DEBUG 2025-05-19 16:32:23,221 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_QUALIDADE
+DEBUG 2025-05-19 16:32:23,225 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_TI
+DEBUG 2025-05-19 16:32:23,229 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_GERAL
+DEBUG 2025-05-19 16:32:23,233 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_SUPRIMENTOS
+DEBUG 2025-05-19 16:32:23,236 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP_PCP
+DEBUG 2025-05-19 16:32:23,240 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP_COMERCIAL
+DEBUG 2025-05-19 16:32:23,245 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_RP
+DEBUG 2025-05-19 16:32:23,249 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_OEM
+DEBUG 2025-05-19 16:32:23,252 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_RP
+DEBUG 2025-05-19 16:32:23,256 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_OEM
+DEBUG 2025-05-19 16:32:23,259 tasks 2621 139813178028736 Tarefa BI: Atualizado ORCAMENTOS_MARKETING
+DEBUG 2025-05-19 16:32:23,263 tasks 2621 139813178028736 Tarefa BI: Atualizado S&OP
+DEBUG 2025-05-19 16:32:23,267 tasks 2621 139813178028736 Tarefa BI: Atualizado TI
+INFO 2025-05-19 16:32:23,268 tasks 2621 139813178028736 Tarefa BI: 40 relatórios sincronizados.
+INFO 2025-05-19 16:32:45,669 tasks 3336 140293827142336 Tarefa BI: começando sincronização.
+INFO 2025-05-19 16:32:45,671 utils 3336 140293827142336 PBI-Auth: ROPC inicial (username+password).
+DEBUG 2025-05-19 16:32:46,679 tasks 3336 140293827142336 Tarefa BI: Atualizado PRODUÇÃO_NOVO
+DEBUG 2025-05-19 16:32:46,683 tasks 3336 140293827142336 Tarefa BI: Atualizado QUALIDADE
+DEBUG 2025-05-19 16:32:46,686 tasks 3336 140293827142336 Tarefa BI: Atualizado FATURAMENTO MENSAL
+DEBUG 2025-05-19 16:32:46,689 tasks 3336 140293827142336 Tarefa BI: Atualizado PLANO MESTRE
+DEBUG 2025-05-19 16:32:46,693 tasks 3336 140293827142336 Tarefa BI: Atualizado GCC
+DEBUG 2025-05-19 16:32:46,696 tasks 3336 140293827142336 Tarefa BI: Atualizado SOL
+DEBUG 2025-05-19 16:32:46,700 tasks 3336 140293827142336 Tarefa BI: Atualizado Acompanhamento Comercial - OEM
+DEBUG 2025-05-19 16:32:46,705 tasks 3336 140293827142336 Tarefa BI: Atualizado Acompanhamento Comercial RP
+DEBUG 2025-05-19 16:32:46,708 tasks 3336 140293827142336 Tarefa BI: Atualizado COMPRAS
+DEBUG 2025-05-19 16:32:46,713 tasks 3336 140293827142336 Tarefa BI: Atualizado COMPRAS_NOVO
+DEBUG 2025-05-19 16:32:46,717 tasks 3336 140293827142336 Tarefa BI: Atualizado ESTOQUE
+DEBUG 2025-05-19 16:32:46,721 tasks 3336 140293827142336 Tarefa BI: Atualizado ESTRUTURA
+DEBUG 2025-05-19 16:32:46,724 tasks 3336 140293827142336 Tarefa BI: Atualizado INDICADORES GERAL
+DEBUG 2025-05-19 16:32:46,727 tasks 3336 140293827142336 Tarefa BI: Atualizado MODELAGEM_FINANCEIRA
+DEBUG 2025-05-19 16:32:46,731 tasks 3336 140293827142336 Tarefa BI: Atualizado ORDENS_EXCEDENTES
+DEBUG 2025-05-19 16:32:46,734 tasks 3336 140293827142336 Tarefa BI: Atualizado PCP_APONTAMENTO
+DEBUG 2025-05-19 16:32:46,738 tasks 3336 140293827142336 Tarefa BI: Atualizado PEDIDOS_PCP
+DEBUG 2025-05-19 16:32:46,740 tasks 3336 140293827142336 Tarefa BI: Atualizado POLIETILENO
+DEBUG 2025-05-19 16:32:46,742 tasks 3336 140293827142336 Tarefa BI: Atualizado POS VENDAS
+DEBUG 2025-05-19 16:32:46,746 tasks 3336 140293827142336 Tarefa BI: Atualizado PRODUCAO
+DEBUG 2025-05-19 16:32:46,748 tasks 3336 140293827142336 Tarefa BI: Atualizado PROGRAMAÇÃO PCP
+DEBUG 2025-05-19 16:32:46,751 tasks 3336 140293827142336 Tarefa BI: Atualizado RELATORIO ENTRADA LOCAL 3
+DEBUG 2025-05-19 16:32:46,754 tasks 3336 140293827142336 Tarefa BI: Atualizado RELATORIO PCP
+DEBUG 2025-05-19 16:32:46,758 tasks 3336 140293827142336 Tarefa BI: Atualizado REMESSAS_NOVO
+DEBUG 2025-05-19 16:32:46,764 tasks 3336 140293827142336 Tarefa BI: Atualizado SGQ
+DEBUG 2025-05-19 16:32:46,767 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_MANUFATURA
+DEBUG 2025-05-19 16:32:46,769 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_RH
+DEBUG 2025-05-19 16:32:46,771 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_QUALIDADE
+DEBUG 2025-05-19 16:32:46,774 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_TI
+DEBUG 2025-05-19 16:32:46,777 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_GERAL
+DEBUG 2025-05-19 16:32:46,779 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_SUPRIMENTOS
+DEBUG 2025-05-19 16:32:46,782 tasks 3336 140293827142336 Tarefa BI: Atualizado S&OP_PCP
+DEBUG 2025-05-19 16:32:46,785 tasks 3336 140293827142336 Tarefa BI: Atualizado S&OP_COMERCIAL
+DEBUG 2025-05-19 16:32:46,787 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_RP
+DEBUG 2025-05-19 16:32:46,790 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_OEM
+DEBUG 2025-05-19 16:32:46,793 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_ENGENHARIA_RP
+DEBUG 2025-05-19 16:32:46,796 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_COMERCIAL_OEM
+DEBUG 2025-05-19 16:32:46,799 tasks 3336 140293827142336 Tarefa BI: Atualizado ORCAMENTOS_MARKETING
+DEBUG 2025-05-19 16:32:46,801 tasks 3336 140293827142336 Tarefa BI: Atualizado S&OP
+DEBUG 2025-05-19 16:32:46,804 tasks 3336 140293827142336 Tarefa BI: Atualizado TI
+INFO 2025-05-19 16:32:46,804 tasks 3336 140293827142336 Tarefa BI: 40 relatórios sincronizados.
+WARNING 2025-05-19 16:33:19,899 views 2163 140067003692736 BI: acesso negado – admin → TI
+WARNING 2025-05-19 16:33:44,264 views 2163 140067003692736 BI: acesso negado – admin → TI
+WARNING 2025-05-19 16:33:58,760 views 2163 140066958583488 BI: acesso negado – admin → TI
+WARNING 2025-05-19 16:39:56,643 views 2163 140066958583488 BI: acesso negado – admin → PRODUÇÃO_NOVO
+INFO 2025-05-20 14:52:54,034 utils 1728 139691237864128 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-05-20 14:54:11,004 utils 932 140715382014656 PBI-Auth: ROPC inicial (username+password).

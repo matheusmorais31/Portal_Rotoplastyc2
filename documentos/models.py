@@ -12,9 +12,10 @@ import os
 import shutil
 from django.utils import timezone
 
-# Usa o logger "django" ou, se preferir, altere para "documentos" se desejar unificar os logs
+# Usa o logger "django" ou "documentos"
 logger = logging.getLogger('documentos')
 User = get_user_model()
+
 
 class OverwriteStorage(FileSystemStorage):
     def get_available_name(self, name, max_length=None):
@@ -26,19 +27,24 @@ class OverwriteStorage(FileSystemStorage):
                 logger.error(f"[OverwriteStorage] Falha ao remover o arquivo existente {name}: {e}")
         return name
 
+
 protected_storage = FileSystemStorage(
     location=os.path.join(settings.MEDIA_ROOT),
     base_url=None
 )
 
+
 def documento_upload_path(instance, filename):
     return Path('documentos') / 'editaveis' / filename
+
 
 def pdf_upload_path(instance, filename):
     return Path('documentos') / 'pdf' / filename
 
+
 def spreadsheet_upload_path(instance, filename):
     return Path('documentos') / 'spreadsheet' / filename
+
 
 class Categoria(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -49,6 +55,7 @@ class Categoria(models.Model):
 
     def __str__(self):
         return self.nome
+
 
 class Documento(models.Model):
     DOCUMENT_TYPE_CHOICES = [
@@ -124,6 +131,11 @@ class Documento(models.Model):
         help_text='Tipo do documento: PDF ou Planilha.'
     )
 
+    text_content = models.TextField(
+        blank=True, editable=False,
+        help_text="Texto extraído automaticamente para busca IA")
+
+
     class Meta:
         default_permissions = ()
         permissions = [
@@ -145,7 +157,6 @@ class Documento(models.Model):
             ('add_categoria', 'Adicionar Categoria'),
             ('change_categoria', 'Editar Categoria'),
             ('delete_categoria', 'Deletar Categoria'),
-
         ]
 
     def __str__(self):
@@ -283,6 +294,7 @@ class Documento(models.Model):
             logger.error(f"[gerar_pdf] Erro ao gerar ou salvar o documento_pdf: {e}", exc_info=True)
             raise
 
+
 class Acesso(models.Model):
     documento = models.ForeignKey(Documento, on_delete=models.CASCADE)
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -291,10 +303,11 @@ class Acesso(models.Model):
     def __str__(self):
         return f"{self.usuario.username} - {self.documento.nome}"
 
+
 class DocumentoDeletado(models.Model):
     usuario = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name="documentos_deletados"
     )
     documento_nome = models.CharField(max_length=200)
