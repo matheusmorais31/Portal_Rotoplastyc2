@@ -1,0 +1,308 @@
+DEBUG 2025-05-23 16:21:43,749 views 3946 139881534715584 === nova_revisao start ===
+DEBUG 2025-05-23 16:21:43,750 views 3946 139881534715584 Parâmetros: documento_id=315, user=matheus.oliveira
+DEBUG 2025-05-23 16:21:43,752 views 3946 139881534715584 Documento atual: id=315, nome='DS06 - Plano de Inspeção de Recebimento', revisao=12, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:21:43,755 views 3946 139881534715584 Método GET: exibindo formulário
+DEBUG 2025-05-23 16:21:43,768 views 3946 139881534715584 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 16:21:55,200 views 3946 139881534715584 === nova_revisao start ===
+DEBUG 2025-05-23 16:21:55,200 views 3946 139881534715584 Parâmetros: documento_id=315, user=matheus.oliveira
+DEBUG 2025-05-23 16:21:55,202 views 3946 139881534715584 Documento atual: id=315, nome='DS06 - Plano de Inspeção de Recebimento', revisao=12, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:21:55,205 views 3946 139881534715584 Recebido POST para nova revisão
+DEBUG 2025-05-23 16:21:55,206 views 3946 139881534715584 POST data: <QueryDict: {'csrfmiddlewaretoken': ['rCCVNn51MXPfsOH2KNtG5vu8r2q03b9gkuNfNH0gTsnxxjGMFoWkXENW3YEM0tZY'], 'nome': ['DS06 - Plano de Inspeção de Recebimento - RYPRO'], 'revisao': ['13'], 'aprovador1': ['42']}>
+DEBUG 2025-05-23 16:21:55,206 views 3946 139881534715584 FILES data: <MultiValueDict: {'documento': [<InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>]}>
+DEBUG 2025-05-23 16:21:55,212 views 3946 139881534715584 Form instanciado: <NovaRevisaoForm bound=True, valid=Unknown, fields=(nome;revisao;aprovador1;documento)>
+DEBUG 2025-05-23 16:21:55,217 views 3946 139881534715584 Form validado, cleaned_data: {'nome': 'DS06 - Plano de Inspeção de Recebimento - RYPRO', 'revisao': 13, 'aprovador1': <Usuario: matheus.oliveira>, 'documento': <InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>}
+DEBUG 2025-05-23 16:21:55,222 views 3946 139881534715584 Rename sinalizado: 'DS06 - Plano de Inspeção de Recebimento' → 'DS06 - Plano de Inspeção de Recebimento - RYPRO'
+DEBUG 2025-05-23 16:21:55,227 views 3946 139881534715584 Excluindo revisões reprovadas duplicadas: [619]
+DEBUG 2025-05-23 16:21:55,241 views 3946 139881534715584 Salvando nova revisão: nome='DS06 - Plano de Inspeção de Recebimento - RYPRO' revisao=13 codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c categoria=Documento de Sistema
+INFO 2025-05-23 16:21:55,350 views 3946 139881534715584 Nova revisão ID=622 salva com sucesso
+WARNING 2025-05-23 16:21:55,350 views 3946 139881534715584 Falha ao gerar PDF ID=622: The 'documento_pdf' attribute has no file associated with it.
+DEBUG 2025-05-23 16:21:55,350 views 3946 139881534715584 === nova_revisao end (sucesso) ===
+ERROR 2025-05-23 16:22:12,106 views 3946 139881534715584 Erro ao aprovar análise do documento 622: The 'documento_pdf' attribute has no file associated with it.
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/documentos/views.py", line 150, in listar_documentos_para_analise
+    documento.gerar_pdf()
+  File "/opt/Portal_Rotoplastyc/documentos/models.py", line 202, in gerar_pdf
+    return self.documento_pdf.path
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/django/db/models/fields/files.py", line 64, in path
+    self._require_file()
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/django/db/models/fields/files.py", line 44, in _require_file
+    raise ValueError(
+ValueError: The 'documento_pdf' attribute has no file associated with it.
+DEBUG 2025-05-23 16:26:54,997 views 4265 140132000724672 Aprovando análise do documento 622 …
+INFO 2025-05-23 16:26:55,082 views 4265 140132000724672 Documento 622 marcado como aguardando_elaborador
+WARNING 2025-05-23 16:26:55,083 views 4265 140132000724672 gerar_pdf pulou para 622: The 'documento_pdf' attribute has no file associated with it.
+DEBUG 2025-05-23 16:27:02,822 views 4265 140132000724672 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento - RYPRO
+DEBUG 2025-05-23 16:27:09,178 views 4265 140132000724672 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento - RYPRO
+DEBUG 2025-05-23 16:27:21,027 views 4265 140132000724672 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento - RYPRO
+DEBUG 2025-05-23 16:31:50,007 views 4489 139704249874112 Aprovando análise do documento 618 …
+INFO 2025-05-23 16:31:50,073 views 4489 139704249874112 Documento 618 marcado como aguardando_elaborador
+DEBUG 2025-05-23 16:31:50,073 models 4489 139704249874112 [gerar_pdf] Iniciando processo para o documento 'Teste' (ID: 618) com tipo 'pdf'.
+DEBUG 2025-05-23 16:31:50,073 models 4489 139704249874112 [gerar_pdf] Nenhum PDF manual encontrado, prosseguindo com a conversão automática.
+DEBUG 2025-05-23 16:31:50,074 models 4489 139704249874112 [gerar_pdf] Iniciando conversão automática para PDF.
+DEBUG 2025-05-23 16:31:50,074 models 4489 139704249874112 [gerar_pdf] Caminho do documento editável: /opt/Portal_Rotoplastyc/media/documentos/editaveis/IT1202_-Assistência_Tecnica_e_Garantia_RP_lk4WENF.odt.odt
+DEBUG 2025-05-23 16:31:50,074 models 4489 139704249874112 [gerar_pdf] Caminho do LibreOffice: /usr/bin/soffice
+DEBUG 2025-05-23 16:31:50,074 models 4489 139704249874112 [gerar_pdf] PATH para subprocesso: /usr/bin:/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/cli/servers/Stable-848b80aeb52026648a8ff9f7c45a9b0a80641e2e/server/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+DEBUG 2025-05-23 16:31:50,075 models 4489 139704249874112 [gerar_pdf] Executando comando: /usr/bin/soffice --headless --convert-to pdf --outdir /tmp/tmpjmgb0qlb /opt/Portal_Rotoplastyc/media/documentos/editaveis/IT1202_-Assistência_Tecnica_e_Garantia_RP_lk4WENF.odt.odt
+DEBUG 2025-05-23 16:31:53,793 models 4489 139704249874112 [gerar_pdf] Retorno do subprocess: 0
+DEBUG 2025-05-23 16:31:53,793 models 4489 139704249874112 [gerar_pdf] STDOUT: convert /opt/Portal_Rotoplastyc/media/documentos/editaveis/IT1202_-Assistência_Tecnica_e_Garantia_RP_lk4WENF.odt.odt -> /tmp/tmpjmgb0qlb/IT1202_-Assistência_Tecnica_e_Garantia_RP_lk4WENF.odt.pdf using filter : writer_pdf_Export
+
+DEBUG 2025-05-23 16:31:53,794 models 4489 139704249874112 [gerar_pdf] STDERR: 
+DEBUG 2025-05-23 16:31:53,794 models 4489 139704249874112 [gerar_pdf] PDF gerado com sucesso.
+DEBUG 2025-05-23 16:31:53,794 models 4489 139704249874112 [gerar_pdf] Caminho desejado para o PDF: /opt/Portal_Rotoplastyc/media/documentos/pdf/teste_v0.pdf
+DEBUG 2025-05-23 16:31:53,794 models 4489 139704249874112 [gerar_pdf] Diretório criado ou já existente: /opt/Portal_Rotoplastyc/media/documentos/pdf
+DEBUG 2025-05-23 16:31:53,795 models 4489 139704249874112 [gerar_pdf] PDF movido para: /opt/Portal_Rotoplastyc/media/documentos/pdf/teste_v0.pdf
+DEBUG 2025-05-23 16:31:53,795 models 4489 139704249874112 [gerar_pdf] Caminho salvo no campo documento_pdf: documentos/pdf/teste_v0.pdf
+INFO 2025-05-23 16:31:53,799 models 4489 139704249874112 [gerar_pdf] PDF atualizado e salvo no campo documento_pdf: /opt/Portal_Rotoplastyc/media/documentos/pdf/teste_v0.pdf
+DEBUG 2025-05-23 16:31:53,803 views 4489 139704249874112 PDF gerado com sucesso para 618: /opt/Portal_Rotoplastyc/media/documentos/pdf/teste_v0.pdf
+DEBUG 2025-05-23 16:31:57,304 views 4489 139704249874112 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento Teste
+DEBUG 2025-05-23 16:32:08,655 views 4489 139704249874112 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento
+DEBUG 2025-05-23 16:32:26,937 views 4489 139704249874112 === nova_revisao start ===
+DEBUG 2025-05-23 16:32:26,938 views 4489 139704249874112 Parâmetros: documento_id=315, user=matheus.oliveira
+DEBUG 2025-05-23 16:32:26,939 views 4489 139704249874112 Documento atual: id=315, nome='DS06 - Plano de Inspeção de Recebimento', revisao=12, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:32:26,940 views 4489 139704249874112 Método GET: exibindo formulário
+DEBUG 2025-05-23 16:32:26,945 views 4489 139704249874112 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 16:32:38,372 views 4489 139704249874112 === nova_revisao start ===
+DEBUG 2025-05-23 16:32:38,373 views 4489 139704249874112 Parâmetros: documento_id=315, user=matheus.oliveira
+DEBUG 2025-05-23 16:32:38,375 views 4489 139704249874112 Documento atual: id=315, nome='DS06 - Plano de Inspeção de Recebimento', revisao=12, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:32:38,376 views 4489 139704249874112 Recebido POST para nova revisão
+DEBUG 2025-05-23 16:32:38,377 views 4489 139704249874112 POST data: <QueryDict: {'csrfmiddlewaretoken': ['efJrnPHpWukoYoyWJZfl2ZnId4yacSAP77ULn9CE3ZSG3TxGEAIZU8GwP0MW9aqx'], 'nome': ['DS06 - Plano de Inspeção de Recebimento - RYPRO'], 'revisao': ['13'], 'aprovador1': ['42']}>
+DEBUG 2025-05-23 16:32:38,377 views 4489 139704249874112 FILES data: <MultiValueDict: {'documento': [<InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>]}>
+DEBUG 2025-05-23 16:32:38,379 views 4489 139704249874112 Form instanciado: <NovaRevisaoForm bound=True, valid=Unknown, fields=(nome;revisao;aprovador1;documento)>
+DEBUG 2025-05-23 16:32:38,382 views 4489 139704249874112 Form validado, cleaned_data: {'nome': 'DS06 - Plano de Inspeção de Recebimento - RYPRO', 'revisao': 13, 'aprovador1': <Usuario: matheus.oliveira>, 'documento': <InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>}
+DEBUG 2025-05-23 16:32:38,386 views 4489 139704249874112 Rename sinalizado: 'DS06 - Plano de Inspeção de Recebimento' → 'DS06 - Plano de Inspeção de Recebimento - RYPRO'
+DEBUG 2025-05-23 16:32:38,388 views 4489 139704249874112 Excluindo revisões reprovadas duplicadas: [622]
+DEBUG 2025-05-23 16:32:38,394 views 4489 139704249874112 Salvando nova revisão: nome='DS06 - Plano de Inspeção de Recebimento - RYPRO' revisao=13 codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c categoria=Documento de Sistema
+INFO 2025-05-23 16:32:38,415 views 4489 139704249874112 Nova revisão ID=623 salva com sucesso
+DEBUG 2025-05-23 16:32:38,415 models 4489 139704249874112 [gerar_pdf] Iniciando processo para o documento 'DS06 - Plano de Inspeção de Recebimento - RYPRO' (ID: 623) com tipo 'pdf'.
+DEBUG 2025-05-23 16:32:38,416 models 4489 139704249874112 [gerar_pdf] Nenhum PDF manual encontrado, prosseguindo com a conversão automática.
+DEBUG 2025-05-23 16:32:38,416 models 4489 139704249874112 [gerar_pdf] Iniciando conversão automática para PDF.
+DEBUG 2025-05-23 16:32:38,416 models 4489 139704249874112 [gerar_pdf] Caminho do documento editável: /opt/Portal_Rotoplastyc/media/documentos/editaveis/IT1202_-Assistência_Tecnica_e_Garantia_RP_WTjGr9D.odt.odt
+DEBUG 2025-05-23 16:32:38,416 models 4489 139704249874112 [gerar_pdf] Caminho do LibreOffice: /usr/bin/soffice
+DEBUG 2025-05-23 16:32:38,416 models 4489 139704249874112 [gerar_pdf] PATH para subprocesso: /usr/bin:/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/cli/servers/Stable-848b80aeb52026648a8ff9f7c45a9b0a80641e2e/server/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+DEBUG 2025-05-23 16:32:38,417 models 4489 139704249874112 [gerar_pdf] Executando comando: /usr/bin/soffice --headless --convert-to pdf --outdir /tmp/tmph76e4cjr /opt/Portal_Rotoplastyc/media/documentos/editaveis/IT1202_-Assistência_Tecnica_e_Garantia_RP_WTjGr9D.odt.odt
+DEBUG 2025-05-23 16:32:39,799 models 4489 139704249874112 [gerar_pdf] Retorno do subprocess: 0
+DEBUG 2025-05-23 16:32:39,800 models 4489 139704249874112 [gerar_pdf] STDOUT: convert /opt/Portal_Rotoplastyc/media/documentos/editaveis/IT1202_-Assistência_Tecnica_e_Garantia_RP_WTjGr9D.odt.odt -> /tmp/tmph76e4cjr/IT1202_-Assistência_Tecnica_e_Garantia_RP_WTjGr9D.odt.pdf using filter : writer_pdf_Export
+
+DEBUG 2025-05-23 16:32:39,800 models 4489 139704249874112 [gerar_pdf] STDERR: 
+DEBUG 2025-05-23 16:32:39,800 models 4489 139704249874112 [gerar_pdf] PDF gerado com sucesso.
+DEBUG 2025-05-23 16:32:39,801 models 4489 139704249874112 [gerar_pdf] Caminho desejado para o PDF: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro_v13.pdf
+DEBUG 2025-05-23 16:32:39,801 models 4489 139704249874112 [gerar_pdf] Diretório criado ou já existente: /opt/Portal_Rotoplastyc/media/documentos/pdf
+DEBUG 2025-05-23 16:32:39,802 models 4489 139704249874112 [gerar_pdf] PDF movido para: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro_v13.pdf
+DEBUG 2025-05-23 16:32:39,802 models 4489 139704249874112 [gerar_pdf] Caminho salvo no campo documento_pdf: documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro_v13.pdf
+INFO 2025-05-23 16:32:39,805 models 4489 139704249874112 [gerar_pdf] PDF atualizado e salvo no campo documento_pdf: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro_v13.pdf
+DEBUG 2025-05-23 16:32:39,805 views 4489 139704249874112 gerar_pdf() executado para ID=623
+DEBUG 2025-05-23 16:32:39,806 views 4489 139704249874112 === nova_revisao end (sucesso) ===
+DEBUG 2025-05-23 16:32:47,660 views 4489 139704249874112 Aprovando análise do documento 623 …
+INFO 2025-05-23 16:32:47,674 views 4489 139704249874112 Documento 623 marcado como aguardando_elaborador
+DEBUG 2025-05-23 16:32:47,675 models 4489 139704249874112 [gerar_pdf] Iniciando processo para o documento 'DS06 - Plano de Inspeção de Recebimento - RYPRO' (ID: 623) com tipo 'pdf'.
+INFO 2025-05-23 16:32:47,675 models 4489 139704249874112 [gerar_pdf] PDF manual encontrado em: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro_v13.pdf. Geração automática ignorada.
+DEBUG 2025-05-23 16:32:47,677 views 4489 139704249874112 PDF gerado com sucesso para 623: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro_v13.pdf
+DEBUG 2025-05-23 16:32:52,998 views 4489 139704249874112 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento - RYPRO
+DEBUG 2025-05-23 16:33:24,502 models 4489 139704249874112 [gerar_pdf] Iniciando processo para o documento 'DS06 - Plano de Inspeção de Recebimento - RYPRO' (ID: 623) com tipo 'pdf'.
+INFO 2025-05-23 16:33:24,503 models 4489 139704249874112 [gerar_pdf] PDF manual encontrado em: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro_v13.pdf. Geração automática ignorada.
+DEBUG 2025-05-23 16:39:04,255 views 5256 140368879285952 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento - RYPRO
+DEBUG 2025-05-23 16:39:07,464 views 5256 140368879285952 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento
+DEBUG 2025-05-23 16:40:01,609 views 5256 140368879285952 === nova_revisao start ===
+DEBUG 2025-05-23 16:40:01,610 views 5256 140368879285952 Parâmetros: documento_id=623, user=joao.silva
+DEBUG 2025-05-23 16:40:01,611 views 5256 140368879285952 Documento atual: id=623, nome='DS06 - Plano de Inspeção de Recebimento - RYPRO', revisao=13, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:40:01,613 views 5256 140368879285952 Método GET: exibindo formulário
+DEBUG 2025-05-23 16:40:01,617 views 5256 140368879285952 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 16:43:38,378 views 5256 140368879285952 === nova_revisao start ===
+DEBUG 2025-05-23 16:43:38,379 views 5256 140368879285952 Parâmetros: documento_id=623, user=matheus.oliveira
+DEBUG 2025-05-23 16:43:38,381 views 5256 140368879285952 Documento atual: id=623, nome='DS06 - Plano de Inspeção de Recebimento - RYPRO', revisao=13, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:43:38,382 views 5256 140368879285952 Método GET: exibindo formulário
+DEBUG 2025-05-23 16:43:38,384 views 5256 140368879285952 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 16:43:50,436 views 5256 140368879285952 === nova_revisao start ===
+DEBUG 2025-05-23 16:43:50,437 views 5256 140368879285952 Parâmetros: documento_id=623, user=matheus.oliveira
+DEBUG 2025-05-23 16:43:50,440 views 5256 140368879285952 Documento atual: id=623, nome='DS06 - Plano de Inspeção de Recebimento - RYPRO', revisao=13, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:43:50,444 views 5256 140368879285952 Recebido POST para nova revisão
+DEBUG 2025-05-23 16:43:50,445 views 5256 140368879285952 POST data: <QueryDict: {'csrfmiddlewaretoken': ['en7N54levdpkFxeemaFJBtlUMy4SiENN7fi75ogtCIXCK2dYhL8ntCEIouiEfWDv'], 'nome': ['DS06 - Plano de Inspeção de Recebimento - RYPRO 2'], 'revisao': ['14'], 'aprovador1': ['42']}>
+DEBUG 2025-05-23 16:43:50,445 views 5256 140368879285952 FILES data: <MultiValueDict: {'documento': [<InMemoryUploadedFile: RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção.xlsx (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)>]}>
+DEBUG 2025-05-23 16:43:50,450 views 5256 140368879285952 Form instanciado: <NovaRevisaoForm bound=True, valid=Unknown, fields=(nome;revisao;aprovador1;documento)>
+DEBUG 2025-05-23 16:43:50,456 views 5256 140368879285952 Form validado, cleaned_data: {'nome': 'DS06 - Plano de Inspeção de Recebimento - RYPRO 2', 'revisao': 14, 'aprovador1': <Usuario: matheus.oliveira>, 'documento': <InMemoryUploadedFile: RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção.xlsx (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)>}
+DEBUG 2025-05-23 16:43:50,465 views 5256 140368879285952 Rename sinalizado: 'DS06 - Plano de Inspeção de Recebimento - RYPRO' → 'DS06 - Plano de Inspeção de Recebimento - RYPRO 2'
+DEBUG 2025-05-23 16:43:50,469 views 5256 140368879285952 Salvando nova revisão: nome='DS06 - Plano de Inspeção de Recebimento - RYPRO 2' revisao=14 codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c categoria=Documento de Sistema
+INFO 2025-05-23 16:43:50,672 views 5256 140368879285952 Nova revisão ID=624 salva com sucesso
+DEBUG 2025-05-23 16:43:50,673 models 5256 140368879285952 [gerar_pdf] Iniciando processo para o documento 'DS06 - Plano de Inspeção de Recebimento - RYPRO 2' (ID: 624) com tipo 'pdf'.
+DEBUG 2025-05-23 16:43:50,673 models 5256 140368879285952 [gerar_pdf] Nenhum PDF manual encontrado, prosseguindo com a conversão automática.
+DEBUG 2025-05-23 16:43:50,674 models 5256 140368879285952 [gerar_pdf] Iniciando conversão automática para PDF.
+DEBUG 2025-05-23 16:43:50,674 models 5256 140368879285952 [gerar_pdf] Caminho do documento editável: /opt/Portal_Rotoplastyc/media/documentos/editaveis/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_oee5hag.xlsx
+DEBUG 2025-05-23 16:43:50,675 models 5256 140368879285952 [gerar_pdf] Caminho do LibreOffice: /usr/bin/soffice
+DEBUG 2025-05-23 16:43:50,683 models 5256 140368879285952 [gerar_pdf] PATH para subprocesso: /usr/bin:/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/cli/servers/Stable-848b80aeb52026648a8ff9f7c45a9b0a80641e2e/server/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+DEBUG 2025-05-23 16:43:50,684 models 5256 140368879285952 [gerar_pdf] Executando comando: /usr/bin/soffice --headless --convert-to pdf --outdir /tmp/tmpa5vrjvgc /opt/Portal_Rotoplastyc/media/documentos/editaveis/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_oee5hag.xlsx
+DEBUG 2025-05-23 16:43:57,169 models 5256 140368879285952 [gerar_pdf] Retorno do subprocess: 0
+DEBUG 2025-05-23 16:43:57,170 models 5256 140368879285952 [gerar_pdf] STDOUT: convert /opt/Portal_Rotoplastyc/media/documentos/editaveis/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_oee5hag.xlsx -> /tmp/tmpa5vrjvgc/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_oee5hag.pdf using filter : calc_pdf_Export
+
+DEBUG 2025-05-23 16:43:57,170 models 5256 140368879285952 [gerar_pdf] STDERR: 
+DEBUG 2025-05-23 16:43:57,170 models 5256 140368879285952 [gerar_pdf] PDF gerado com sucesso.
+DEBUG 2025-05-23 16:43:57,171 models 5256 140368879285952 [gerar_pdf] Caminho desejado para o PDF: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v14.pdf
+DEBUG 2025-05-23 16:43:57,171 models 5256 140368879285952 [gerar_pdf] Diretório criado ou já existente: /opt/Portal_Rotoplastyc/media/documentos/pdf
+DEBUG 2025-05-23 16:43:57,172 models 5256 140368879285952 [gerar_pdf] PDF movido para: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v14.pdf
+DEBUG 2025-05-23 16:43:57,172 models 5256 140368879285952 [gerar_pdf] Caminho salvo no campo documento_pdf: documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v14.pdf
+INFO 2025-05-23 16:43:57,176 models 5256 140368879285952 [gerar_pdf] PDF atualizado e salvo no campo documento_pdf: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v14.pdf
+DEBUG 2025-05-23 16:43:57,177 views 5256 140368879285952 gerar_pdf() executado para ID=624
+DEBUG 2025-05-23 16:43:57,177 views 5256 140368879285952 === nova_revisao end (sucesso) ===
+DEBUG 2025-05-23 16:44:11,908 views 5256 140368879285952 Aprovando análise do documento 624 …
+INFO 2025-05-23 16:44:11,923 views 5256 140368879285952 Documento 624 marcado como aguardando_elaborador
+DEBUG 2025-05-23 16:44:11,923 models 5256 140368879285952 [gerar_pdf] Iniciando processo para o documento 'DS06 - Plano de Inspeção de Recebimento - RYPRO 2' (ID: 624) com tipo 'pdf'.
+INFO 2025-05-23 16:44:11,924 models 5256 140368879285952 [gerar_pdf] PDF manual encontrado em: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v14.pdf. Geração automática ignorada.
+DEBUG 2025-05-23 16:44:11,926 views 5256 140368879285952 PDF gerado com sucesso para 624: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v14.pdf
+DEBUG 2025-05-23 16:44:18,419 models 5256 140368879285952 [gerar_pdf] Iniciando processo para o documento 'DS06 - Plano de Inspeção de Recebimento - RYPRO 2' (ID: 624) com tipo 'pdf'.
+INFO 2025-05-23 16:44:18,420 models 5256 140368879285952 [gerar_pdf] PDF manual encontrado em: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v14.pdf. Geração automática ignorada.
+DEBUG 2025-05-23 16:44:52,742 views 5256 140368879285952 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS06 - Plano de Inspeção de Recebimento - RYPRO 2
+DEBUG 2025-05-23 16:47:53,825 views 5256 140368879285952 === nova_revisao start ===
+DEBUG 2025-05-23 16:47:53,826 views 5256 140368879285952 Parâmetros: documento_id=624, user=matheus.oliveira
+DEBUG 2025-05-23 16:47:53,828 views 5256 140368879285952 Documento atual: id=624, nome='DS06 - Plano de Inspeção de Recebimento - RYPRO 2', revisao=14, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:47:53,830 views 5256 140368879285952 Método GET: exibindo formulário
+DEBUG 2025-05-23 16:47:53,835 views 5256 140368879285952 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 16:48:04,758 views 5256 140368879285952 === nova_revisao start ===
+DEBUG 2025-05-23 16:48:04,758 views 5256 140368879285952 Parâmetros: documento_id=624, user=matheus.oliveira
+DEBUG 2025-05-23 16:48:04,760 views 5256 140368879285952 Documento atual: id=624, nome='DS06 - Plano de Inspeção de Recebimento - RYPRO 2', revisao=14, codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c
+DEBUG 2025-05-23 16:48:04,761 views 5256 140368879285952 Recebido POST para nova revisão
+DEBUG 2025-05-23 16:48:04,761 views 5256 140368879285952 POST data: <QueryDict: {'csrfmiddlewaretoken': ['sCEjtsro9T0YEtaIAdI8DyQimZGTKnWPluPDtMmDgoygJY9svObMvH96YVUFHFMx'], 'nome': ['DS06 - Plano de Inspeção de Recebimento - RYPRO 2'], 'revisao': ['15'], 'aprovador1': ['42']}>
+DEBUG 2025-05-23 16:48:04,761 views 5256 140368879285952 FILES data: <MultiValueDict: {'documento': [<InMemoryUploadedFile: RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção.xlsx (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)>]}>
+DEBUG 2025-05-23 16:48:04,768 views 5256 140368879285952 Form instanciado: <NovaRevisaoForm bound=True, valid=Unknown, fields=(nome;revisao;aprovador1;documento)>
+DEBUG 2025-05-23 16:48:04,775 views 5256 140368879285952 Form validado, cleaned_data: {'nome': 'DS06 - Plano de Inspeção de Recebimento - RYPRO 2', 'revisao': 15, 'aprovador1': <Usuario: matheus.oliveira>, 'documento': <InMemoryUploadedFile: RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção.xlsx (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)>}
+DEBUG 2025-05-23 16:48:04,780 views 5256 140368879285952 Salvando nova revisão: nome='DS06 - Plano de Inspeção de Recebimento - RYPRO 2' revisao=15 codigo=1ec0aa28-8f01-4534-80fd-f2c2e870f64c categoria=Documento de Sistema
+INFO 2025-05-23 16:48:04,804 views 5256 140368879285952 Nova revisão ID=625 salva com sucesso
+DEBUG 2025-05-23 16:48:04,804 models 5256 140368879285952 [gerar_pdf] Iniciando processo para o documento 'DS06 - Plano de Inspeção de Recebimento - RYPRO 2' (ID: 625) com tipo 'pdf'.
+DEBUG 2025-05-23 16:48:04,804 models 5256 140368879285952 [gerar_pdf] Nenhum PDF manual encontrado, prosseguindo com a conversão automática.
+DEBUG 2025-05-23 16:48:04,805 models 5256 140368879285952 [gerar_pdf] Iniciando conversão automática para PDF.
+DEBUG 2025-05-23 16:48:04,805 models 5256 140368879285952 [gerar_pdf] Caminho do documento editável: /opt/Portal_Rotoplastyc/media/documentos/editaveis/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_XUCBJKT.xlsx
+DEBUG 2025-05-23 16:48:04,805 models 5256 140368879285952 [gerar_pdf] Caminho do LibreOffice: /usr/bin/soffice
+DEBUG 2025-05-23 16:48:04,806 models 5256 140368879285952 [gerar_pdf] PATH para subprocesso: /usr/bin:/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/extensions/ms-python.python-2025.6.1-linux-x64/python_files/deactivate/bash:/opt/Portal_Rotoplastyc/venv/bin:/root/.vscode-server/cli/servers/Stable-848b80aeb52026648a8ff9f7c45a9b0a80641e2e/server/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+DEBUG 2025-05-23 16:48:04,806 models 5256 140368879285952 [gerar_pdf] Executando comando: /usr/bin/soffice --headless --convert-to pdf --outdir /tmp/tmp9xkijt2c /opt/Portal_Rotoplastyc/media/documentos/editaveis/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_XUCBJKT.xlsx
+DEBUG 2025-05-23 16:48:08,068 models 5256 140368879285952 [gerar_pdf] Retorno do subprocess: 0
+DEBUG 2025-05-23 16:48:08,069 models 5256 140368879285952 [gerar_pdf] STDOUT: convert /opt/Portal_Rotoplastyc/media/documentos/editaveis/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_XUCBJKT.xlsx -> /tmp/tmp9xkijt2c/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_XUCBJKT.pdf using filter : calc_pdf_Export
+
+DEBUG 2025-05-23 16:48:08,069 models 5256 140368879285952 [gerar_pdf] STDERR: 
+DEBUG 2025-05-23 16:48:08,070 models 5256 140368879285952 [gerar_pdf] PDF gerado com sucesso.
+DEBUG 2025-05-23 16:48:08,070 models 5256 140368879285952 [gerar_pdf] Caminho desejado para o PDF: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v15.pdf
+DEBUG 2025-05-23 16:48:08,070 models 5256 140368879285952 [gerar_pdf] Diretório criado ou já existente: /opt/Portal_Rotoplastyc/media/documentos/pdf
+DEBUG 2025-05-23 16:48:08,070 models 5256 140368879285952 [gerar_pdf] PDF movido para: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v15.pdf
+DEBUG 2025-05-23 16:48:08,071 models 5256 140368879285952 [gerar_pdf] Caminho salvo no campo documento_pdf: documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v15.pdf
+INFO 2025-05-23 16:48:08,075 models 5256 140368879285952 [gerar_pdf] PDF atualizado e salvo no campo documento_pdf: /opt/Portal_Rotoplastyc/media/documentos/pdf/ds06-plano-de-inspecao-de-recebimento-rypro-2_v15.pdf
+DEBUG 2025-05-23 16:48:08,075 views 5256 140368879285952 gerar_pdf() executado para ID=625
+DEBUG 2025-05-23 16:48:08,076 views 5256 140368879285952 === nova_revisao end (sucesso) ===
+DEBUG 2025-05-23 16:57:32,467 models 8963 139689416718016 [save] Documento 'teste2' (id=None)
+DEBUG 2025-05-23 16:57:48,160 views 8963 139689416718016 === nova_revisao start ===
+DEBUG 2025-05-23 16:57:48,161 views 8963 139689416718016 Parâmetros: documento_id=384, user=matheus.oliveira
+DEBUG 2025-05-23 16:57:48,162 views 8963 139689416718016 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ee9a0147-b001-433f-8b8a-4f3816aeb687
+DEBUG 2025-05-23 16:57:48,164 views 8963 139689416718016 Método GET: exibindo formulário
+DEBUG 2025-05-23 16:57:48,167 views 8963 139689416718016 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 16:58:02,874 views 8963 139689416718016 === nova_revisao start ===
+DEBUG 2025-05-23 16:58:02,875 views 8963 139689416718016 Parâmetros: documento_id=384, user=matheus.oliveira
+DEBUG 2025-05-23 16:58:02,877 views 8963 139689416718016 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ee9a0147-b001-433f-8b8a-4f3816aeb687
+DEBUG 2025-05-23 16:58:02,879 views 8963 139689416718016 Recebido POST para nova revisão
+DEBUG 2025-05-23 16:58:02,880 views 8963 139689416718016 POST data: <QueryDict: {'csrfmiddlewaretoken': ['lCIrt6yyVy1dvOJMlDft4C990Rl315j4euTLtqtN23zvAjIwgeI7WLsXCNzPYn9M'], 'nome': ['DS08 - Definições de Cadastro de Produto - TESTE'], 'revisao': ['9'], 'aprovador1': ['42']}>
+DEBUG 2025-05-23 16:58:02,881 views 8963 139689416718016 FILES data: <MultiValueDict: {'documento': [<InMemoryUploadedFile: RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção.xlsx (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)>]}>
+DEBUG 2025-05-23 16:58:02,884 views 8963 139689416718016 Form instanciado: <NovaRevisaoForm bound=True, valid=Unknown, fields=(nome;revisao;aprovador1;documento)>
+DEBUG 2025-05-23 16:58:02,889 views 8963 139689416718016 Form validado, cleaned_data: {'nome': 'DS08 - Definições de Cadastro de Produto - TESTE', 'revisao': 9, 'aprovador1': <Usuario: matheus.oliveira>, 'documento': <InMemoryUploadedFile: RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção.xlsx (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)>}
+DEBUG 2025-05-23 16:58:02,894 views 8963 139689416718016 Rename sinalizado: 'DS08 - Definições de Cadastro de Produto' → 'DS08 - Definições de Cadastro de Produto - TESTE'
+DEBUG 2025-05-23 16:58:02,896 views 8963 139689416718016 Salvando nova revisão: nome='DS08 - Definições de Cadastro de Produto - TESTE' revisao=9 codigo=ee9a0147-b001-433f-8b8a-4f3816aeb687 categoria=Documento de Sistema
+DEBUG 2025-05-23 16:58:02,897 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=None)
+INFO 2025-05-23 16:58:02,920 views 8963 139689416718016 Nova revisão ID=628 salva com sucesso
+DEBUG 2025-05-23 16:58:02,920 models 8963 139689416718016 [gerar_pdf] Iniciando para 'DS08 - Definições de Cadastro de Produto - TESTE' (tipo=spreadsheet)
+DEBUG 2025-05-23 16:58:02,922 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=628)
+DEBUG 2025-05-23 16:58:02,925 views 8963 139689416718016 gerar_pdf() executado para ID=628
+DEBUG 2025-05-23 16:58:02,926 views 8963 139689416718016 === nova_revisao end (sucesso) ===
+DEBUG 2025-05-23 16:58:09,042 views 8963 139689416718016 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS08 - Definições de Cadastro de Produto - TESTE
+DEBUG 2025-05-23 16:58:20,991 views 8963 139689416718016 Aprovando análise do documento 628 …
+DEBUG 2025-05-23 16:58:20,992 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=628)
+INFO 2025-05-23 16:58:21,005 views 8963 139689416718016 Documento 628 marcado como aguardando_elaborador
+DEBUG 2025-05-23 16:58:21,006 models 8963 139689416718016 [gerar_pdf] Iniciando para 'DS08 - Definições de Cadastro de Produto - TESTE' (tipo=spreadsheet)
+DEBUG 2025-05-23 16:58:21,008 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=628)
+DEBUG 2025-05-23 16:58:21,011 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=628)
+DEBUG 2025-05-23 16:58:21,013 views 8963 139689416718016 PDF gerado com sucesso para 628: /opt/Portal_Rotoplastyc/media/documentos/spreadsheet/ds08-definicoes-de-cadastro-de-produto-teste_v9.xlsx
+DEBUG 2025-05-23 16:58:25,491 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=628)
+DEBUG 2025-05-23 16:58:40,562 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=628)
+DEBUG 2025-05-23 16:58:40,573 models 8963 139689416718016 [gerar_pdf] Iniciando para 'DS08 - Definições de Cadastro de Produto - TESTE' (tipo=spreadsheet)
+DEBUG 2025-05-23 16:58:40,575 models 8963 139689416718016 [save] Documento 'DS08 - Definições de Cadastro de Produto - TESTE' (id=628)
+DEBUG 2025-05-23 17:07:05,447 views 9710 140192875804352 === listar_documentos_para_analise start ===
+DEBUG 2025-05-23 17:07:05,451 views 9710 140192875804352 POST recebido: documento_id=627, action=upload_pdf_spreadsheet, user=matheus.oliveira
+DEBUG 2025-05-23 17:07:05,453 views 9710 140192875804352 Renderizando template de análise com 2 documentos
+DEBUG 2025-05-23 17:07:10,468 views 9710 140192875804352 === listar_documentos_para_analise start ===
+DEBUG 2025-05-23 17:07:10,470 views 9710 140192875804352 POST recebido: documento_id=627, action=upload_pdf_spreadsheet, user=matheus.oliveira
+DEBUG 2025-05-23 17:07:10,472 views 9710 140192875804352 Renderizando template de análise com 2 documentos
+DEBUG 2025-05-23 17:07:53,707 models 9885 140301587969728 [save] Documento 'teste2' (id=627)
+DEBUG 2025-05-23 17:07:53,710 models 9885 140301587969728 [save] Documento 'teste2' (id=627)
+DEBUG 2025-05-23 17:08:18,785 models 9885 140301587969728 [save] Documento 'teste' (id=626)
+DEBUG 2025-05-23 17:08:18,850 models 9885 140301587969728 [gerar_pdf] Iniciando para 'teste' (tipo=spreadsheet)
+DEBUG 2025-05-23 17:08:18,851 models 9885 140301587969728 [save] Documento 'teste' (id=626)
+DEBUG 2025-05-23 17:08:21,165 models 9885 140301587969728 [save] Documento 'teste2' (id=627)
+DEBUG 2025-05-23 17:08:21,178 models 9885 140301587969728 [gerar_pdf] Iniciando para 'teste2' (tipo=pdf_spreadsheet)
+DEBUG 2025-05-23 17:08:26,862 views 9885 140301587969728 === nova_revisao start ===
+DEBUG 2025-05-23 17:08:26,862 views 9885 140301587969728 Parâmetros: documento_id=594, user=matheus.oliveira
+DEBUG 2025-05-23 17:08:26,864 views 9885 140301587969728 Documento atual: id=594, nome='DS09 - Politica da Qualidade', revisao=2, codigo=af6a94e5-8bd9-41e0-9614-ccbfefe249cb
+DEBUG 2025-05-23 17:08:26,865 views 9885 140301587969728 Método GET: exibindo formulário
+DEBUG 2025-05-23 17:08:26,869 views 9885 140301587969728 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 17:08:38,190 views 9885 140301587969728 === nova_revisao start ===
+DEBUG 2025-05-23 17:08:38,191 views 9885 140301587969728 Parâmetros: documento_id=594, user=matheus.oliveira
+DEBUG 2025-05-23 17:08:38,193 views 9885 140301587969728 Documento atual: id=594, nome='DS09 - Politica da Qualidade', revisao=2, codigo=af6a94e5-8bd9-41e0-9614-ccbfefe249cb
+DEBUG 2025-05-23 17:08:38,194 views 9885 140301587969728 Recebido POST para nova revisão
+DEBUG 2025-05-23 17:08:38,195 views 9885 140301587969728 POST data: <QueryDict: {'csrfmiddlewaretoken': ['hXfofEDGFq0Msb9OHFC4h40yV9Ubzup4aPqIfYyVMVy4xG8yCg5I9djmx58XwMfM'], 'nome': ['DS09 - Politica da Qualidade - TESTE'], 'revisao': ['3'], 'aprovador1': ['42']}>
+DEBUG 2025-05-23 17:08:38,195 views 9885 140301587969728 FILES data: <MultiValueDict: {'documento': [<InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>]}>
+DEBUG 2025-05-23 17:08:38,198 views 9885 140301587969728 Form instanciado: <NovaRevisaoForm bound=True, valid=Unknown, fields=(nome;revisao;aprovador1;documento)>
+DEBUG 2025-05-23 17:08:38,201 views 9885 140301587969728 Form validado, cleaned_data: {'nome': 'DS09 - Politica da Qualidade - TESTE', 'revisao': 3, 'aprovador1': <Usuario: matheus.oliveira>, 'documento': <InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>}
+DEBUG 2025-05-23 17:08:38,204 views 9885 140301587969728 Rename sinalizado: 'DS09 - Politica da Qualidade' → 'DS09 - Politica da Qualidade - TESTE'
+DEBUG 2025-05-23 17:08:38,205 views 9885 140301587969728 Salvando nova revisão: nome='DS09 - Politica da Qualidade - TESTE' revisao=3 codigo=af6a94e5-8bd9-41e0-9614-ccbfefe249cb categoria=Documento de Sistema
+DEBUG 2025-05-23 17:08:38,206 models 9885 140301587969728 [save] Documento 'DS09 - Politica da Qualidade - TESTE' (id=None)
+INFO 2025-05-23 17:08:38,235 views 9885 140301587969728 Nova revisão ID=629 salva com sucesso
+DEBUG 2025-05-23 17:08:38,235 models 9885 140301587969728 [gerar_pdf] Iniciando para 'DS09 - Politica da Qualidade - TESTE' (tipo=pdf)
+DEBUG 2025-05-23 17:08:40,261 models 9885 140301587969728 [save] Documento 'DS09 - Politica da Qualidade - TESTE' (id=629)
+DEBUG 2025-05-23 17:08:40,264 views 9885 140301587969728 gerar_pdf() executado para ID=629
+DEBUG 2025-05-23 17:08:40,265 views 9885 140301587969728 === nova_revisao end (sucesso) ===
+DEBUG 2025-05-23 17:08:43,976 models 9885 140301587969728 [save] Documento 'DS09 - Politica da Qualidade - TESTE' (id=629)
+DEBUG 2025-05-23 17:08:43,989 models 9885 140301587969728 [gerar_pdf] Iniciando para 'DS09 - Politica da Qualidade - TESTE' (tipo=pdf)
+DEBUG 2025-05-23 17:08:50,753 views 9885 140301587969728 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS09 - Politica da Qualidade - TESTE
+DEBUG 2025-05-23 17:08:54,516 views 9885 140301587969728 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento teste2
+DEBUG 2025-05-23 17:08:57,999 models 9885 140301587969728 [save] Documento 'DS09 - Politica da Qualidade - TESTE' (id=629)
+DEBUG 2025-05-23 17:08:59,407 models 9885 140301587969728 [save] Documento 'teste2' (id=627)
+DEBUG 2025-05-23 17:09:00,643 models 9885 140301587969728 [save] Documento 'teste' (id=626)
+DEBUG 2025-05-23 17:09:04,256 models 9885 140301587969728 [save] Documento 'teste' (id=626)
+DEBUG 2025-05-23 17:09:04,266 models 9885 140301587969728 [gerar_pdf] Iniciando para 'teste' (tipo=spreadsheet)
+DEBUG 2025-05-23 17:09:04,268 models 9885 140301587969728 [save] Documento 'teste' (id=626)
+DEBUG 2025-05-23 17:09:05,741 models 9885 140301587969728 [save] Documento 'DS09 - Politica da Qualidade - TESTE' (id=629)
+DEBUG 2025-05-23 17:09:05,751 models 9885 140301587969728 [gerar_pdf] Iniciando para 'DS09 - Politica da Qualidade - TESTE' (tipo=pdf)
+DEBUG 2025-05-23 17:09:07,063 models 9885 140301587969728 [save] Documento 'teste2' (id=627)
+DEBUG 2025-05-23 17:09:07,073 models 9885 140301587969728 [gerar_pdf] Iniciando para 'teste2' (tipo=pdf_spreadsheet)
+DEBUG 2025-05-23 17:09:13,758 views 9885 140301587969728 === nova_revisao start ===
+DEBUG 2025-05-23 17:09:13,759 views 9885 140301587969728 Parâmetros: documento_id=629, user=matheus.oliveira
+DEBUG 2025-05-23 17:09:13,760 views 9885 140301587969728 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=af6a94e5-8bd9-41e0-9614-ccbfefe249cb
+DEBUG 2025-05-23 17:09:13,762 views 9885 140301587969728 Método GET: exibindo formulário
+DEBUG 2025-05-23 17:09:13,764 views 9885 140301587969728 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 17:14:15,545 views 9885 140301587969728 === nova_revisao start ===
+DEBUG 2025-05-23 17:14:15,546 views 9885 140301587969728 Parâmetros: documento_id=316, user=matheus.oliveira
+DEBUG 2025-05-23 17:14:15,548 views 9885 140301587969728 Documento atual: id=316, nome='DS07 - Lista Mestra de Controle de Documentos', revisao=10, codigo=0cf462de-c730-4278-945b-116d8629ac04
+DEBUG 2025-05-23 17:14:15,550 views 9885 140301587969728 Método GET: exibindo formulário
+DEBUG 2025-05-23 17:14:15,555 views 9885 140301587969728 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-05-23 17:14:31,101 views 9885 140301587969728 === nova_revisao start ===
+DEBUG 2025-05-23 17:14:31,101 views 9885 140301587969728 Parâmetros: documento_id=316, user=matheus.oliveira
+DEBUG 2025-05-23 17:14:31,103 views 9885 140301587969728 Documento atual: id=316, nome='DS07 - Lista Mestra de Controle de Documentos', revisao=10, codigo=0cf462de-c730-4278-945b-116d8629ac04
+DEBUG 2025-05-23 17:14:31,105 views 9885 140301587969728 Recebido POST para nova revisão
+DEBUG 2025-05-23 17:14:31,105 views 9885 140301587969728 POST data: <QueryDict: {'csrfmiddlewaretoken': ['N0MqY7qgIPBNbELbTM7nKngbOQ57UR0OGSXKYrlvPk95g9KVOnA1CwzZqMjTR9Qw'], 'nome': ['DS07 - Lista Mestra de Controle de Documentos - TESTE'], 'revisao': ['11'], 'aprovador1': ['42']}>
+DEBUG 2025-05-23 17:14:31,105 views 9885 140301587969728 FILES data: <MultiValueDict: {'documento': [<InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>]}>
+DEBUG 2025-05-23 17:14:31,111 views 9885 140301587969728 Form instanciado: <NovaRevisaoForm bound=True, valid=Unknown, fields=(nome;revisao;aprovador1;documento)>
+DEBUG 2025-05-23 17:14:31,118 views 9885 140301587969728 Form validado, cleaned_data: {'nome': 'DS07 - Lista Mestra de Controle de Documentos - TESTE', 'revisao': 11, 'aprovador1': <Usuario: matheus.oliveira>, 'documento': <InMemoryUploadedFile: IT1202_-Assistência_Tecnica_e_Garantia_RP.odt.odt (application/vnd.oasis.opendocument.text)>}
+DEBUG 2025-05-23 17:14:31,126 views 9885 140301587969728 Rename sinalizado: 'DS07 - Lista Mestra de Controle de Documentos' → 'DS07 - Lista Mestra de Controle de Documentos - TESTE'
+DEBUG 2025-05-23 17:14:31,128 views 9885 140301587969728 Salvando nova revisão: nome='DS07 - Lista Mestra de Controle de Documentos - TESTE' revisao=11 codigo=0cf462de-c730-4278-945b-116d8629ac04 categoria=Documento de Sistema
+DEBUG 2025-05-23 17:14:31,129 models 9885 140301587969728 [save] Documento 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (id=None)
+INFO 2025-05-23 17:14:31,183 views 9885 140301587969728 Nova revisão ID=630 salva com sucesso
+DEBUG 2025-05-23 17:14:31,183 models 9885 140301587969728 [gerar_pdf] Iniciando para 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (tipo=pdf)
+DEBUG 2025-05-23 17:14:32,877 models 9885 140301587969728 [save] Documento 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (id=630)
+DEBUG 2025-05-23 17:14:32,881 views 9885 140301587969728 gerar_pdf() executado para ID=630
+DEBUG 2025-05-23 17:14:32,882 views 9885 140301587969728 === nova_revisao end (sucesso) ===
+DEBUG 2025-05-23 17:14:41,069 views 9885 140301587969728 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS07 - Lista Mestra de Controle de Documentos - TESTE
+DEBUG 2025-05-23 17:14:55,770 views 9885 140301587969728 [upload_documento_revisado] Iniciando upload revisado para documento ID: 630
+DEBUG 2025-05-23 17:14:55,770 views 9885 140301587969728 [upload_documento_revisado] Arquivo recebido: RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção.xlsx
+DEBUG 2025-05-23 17:14:55,772 views 9885 140301587969728 [upload_documento_revisado] Documento editável antigo removido: None
+DEBUG 2025-05-23 17:14:55,774 models 9885 140301587969728 [save] Documento 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (id=630)
+DEBUG 2025-05-23 17:14:55,780 views 9885 140301587969728 [upload_documento_revisado] Novo documento revisado salvo: documentos/editaveis/RQ216_-_PPAP_Processo_de_Aprovação_de_Peças_de_Produção_2NqfLz7.xlsx
+DEBUG 2025-05-23 17:14:55,780 models 9885 140301587969728 [save] Documento 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (id=630)
+DEBUG 2025-05-23 17:14:55,785 views 9885 140301587969728 [upload_documento_revisado] Status atualizado para: aguardando_analise
+DEBUG 2025-05-23 17:15:03,205 views 9885 140301587969728 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS07 - Lista Mestra de Controle de Documentos - TESTE
+DEBUG 2025-05-23 17:15:28,385 models 9885 140301587969728 [save] Documento 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (id=630)
+DEBUG 2025-05-23 17:15:28,397 models 9885 140301587969728 [gerar_pdf] Iniciando para 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (tipo=spreadsheet)
+DEBUG 2025-05-23 17:15:28,400 models 9885 140301587969728 [save] Documento 'DS07 - Lista Mestra de Controle de Documentos - TESTE' (id=630)
+DEBUG 2025-05-23 17:15:32,268 views 9885 140301587969728 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS07 - Lista Mestra de Controle de Documentos - TESTE

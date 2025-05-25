@@ -23,7 +23,7 @@ urlpatterns = [
     path('assinatura/', views.assinatura, name='assinatura'),
     path('descricao/', views.descricao, name='descricao'),
     path('indicadores/', views.indicadores, name='indicadores'),
-
+    path('beneficios/', views.beneficios, name='beneficios'),
     
     # Administração
     path('admin/', admin.site.urls),

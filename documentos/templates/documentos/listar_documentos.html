@@ -93,12 +93,7 @@
             </a> 
         {% endif %}
 
-        {% if perms.documentos.replace_document %}
-            <a href="{% url 'documentos:substituir_pdf' documento.id %}" class="action-icon">
-            <img src="{% static 'images/substitute_icon.png' %}" alt="Substituir PDF" class="substitute-icon">
-            <span class="tooltip-text">Substituir PDF</span>
-            </a>
-        {% endif %}
+
         
         {% if perms.documentos.can_view_revisions %}
             <a href="{% url 'documentos:listar_revisoes_documento' documento.id %}" class="action-icon">
@@ -191,13 +186,14 @@
             </button>
         </form>
         {% endif %}
+        {% if perms.documentos.replace_document %}
+        <a href="{% url 'documentos:substituir_pdf' documento.id %}" class="action-icon">
+        <img src="{% static 'images/substitute_icon.png' %}" alt="Substituir PDF" class="substitute-icon">
+        <span class="tooltip-text">Substituir PDF</span>
+        </a>
+        {% endif %}
     {% endif %}
-    {% if perms.documentos.replace_document %}
-    <a href="{% url 'documentos:substituir_pdf' documento.id %}" class="action-icon">
-       <img src="{% static 'images/substitute_icon.png' %}" alt="Substituir PDF" class="substitute-icon">
-       <span class="tooltip-text">Substituir PDF</span>
-    </a>
-    {% endif %}
+    
 </div>
                         </div>
                     </div>

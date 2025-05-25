@@ -10,13 +10,24 @@
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <header class="top-bar">
+<body class="dark-theme"> <script>
+      (function() {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "light-theme") {
+          // Remove a classe padrão e adiciona a classe do tema claro
+          document.body.classList.remove("dark-theme");
+          document.body.classList.add("light-theme");
+        }
+        // Se 'savedTheme' for 'dark-theme' ou nulo, a classe 'dark-theme' inicial do body permanece.
+      })();
+    </script>
+
+    <header class="top-bar light-theme">
         <div class="menu-icon" onclick="toggleMenu()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </div>
 
-        <div class="top-bar-right">
+        <button id="theme-toggle" class="theme-toggle-btn" title="Alterar Tema">🌙</button> <div class="top-bar-right">
             <div class="notification-bell">
                 <a href="#" onclick="toggleNotificationDropdown(event)" class="notification-link">
                     <img src="{% static 'images/notificacao.png' %}" alt="Notificações" class="bell-icon">
@@ -45,6 +56,8 @@
                                             <a href="{{ notificacao.link }}" class="notification-action">Ir para</a>
                                         </div>
                                         {% endif %}
+
+
                                     </div>
                                 </li>
                             {% empty %}
@@ -77,8 +90,24 @@
             </div>
         </div>
     </header>
+        {# Alerta no topo caso exista impersonificação #}
+    {% with orig_id=request.session.original_user_id|default:"" %}
+    {% with imp_type=request.session.impersonation_type|default:"" %}
+        {% if orig_id %}
+            <div class="personificar-alert">
+                Você está personificando <strong>{{ user.get_full_name }}</strong>.
+                {% if imp_type == "cliente" %}
+                    <a href="{% url 'clientes:reverter_personificacao' %}">Voltar ao seu usuário original</a>
+                {% elif imp_type == "usuario" %}
+                    <a href="{% url 'usuarios:reverter_personificacao' %}">Voltar ao seu usuário original</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    {% endwith %}
 
-    <nav class="side-bar" id="side-bar">
+
+    <nav class="side-bar light-theme" id="side-bar">
         <ul>
             <li>
                 <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
@@ -117,23 +146,16 @@
                 </ul>
             </li>
             {% endif %}
-             <!-- Menu BI-->
-            <li> 
-                
+             <li> 
                 <a href="#" onclick="toggleSubmenu(event, this)">
-                    <img src="{% static 'images/indicador.png' %}" alt="Documentos">
+                    <img src="{% static 'images/indicador.png' %}" alt="BI">
                     <span class="menu-label">BI</span>
                 </a>
-                
                 <ul class="submenu">
-                    
                     <li><a href="{% url 'bi:my_bi_report_list' %}">Lista de BI's</a></li>
-                    
-
                     {% if perms.bi.view_bi %}
                     <li><a href="{% url 'bi:bi_report_list' %}">Lista geral de BI's</a></li>
                     {% endif %}
-
                 </ul>
             </li>
             {% if perms.usuarios %}
@@ -149,7 +171,6 @@
                 </ul>
             </li>
             {% endif %}
-           
         </ul>
     </nav>
 
@@ -168,14 +189,16 @@
             const openSubmenus = sideBar.querySelectorAll('.submenu.open');
             if (!sideBar.classList.contains("expanded")) {
                 openSubmenus.forEach(submenu => {
-                    if (!submenu.closest('li').matches(':hover')) {
+                    // Apenas fecha se não estiver sob o mouse (para submenus flutuantes)
+                    if (!submenu.closest('li').matches(':hover')) { 
                         submenu.classList.remove('open');
                         submenu.style.maxHeight = null;
                     }
                 });
             } else {
+                // Se expandido, recalcula o maxHeight dos submenus já abertos
                  openSubmenus.forEach(submenu => {
-                    if (submenu.classList.contains('open')) {
+                    if (submenu.classList.contains('open')) { // Verifica se ainda está aberto
                          submenu.style.maxHeight = submenu.scrollHeight + "px";
                     }
                  });
@@ -185,7 +208,11 @@
         function toggleNotificationDropdown(event) {
             event.stopPropagation();
             const isOpen = notificationDropdown.classList.contains("open");
-            profileMenu.classList.remove("open");
+            // Fecha o menu de perfil se estiver aberto
+            if (profileMenu && profileMenu.classList.contains("open")) {
+                profileMenu.classList.remove("open");
+            }
+            // Alterna o dropdown de notificação
             if (isOpen) {
                 notificationDropdown.classList.remove("open");
             } else {
@@ -196,7 +223,11 @@
         function toggleProfileMenu(event) {
             event.stopPropagation();
             const isOpen = profileMenu.classList.contains("open");
-            notificationDropdown.classList.remove("open");
+            // Fecha o dropdown de notificação se estiver aberto
+            if (notificationDropdown && notificationDropdown.classList.contains("open")) {
+                notificationDropdown.classList.remove("open");
+            }
+            // Alterna o menu de perfil
             if (isOpen) {
                 profileMenu.classList.remove("open");
             } else {
@@ -209,8 +240,9 @@
             allSubmenus.forEach(s => {
                 if (s !== exceptThisSubmenu && s.classList.contains('open')) {
                     s.classList.remove('open');
+                    // Apenas redefine maxHeight se a sidebar estiver expandida
                     if (sideBar.classList.contains("expanded")) {
-                        s.style.maxHeight = null;
+                        s.style.maxHeight = null; 
                     }
                 }
             });
@@ -221,28 +253,45 @@
             event.stopPropagation();
             const submenu = element.nextElementSibling;
 
+            // Apenas permite abrir/fechar submenus se a barra lateral estiver expandida
             if (sideBar.classList.contains("expanded")) {
                 const isOpen = submenu.classList.contains('open');
-                closeAllSubmenus(submenu);
+                // Fecha outros submenus abertos antes de abrir um novo (opcional, mas comum)
+                closeAllSubmenus(submenu); 
                 if (!isOpen) {
                     submenu.classList.add('open');
                     submenu.style.maxHeight = submenu.scrollHeight + "px";
                 } else {
+                    // Se já estava aberto e foi clicado de novo, ele será fechado por closeAllSubmenus se outro for aberto
+                    // ou simplesmente removido se for o único aberto e clicado novamente.
+                    // Para garantir que feche ao clicar nele mesmo:
+                    submenu.classList.remove('open');
                     submenu.style.maxHeight = null;
                 }
             }
         }
 
         document.addEventListener('click', function(event) {
-            if (profileMenu && profileMenu.classList.contains('open') && !profileMenu.contains(event.target) && !event.target.closest('.profile-icon')) {
+            // Fecha o menu de perfil se clicar fora dele
+            if (profileMenu && profileMenu.classList.contains('open') && 
+                !profileMenu.contains(event.target) && 
+                !event.target.closest('.profile-icon')) {
                 profileMenu.classList.remove('open');
             }
-            if (notificationDropdown && notificationDropdown.classList.contains('open') && !notificationDropdown.contains(event.target) && !event.target.closest('.notification-bell')) {
+            // Fecha o dropdown de notificação se clicar fora dele
+            if (notificationDropdown && notificationDropdown.classList.contains('open') && 
+                !notificationDropdown.contains(event.target) && 
+                !event.target.closest('.notification-bell')) {
                 notificationDropdown.classList.remove('open');
             }
+            
+            // Fecha submenus flutuantes se clicar fora da side-bar e ela não estiver expandida
             if (!sideBar.classList.contains("expanded") && !sideBar.contains(event.target)) {
-                 const openFloatingSubmenus = sideBar.querySelectorAll('.submenu');
-                 openFloatingSubmenus.forEach(submenu => { /* O CSS :hover geralmente trata o fechamento */ });
+                const openFloatingSubmenus = sideBar.querySelectorAll('.submenu.open');
+                openFloatingSubmenus.forEach(submenu => {
+                     // O CSS :hover geralmente trata o fechamento, mas podemos forçar aqui se necessário.
+                     // submenu.classList.remove('open'); // Descomente se o CSS :hover não for suficiente
+                });
             }
         });
 
@@ -260,47 +309,104 @@
             }
             return cookieValue;
         }
-        const csrftoken = getCookie('csrftoken');
+        const csrftoken = getCookie('csrftoken'); // Essencial para as requisições POST de notificação
 
         function updateNotificationCount(newCount) {
             const notificationCountElement = document.getElementById('notification-count');
             if (notificationCountElement) {
                 if (newCount > 0) {
                     notificationCountElement.textContent = newCount;
-                    notificationCountElement.style.display = 'block';
+                    notificationCountElement.style.display = 'block'; // Ou 'inline-block', 'flex', etc., dependendo do seu CSS
                 } else {
                     notificationCountElement.style.display = 'none';
                 }
             }
         }
         
+        // Função para buscar a contagem inicial de notificações (pode ser chamada no DOMContentLoaded)
         async function fetchNotificationCount() {
             const initialCountElement = document.getElementById('notification-count');
             if (initialCountElement && initialCountElement.textContent.trim() !== "") {
-                 try { updateNotificationCount(parseInt(initialCountElement.textContent)); }
-                 catch (e) { updateNotificationCount(0); }
-            } else { updateNotificationCount(0); }
+                 try { 
+                    const count = parseInt(initialCountElement.textContent);
+                    updateNotificationCount(count); 
+                 }
+                 catch (e) { 
+                    console.warn("Não foi possível ler a contagem inicial de notificações.", e);
+                    updateNotificationCount(0); 
+                 }
+            } else { 
+                updateNotificationCount(0); // Se não houver elemento ou estiver vazio
+            }
         }
+    </script>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchNotificationCount();
+    {% block extra_js %}
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const themeToggleButton = document.getElementById("theme-toggle");
+        const bodyElement = document.body;
+    
+        // Inicializa o texto do botão baseado no tema ATUALMENTE aplicado
+        // (que foi definido pelo script inline anti-flicker ou é o padrão)
+        if (bodyElement.classList.contains("light-theme")) {
+            themeToggleButton.textContent = "🌞";
+        } else {
+            themeToggleButton.textContent = "🌙"; // Assume dark-theme se light-theme não estiver presente
+        }
+    
+        themeToggleButton.addEventListener("click", () => {
+            if (bodyElement.classList.contains("dark-theme")) {
+                bodyElement.classList.replace("dark-theme", "light-theme");
+                themeToggleButton.textContent = "🌞";
+                localStorage.setItem("theme", "light-theme");
+            } else {
+                bodyElement.classList.replace("light-theme", "dark-theme");
+                themeToggleButton.textContent = "🌙";
+                localStorage.setItem("theme", "dark-theme");
+            }
+        });
 
-            document.querySelectorAll('.close-notification').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var notificacaoId = this.getAttribute('data-id');
-                    fetch("{% url 'notificacoes:marcar_notificacao_como_lida' notificacao_id=0 %}".replace('0', notificacaoId), {
-                        method: 'POST',
-                        headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({})
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            const listItem = this.closest('li');
+        // Lógica de notificações
+        fetchNotificationCount(); // Chama para definir a contagem inicial ao carregar o DOM
+
+        document.querySelectorAll('.close-notification').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var notificacaoId = this.getAttribute('data-id');
+                // Certifique-se que a URL está correta e que 'notificacao_id=0' é um placeholder válido para replace
+                var url = "{% url 'notificacoes:marcar_notificacao_como_lida' notificacao_id=0 %}".replace('/0/', '/' + notificacaoId + '/'); 
+                if (!url.includes(notificacaoId)) { // Fallback se o replace não funcionar como esperado (ex: se a URL não tiver /0/)
+                    url = "{% url 'notificacoes:marcar_notificacao_como_lida' 999999 %}".replace('999999', notificacaoId);
+                }
+
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 
+                        'X-CSRFToken': csrftoken, 
+                        'Content-Type': 'application/json', 
+                        'Accept': 'application/json' 
+                    },
+                    body: JSON.stringify({}) // Corpo vazio se não precisar enviar dados específicos
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        const listItem = this.closest('li');
+                        if (listItem) {
                             listItem.style.transition = 'opacity 0.25s ease, max-height 0.25s ease, padding 0.25s ease, margin-bottom 0.25s ease, border-width 0.25s ease';
-                            listItem.style.opacity = '0'; listItem.style.maxHeight = '0';
-                            listItem.style.paddingTop = '0'; listItem.style.paddingBottom = '0';
-                            listItem.style.marginBottom = '0'; listItem.style.borderWidth = '0';
+                            listItem.style.opacity = '0'; 
+                            listItem.style.maxHeight = '0';
+                            listItem.style.paddingTop = '0'; 
+                            listItem.style.paddingBottom = '0';
+                            listItem.style.marginBottom = '0'; 
+                            listItem.style.borderWidth = '0';
+                            
                             setTimeout(() => {
                                 listItem.remove();
                                 updateNotificationCount(data.unread_count);
@@ -308,54 +414,73 @@
                                 const clearAllBtn = document.getElementById('clear-all-notifications');
                                 const headerClearBtn = document.querySelector('.notification-dropdown-header');
 
-                                if (notificationList.querySelectorAll('li:not(.no-notifications)').length === 0) {
+                                if (notificationList && notificationList.querySelectorAll('li:not(.no-notifications)').length === 0) {
                                     notificationList.innerHTML = '<li class="no-notifications">Nenhuma notificação pendente.</li>';
                                     if(clearAllBtn) clearAllBtn.style.display = 'none';
-                                    if(headerClearBtn && clearAllBtn) headerClearBtn.style.display = 'none'; // Esconde o header se o botão some
+                                    if(headerClearBtn && clearAllBtn) headerClearBtn.style.display = 'none'; 
                                 }
-                            }, 250);
-                        } else { console.error('Erro ao marcar notificação:', data.message); }
-                    })
-                    .catch(error => console.error('Erro na requisição:', error));
-                });
+                            }, 250); // Tempo para a animação de fade-out
+                        }
+                    } else { 
+                        console.error('Erro ao marcar notificação como lida:', data.message || 'Status não foi success'); 
+                    }
+                })
+                .catch(error => console.error('Erro na requisição para marcar notificação:', error));
             });
+        });
 
-            const clearAllButton = document.getElementById('clear-all-notifications');
-            const headerClearButton = document.querySelector('.notification-dropdown-header');
-            if (clearAllButton) {
-                if (document.querySelectorAll('#notification-list li:not(.no-notifications)').length === 0){
-                    clearAllButton.style.display = 'none';
-                    if (headerClearButton) headerClearButton.style.display = 'none';
-                }
-                clearAllButton.addEventListener('click', function() {
-                    if (confirm('Tem certeza de que deseja limpar todas as notificações?')) {
-                        fetch("{% url 'notificacoes:limpar_todas_notificacoes' %}", {
-                            method: 'POST',
-                            headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                            body: JSON.stringify({})
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                const notificationList = document.getElementById('notification-list');
+        const clearAllButton = document.getElementById('clear-all-notifications');
+        const headerClearButtonContainer = document.querySelector('.notification-dropdown-header'); // O container do botão
+        
+        if (clearAllButton) {
+            // Esconde o botão e o header se não houver notificações inicialmente
+            if (document.querySelectorAll('#notification-list li:not(.no-notifications)').length === 0){
+                clearAllButton.style.display = 'none';
+                if (headerClearButtonContainer) headerClearButtonContainer.style.display = 'none';
+            }
+
+            clearAllButton.addEventListener('click', function() {
+                if (confirm('Tem certeza de que deseja limpar todas as notificações?')) {
+                    fetch("{% url 'notificacoes:limpar_todas_notificacoes' %}", {
+                        method: 'POST',
+                        headers: { 
+                            'X-CSRFToken': csrftoken, 
+                            'Content-Type': 'application/json', 
+                            'Accept': 'application/json' 
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const notificationList = document.getElementById('notification-list');
+                            if (notificationList) {
                                 notificationList.querySelectorAll('li:not(.no-notifications)').forEach(function(li) {
-                                   li.style.transition = 'opacity 0.25s ease'; li.style.opacity = '0';
+                                    li.style.transition = 'opacity 0.25s ease'; 
+                                    li.style.opacity = '0';
                                 });
                                 setTimeout(() => {
                                     notificationList.innerHTML = '<li class="no-notifications">Nenhuma notificação pendente.</li>';
                                     updateNotificationCount(0);
-                                    this.style.display = 'none';
-                                    if (headerClearButton) headerClearButton.style.display = 'none';
+                                    clearAllButton.style.display = 'none';
+                                    if (headerClearButtonContainer) headerClearButtonContainer.style.display = 'none';
                                 }, 250);
-                            } else { console.error('Erro ao limpar notificações:', data.message); }
-                        })
-                        .catch(error => console.error('Erro na requisição:', error));
-                    }
-                });
-            }
-        });
+                            }
+                        } else { 
+                            console.error('Erro ao limpar notificações:', data.message || 'Status não foi success'); 
+                        }
+                    })
+                    .catch(error => console.error('Erro na requisição para limpar notificações:', error));
+                }
+            });
+        }
+    });
     </script>
-
-    {% block extra_js %}{% endblock %}
+    {% endblock %}
 </body>
 </html>

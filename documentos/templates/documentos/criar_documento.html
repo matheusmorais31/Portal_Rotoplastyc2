@@ -40,15 +40,16 @@
 
         <div class="form-buttons">
             <a href="{% url 'documentos:listar_documentos_aprovados' %}">
-                <button type="button">Cancelar</button>
+                <button class="btn-form" type="button">Cancelar</button>
             </a>
-            <button type="submit">OK</button>
+            <button class="btn-form-ok" type="submit">OK</button>
         </div>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>

@@ -1,14 +1,13 @@
 /* Estilos Gerais */
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #38393F;
-    color: #fff;
+    font-family: 'Inter';
+    color: #333;
     margin: 0;
     padding: 0;
 }
 
 .container {
-    padding: 2px;
+    padding: 20px;
 }
 
 h1 {
@@ -18,9 +17,7 @@ h1 {
     margin-top: 5%;
 }
 
-
-
-/* Tooltip personalizado para action-icon e icon-link */
+/* Tooltip personalizado para action-icon, icon-link e edit-icon */
 .tooltip-text {
     visibility: hidden;
     width: max-content;
@@ -51,13 +48,44 @@ h1 {
     border-color: #555 transparent transparent transparent;
 }
 
-.action-icon:hover .tooltip-text,
+/* Botões de ação gerais (ex: personificar, adicionar usuário) */
+.icon-link {
+    margin-left: 28px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+}
+
 .icon-link:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
 }
 
-.edit-icon:hover .tooltip-text{
+/* Ícones de ação específicos de edição */
+.edit-icon {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.edit-icon img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.edit-icon img:hover {
+    transform: scale(1.5);
+}
+
+/* Ajuste da tooltip ao passar o mouse no ícone de edição */
+.edit-icon:hover .tooltip-text {
     left: 97%;
     bottom: 75%;
     font-size: 14px;
@@ -66,17 +94,45 @@ h1 {
     opacity: 1;
 }
 
-.edit-icon:hover .tooltip-text:after{
+.edit-icon:hover .tooltip-text::after {
     left: 65%;
 }
 
-.icon-link {
-    margin-left: 28px;
+/* Botão de Personificar Usuário */
+.action-icon {
+    margin-left: 10px; /* Ajuste se desejar mais ou menos espaço */
     background: none;
     border: none;
     padding: 0;
     cursor: pointer;
     position: relative;
+}
+
+.action-icon img {
+    width: 24px;  /* Mesmo tamanho do ícone de editar */
+    height: 24px; /* Mesmo tamanho do ícone de editar */
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.action-icon:hover img {
+    transform: scale(1.5);
+}
+
+/* Ajuste da tooltip quando o mouse está sobre o botão de personificar */
+.action-icon:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    z-index: 1000;
+}
+
+.action-icon:hover .tooltip-text::after {
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* Filtro de Busca */
@@ -89,7 +145,7 @@ h1 {
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
-    background-color: #ddd;
+    background-color: #ffffff;
     color: #333;
     font-size: 16px;
 }
@@ -135,19 +191,10 @@ h1 {
 }
 
 .user-actions {
-    margin-left: auto;
-}
-
-.edit-icon img {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.edit-icon img:hover {
-    transform: scale(1.5);
-}
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Controla o espaço horizontal entre os ícones */
+  }
 
 /* Responsividade */
 @media (max-width: 768px) {
@@ -184,10 +231,6 @@ h1 {
     display: flex;
     align-items: center;
     margin-bottom: 14px;
-}
-
-.icon-link {
-    margin-right: 5px;
 }
 
 .icon {

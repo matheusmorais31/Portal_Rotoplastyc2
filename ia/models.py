@@ -202,6 +202,8 @@ class ApiUsageLog(models.Model):
             ('chat_pag', 'Chat IA'),
             ('cost_monitor', 'Custos IA'),
             ('model_2.5_pro', 'Modelo mais caro Gemini 2.5 Pro'),
+            ('model_1.5_pro', 'Modelo  Gemini 1.5 Pro'),
+            ('rotoplastyc_ia', 'Modelo  Rotoplastyc IA para documentos'),
         ]
         verbose_name = "Log de Uso da API"
         verbose_name_plural = "Logs de Uso da API"

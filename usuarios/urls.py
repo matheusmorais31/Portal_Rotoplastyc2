@@ -25,4 +25,6 @@ urlpatterns = [
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
     path('duplicar_acesso/', views.duplicar_acesso, name='duplicar_acesso'),
     path('buscar_entidade/', views.buscar_entidade, name='buscar_entidade'),
+    path('personificar/<int:usuario_id>/', views.personificar_usuario, name='personificar_usuario'),
+    path('reverter-personificacao/', views.reverter_personificacao, name='reverter_personificacao'),
 ]

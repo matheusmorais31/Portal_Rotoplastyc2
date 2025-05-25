@@ -46,7 +46,7 @@ form input[type="text"]:focus {
 }
 
 /* Estilizando o botão de buscar */
-button {
+.btn-search {
     background-color: #2EC2D6;
     color: white;
     width: 120px; 
@@ -59,7 +59,7 @@ button {
     margin-top: 20px;
 }
 
-button:hover {
+.btn-search:hover {
     background-color: #1EB2C1;
     box-shadow:  0px 0px 15px #2EC2D6;
 }
@@ -78,6 +78,14 @@ th, td {
     text-align: left;
     border-bottom: 1px solid #ddd;
     
+}
+
+body.light-theme th {
+    color: #ffffff;
+}
+
+body.light-theme h2 {
+    color: black;
 }
 
 td {

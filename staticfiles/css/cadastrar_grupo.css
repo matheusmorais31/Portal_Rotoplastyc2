@@ -13,10 +13,10 @@ html, body {
 }
 
 /* Estilizar o contêiner do formulário */
-.container {
+.register-container {
     background-color: rgba(17, 16, 16, 44%); /* Fundo semi-transparente */
     padding: 20px 20px; /* Diminui o padding para reduzir a altura */
-    border-radius: 80px;
+    border-radius: 20px;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
     width: 600px; /* Diminuir a largura do contêiner */
     max-width: 70%; /* Limita a largura máxima a 70% da tela */
@@ -64,36 +64,51 @@ label {
 }
 
 /* Estilizar os botões */
-button {
-    width: 100px; /* Diminui um pouco a largura dos botões */
-    padding: 6px; /* Reduz o padding para ajustar o tamanho do botão */
-    margin: 10px 5px; /* Reduz a margem entre os botões */
+.btn-form {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #ff0000;
+    color: #ffffff;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+/* Botão OK */
+.form-buttons .btn-form-ok {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
     border: none;
     border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
     display: inline-block;
-}
-
-button[type="submit"] {
     background-color: #2EC2D6;
     color: white;
 }
+
+
 
 /* Botão Cancelar */
-button[type="button"] {
-    background-color: #2EC2D6;
+.form-buttons .btn-form {
+    background-color: #ff0000;
     color: white;
 }
 
-button[type="submit"]:hover, button[type="button"]:hover {
-    background-color: #1EB2C1;
-    box-shadow:  0px 0px 15px #2EC2D6;
+.btn-form:hover {
+    background-color: #d62e2e;
+    box-shadow: 0px 0px 10px #d62e2e;
 }
 
-button:hover {
-    color: #ffffff;
+button[type="submit"]:hover {
+    background-color: #2EC2D6;
+    box-shadow: 0px 0px 10px #2EC2D6;
 }
 
 /* Ajuste para que os botões fiquem centralizados */
@@ -165,7 +180,7 @@ tr:hover {
 
 /* Estilos para dispositivos móveis */
 @media (max-width: 600px) {
-    .container {
+    .register-container {
         padding: 20px;
         border-radius: 10px;
     }
@@ -192,4 +207,10 @@ tr:hover {
         padding: 10px 12px;
     }
     
+}
+
+/* TEMA CLARO */ 
+body.light-theme .register-container {
+    background-color: #515e6c;
+    color: #ffffff;
 }

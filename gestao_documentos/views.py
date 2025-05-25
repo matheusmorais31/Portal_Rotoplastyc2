@@ -171,3 +171,6 @@ def descricao(request):
 
 def indicadores(request):
     return render(request, 'indicadores.html')
+
+def beneficios(request):
+    return render(request, 'beneficios.html')

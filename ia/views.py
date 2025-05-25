@@ -70,6 +70,12 @@ MODEL_MAP = {
     "gemini-2.5-flash": "models/gemini-2.5-flash-preview-04-17",
 }
 
+MODEL_MAP.update({
+    # ‘roto-ia’ usa internamente o mesmo Gemini que já é rápido/económico.
+    # Se quiser pode pôr 1.5-flash, 2.0-flash, 2.5-flash… aqui.
+    "roto-ia": MODEL_MAP["gemini-2.5-flash"],
+})
+
 DEFAULT_GEMINI_MODEL_KEY = "gemini-1.5-flash"
 DEFAULT_GEMINI_MODEL_NAME = MODEL_MAP.get(DEFAULT_GEMINI_MODEL_KEY, "models/gemini-1.5-flash-latest")
 
@@ -470,12 +476,14 @@ def send_message_view(request, chat_id):
     # ───────── 1. Processar Texto do Prompt (do FormData) ─────────
     prompt_raw = request.POST.get("prompt", "").strip()
     prompt_user_typed = remove_emojis(prompt_raw)
+    selected_model_key = request.POST.get("model", DEFAULT_GEMINI_MODEL_KEY)
     logger.debug(f"Prompt recebido (raw): '{prompt_raw[:100]}...', (limpo): '{prompt_user_typed[:100]}...'")
     if not prompt_user_typed and prompt_raw:
         logger.warning(f"Prompt para chat {chat.id} continha apenas emojis e foi removido.")
 
     # --- 4A  Recuperação automática se usuário NÃO anexou arquivos ---
-    if prompt_user_typed and not request.FILES.getlist('arquivo'):  # Verifica se há arquivos anexados
+    if selected_model_key == "roto-ia" and prompt_user_typed and not request.FILES.getlist('arquivo'):
+
         try:
             # troque a chamada se preferir vector_search
             retrieved = find_relevant_document_chunks(user, prompt_user_typed, top_k=600)

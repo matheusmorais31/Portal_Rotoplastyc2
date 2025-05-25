@@ -9,18 +9,24 @@
     --neon-cyan: #1EB2C1;
     --neon-cyan-darker: #18909F;
     --neon-cyan-glow: rgba(30, 178, 193, 0.5);
-    --dark-bg1: #0D0F12; /* Fundo principal mais escuro */
-    --dark-bg2: #13161A; /* Para elementos um pouco acima */
-    --dark-bg3: #1A1E24; /* Para elementos ainda mais acima, como dropdowns */
+    --dark-bg1: #0D0F12;
+    /* Fundo principal mais escuro */
+    --dark-bg2: #13161A;
+    /* Para elementos um pouco acima */
+    --dark-bg3: #1A1E24;
+    /* Para elementos ainda mais acima, como dropdowns */
     --text-primary: #EAEAEA;
     --text-secondary: #A0A0A0;
-    --border-color: #282C34; /* Bordas sutis */
+    --border-color: #282C34;
+    /* Bordas sutis */
     --border-color-light: rgba(55, 65, 81, 0.5);
     --glass-bg: rgba(26, 30, 36, 0.7);
 
     /* Variáveis RGB para uso em rgba() */
-    --dark-bg2-rgb: 19,22,26; /* Cor #13161A em RGB */
-    --neon-cyan-rgb: 30,178,193; /* Cor #1EB2C1 em RGB */
+    --dark-bg2-rgb: 19, 22, 26;
+    /* Cor #13161A em RGB */
+    --neon-cyan-rgb: 30, 178, 193;
+    /* Cor #1EB2C1 em RGB */
 }
 
 body {
@@ -45,7 +51,7 @@ body {
     padding: 0 20px;
     z-index: 9999;
     box-shadow: 0px 0px 2px #000000;
-    border-radius: 5px;
+  
 }
 
 .top-bar-right {
@@ -59,11 +65,13 @@ body {
     color: var(--text-secondary);
     transition: color 0.2s ease, filter 0.2s ease;
 }
+
 .menu-icon svg {
     width: 24px;
     height: 24px;
     stroke-width: 2.5;
 }
+
 .menu-icon:hover {
     color: var(--neon-cyan);
     filter: drop-shadow(0 0 4px var(--neon-cyan-glow));
@@ -86,6 +94,7 @@ body {
     transition: width 0.3s;
     box-shadow: 0px 0px 2px #000000;
 }
+
 .side-bar.expanded {
     width: 250px;
 }
@@ -94,10 +103,12 @@ body {
     list-style-type: none;
     width: 100%;
 }
+
 .side-bar ul li {
     margin: 10px 0;
     position: relative;
 }
+
 .side-bar ul li a {
     color: white;
     text-decoration: none;
@@ -123,6 +134,7 @@ body {
     opacity: 0;
     box-shadow: 0 0 10px var(--neon-cyan-glow);
 }
+
 .side-bar ul li a:hover::before,
 .side-bar ul li a.active::before {
     transform: translateY(-50%) scaleY(1);
@@ -134,16 +146,17 @@ body {
     background-color: rgba(30, 178, 193, 0.1);
     color: var(--text-primary);
 }
+
 .side-bar ul li a:hover .menu-label,
 .side-bar ul li a.active .menu-label {
     color: var(--text-primary);
 }
+
 .side-bar ul li a:hover img,
 .side-bar ul li a.active img,
 .side-bar ul li a:hover svg,
 .side-bar ul li a.active svg {
-    filter: brightness(0) saturate(100%) invert(69%) sepia(53%)
-            saturate(4787%) hue-rotate(141deg) brightness(100%) contrast(90%);
+    filter: brightness(0) saturate(100%) invert(69%) sepia(53%) saturate(4787%) hue-rotate(141deg) brightness(100%) contrast(90%);
     opacity: 1;
     color: var(--neon-cyan);
 }
@@ -158,10 +171,12 @@ body {
     color: #fff;
     margin: 0;
 }
+
 .side-bar.expanded ul li a img,
 .side-bar.expanded ul li a svg {
     margin-right: 18px;
 }
+
 .side-bar:not(.expanded) ul li a img,
 .side-bar:not(.expanded) ul li a svg {
     margin-right: 0;
@@ -176,6 +191,7 @@ body {
     visibility: hidden;
     color: var(--text-secondary);
 }
+
 .side-bar.expanded .menu-label {
     opacity: 1;
     visibility: visible;
@@ -192,6 +208,7 @@ body {
     overflow: hidden;
     transform-origin: top center;
 }
+
 .side-bar:not(.expanded) .submenu {
     position: absolute;
     left: 100%;
@@ -200,11 +217,12 @@ body {
     background: rgba(20, 37, 42, 0.682);
     backdrop-filter: blur(50px);
     border-radius: 8px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.45);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
     border: 1px solid var(--border-color-light);
     padding: 8px 0;
     transform-origin: top left;
 }
+
 .side-bar.expanded .submenu {
     position: static;
     padding-left: 35px;
@@ -212,22 +230,56 @@ body {
     border: none;
     box-shadow: none;
 }
-.submenu.open { display: block; opacity: 1; transform: translateY(0) scale(1); max-height: 500px; }
-.side-bar:not(.expanded) ul li:hover > .submenu { display: block; opacity: 1; transform: translateY(0) scale(1); max-height: 500px; }
-.submenu li a { font-size: 0.88em; padding: 10px 20px; color: var(--text-secondary); }
-.submenu li a:hover { color: var(--neon-cyan); background-color: rgba(30, 178, 193, 0.15); }
-.submenu li a::before { display: none; }
+
+.submenu.open {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 500px;
+}
+
+.side-bar:not(.expanded) ul li:hover>.submenu {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 500px;
+}
+
+.submenu li a {
+    font-size: 0.88em;
+    padding: 10px 20px;
+    color: var(--text-secondary);
+}
+
+.submenu li a:hover {
+    color: var(--neon-cyan);
+    background-color: rgba(30, 178, 193, 0.15);
+}
+
+.submenu li a::before {
+    display: none;
+}
 
 /* Conteúdo Principal */
-.main-content { margin-left: 65px; padding-top: 80px; min-height: 100vh; padding: 25px 30px; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.side-bar.expanded ~ .main-content { margin-left: 250px; }
+.main-content {
+    margin-left: 65px;
+    padding-top: 80px;
+    min-height: 100vh;
+    padding: 25px 30px;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-bar.expanded~.main-content {
+    margin-left: 250px;
+}
 
 .profile-icon {
     display: flex;
     align-items: center;
 }
 
-.profile-icon img { /* Renomeado no HTML para 'profile-photo', mas vamos manter 'profile-icon img' para o wrapper e 'profile-photo' para a imagem específica se necessário */
+.profile-icon img {
+    /* Renomeado no HTML para 'profile-photo', mas vamos manter 'profile-icon img' para o wrapper e 'profile-photo' para a imagem específica se necessário */
     width: 38px;
     height: 38px;
     border-radius: 50%;
@@ -238,7 +290,8 @@ body {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.profile-icon img:hover { /* Estilo de hover para a imagem do perfil */
+.profile-icon img:hover {
+    /* Estilo de hover para a imagem do perfil */
     transform: scale(1.05);
     box-shadow: 0 0 8px var(--neon-cyan-glow);
 }
@@ -263,7 +316,7 @@ body {
     background-color: var(--glass-bg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.45), 0 0 0 1px var(--border-color-light);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border-color-light);
     width: 260px;
     z-index: 10000;
     border-radius: 8px;
@@ -277,8 +330,15 @@ body {
 }
 
 @keyframes fadeInDropdown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .profile-menu ul {
@@ -304,7 +364,7 @@ body {
 
 .profile-info {
     padding: 15px 20px;
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0, 0, 0, 0.2);
     text-align: center;
     border-bottom: 1px solid var(--border-color-light);
 }
@@ -313,10 +373,12 @@ body {
     margin: 4px 0;
     font-size: 0.95em;
 }
+
 .profile-info p:first-child {
     font-weight: 500;
     color: var(--text-primary);
 }
+
 .profile-info p:last-child {
     font-size: 0.8em;
     color: var(--text-secondary);
@@ -327,10 +389,12 @@ body {
 .notification-bell {
     position: relative;
     display: inline-block;
+    top: 6.5px;
     margin-right: -5px;
 }
 
-.bell-icon { /* Aplicado à tag <img> diretamente no HTML */
+.bell-icon {
+    /* Aplicado à tag <img> diretamente no HTML */
     width: 28px;
     height: 28px;
     cursor: pointer;
@@ -338,10 +402,10 @@ body {
     /* Para aplicar filtros, pode-se usar o 'filter' property. */
     transition: filter 0.2s ease, transform 0.2s ease;
 }
-.notification-bell a:hover .bell-icon, /* Supondo que o <a> envolve a <img> */
+
+.notification-bell a:hover .bell-icon,
 .notification-bell a.active .bell-icon {
-    /* filter: drop-shadow(0 0 4px var(--neon-cyan-glow)); -- O drop-shadow pode ser muito forte em .png com transparência */
-    transform: scale(1.05); /* Efeito de hover sutil */
+    transform: scale(1.05);
 }
 
 
@@ -361,7 +425,8 @@ body {
 
 /* Dropdown de notificações */
 .notification-dropdown {
-    display: none; /* Alterado para flex quando open */
+    display: none;
+    /* Alterado para flex quando open */
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
@@ -371,15 +436,17 @@ body {
     color: var(--text-primary);
     width: 450px;
     border-radius: 8px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.45), 0 0 0 1px var(--border-color-light);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border-color-light);
     z-index: 10000;
     border: 1px solid var(--border-color-light);
     max-height: 400px;
-    flex-direction: column; /* Adicionado para .notification-dropdown */
+    flex-direction: column;
+    /* Adicionado para .notification-dropdown */
 }
 
 .notification-dropdown.open {
-    display: flex; /* Alterado de block para flex */
+    display: flex;
+    /* Alterado de block para flex */
     animation: fadeInDropdown 0.2s ease-out;
 }
 
@@ -422,8 +489,10 @@ body {
 .notification-dropdown ul li {
     position: relative;
     padding: 12px 15px;
-    background-color: rgba(var(--dark-bg2-rgb), 0.5); /* Usando RGBa */
-    /* background-color: var(--dark-bg2); */ /* Alternativa sólida */
+    background-color: rgba(var(--dark-bg2-rgb), 0.5);
+    /* Usando RGBa */
+    /* background-color: var(--dark-bg2); */
+    /* Alternativa sólida */
     border-radius: 6px;
     margin-bottom: 8px;
     border: 1px solid var(--border-color);
@@ -432,6 +501,7 @@ body {
     align-items: flex-start;
     transition: background-color 0.2s ease;
 }
+
 .notification-dropdown ul li:last-child {
     margin-bottom: 0;
 }
@@ -472,7 +542,8 @@ body {
 .notification-message {
     display: flex;
     align-items: center;
-    width: calc(100% - 20px); /* Deixar espaço para o botão de fechar */
+    width: calc(100% - 20px);
+    /* Deixar espaço para o botão de fechar */
     margin-bottom: 8px;
 }
 
@@ -533,74 +604,321 @@ body {
     background-color: transparent !important;
     border: none !important;
 }
+
 .no-notifications:hover {
     background-color: transparent !important;
 }
 
 /* Cards de Conteúdo (Exemplo) */
 .content-card {
-    background-color: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    padding: 25px; border-radius: 12px; border: 1px solid var(--border-color-light); margin-bottom: 30px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(55,65,81,0.15);
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color-light);
+    margin-bottom: 30px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(55, 65, 81, 0.15);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.content-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 15px var(--neon-cyan-glow), 0 0 0 1px var(--border-color-light); }
-.content-card h2 {
-    color: var(--text-primary); border-bottom: 1px solid var(--neon-cyan); padding-bottom: 15px;
-    margin: -25px -25px 25px -25px; padding-left: 25px; padding-top: 22px;
-    background-color: rgba(30,178,193,0.08); border-radius: 12px 12px 0 0;
-    font-size: 1.3em; font-weight: 500; text-shadow: 0 0 5px rgba(30,178,193,0.2);
+
+.content-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 15px var(--neon-cyan-glow), 0 0 0 1px var(--border-color-light);
 }
+
+.content-card h2 {
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--neon-cyan);
+    padding-bottom: 15px;
+    margin: -25px -25px 25px -25px;
+    padding-left: 25px;
+    padding-top: 22px;
+    background-color: rgba(30, 178, 193, 0.08);
+    border-radius: 12px 12px 0 0;
+    font-size: 1.3em;
+    font-weight: 500;
+    text-shadow: 0 0 5px rgba(30, 178, 193, 0.2);
+}
+
+.personificar-alert {
+    background-color: #ff4040; /* cor de fundo de destaque */
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 20px;
+    margin-top: 50px; /* se quiser dar espaço abaixo da top-bar */
+}
+
+.personificar-alert a {
+    color: #fff;
+    text-decoration: underline;
+    margin-left: 10px;
+}
+
 
 /* Responsividade */
 @media (max-width: 992px) {
-    .side-bar.expanded { width: 230px; }
-    .side-bar.expanded ~ .main-content { margin-left: 230px; }
-    .notification-dropdown { width: 380px; }
-}
-@media (max-width: 768px) {
-    .top-bar { padding: 0 20px; height: 55px; }
-    .side-bar { top: 55px; width: 60px; height: calc(100% - 55px); }
-    .side-bar.expanded { width: 220px; }
-    .main-content { margin-left: 60px; padding: 20px; padding-top: 75px; }
-    .side-bar.expanded ~ .main-content { margin-left: 220px; }
-    .notification-dropdown { width: 340px; }
-    .profile-menu { width: 260px; } /* Mantido, pode ser ajustado aqui também se necessário */
-    .content-card { padding: 20px; border-radius: 10px; }
-    .content-card h2 { font-size: 1.2em; margin: -20px -20px 20px -20px; padding-left: 20px; padding-top: 18px;}
-}
-@media (max-width: 480px) {
-    .top-bar-right { gap: 12px; }
-    .profile-icon img.profile-photo, /* Se usar .profile-photo especificamente */
-    .profile-icon img { /* Aplica a ambas as imagens de perfil */
-      width: 32px;
-      height: 32px;
-    }
-    .bell-icon {
-      width: 26px;
-      height: 26px;
+    .side-bar.expanded {
+        width: 230px;
     }
 
-    .notification-dropdown, .profile-menu {
+    .side-bar.expanded~.main-content {
+        margin-left: 230px;
+    }
+
+    .notification-dropdown {
+        width: 380px;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-bar {
+        padding: 0 20px;
+        height: 55px;
+    }
+
+    .side-bar {
+        top: 55px;
+        width: 60px;
+        height: calc(100% - 55px);
+    }
+
+    .side-bar.expanded {
+        width: 220px;
+    }
+
+    .main-content {
+        margin-left: 60px;
+        padding: 20px;
+        padding-top: 75px;
+    }
+
+    .side-bar.expanded~.main-content {
+        margin-left: 220px;
+    }
+
+    .notification-dropdown {
+        width: 340px;
+    }
+
+    .profile-menu {
+        width: 260px;
+    }
+
+    /* Mantido, pode ser ajustado aqui também se necessário */
+    .content-card {
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .content-card h2 {
+        font-size: 1.2em;
+        margin: -20px -20px 20px -20px;
+        padding-left: 20px;
+        padding-top: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-bar-right {
+        gap: 12px;
+    }
+
+    .profile-icon img.profile-photo,
+    /* Se usar .profile-photo especificamente */
+    .profile-icon img {
+        /* Aplica a ambas as imagens de perfil */
+        width: 32px;
+        height: 32px;
+    }
+
+    .bell-icon {
+        width: 26px;
+        height: 26px;
+    }
+
+    .notification-dropdown,
+    .profile-menu {
         /* width: calc(100vw - 24px); -- Removido para usar max-width e right/left específicos */
         top: calc(100% + 5px);
         right: 10px;
-        left: 10px; /* Adicionado para centralizar em telas muito pequenas se desejado */
+        left: 10px;
+        /* Adicionado para centralizar em telas muito pequenas se desejado */
         transform: none;
-        transform-origin: top center; /* Alterado para centralizar a origem */
-        width: auto; /* Para que left e right definam a largura */
-        max-width: calc(100vw - 20px); /* Garante que não ultrapasse a tela */
-    }
-    /* Ajuste específico se quiser larguras diferentes para cada dropdown em mobile */
-    .profile-menu {
-      width: auto; /* Deixa o left/right definir */
-      max-width: 240px; /* Limita o profile menu */
-      left: auto; /* Prioriza o 'right: 10px' */
-    }
-    .notification-dropdown {
-      max-width: calc(100vw - 20px); /* Permite que o notification dropdown seja mais largo */
+        transform-origin: top center;
+        /* Alterado para centralizar a origem */
+        width: auto;
+        /* Para que left e right definam a largura */
+        max-width: calc(100vw - 20px);
+        /* Garante que não ultrapasse a tela */
     }
 
-    .content-card { padding: 15px; border-radius: 8px; }
-    .content-card h2 { font-size: 1.1em; margin: -15px -15px 15px -15px; padding-left: 15px; padding-top: 15px;}
+    /* Ajuste específico se quiser larguras diferentes para cada dropdown em mobile */
+    .profile-menu {
+        width: auto;
+        /* Deixa o left/right definir */
+        max-width: 240px;
+        /* Limita o profile menu */
+        left: auto;
+        /* Prioriza o 'right: 10px' */
+    }
+
+    .notification-dropdown {
+        max-width: calc(100vw - 20px);
+        /* Permite que o notification dropdown seja mais largo */
+    }
+
+    .content-card {
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .content-card h2 {
+        font-size: 1.1em;
+        margin: -15px -15px 15px -15px;
+        padding-left: 15px;
+        padding-top: 15px;
+    }
 }
+
+/* TEMA CLARO */
+
+/* DEFINIÇÃO DO TEMA ESCURO (PADRÃO) */ 
+body.dark-theme {
+    background: #0f1e24 url("/static/images/fundo2.png") center/100% 100% fixed;
+    color: var(--text-primary);
+}
+
+/* DEFINIÇÃO DO TEMA CLARO */ 
+body.light-theme {
+    background: #f2f2f2 url("/static/images/fundo2-white.png") center/100% 100% fixed;
+    color: #1a1a1a
+}
+
+/* BOTÃO DE TROCA DE TEMA */ 
+.theme-toggle-btn {
+    position: absolute;
+    top: 6.5px;
+    right: 150px;
+    z-index: 99999;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+/* HOVER DO BOTÃO */ 
+.theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* BOTÃO DE TROCA DE TEMA QUANDO ESTIVER NO TEMA CLARO */ 
+body.light-theme .theme-toggle-btn {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #000;
+}
+
+/* BARRA LATERAL TEMA CLARO */
+body.light-theme .side-bar {
+    background-color: #515e6c;
+}
+
+/* BARRA SUPERIOR TEMA CLARO */
+body.light-theme .top-bar {
+    background-color: #515e6c;
+}
+
+/* CONTAINERS HOME TEMA CLARO */
+body.light-theme .modal-container {
+    background-color: #515e6c;
+    box-shadow: none;
+}
+
+/* CONTAINER CLIMA TEMA CLARO */
+body.light-theme .weather-card {
+    background-color: #515e6c;
+    box-shadow: none;
+}
+
+/* TITULO CLIMA TEMA CLARO */
+body.light-theme .title-weather {
+    color: #ffffff;
+}
+
+body.light-theme a {
+    color: #000;
+}
+
+/* CONTAINER LISTA DOCUMENTOS TEMA CLARO */
+body.light-theme .document-container {
+    background-color: #515e6c;
+}
+
+/* H1'S LISTA DOCUMENTOS TEMA CLARO */
+body.light-theme h1 {
+    color: black;
+}
+
+/* ÍCONES LISTA DOCUMENTOS TEMA CLARO */
+body.light-theme .icon {
+    filter: brightness(0) saturate(100%);
+    opacity: 1;
+    color: rgba(var(--dark-bg2-rgb), 0.5);
+}
+
+/* TEXTOS CONTAINER DOCUMENTOS TEMA CLARO */
+body.light-theme .document-grid {
+    color: #ffffff;
+}
+
+/* CONTAINERS VISUALIZAR DOCUMENTOS TEMA CLARO */
+body.light-theme .container-visualize {
+    background-color: #515e6c;
+    color: #ffffff;
+}
+
+/* H1'S VISUALIZAR DOCUMENTOS TEMA CLARO */
+body.light-theme .container-visualize h1 {
+    color: #ffffff;
+}
+
+/* CONTAINERS CATEGORIAS DOCUMENTOS TEMA CLARO */
+body.light-theme .category-container {
+    background-color: #515e6c;
+    color: #ffffff;
+}
+
+/* CONTAINER BI TEMA CLARO */
+body.light-theme .bi-container {
+    background-color: #515e6c;
+    color: #ffffff;
+}
+
+/* CONTAINER USUÁRIOS TEMA CLARO */
+body.light-theme .user-container {
+    background-color: #515e6c;
+    color: #ffffff;
+}
+
+/* BOTÃO DE VOLTAR TEMA CLARO */
+body.light-theme .back-button {
+    color: #ffffff;
+}
+
+/* CONTAINER DE GRUPOS TEMA CLARO */
+body.light-theme .group-container {
+    background-color: #515e6c;
+    color: #ffffff;
+}
+
+/* NOTIFICAÇÃO TEMA CLARO */
+body.light-theme .notification-dropdown li a{
+    color: #ffffff;
+}
+

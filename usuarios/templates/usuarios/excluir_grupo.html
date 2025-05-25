@@ -1,7 +1,9 @@
 <!-- usuarios/templates/usuarios/excluir_grupo.html -->
 {% extends 'base.html' %}
 {% load static %}
-
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/excluir_grupo.css' %}">
+{% endblock %}
 {% block title %}Excluir Grupo{% endblock %}
 
 {% block content %}

@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="register-container">
     <h2>Cadastro - Grupos de Usuários</h2>
 
     <form id="form-grupo" method="POST" action="{% url 'usuarios:cadastrar_grupo' %}">
@@ -45,15 +45,16 @@
         <!-- Botões do Formulário -->
         <div class="form-buttons">
             <!-- Botão Cancelar -->
-            <button type="button" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
+            <button class="btn-form" type="button" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
             <!-- Botão Salvar -->
-            <button type="submit">Salvar</button>
+            <button class="btn-form-ok" type="submit">Salvar</button>
         </div>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <!-- Inclua o jQuery localmente -->
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 

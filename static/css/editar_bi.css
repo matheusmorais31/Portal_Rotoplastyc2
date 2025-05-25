@@ -64,7 +64,7 @@ label {
 }
 
 /* Estilizar os botões */
-button {
+.btn,.btn-primary,.btn-secondary {
     width: 100px; /* Diminui um pouco a largura dos botões */
     padding: 6px; /* Reduz o padding para ajustar o tamanho do botão */
     margin: 10px 5px; /* Reduz a margem entre os botões */
@@ -76,18 +76,18 @@ button {
     display: inline-block;
 }
 
-button[type="submit"] {
+.btn-primary {
     background-color: #2EC2D6;
     color: white;
 }
 
 /* Botão Cancelar */
-button[type="button"] {
+.btn-secondary {
     background-color: #2EC2D6;
     color: white;
 }
 
-button[type="submit"]:hover, button[type="button"]:hover {
+.btn-primary:hover, .btn-secondary:hover {
     background-color: #1EB2C1;
     box-shadow:  0px 0px 15px #2EC2D6;
 }
@@ -227,4 +227,9 @@ tr:hover {
 .form-check input[type="checkbox"]:focus + .form-check-label {
     outline: 2px solid #2EC2D6;
     outline-offset: 4px;
+}
+
+body.light-theme .container {
+    background-color: #515e6c;
+    color: #ffffff;
 }

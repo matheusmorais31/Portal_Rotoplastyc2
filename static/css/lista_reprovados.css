@@ -39,6 +39,13 @@ h1 {
     font-size: 16px;
 }
 
+input#searchInput.search-input:focus {
+    border-color: #2EC2D6;
+    outline: none;
+    background-color: #fff;
+    color: #000;
+}
+
 /* Lista de Documentos */
 .document-container {
     margin-top: 2%;
@@ -94,7 +101,12 @@ h1 {
 }
 
 .motivo-reprovacao-container strong {
-    color: #FF4D4D;
+    color: #ffffff;
+    padding: 10px;
+}
+
+.motivo-reprovacao-container p {
+    padding: 10px;
 }
 
 /* Botões de ação */
@@ -291,4 +303,17 @@ h1 {
     .modal-content {
         width: 90%;
     }
+}
+
+/* TEMA CLARO */
+body.light-theme .motivo-reprovacao-container {
+    background-color: #E8E9E6;
+}
+
+body.light-theme .motivo-reprovacao-container strong {
+    color: black;
+}
+
+body.light-theme .motivo-reprovacao-container p {
+    color: black;
 }

@@ -1,4 +1,4 @@
-<!-- templates/documentos/nova_revisao.html -->
+{# templates/documentos/nova_revisao.html #}
 {% extends 'base.html' %}
 {% load static %}
 
@@ -11,8 +11,10 @@
 
 {% block content %}
 <div class="container">
-    <h2>Nova Revisão - {{ documento.nome }}</h2>
 
+    <h2>Nova Revisão&nbsp;-&nbsp;{{ documento.nome }}</h2>
+
+    {# ─────────── aviso se há pendente ─────────── #}
     {% if mensagem %}
         <div class="alert alert-warning">
             {{ mensagem }}
@@ -20,48 +22,76 @@
     {% endif %}
 
     {% if revisao_pendente %}
-        <!-- Exibe detalhes da revisão pendente -->
         <p><strong>Revisão Pendente</strong></p>
-           <ul> 
-            <li class="lista-revisao"><strong>Revisão Número:</strong> {{ revisao_pendente.revisao }}</li>
-            <li class="lista-revisao"><strong>Status:</strong> {{ revisao_pendente.get_status_display }}</li>
-            <li class="lista-revisao"><strong>Data de Criação:</strong> {{ revisao_pendente.data_criacao|date:"d/m/Y H:i" }}</li></ul>
-            <!-- Você pode adicionar mais detalhes se necessário -->
-        
+        <ul>
+            <li class="lista-revisao"><strong>Número:&nbsp;</strong>{{ revisao_pendente.revisao }}</li>
+            <li class="lista-revisao"><strong>Status:&nbsp;</strong>{{ revisao_pendente.get_status_display }}</li>
+            <li class="lista-revisao"><strong>Data de Criação:&nbsp;</strong>{{ revisao_pendente.data_criacao|date:"d/m/Y H:i" }}</li>
+        </ul>
+
         <a href="javascript:history.back()" class="btn btn-primary">Voltar</a>
+
     {% else %}
-        <!-- Exibe o formulário normalmente -->
-        <form method="post" enctype="multipart/form-data">
+        {# ─────────── formulário ─────────── #}
+        <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
 
-            <!-- Exibe mensagens de erro gerais apenas quando houver -->
             {% if form.non_field_errors %}
-                <div class="error-message" style="color: red;">
+                <div class="error-message" style="color:red;">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            <!-- Campos do formulário -->
-            {% for field in form %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% if field.errors %}
-                        <div class="error-message" style="color: red;">
-                            {{ field.errors }}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+            {# ===== Campo Nome ===== #}
+            <div class="form-group">
+                <label>{{ form.nome.label }}</label>
+                {{ form.nome }}
+                {% if form.nome.errors %}
+                    <div class="error-message" style="color:red;">
+                        {{ form.nome.errors }}
+                    </div>
+                {% endif %}
+            </div>
 
+            {# ===== Campo Revisão ===== #}
+            <div class="form-group">
+                <label>{{ form.revisao.label }}</label>
+                {{ form.revisao }}
+                {% if form.revisao.errors %}
+                    <div class="error-message" style="color:red;">
+                        {{ form.revisao.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# ===== Campo Aprovador ===== #}
+            <div class="form-group">
+                <label>{{ form.aprovador1.label }}</label>
+                {{ form.aprovador1 }}
+                {% if form.aprovador1.errors %}
+                    <div class="error-message" style="color:red;">
+                        {{ form.aprovador1.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# ===== Campo Documento ===== #}
+            <div class="form-group">
+                <label>{{ form.documento.label }}</label>
+                {{ form.documento }}
+                {% if form.documento.errors %}
+                    <div class="error-message" style="color:red;">
+                        {{ form.documento.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# ─────────── botões ─────────── #}
             <div class="form-buttons">
                 <a href="{% url 'documentos:listar_documentos_aprovados' %}">
-                    <button type="button">Cancelar</button>
+                    <button class="btn-form" type="button">Cancelar</button>
                 </a>
-                <button type="submit">OK</button>
+                <button class="btn-form-ok" type="submit">OK</button>
             </div>
         </form>
     {% endif %}
@@ -69,12 +99,12 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<!-- Incluindo o arquivo de idioma para português -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>
 <script>
-    $(document).ready(function() {
+    $(function () {
         $('.select2').select2({
             width: 'resolve',
             language: 'pt-BR'

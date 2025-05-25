@@ -103,3 +103,14 @@ h1 {
     color: #ffffff;
 }
 
+/* TEMA CLARO */ 
+body.light-theme .container {
+    background-color: #515e6c;
+    color: #ffffff;
+}
+
+/* TEMA CLARO */ 
+body.light-theme .container h1 {
+    color: #ffffff;
+}
+

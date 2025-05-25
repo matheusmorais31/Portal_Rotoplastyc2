@@ -58,6 +58,11 @@
                         <img src="{% static 'images/edit-icon.png' %}" alt="Editar" class="edit-icon">
                         <span class="tooltip-text">Editar Usuário</span>
                     </a>
+                    <!-- Ícone: Personificar Usuário -->
+                    <a href="{% url 'usuarios:personificar_usuario' usuario.id %}" class="action-icon">
+                        <img src="{% static 'images/personificar-icon.png' %}" alt="Personificar Usuário">
+                        <span class="tooltip-text">Personificar</span>
+                    </a>
                 </div>
             </div>
         </div>

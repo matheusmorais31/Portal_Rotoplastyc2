@@ -39,6 +39,12 @@ h1 {
     font-size: 16px;
 }
 
+#searchInput:focus {
+    background-color: #fff;
+    outline: none;
+    border-color: #2EC2D6;
+}
+
 /* Lista de Documentos */
 .document-container {
     margin-top: 2%;

@@ -363,18 +363,27 @@ def listar_aprovacoes_pendentes(request):
 @login_required
 @permission_required('documentos.view_documentos', raise_exception=True)
 def listar_documentos_aprovados(request):
-    documentos = Documento.objects.filter(status='aprovado', is_active=True)\
-        .select_related('categoria')\
-        .order_by('categoria__nome', 'nome', '-revisao')
-    documentos_unicos = {}
+    # traz todas as revisões aprovadas e ativas, 
+    # ordenando por categoria e revisão descendente
+    documentos = (
+        Documento.objects
+        .filter(status='aprovado', is_active=True)
+        .select_related('categoria')
+        .order_by('-revisao')
+    )
+
+    # agrupa por código, pegando sempre a revisão mais alta
+    docs_por_codigo = {}
     for doc in documentos:
-        chave_unica = (doc.nome, doc.categoria.id)
-        if chave_unica not in documentos_unicos:
-            documentos_unicos[chave_unica] = doc
-    documentos = list(documentos_unicos.values())
-    documentos.sort(key=lambda x: (x.categoria.nome, x.nome))
+        if doc.codigo not in docs_por_codigo:
+            docs_por_codigo[doc.codigo] = doc
+
+    documentos_unicos = list(docs_por_codigo.values())
+    # por fim, ordena alfabeticamente por categoria e nome (da última revisão)
+    documentos_unicos.sort(key=lambda x: (x.categoria.nome, x.nome))
+
     return render(request, 'documentos/listar_documentos.html', {
-        'documentos': documentos,
+        'documentos': documentos_unicos,
         'titulo': 'Documentos Aprovados'
     })
 
@@ -467,42 +476,134 @@ def listar_documentos_reprovados(request):
 
 # Função para nova revisão
 @login_required
-@permission_required('documentos.can_add_documento', raise_exception=True)
+@permission_required("documentos.can_add_documento", raise_exception=True)
 def nova_revisao(request, documento_id):
+    """
+    Cria nova revisão, logando cada etapa e removendo revisions 'reprovado'
+    com mesmo (codigo, revisao) para evitar o UniqueConstraint.
+    """
+    logger.debug("=== nova_revisao start ===")
+    logger.debug("Parâmetros: documento_id=%s, user=%s", documento_id, request.user)
+
     documento_atual = get_object_or_404(Documento, id=documento_id)
+    logger.debug(
+        "Documento atual: id=%s, nome=%r, revisao=%s, codigo=%s",
+        documento_atual.id, documento_atual.nome,
+        documento_atual.revisao, documento_atual.codigo
+    )
+
+    # Bloqueio: se já há alguma revisão em andamento
+    PENDENTES = [
+        "aguardando_analise",
+        "analise_concluida",
+        "aguardando_elaborador",
+        "aguardando_aprovador1",
+    ]
     revisoes_pendentes = Documento.objects.filter(
-        nome=documento_atual.nome,
-        status__in=['aguardando_analise', 'analise_concluida', 'aguardando_aprovador1', 'aguardando_elaborador']
+        codigo=documento_atual.codigo, status__in=PENDENTES
     ).exclude(id=documento_atual.id)
     if revisoes_pendentes.exists():
-        revisao_pendente = revisoes_pendentes.first()
-        mensagem = f"Não é possível criar uma nova revisão enquanto houver revisões pendentes de aprovação. Status da revisão pendente: {revisao_pendente.get_status_display()}."
-        return render(request, 'documentos/nova_revisao.html', {
-            'documento': documento_atual,
-            'mensagem': mensagem,
-            'revisao_pendente': revisao_pendente
+        rev = revisoes_pendentes.order_by("-revisao").first()
+        mensagem = (
+            "Não é possível criar uma nova revisão enquanto houver revisões "
+            f"pendentes. Status da pendente: {rev.get_status_display()}."
+        )
+        logger.info("Bloqueio por pendente: id=%s status=%s", rev.id, rev.status)
+        return render(request, "documentos/nova_revisao.html", {
+            "documento": documento_atual,
+            "revisao_pendente": rev,
+            "mensagem": mensagem,
         })
-    if request.method == 'POST':
+
+    if request.method == "POST":
+        logger.debug("Recebido POST para nova revisão")
+        logger.debug("POST data: %s", request.POST)
+        logger.debug("FILES data: %s", request.FILES)
+
         form = NovaRevisaoForm(request.POST, request.FILES, documento_atual=documento_atual)
+        logger.debug("Form instanciado: %r", form)
+
         if form.is_valid():
+            logger.debug("Form validado, cleaned_data: %s", form.cleaned_data)
             try:
                 with transaction.atomic():
-                    nova_revisao = form.save(commit=False)
-                    nova_revisao.nome = documento_atual.nome
-                    nova_revisao.categoria = documento_atual.categoria
-                    nova_revisao.elaborador = request.user
-                    nova_revisao.status = 'aguardando_analise'
-                    nova_revisao.save()
-                    messages.success(request, 'Nova revisão criada com sucesso!')
-                    return redirect('documentos:listar_documentos_aprovados')
-            except Exception as e:
-                logger.error(f'Erro ao criar nova revisão: {e}', exc_info=True)
-                messages.error(request, f'Ocorreu um erro ao criar a nova revisão: {e}')
+                    nova_rev = form.save(commit=False)
+
+                    # herda categoria e código do documento raiz
+                    nova_rev.categoria = documento_atual.categoria
+                    raiz = Documento.objects.filter(
+                        codigo=documento_atual.codigo,
+                        documento_original__isnull=True
+                    ).order_by("revisao").first() or documento_atual
+                    nova_rev.codigo = raiz.codigo
+                    nova_rev.documento_original = raiz
+
+                    # metadados
+                    nova_rev.elaborador = request.user
+                    nova_rev.status = "aguardando_analise"
+                    nova_rev.data_criacao = timezone.now()
+                    nova_rev.nome = form.cleaned_data["nome"]
+                    if nova_rev.nome != documento_atual.nome:
+                        nova_rev._rename_user = request.user
+                        logger.debug(
+                            "Rename sinalizado: %r → %r",
+                            documento_atual.nome, nova_rev.nome
+                        )
+
+                    # -> novo passo: apagar qualquer revisão *reprovada*
+                    dup_reprov = Documento.objects.filter(
+                        codigo=nova_rev.codigo,
+                        revisao=nova_rev.revisao,
+                        status="reprovado"
+                    )
+                    if dup_reprov.exists():
+                        ids = list(dup_reprov.values_list("id", flat=True))
+                        logger.debug("Excluindo revisões reprovadas duplicadas: %s", ids)
+                        dup_reprov.delete()
+
+                    logger.debug(
+                        "Salvando nova revisão: nome=%r revisao=%s codigo=%s categoria=%s",
+                        nova_rev.nome, nova_rev.revisao, nova_rev.codigo, nova_rev.categoria
+                    )
+                    nova_rev.save()
+                    logger.info("Nova revisão ID=%s salva com sucesso", nova_rev.id)
+
+                    # tenta gerar PDF
+                    try:
+                        nova_rev.gerar_pdf()
+                        logger.debug("gerar_pdf() executado para ID=%s", nova_rev.id)
+                    except Exception as e:
+                        logger.warning("Falha ao gerar PDF ID=%s: %s", nova_rev.id, e)
+
+                    messages.success(request, "Nova revisão criada e enviada para análise.")
+                    logger.debug("=== nova_revisao end (sucesso) ===")
+                    return redirect("documentos:listar_documentos_aprovados")
+
+            except IntegrityError as ie:
+                logger.error("IntegrityError ao criar revisão: %s", ie)
+                messages.error(
+                    request,
+                    "Já existe uma revisão ativa com esse número (mesmo código/revisão)."
+                )
+            except ValidationError as ve:
+                logger.error("ValidationError ao criar revisão: %s", ve)
+                messages.error(request, f"Erro de validação: {ve.messages}")
+            except Exception:
+                logger.exception("Erro inesperado ao criar nova revisão")
+                messages.error(request, "Ocorreu um erro inesperado.")
         else:
-            messages.error(request, 'Por favor, corrija os erros no formulário.')
+            logger.warning("Form inválido: %s", form.errors)
+            messages.error(request, "Por favor, corrija os erros abaixo.")
     else:
+        logger.debug("Método GET: exibindo formulário")
         form = NovaRevisaoForm(documento_atual=documento_atual)
-    return render(request, 'documentos/nova_revisao.html', {'form': form, 'documento': documento_atual})
+
+    logger.debug("Renderizando template com formulário (GET ou erro)")
+    return render(request, "documentos/nova_revisao.html", {
+        "form": form,
+        "documento": documento_atual,
+        "mensagem": None,
+    })
 
 # Função para upload de documento revisado
 @login_required
@@ -567,15 +668,21 @@ def listar_documentos_editaveis(request):
 @permission_required('documentos.can_view_revisions', raise_exception=True)
 def listar_revisoes_documento(request, documento_id):
     documento_atual = get_object_or_404(Documento, id=documento_id)
-    revisoes_aprovadas = Documento.objects.filter(
-        nome=documento_atual.nome,
-        status='aprovado'
-    ).order_by('-revisao')
+
+    # agora filtramos TODAS as revisões (aprovadas) do mesmo código,
+    # não mais pelo nome exato
+    revisoes = (
+        Documento.objects
+        .filter(codigo=documento_atual.codigo, status='aprovado')
+        .order_by('-revisao')
+    )
+
     return render(request, 'documentos/listar_revisoes_documento.html', {
         'documento_atual': documento_atual,
-        'revisoes': revisoes_aprovadas,
-        'titulo': f'Revisões Aprovadas de {documento_atual.nome}',
+        'revisoes': revisoes,
+        'titulo': f'Revisões de {documento_atual.nome}'
     })
+
 
 # Função para monitorar documentos pendentes de aprovação
 @login_required

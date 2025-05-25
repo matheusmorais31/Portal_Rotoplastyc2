@@ -284,3 +284,13 @@ td[colspan] {
     .cost-monitor-container { padding: 15px; }
     .total-cost { font-size: 1.4em; padding: 20px; }
 }
+
+body.light-theme .cost-monitor-container {
+    background-color: #515e6c;
+    color: #ffffff;
+}
+
+body.light-theme .cost-monitor-container h1 {
+    color: #ffffff;
+}
+

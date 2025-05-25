@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="register-container">
     <h2>Editar Grupo: {{ group.name }}</h2>
 
     <!-- Exibição de mensagens de feedback -->
@@ -53,7 +53,7 @@
                         <tr data-id="{{ participante.id }}">
                             <td>{{ participante.id }}</td>
                             <td>{{ participante.username }}</td>
-                            <td><button type="button" class="btn btn-danger btn-sm remover-participante">Remover</button></td>
+                            <td><button type="button" class="btn-secondary btn-form">Remover</button></td>
                         </tr>
                         <!-- Campo oculto para participantes existentes -->
                         <input type="hidden" name="participantes" value="{{ participante.id }}">
@@ -65,15 +65,16 @@
         <!-- Botões do Formulário -->
         <div class="form-buttons">
             <!-- Botão Cancelar -->
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-form" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
             <!-- Botão Salvar -->
-            <button type="submit" class="btn btn-primary">Salvar</button>
+            <button type="submit" class="btn btn-primary btn-form-ok">Salvar</button>
         </div>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <!-- Inclua o jQuery localmente -->
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 

@@ -71,6 +71,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 <script>
     $(document).ready(function () {

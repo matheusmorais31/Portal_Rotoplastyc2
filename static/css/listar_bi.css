@@ -48,6 +48,13 @@ h1 {
     font-size: 16px;
 }
 
+input#searchInput.search-input:focus {
+    border-color: #2EC2D6;
+    outline: none;
+    background-color: #fff;
+    color: #000;
+}
+
 /* Filtro por Categoria */
 .filter-container {
     flex: 0 1 200px;

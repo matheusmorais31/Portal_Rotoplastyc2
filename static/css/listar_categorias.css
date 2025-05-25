@@ -33,6 +33,13 @@ h1 {
     font-size: 16px;
 }
 
+input#searchInput.search-input:focus {
+    border-color: #2EC2D6;
+    outline: none;
+    background-color: #fff;
+    color: #000;
+}
+
 /* Estilos da Lista de Categorias */
 .category-container {
     margin-top: 2%;

@@ -91,13 +91,22 @@ class DocumentoForm(forms.ModelForm):
             raise ValidationError('Formato de arquivo inválido.')
         return documento
 
-    def clean(self):
-        cleaned_data = super().clean()
-        nome = cleaned_data.get('nome')
-        documentos_existentes = Documento.objects.filter(nome=nome).exclude(status='reprovado')
-        if documentos_existentes.exists():
-            raise ValidationError('Já existe um documento aprovado ou pendente com este nome. Escolha outro nome.')
-        return cleaned_data
+def clean(self):
+    cleaned_data = super().clean()
+    nome = cleaned_data.get('nome')
+
+    # Só bloqueia se já existir OUTRO documento “raiz” com o mesmo nome
+    duplicado = Documento.objects.filter(
+        nome=nome,
+        documento_original__isnull=True  # raiz somente
+    ).exclude(status='reprovado')
+
+    if duplicado.exists():
+        raise ValidationError(
+            'Já existe um documento inicial aprovado ou pendente com este nome.'
+        )
+    return cleaned_data
+
 
 class AnaliseDocumentoForm(forms.ModelForm):
     class Meta:
@@ -129,85 +138,102 @@ class AnaliseDocumentoForm(forms.ModelForm):
         return documento
 
 class NovaRevisaoForm(forms.ModelForm):
+    """
+    Formulário usado na view nova_revisao.
+    • Exibe **nome** (editável), revisao, aprovador, documento.
+    • Pré-preenche revisão +1 e nome atual.
+    • Impede duplicidade de revisão dentro do mesmo documento (código).
+    """
+
     aprovador1 = forms.ModelChoiceField(
         queryset=User.objects.none(),
-        label='Aprovador',
-        widget=forms.Select(attrs={'class': 'form-control select2'}),
-        empty_label="Selecione um aprovador"
+        label="Aprovador",
+        widget=forms.Select(attrs={"class": "form-control select2"}),
+        empty_label="Selecione um aprovador",
     )
 
     class Meta:
         model = Documento
-        fields = ['revisao', 'aprovador1', 'documento']
+        fields = ["nome", "revisao", "aprovador1", "documento"]
         labels = {
-            'revisao': 'Revisão',
-            'aprovador1': 'Aprovador',
-            'documento': 'Anexar Documento',
+            "nome": "Nome da Revisão",
+            "revisao": "Revisão",
+            "aprovador1": "Aprovador",
+            "documento": "Anexar Documento",
         }
         widgets = {
-            'revisao': forms.Select(attrs={'class': 'form-control select2'}),
-            'documento': forms.FileInput(attrs={
-                'class': 'form-control-file',
-                'accept': '.doc,.docx,.odt,.xls,.xlsx,.ods'
-            }),
+            "nome": forms.TextInput(attrs={"class": "form-control"}),
+            "revisao": forms.Select(attrs={"class": "form-control select2"}),
+            "documento": forms.FileInput(
+                attrs={
+                    "class": "form-control-file",
+                    "accept": ".doc,.docx,.odt,.xls,.xlsx,.ods",
+                }
+            ),
         }
 
+    # -------------------- INIT --------------------
     def __init__(self, *args, **kwargs):
-        self.documento_atual = kwargs.pop('documento_atual', None)
-        super(NovaRevisaoForm, self).__init__(*args, **kwargs)
+        self.documento_atual = kwargs.pop("documento_atual", None)
+        super().__init__(*args, **kwargs)
+
+        # revisão sugerida = atual + 1
         if self.documento_atual:
-            revisao_atual = self.documento_atual.revisao
-            proxima_revisao = revisao_atual + 1
-            choices = [(proxima_revisao, f"{proxima_revisao:02d}")]
+            proxima_revisao = self.documento_atual.revisao + 1
+            self.fields["revisao"].choices = [(proxima_revisao, f"{proxima_revisao:02d}")]
+            self.fields["nome"].initial = self.documento_atual.nome
         else:
-            choices = [(1, "Revisão 01")]
-        self.fields['revisao'].choices = choices
-        self.fields['aprovador1'].queryset = self._set_aprovadores()
-        self.fields['aprovador1'].label_from_instance = self.get_aprovador_label
+            self.fields["revisao"].choices = [(1, "01")]
+
+        # lista de aprovadores
+        self.fields["aprovador1"].queryset = self._set_aprovadores()
+        self.fields["aprovador1"].label_from_instance = self._get_aprovador_label
 
     def _set_aprovadores(self):
         content_type = ContentType.objects.get_for_model(Documento)
         try:
-            permission = Permission.objects.get(content_type=content_type, codename='can_approve')
-            aprovadores = User.objects.filter(
-                Q(user_permissions=permission) | Q(groups__permissions=permission),
-                is_active=True
-            ).distinct()
-            return aprovadores
+            perm = Permission.objects.get(content_type=content_type, codename="can_approve")
+            return (
+                User.objects.filter(Q(user_permissions=perm) | Q(groups__permissions=perm), is_active=True)
+                .distinct()
+            )
         except Permission.DoesNotExist:
             logger.warning("Permissão 'can_approve' não encontrada.")
             return User.objects.none()
 
-    def get_aprovador_label(self, obj):
-        full_name = f"{obj.first_name} {obj.last_name}".strip()
-        return f"{full_name} ({obj.username})" if full_name else obj.username
+    @staticmethod
+    def _get_aprovador_label(user):
+        fn = f"{user.first_name} {user.last_name}".strip()
+        return f"{fn} ({user.username})" if fn else user.username
 
+    # -------------------- VALIDATIONS --------------------
     def clean_documento(self):
-        documento = self.cleaned_data.get('documento')
-        if not documento:
-            raise ValidationError('É necessário anexar o documento.')
-        ext = os.path.splitext(documento.name)[1].lower()
-        if ext in ['.doc', '.docx', '.odt']:
-            valid_extensions = ['.doc', '.docx', '.odt']
-        elif ext in ['.xls', '.xlsx', '.ods']:
-            valid_extensions = ['.xls', '.xlsx', '.ods']
-        else:
-            raise ValidationError('Formato de arquivo inválido. Apenas arquivos .doc, .docx, .odt, .xls, .xlsx e .ods são permitidos.')
-        if ext not in valid_extensions:
-            raise ValidationError('Formato de arquivo inválido.')
-        return documento
+        doc = self.cleaned_data.get("documento")
+        if not doc:
+            raise ValidationError("É necessário anexar o documento.")
+        ext = os.path.splitext(doc.name)[1].lower()
+        if ext not in [".doc", ".docx", ".odt", ".xls", ".xlsx", ".ods"]:
+            raise ValidationError(
+                "Formato inválido. Utilize .doc, .docx, .odt, .xls, .xlsx ou .ods."
+            )
+        return doc
 
-    def clean(self):
-        cleaned_data = super().clean()
-        revisao = cleaned_data.get('revisao')
-        if self.documento_atual and revisao:
-            revisao_atual = self.documento_atual.revisao
-            if revisao <= revisao_atual:
-                raise ValidationError('A revisão deve ser maior que a revisão atual.')
-            if Documento.objects.filter(
-                nome=self.documento_atual.nome,
-                revisao=revisao,
-                status='aprovado'
-            ).exists():
-                raise ValidationError('Já existe uma revisão aprovada com este número para este documento.')
-        return cleaned_data
+def clean(self):
+    cleaned = super().clean()
+    revisao = cleaned.get("revisao")
+    nome    = cleaned.get("nome")
+
+    if self.documento_atual:
+        if revisao <= self.documento_atual.revisao:
+            raise ValidationError("A revisão deve ser maior que a atual.")
+
+        duplicada = (Documento.objects
+                     .filter(codigo=self.documento_atual.codigo, revisao=revisao)
+                     .exclude(status='reprovado'))     # ignora reprovados
+
+        if duplicada.exists():
+            raise ValidationError("Já existe uma revisão com esse número.")
+
+    if not nome:
+        raise ValidationError("O nome não pode ficar em branco.")
+    return cleaned

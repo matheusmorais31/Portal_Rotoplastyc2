@@ -200,3 +200,14 @@ h2 {
     left: 0;
     right: 0;
 }
+
+/* TEMA CLARO */
+
+body.light-theme h3 {
+    color: #ffffff;
+}
+
+
+body.light-theme td {
+    color: #ffffff;
+}

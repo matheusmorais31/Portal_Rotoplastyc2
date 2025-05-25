@@ -77,6 +77,7 @@
                 <!-- Informações da Revisão Aprovada -->
                 <div class="document-info">
                     <div class="document-grid">
+                        <div><strong>Nome:</strong> {{ revisao.nome }}</div>
                         <div><strong>Revisão:</strong> {{ revisao.revisao }}</div>
                         <div><strong>Data de Criação:</strong> {{ revisao.data_criacao|date:"d/m/Y" }}</div>
                         <div><strong>Status:</strong> {{ revisao.get_status_display }}</div>

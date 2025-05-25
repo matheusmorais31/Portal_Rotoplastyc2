@@ -7,13 +7,7 @@ ul {
 }
 
 /* Estilo básico */
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #38393F;
-    color: #fff;
-    margin: 0;
-    padding: 0;
-}
+
 
 .container {
     padding: 20px;
@@ -52,6 +46,13 @@ h1 {
     background-color: #ddd;
     color: #333;
     font-size: 16px;
+}
+
+input#searchInput.search-input:focus {
+    border-color: #2EC2D6;
+    outline: none;
+    background-color: #fff;
+    color: #000;
 }
 
 /* Filtro por Categoria */

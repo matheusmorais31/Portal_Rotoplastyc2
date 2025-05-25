@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+   <link rel="stylesheet" type="text/css" href="{% static 'css/home2.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<a href="/static/pdfs/Unimed.pdf" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/unimed.png" class="modal-img">
+        <span class="modal-title">Unimed</span>
+    </div>
+</a>
+
+<a href="/static/images/parceiros.jpg" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/parceiros-icon.png" class="modal-img">
+        <span class="modal-title">Parceiros</span>
+    </div>
+</a>
+
+<a href="/static/images/planoondonto.png" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/Odontologico.png" class="modal-img">
+        <span class="modal-title">Plano Odontológico</span>
+    </div>
+</a>
+
+   {% endblock %}

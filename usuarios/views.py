@@ -23,7 +23,8 @@ from django.contrib import admin
 from django.contrib.sessions.models import Session
 from django.utils.timezone import localtime
 from django.utils import timezone
-
+from django.contrib.auth import login
+from .models import Usuario 
 
 
 
@@ -624,3 +625,61 @@ def buscar_entidade(request):
 
 
 
+@login_required
+@permission_required('usuarios.list_user', raise_exception=True) # Ajuste a permissão se necessário, ex: 'usuarios.can_impersonate_user'
+def personificar_usuario(request, usuario_id):
+    """
+    Personifica outro usuário local/AD.
+    """
+    if 'original_user_id' not in request.session:
+        request.session['original_user_id'] = request.user.pk
+
+    # Guarde localmente
+    original_id = request.session['original_user_id']
+    impersonation_type = 'usuario'
+
+    # Use o seu modelo de usuário customizado 'Usuario'
+    user_alvo = get_object_or_404(Usuario, pk=usuario_id)
+
+    if user_alvo.is_ad_user:
+        backend = 'usuarios.auth_backends.ActiveDirectoryBackend'
+    else:
+        backend = 'django.contrib.auth.backends.ModelBackend'
+
+    # Use a função 'login' importada do Django
+    login(request, user_alvo, backend=backend)
+
+    # Regrava as chaves
+    request.session['original_user_id'] = original_id
+    request.session['impersonation_type'] = impersonation_type
+
+    messages.success(request, f"Personificando usuário {user_alvo.username}.")
+    return redirect('home')
+
+
+@login_required
+def reverter_personificacao(request):
+    """
+    Reverte a personificação do usuário.
+    """
+    original_user_id = request.session.pop('original_user_id', None)
+    request.session.pop('impersonation_type', None)
+
+    if original_user_id:
+        try:
+            # Use o seu modelo de usuário customizado 'Usuario'
+            original_user = Usuario.objects.get(pk=original_user_id)
+            if original_user.is_ad_user:
+                backend = 'usuarios.auth_backends.ActiveDirectoryBackend'
+            else:
+                backend = 'django.contrib.auth.backends.ModelBackend'
+
+            # Use a função 'login' importada do Django
+            login(request, original_user, backend=backend)
+            messages.success(request, f"Você voltou ao seu usuário original: {original_user.username}")
+        except Usuario.DoesNotExist: # Use a exceção do seu modelo customizado
+            messages.error(request, "Usuário original não encontrado.")
+    else:
+        messages.warning(request, "Nenhum usuário original foi encontrado para reverter.")
+
+    return redirect('usuarios:lista_usuarios')

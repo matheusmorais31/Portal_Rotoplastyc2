@@ -34,14 +34,20 @@
 
             {# Select original escondido (fonte de dados e valor) (Usando opções da sua versão antiga) #}
             <select id="model-select" style="display: none;">
+                {% if perms.ia.model_2_5_pro %}
                 <option value="gemini-1.5-pro" title="Potente e versátil para diversas tarefas. Ótimo equilíbrio.">Gemini 1.5 Pro</option>
+                {% endif %}
                 <option value="gemini-2.0-flash" title="Rápido e eficiente para tarefas mais simples e respostas ágeis.">Gemini 2.0 Flash</option>
                 <option value="gemini-2.0-flash-lite" selected title="Versão ainda mais leve e rápida do Flash.">Gemini 2.0 Flash-Lite</option>
                 <option value="gemini-1.5-flash" title="Rápido e otimizado para velocidade e custo.">Gemini 1.5 Flash</option>
                 <option value="gemini-2.5-flash" title="Versão leve e veloz, focada em respostas rápidas com menor custo computacional.">Gemini 2.5 Flash</option>
-                 {% if perms.ia.model_2_5_pro %} {# Mantendo sua condicional original #}
+                 {% if perms.ia.model_2_5_pro %}
                  <option value="gemini-2.5-pro" title="Prévia do próximo modelo Pro, com capacidades avançadas.">Gemini 2.5 Pro</option>
                  {% endif %}
+                 {% if perms.ia.rotoplastyc_ia %}
+                <option value="roto-ia" title="Modo documentos internos – lê e cita os procedimentos da Rotoplastyc">Rotoplastyc IA</option>
+                {% endif %}
+               
             </select>
         </div>
         {# Fim Container Seletor #}
@@ -98,6 +104,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 {# Inclusão de Bibliotecas JavaScript #}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
