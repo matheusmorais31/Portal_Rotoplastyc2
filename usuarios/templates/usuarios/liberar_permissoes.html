@@ -1,4 +1,4 @@
-<!-- usuarios/templates/usuarios/liberar_permissoes.html -->
+{# usuarios/templates/usuarios/liberar_permissoes.html #}
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
@@ -12,14 +12,6 @@
 {% block content %}
 <div class="container">
     <h2>{% trans "Liberação de Permissões" %}</h2>
-
-    <div id="mensagens">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    </div>
 
     <form id="form-permissoes" method="POST" action="{% url 'usuarios:liberar_permissoes' %}">
         {% csrf_token %}
@@ -51,7 +43,7 @@
                     </tr>
                 </thead>
                 <tbody class="lista_permissoes">
-                    <!-- Permissões carregadas dinamicamente -->
+                    {# Permissões carregadas dinamicamente #}
                 </tbody>
             </table>
         </div>
@@ -63,6 +55,16 @@
             <button type="submit" class="btn btn-primary">{% trans "Salvar" %}</button>
         </div>
 
+        <!-- Alertas de mensagens (abaixo dos botões) -->
+        <div id="mensagens" style="margin-top: 1rem;">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        {# Campos ocultos #}
         <input type="hidden" name="usuario_grupo_id" id="usuario_grupo_id">
         <input type="hidden" name="tipo" id="tipo">
         <input type="hidden" name="app_label" id="app_label">
@@ -197,18 +199,14 @@
         $('#form-permissoes').on('submit', function (e) {
             e.preventDefault();
             var formData = $(this).serialize();
-
             $.ajax({
                 url: $(this).attr('action'),
                 method: 'POST',
                 data: formData,
                 success: function (response) {
-                    // Limpa mensagens
                     $('#mensagens').empty();
                     if (response.success) {
                         $('#mensagens').html('<div class="alert alert-success">' + response.message + '</div>');
-                        // Você pode recarregar as permissões se quiser atualizar o estado:
-                        // carregarPermissoes($('#app_label').val());
                     } else {
                         $('#mensagens').html('<div class="alert alert-danger">' + response.message + '</div>');
                     }

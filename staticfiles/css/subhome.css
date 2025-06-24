@@ -1,0 +1,247 @@
+/* home2.css */
+
+/* Reset básico para remover margens e paddings padrões */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo para o body */
+body {
+    font-family: Arial, sans-serif;
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    max-height: 100vh;
+}
+
+
+a {
+    text-decoration: none;
+}
+
+/* Estilos para as imagens dentro dos links */
+
+.modal-content {
+    display: inline-block;
+    text-decoration: none;
+    height: auto;
+}
+
+
+.modal-container {
+    background-color: rgba(23, 23, 24, 0);
+    backdrop-filter: blur(5px);
+    width: 145px;
+    height: 145px;
+    display: flex;
+    margin-right: 20px;
+    margin-top: 25%;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: 0.2s ease-in-out;
+    box-shadow: 0px 0px 8px #141212;
+    border-radius: 10px;
+    border: 1px solid #8d8989;
+}
+
+.modal-title {
+    margin: 15px 5px;
+    font-size: 16px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.modal-img {
+    display: block;
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+    margin-top: 15px;
+    cursor: pointer;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-container:hover {
+    border-radius: 10px;
+    transform: scale(1.05);
+    box-shadow: 0px 0px 17px #2EC2D6;
+    transition: 0.2s ease-in-out;
+}
+
+.back-button {
+    margin-top: 5%;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #2EC2D6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #1EB2C1;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+/* ----------------------------------------- API WEATHER ---------------------------------------- */
+
+.weather-card {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+    width: 350px;
+    max-height: calc(100vh - 20px); /* Ajusta altura com base na tela */
+    background-color: rgba(23, 23, 24, 0.06);
+    backdrop-filter: blur(5px);
+    color: #ffffff;
+    padding: 15px;
+    border-radius: 15px;
+    font-family: 'Roboto', sans-serif;
+    border: 1px solid #8d8989;
+    box-shadow: 0px 0px 25px #000000;
+    overflow-y: auto; /* Adiciona rolagem vertical */
+    z-index: 999;
+    transition: transform 0.3s ease;
+}
+
+.current-weather-container h2,
+.forecast-container h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.weather-icon {
+    width: 60px;
+    height: auto;
+    margin: 5px auto;
+    display: block;
+}
+
+.current-weather-container h1,
+.temp-container h1 {
+    font-size: 36px;
+    margin: 5px 0;
+    text-align: center;
+}
+
+.current-weather-container p,
+.temp-container p,
+#previsao-dia p {
+    font-size: 16px;
+    margin: 3px 0;
+    text-align: center;
+}
+
+.forecast-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.temp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rain-icon {
+    width: 15px;
+    height: auto;
+    margin-right: 5px;
+}
+
+.prev-day,
+.next-day {
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.prev-day:hover,
+.next-day:hover {
+    color: #2EC2D6;
+}
+
+.separator-line {
+    width: 100%;
+    height: 0.1px;
+    background-color: #8d8989;
+    margin: 20px 0;
+}
+
+/* Responsividade */
+@media (max-width: 1920px) {
+    .weather-card {
+        transform: scale(0.9); /* Reduz ligeiramente para evitar cortes */
+        transform-origin: bottom right;
+    }
+
+    .weather-icon {
+        width: 50px;
+    }
+
+    .current-weather-container h1 {
+        font-size: 38px;
+    }
+}
+
+@media (max-width: 1440px) {
+    .weather-card {
+        position: fixed;
+        width: 320px;
+    }
+
+    .current-weather-container h1 {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .weather-card {
+        width: 280px;
+        bottom: 5px; /* Ajusta posição vertical */
+        right: 10px; /* Ajusta posição horizontal */
+    }
+
+    .weather-icon {
+        width: 40px;
+    }
+
+    .current-weather-container h1 {
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 580px) {
+    .weather-card {
+        display: none;
+    }
+
+    .modal-content{
+        margin-left: 110%;
+    }
+}
+
+/* Zoom Responsivo (Ajusta para escalas maiores que 100%) */
+@media (min-resolution: 2dppx) {
+    .weather-card {
+        transform: scale(0.9); /* Reduz ligeiramente para evitar cortes */
+        transform-origin: bottom right;
+    }
+}

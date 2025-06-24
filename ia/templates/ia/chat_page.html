@@ -47,6 +47,13 @@
                  {% if perms.ia.rotoplastyc_ia %}
                 <option value="roto-ia" title="Modo documentos internos – lê e cita os procedimentos da Rotoplastyc">Rotoplastyc IA</option>
                 {% endif %}
+                {% if perms.ia.gpt_4o_mini %}
+                <option value="gpt-4o-mini" title="Rápido, barato e multimodal (OpenAI)">GPT-4o mini</option>
+                {% endif %}
+                {% if perms.ia.gpt_4o %}
+                <option value="gpt-4o" title="Modelo completo do GPT-4o">GPT-4o</option>
+                {% endif %}
+                
                
             </select>
         </div>

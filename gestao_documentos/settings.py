@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'bi',
     'ia',
+    'rh',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -150,45 +151,101 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}', 'style': '{'},
-        'simple': {'format': '{levelname} {message}', 'style': '{'},
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {asctime} [{name}] {message}', # Adicionado [{name}] para ver a origem do logger
+            'style': '{',
+        },
     },
     'handlers': {
         'file_django': {
-            'level': 'DEBUG', 'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGGING_DIR / 'django.log', 'maxBytes': 1024 * 1024 * 5, 'backupCount': 5,
+            'level': 'INFO', # Pode ser INFO para logs gerais do Django
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'django.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
             'formatter': 'verbose',
         },
-        'file_documentos': {
-            'level': 'DEBUG', 'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGGING_DIR / 'documentos.log', 'maxBytes': 1024 * 1024 * 5, 'backupCount': 5,
-            'formatter': 'verbose',
-        },
-        'file_email': {
-            'level': 'INFO', 'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGGING_DIR / 'email.log', 'maxBytes': 1024 * 1024 * 5, 'backupCount': 5,
-            'formatter': 'verbose',
-        },
-        'file_bi': {
-            'level': 'DEBUG', 'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGGING_DIR / 'bi.log', 'maxBytes': 1024 * 1024 * 5, 'backupCount': 5,
-            'formatter': 'verbose',
-        },
-        'console': { # Adicionado para ver logs no console durante o desenvolvimento
+        'file_documentos': { # Se você ainda usa este logger
             'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'documentos.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_email': { # Para o 'custom_email_logger'
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'email.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_bi': { # Se você ainda usa este logger
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'bi.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # --- NOVO HANDLER PARA A APLICAÇÃO 'ia' ---
+        'file_ia': {
+            'level': 'DEBUG',  # Captura logs de nível DEBUG e acima para 'ia'
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'ia.log', # Nome do arquivo de log
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB por arquivo
+            'backupCount': 5,             # Mantém 5 arquivos de backup
+            'formatter': 'verbose',       # Usa o formatador detalhado
+        },
+        # --- FIM DO NOVO HANDLER ---
+        'console': {
+            'level': 'DEBUG', # Mostra logs DEBUG e acima no console durante o desenvolvimento
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'simple', # Formato simples para o console
         },
     },
     'loggers': {
-        'django': {'handlers': ['file_django', 'console'], 'level': 'INFO', 'propagate': True}, # Nível INFO para Django no console
-        'documentos': {'handlers': ['file_documentos', 'console'], 'level': 'DEBUG', 'propagate': False},
-        # 'email': {'handlers': ['file_email', 'console'], 'level': 'INFO', 'propagate': False}, # Removido 'email' como nome de logger
-        'bi': {'handlers': ['file_bi', 'console'], 'level': 'DEBUG', 'propagate': True},
-        # Logger customizado para emails, se necessário:
-        'custom_email_logger': {'handlers': ['file_email', 'console'], 'level': 'INFO', 'propagate': False},
+        'django': {
+            'handlers': ['file_django', 'console'],
+            'level': 'INFO', # Nível para os logs do próprio Django
+            'propagate': True,
+        },
+        'documentos': { # Se ainda relevante
+            'handlers': ['file_documentos', 'console'],
+            'level': 'DEBUG',
+            'propagate': False, # False para não enviar para o logger 'django' ou root
+        },
+        'bi': { # Se ainda relevante
+            'handlers': ['file_bi', 'console'],
+            'level': 'DEBUG',
+            'propagate': False, # Ajuste propagate conforme necessidade
+        },
+        'custom_email_logger': { # Para logs de e-mail
+            'handlers': ['file_email', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # --- NOVO LOGGER PARA A APLICAÇÃO 'ia' ---
+        'ia': {  # Este nome ('ia') corresponderá a loggers como 'ia.views', 'ia.models', etc.
+            'handlers': ['file_ia', 'console'], # Envia para 'ia.log' e para o console
+            'level': 'DEBUG',          # Define o nível mínimo de log a ser capturado para esta app
+            'propagate': False,        # Impede que as mensagens sejam passadas para loggers pai (root ou django)
+                                       # Isso mantém o ia.log mais limpo e focado.
+        },
+        # --- FIM DO NOVO LOGGER ---
     },
+    # Opcional: Configuração do logger raiz para capturar logs não tratados por loggers específicos
+    # 'root': {
+    # 'handlers': ['console', 'file_django'], # Onde enviar logs "órfãos"
+    # 'level': 'WARNING', # Nível para logs não especificados
+    # }
 }
+
 
 
 # Authentication backends
@@ -236,6 +293,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE # Usa o TIME_ZONE já definido para o Django
+DJANGO_CELERY_BEAT_TZ_AWARE = False
 
 
 # ==============================================================================
@@ -262,6 +320,12 @@ POWERBI_SCOPE = config(
     default="https://analysis.windows.net/powerbi/api/.default"
 )
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}
 
 # LDAP Configuration
 LDAP_SERVER = config('LDAP_SERVER', default=None)
@@ -278,9 +342,16 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = config('SESSION_EXPIRE_AT_BROWSER_CLOSE', default=True, cast=bool)
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
+IA_MAX_FILE_EXTRACTION_CHARS = config('IA_MAX_FILE_EXTRACTION_CHARS', default=1000000, cast=int)  # 1 milhão de caracteres
 
 # CHAVE IA
 GEMINI_API_KEY = config('GEMINI_API_KEY', default=None)
+
+# CHAVE API OpenAI
+OPENAI_API_KEY = config('OPENAI_API_KEY', default=None)
+
+ASSISTANT_ID = "asst_n3bjyIruC73ZJVgygOKRtaqU"
+
 
 
 # Taxa de Câmbio (Exemplo)

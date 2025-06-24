@@ -1,14 +1,19 @@
 # ia/views.py
 
 import json
+import types
+import pandas as pd 
 import logging
 import traceback
+import tempfile
 import re # Importar o módulo de regex
 import base64
 import mimetypes
 import io # Para trabalhar com streams de bytes na extração
+from pathlib import Path
 from django.utils import timezone
 import google.generativeai as genai
+import typing
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -19,8 +24,17 @@ from decimal import Decimal
 from django import forms
 from .models import Chat, ChatMessage, ChatAttachment, ApiUsageLog
 from ia.retrieval import find_relevant_document_chunks
+from ia.old_spreadsheet_utils import (
+    convert_to_csv,
+    load_dataframe,
+    normalize_columns,
+    parse_filters_from_prompt,
+    apply_filters,
+    df_to_prompt_block,
+    SpreadsheetExtractionError,
+)
 
-
+from ia.openai_helper import get_or_create_thread, ensure_oa_file, oa_client
 # --- Imports das bibliotecas de extração ---
 # Guardados por try-except para não quebrar se não instalados
 try:
@@ -52,7 +66,7 @@ logger = logging.getLogger(__name__)
 MAX_UPLOAD_SIZE_MB = getattr(settings, 'MAX_CHAT_UPLOAD_MB', 15)
 MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 # Limite de caracteres para extração de texto de arquivos
-MAX_EXTRACTION_CHARS = getattr(settings, 'IA_MAX_FILE_EXTRACTION_CHARS', 5000)
+MAX_EXTRACTION_CHARS = getattr(settings, 'IA_MAX_FILE_EXTRACTION_CHARS', 1000000)
 EMOJI_PATTERN = r"[\U0001F300-\U0001FAFF\U00002700-\U000027B0]"
 
 # Modelos Gemini Mapeados
@@ -68,6 +82,10 @@ MODEL_MAP = {
     # 2.5 preview
     "gemini-2.5-pro":   "models/gemini-2.5-pro-preview-03-25",
     "gemini-2.5-flash": "models/gemini-2.5-flash-preview-04-17",
+
+    #GPT
+    "gpt-4o-mini": "gpt-4o-mini",
+    "gpt-4o": "gpt-4o", 
 }
 
 MODEL_MAP.update({
@@ -124,154 +142,157 @@ def remove_emojis(text):
     return re.sub(EMOJI_PATTERN, '', text).strip()
 
 def extract_text_from_file(filename, file_content_bytes):
-    # <-- LOG 3: Confirma que a função foi chamada -->
-    logger.debug(f"FUNÇÃO extract_text_from_file INICIADA para: '{filename}'")
     """
     Tenta extrair texto de diferentes tipos de arquivo usando bibliotecas apropriadas.
     Retorna o texto extraído (limitado em tamanho) ou uma string de erro/aviso.
     """
+    logger.debug(f"FUNÇÃO extract_text_from_file INICIADA para: '{filename}'")
     logger.debug(f"Tentando extrair texto de '{filename}' (Tamanho: {len(file_content_bytes)} bytes)")
     ext = '.' + filename.split('.')[-1].lower() if '.' in filename else ''
     text = None
     library_missing = False
-    error_message = None # Mensagem específica de erro na extração
+    error_message = None
 
     try:
         # --- DOCX ---
         if ext == '.docx':
-            if not docx: library_missing = True; raise ImportError("python-docx não está instalado.")
+            if not docx:
+                library_missing = True
+                raise ImportError("python-docx não está instalado.")
             document = docx.Document(io.BytesIO(file_content_bytes))
             text = "\n".join([para.text for para in document.paragraphs if para.text])
 
-        # --- XLSX ---
+        # --- XLSX (sem limite de linhas/colunas) ---
         elif ext == '.xlsx':
-            if not openpyxl: library_missing = True; raise ImportError("openpyxl não está instalado.")
-            workbook = openpyxl.load_workbook(filename=io.BytesIO(file_content_bytes), data_only=True)
+            if not openpyxl:
+                library_missing = True
+                raise ImportError("openpyxl não está instalado.")
+            workbook = openpyxl.load_workbook(
+                filename=io.BytesIO(file_content_bytes),
+                data_only=True
+            )
             all_texts = []
-            max_rows = 100 # Limite de linhas por planilha
-            max_cols = 50  # Limite de colunas por linha
             for sheet_name in workbook.sheetnames:
                 sheet = workbook[sheet_name]
-                all_texts.append(f"--- Planilha: {sheet_name} ---")
-                for row in sheet.iter_rows(max_row=max_rows):
-                    row_texts = [str(cell.value) for cell in row[:max_cols] if cell.value is not None and str(cell.value).strip()]
-                    if row_texts:
-                        all_texts.append(" | ".join(row_texts))
-                if sheet.max_row > max_rows:
-                    all_texts.append(f"(...mais {sheet.max_row - max_rows} linhas não incluídas...)")
+                n_rows = sheet.max_row
+                n_cols = sheet.max_column
+                all_texts.append(f"--- Planilha: {sheet_name} ({n_rows} linhas x {n_cols} colunas) ---")
+                for row in sheet.iter_rows(min_row=1, max_row=n_rows, max_col=n_cols):
+                    row_vals = [
+                        str(cell.value)
+                        for cell in row
+                        if cell.value is not None and str(cell.value).strip()
+                    ]
+                    if row_vals:
+                        all_texts.append(" | ".join(row_vals))
             text = "\n".join(all_texts)
 
-        # --- PDF (Usando PyMuPDF/fitz) ---
+        # --- PDF (PyMuPDF) ---
         elif ext == '.pdf':
-            logger.debug(f"Processando PDF com PyMuPDF. Biblioteca disponível: {pymupdf_available}") # <-- LOG ADICIONADO
-            if not pymupdf_available: library_missing = True; raise ImportError("PyMuPDF (fitz) não está instalado.")
+            logger.debug(f"Processando PDF com PyMuPDF. Biblioteca disponível: {pymupdf_available}")
+            if not pymupdf_available:
+                library_missing = True
+                raise ImportError("PyMuPDF (fitz) não está instalado.")
+            doc = fitz.open(stream=file_content_bytes, filetype="pdf")
+            num_pages = len(doc)
             all_texts = []
-            max_pages = 200 # Limite de páginas
-            try:
-                logger.debug("Tentando abrir PDF com fitz.open()...") # <-- LOG ADICIONADO
-                # Use stream= para ler de bytes
-                doc = fitz.open(stream=file_content_bytes, filetype="pdf")
-                num_pages = len(doc)
-                logger.debug(f"PDF aberto com sucesso via PyMuPDF. Número de páginas: {num_pages}") # <-- LOG ADICIONADO
-                for i, page in enumerate(doc.pages()):
-                    if i >= max_pages:
-                        logger.warning(f"Limite de {max_pages} páginas atingido para '{filename}'.") # <-- LOG ADICIONADO
-                        all_texts.append(f"\n(...mais {num_pages - max_pages} páginas não incluídas...)")
-                        break
-                    # Extrai texto ordenado da página
-                    page_text = page.get_text("text", sort=True)
-                    # Descomente a linha abaixo se precisar de log MUITO detalhado (cuidado com o volume)
-                    # logger.debug(f"Texto extraído da página {i+1} (primeiros 100 chars): {page_text[:100]}")
-                    if page_text:
-                        all_texts.append(page_text)
-                doc.close() # Fecha o documento
-                text = "\n".join(all_texts)
+            max_pages = 200
+            for i, page in enumerate(doc.pages()):
+                if i >= max_pages:
+                    all_texts.append(f"\n(...mais {num_pages - max_pages} páginas não incluídas...)")
+                    break
+                page_text = page.get_text("text", sort=True)
+                if page_text:
+                    all_texts.append(page_text)
+            doc.close()
+            text = "\n".join(all_texts)
+            if not text:
+                error_message = f"(Não foi possível extrair conteúdo textual de '{filename}')"
 
-                if text:
-                    logger.info(f"Texto extraído com sucesso via PyMuPDF de '{filename}'.") # <-- LOG ADICIONADO
-                else:
-                    # Se o documento foi aberto mas não retornou texto
-                    logger.warning(f"PyMuPDF (fitz) não extraiu texto do PDF '{filename}'. O arquivo pode estar vazio ou não conter texto reconhecível.")
-                    error_message = f"(Não foi possível extrair conteúdo textual de '{filename}')"
-
-            except Exception as pdf_err: # Captura erros específicos do fitz ou gerais na leitura
-                logger.error(f"Erro ao processar PDF '{filename}' com PyMuPDF (fitz): {pdf_err}", exc_info=True) # <-- LOG DE ERRO IMPORTANTE
-                error_message = f"(Erro ao tentar processar o arquivo PDF '{filename}')"
-        
+        # --- XLS (xlrd stub) ---
         elif ext == ".xls":
             import xlrd
             workbook = xlrd.open_workbook(file_contents=file_content_bytes)
-            # percorre sheets/células…
+            # implementar extração conforme necessário
+            text = "(Extração de .xls não implementada)"
 
+        # --- ODS (pyexcel_ods stub) ---
         elif ext == ".ods":
             import pyexcel_ods
             data = pyexcel_ods.get_data(io.BytesIO(file_content_bytes))
+            # você pode formatar 'data' conforme desejar
+            text = str(data)
 
-        # --- ODT (Usando odfpy) ---
+        # --- ODT ---
         elif ext == '.odt':
-            if not odfpy_available: library_missing = True; raise ImportError("odfpy não está instalado.")
-            try:
-                doc = odf.opendocument.load(io.BytesIO(file_content_bytes))
-                all_texts = []
-                text_elements = doc.getElementsByType(odf.text.P) # Parágrafos
-                for elem in text_elements:
-                    para_text = odf.teletype.extractText(elem)
-                    if para_text:
-                        all_texts.append(para_text.strip())
-                text = "\n".join(all_texts)
-                if not text:
-                    logger.warning(f"odfpy não extraiu texto do ODT '{filename}'. Documento vazio ou estrutura incomum?")
-                    error_message = f"(Não foi possível extrair conteúdo textual de '{filename}')"
-            except Exception as odf_err:
-                logger.error(f"Erro ao processar ODT '{filename}' com odfpy: {odf_err}", exc_info=True)
-                error_message = f"(Erro ao processar o arquivo ODT '{filename}')"
+            if not odfpy_available:
+                library_missing = True
+                raise ImportError("odfpy não está instalado.")
+            doc = odf.opendocument.load(io.BytesIO(file_content_bytes))
+            all_texts = []
+            text_elements = doc.getElementsByType(odf.text.P)
+            for elem in text_elements:
+                para_text = odf.teletype.extractText(elem)
+                if para_text:
+                    all_texts.append(para_text.strip())
+            text = "\n".join(all_texts)
+            if not text:
+                error_message = f"(Não foi possível extrair conteúdo textual de '{filename}')"
 
-        # --- Tipos baseados em Texto Simples ---
-        elif ext in EXTRACTABLE_EXTENSIONS: # Pega outros da lista (txt, csv, etc.)
+        # --- Texto simples (txt, csv, md, etc.) ---
+        elif ext in EXTRACTABLE_EXTENSIONS:
             try:
                 text = file_content_bytes.decode('utf-8')
             except UnicodeDecodeError:
                 logger.warning(f"Falha ao decodificar '{filename}' como UTF-8, tentando latin-1.")
-                try:
-                    text = file_content_bytes.decode('latin-1', errors='replace')
-                except Exception as decode_err:
-                     logger.error(f"Falha ao decodificar '{filename}' como latin-1 também: {decode_err}")
-                     error_message = f"(Não foi possível decodificar o conteúdo de '{filename}')"
+                text = file_content_bytes.decode('latin-1', errors='replace')
 
-        # --- Não Suportado ---
+        # --- Extensão não suportada ---
         else:
             logger.warning(f"Extração de texto não suportada para extensão '{ext}' do arquivo '{filename}'.")
-            # Retorna None para indicar que não é um tipo extraível
+            return None
 
-        # --- Processamento Final do Texto Extraído ---
+        # --- Processamento final do texto extraído ---
         if text:
             original_len = len(text)
             if original_len > MAX_EXTRACTION_CHARS:
                 text = text[:MAX_EXTRACTION_CHARS] + f"\n\n(... [CONTEÚDO TRUNCADO em {MAX_EXTRACTION_CHARS} caracteres] ...)"
-                logger.info(f"Texto extraído de '{filename}' (ext: {ext}) TRUNCADO para {MAX_EXTRACTION_CHARS} caracteres (original: {original_len}).")
+                logger.info(
+                    f"Texto extraído de '{filename}' (ext: {ext}) TRUNCADO para "
+                    f"{MAX_EXTRACTION_CHARS} caracteres (original: {original_len})."
+                )
             else:
-                logger.info(f"Texto extraído com sucesso de '{filename}' (ext: {ext}, {original_len} caracteres).")
-            # Limpa espaços extras e linhas vazias
+                logger.info(
+                    f"Texto extraído com sucesso de '{filename}' (ext: {ext}, {original_len} caracteres)."
+                )
+            # Remove linhas vazias e espaços extras
             text = "\n".join(line.strip() for line in text.splitlines() if line.strip())
-            return text # Retorna o texto processado
+            return text
 
         elif error_message:
-            # Se houve um erro específico durante a extração
-             return error_message
+            return error_message
+
         elif not library_missing and ext in ['.docx', '.xlsx', '.pdf', '.odt']:
-             # Se a biblioteca existe mas não extraiu texto e não houve erro específico
-             logger.warning(f"Biblioteca para '{ext}' foi encontrada, mas não retornou texto de '{filename}'.")
-             return f"(Não foi possível extrair conteúdo textual de '{filename}')"
+            logger.warning(
+                f"Biblioteca para '{ext}' foi encontrada, mas não retornou texto de '{filename}'."
+            )
+            return f"(Não foi possível extrair conteúdo textual de '{filename}')"
+
         else:
-            # Se não era um tipo extraível ou houve outro problema não capturado
-            return None # Indica falha ou não aplicável
+            return None
 
     except ImportError as ie:
-        logger.error(f"Erro de importação ao tentar processar '{filename}' (ext: {ext}): {ie}. Verifique se a biblioteca está instalada.")
+        logger.error(
+            f"Erro de importação ao tentar processar '{filename}' (ext: {ext}): {ie}. "
+            "Verifique se a biblioteca está instalada."
+        )
         return f"(Erro: Biblioteca para processar arquivos '{ext}' não encontrada no servidor.)"
+
     except Exception as e:
-        logger.error(f"Erro inesperado ao extrair texto de '{filename}' (ext: {ext}): {e}", exc_info=True)
-        # Retorna mensagem de erro genérica, evitando expor detalhes internos
+        logger.error(
+            f"Erro inesperado ao extrair texto de '{filename}' (ext: {ext}): {e}",
+            exc_info=True
+        )
         return f"(Erro ao tentar ler o conteúdo de '{filename}')"
 
 def log_api_usage(user, model_name, ai_message, usage_metadata, image_count):
@@ -448,409 +469,171 @@ def delete_chat_view(request, chat_id):
 # ==============================================================================
 # == VIEW COMBINADA: Enviar Mensagem (Texto e/ou Arquivos) para a IA ==
 # ==============================================================================
+def _merge_plans(last_plan: dict | None, new_plan: dict) -> dict:
+    """
+    Função helper para fundir o plano da pergunta anterior com o da nova.
+    A regra principal é herdar os filtros se a nova pergunta não especificar nenhum.
+    """
+    if not last_plan or not isinstance(last_plan, dict):
+        return new_plan # Se não há plano anterior, o novo plano é o plano final.
+
+    final_plan = new_plan.copy()
+    
+    # Se o novo plano não tem filtros, mas o plano anterior tinha, herda os filtros.
+    if not final_plan.get("filter") and last_plan.get("filter"):
+        logger.info(f"[PLAN MERGE] Herdou filtros do plano anterior: {last_plan.get('filter')}")
+        final_plan["filter"] = last_plan["filter"]
+        # Se herdou filtros, faz sentido herdar a ordenação também,
+        # a menos que o novo plano explicitamente a remova (o que não é um caso comum).
+        if not final_plan.get("sort") and last_plan.get("sort"):
+             logger.info(f"[PLAN MERGE] Herdou ordenação do plano anterior: {last_plan.get('sort')}")
+             final_plan["sort"] = last_plan["sort"]
+             
+    return final_plan
+
+
+# --- Sua view send_message_view ---
+
 @login_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def send_message_view(request, chat_id):
-    """
-    Recebe texto (prompt) e/ou arquivos via FormData,
-    processa (extraindo texto de documentos), salva anexos,
-    envia para a API Gemini, registra o uso e retorna a resposta.
-    """
-    # ───────── 0. Sanidade inicial e Recuperação do Chat ─────────
-    if not (hasattr(settings, "GEMINI_API_KEY") and settings.GEMINI_API_KEY):
-        logger.error("Tentativa de chamada à API Gemini sem GEMINI_API_KEY configurada.")
-        return JsonResponse({"error": "A configuração da API do serviço de IA está indisponível."}, status=503)
+    """Envia prompt + anexos (opcional) ao Assistant, aguarda execução e armazena a resposta."""
 
     user = request.user
-    try:
-        chat = get_object_or_404(Chat, id=chat_id, user=user)
-    except Chat.DoesNotExist:
-        return JsonResponse({'error': 'Chat não encontrado ou acesso não permitido.'}, status=404)
-    except Exception as e:
-        logger.error(f"Erro inesperado ao buscar chat {chat_id} para user {user.username}: {e}", exc_info=True)
-        return JsonResponse({'error': 'Erro interno ao buscar chat.'}, status=500)
+    chat = get_object_or_404(Chat, id=chat_id, user=user)
 
-    logger.info(f"Iniciando processamento de mensagem para chat {chat.id} (user: {user.username})")
+    prompt: str = (request.POST.get("prompt") or "").strip()
+    files = request.FILES.getlist("arquivo")
 
-    # ───────── 1. Processar Texto do Prompt (do FormData) ─────────
-    prompt_raw = request.POST.get("prompt", "").strip()
-    prompt_user_typed = remove_emojis(prompt_raw)
-    selected_model_key = request.POST.get("model", DEFAULT_GEMINI_MODEL_KEY)
-    logger.debug(f"Prompt recebido (raw): '{prompt_raw[:100]}...', (limpo): '{prompt_user_typed[:100]}...'")
-    if not prompt_user_typed and prompt_raw:
-        logger.warning(f"Prompt para chat {chat.id} continha apenas emojis e foi removido.")
+    if not prompt and not files:
+        return JsonResponse({"error": "Envie um prompt ou um arquivo."}, status=400)
 
-    # --- 4A  Recuperação automática se usuário NÃO anexou arquivos ---
-    if selected_model_key == "roto-ia" and prompt_user_typed and not request.FILES.getlist('arquivo'):
+    # ------------------------------------------------------------------
+    # 1) Registra mensagem do usuário
+    # ------------------------------------------------------------------
+    user_msg = ChatMessage.objects.create(
+        chat=chat,
+        sender="user",
+        text=prompt or "(envio de arquivo)"
+    )
 
-        try:
-            # troque a chamada se preferir vector_search
-            retrieved = find_relevant_document_chunks(user, prompt_user_typed, top_k=600)
-            if retrieved:
-                prompt_user_typed += "\n\n--- Documentos Relacionados ---\n"
-                for r in retrieved:
-                    prompt_user_typed += (
-                        f"\n[Doc: {r['doc'].nome} rev {r['doc'].revisao:02d} "
-                        f"(Cat: {r['doc'].categoria.nome})]\n{r['snippet']}\n"
-                        f"[Fim Doc]\n"
-                    )
-                prompt_user_typed += "\n--- Fim Docs ---"
-
-        except Exception as retr_err:
-            logger.error(f"Falha na recuperação de docs p/ chat {chat.id}: {retr_err}", exc_info=True)
-
-
-    # ───────── 2. Processar Arquivos (Imagens e Documentos do FormData) ─────────
-    image_parts_for_api = []
-    saved_attachments = []
-    extracted_content = {}
-    upload_errors = []
-    files_received = request.FILES.getlist('arquivo')
-    image_count_for_log = 0
-
-    if files_received:
-        logger.info(f"Recebidos {len(files_received)} arquivo(s) para processar no chat {chat.id}.")
-        for uploaded_file in files_received:
-            original_filename = uploaded_file.name
-            attachment = None
-            is_image_for_api = False
-            is_extractable_document = False
-
-            try:
-                # Validação de Tamanho
-                if uploaded_file.size > MAX_UPLOAD_SIZE_BYTES:
-                    raise ValueError(f"Arquivo '{original_filename}' ({uploaded_file.size / (1024*1024):.2f}MB) excede o limite de {MAX_UPLOAD_SIZE_MB}MB.")
-
-                # Identificação de Tipo
-                mime_type, _ = mimetypes.guess_type(original_filename)
-                file_ext = '.' + original_filename.split('.')[-1].lower() if '.' in original_filename else ''
-
-                # É imagem para API?
-                if mime_type and mime_type in SUPPORTED_IMAGE_MIMETYPES_FOR_API:
-                    is_image_for_api = True
-                    uploaded_file.seek(0)
-                    image_bytes = uploaded_file.read()
-                    encoded_image = base64.b64encode(image_bytes).decode('utf-8')
-                    image_parts_for_api.append({
-                        "inline_data": {"mime_type": mime_type, "data": encoded_image}
-                    })
-                    image_count_for_log += 1
-                    logger.info(f"Imagem '{original_filename}' preparada para API.")
-
-                # É um documento do qual tentaremos extrair texto?
-                elif file_ext in EXTRACTABLE_EXTENSIONS:
-                    is_extractable_document = True
-                    logger.info(f"Arquivo '{original_filename}' (ext: {file_ext}) será processado para extração de texto.")
-
-                # Tipo não suportado
-                else:
-                    raise ValueError(f"Tipo de arquivo (ext: {file_ext}, mime: {mime_type or 'desconhecido'}) não é suportado.")
-
-                # Salva o anexo (se for imagem ou documento extraível)
-                attachment = ChatAttachment(chat=chat, file=uploaded_file)
-                attachment.save()
-                saved_attachments.append(attachment)
-                logger.info(f"Anexo '{original_filename}' (ID: {attachment.id}) salvo.")
-
-                # ** EXTRAÇÃO DE TEXTO (se aplicável) **
-                if is_extractable_document:
-                    # <-- LOG 1: Confirma que o arquivo foi marcado como extraível -->
-                    logger.debug(f"Arquivo '{original_filename}' identificado como extraível (ext='{file_ext}'). Tentando ler bytes e chamar extract_text_from_file.")
-                    try:
-                        uploaded_file.seek(0)
-                        file_content_bytes = uploaded_file.read()
-                        # <-- LOG 2: Verifica se os bytes foram lidos -->
-                        logger.debug(f"Bytes lidos para '{original_filename}': {len(file_content_bytes)} bytes.")
-                        if file_content_bytes:
-                            # Chama a função de extração atualizada
-                            extracted_text = extract_text_from_file(original_filename, file_content_bytes)  # A chamada acontece aqui
-                            extracted_content[original_filename] = extracted_text
-                        else:
-                            logger.warning(f"Não foi possível ler bytes de '{original_filename}' antes da extração.")
-                            extracted_content[original_filename] = f"(Erro ao ler o arquivo '{original_filename}' antes da extração)"
-
-                    except Exception as extraction_error:
-                        logger.error(f"Erro crítico durante chamada de extração para {original_filename}: {extraction_error}", exc_info=True)
-                        extracted_content[original_filename] = f"(Erro interno ao tentar ler {original_filename})"
-
-            except ValueError as ve:
-                logger.warning(f"Erro de validação para arquivo '{original_filename}' no chat {chat.id}: {ve}")
-                upload_errors.append({'filename': original_filename, 'error': str(ve)})
-            except Exception as file_proc_err:
-                logger.error(f"Erro inesperado ao processar arquivo '{original_filename}' para chat {chat.id}: {file_proc_err}", exc_info=True)
-                upload_errors.append({'filename': original_filename, 'error': 'Erro interno ao processar o arquivo.'})
-                if attachment and attachment.pk:
-                    try:
-                        attachment.delete()
-                        logger.warning(f"Anexo {attachment.pk} removido devido a erro.")
-                    except Exception as del_err:
-                        logger.error(f"Erro adicional ao remover anexo {attachment.pk}: {del_err}")
-
-    # ───────── 3. Validação Mínima e Salvamento da Mensagem + Associação de Anexos ─────────
-    if not prompt_user_typed and not image_parts_for_api and not saved_attachments:
-        logger.warning(f"Tentativa de envio para chat {chat.id} sem texto e sem arquivos válidos.")
-        return JsonResponse({
-            "error": 'É necessário enviar um texto ou pelo menos um arquivo suportado.',
-            "upload_errors": upload_errors
-        }, status=400)
-
-    user_msg = None
-    user_attachments_data = []
-    try:
-        # Salva a mensagem APENAS com o texto que o usuário digitou
-        user_msg = ChatMessage.objects.create(chat=chat, sender="user", text=prompt_user_typed)
-        if saved_attachments:
-            for att in saved_attachments:
-                att.message = user_msg
-                att.save(update_fields=['message'])
-                user_attachments_data.append({
-                    'id': att.id,
-                    'url': att.file.url,
-                    'filename': att.get_filename()
-                })
-        logger.info(f"Mensagem usuário {user_msg.id} e {len(saved_attachments)} anexos associados salvos.")
-    except Exception as e:
-        logger.error(f"Erro ao salvar mensagem de usuário ou associar anexos para chat {chat.id}: {e}", exc_info=True)
-        return JsonResponse({'error': 'Erro interno ao salvar sua mensagem ou anexos.'}, status=500)
-
-    # ───────── 4. Montar Histórico e Prompt Atual para API ─────────
-    history_for_api = []
-    try:
-        # Pega mensagens anteriores
-        previous_messages = chat.messages.filter(created_at__lt=user_msg.created_at).order_by("created_at")
-        for msg in previous_messages:
-            history_for_api.append({
-                "role": "user" if msg.sender == "user" else "model",
-                "parts": [{"text": msg.text or ""}]  # Apenas texto do histórico
-            })
-        logger.debug(f"Histórico anterior ({len(history_for_api)} turnos) montado para chat {chat.id}.")
-    except Exception as e:
-        logger.error(f"Erro ao montar histórico anterior para chat {chat.id}: {e}", exc_info=True)
-
-    # Montar Parts da Mensagem ATUAL
-    current_prompt_parts = []
-    # 1. Adiciona IMAGENS (se houver)
-    if image_parts_for_api:
-        current_prompt_parts.extend(image_parts_for_api)
-
-    # 2. Constrói o TEXTO final para a API (prompt + conteúdo extraído)
-    final_text_for_api = prompt_user_typed
-    if extracted_content:
-        final_text_for_api += "\n\n--- Conteúdo dos Arquivos Anexados ---\n"
-        for filename, content in extracted_content.items():
-            if content:  # Inclui texto extraído ou mensagem de erro da extração
-                final_text_for_api += f"\n[Conteúdo de: {filename}]\n{content}\n[Fim de: {filename}]\n"
-            else:
-                # Informa que não foi possível extrair texto deste arquivo específico
-                final_text_for_api += f"\n[Não foi possível extrair texto de: {filename}]\n"
-        final_text_for_api += "\n--- Fim do Conteúdo dos Arquivos ---"
-
-    # Adiciona a parte de texto final (mesmo se vazia, se não houver imagens/outros)
-    if final_text_for_api or not current_prompt_parts:
-        current_prompt_parts.append({"text": final_text_for_api})
-
-    # Verifica se há algo para enviar
-    if not current_prompt_parts:
-        logger.error(
-            f"Erro crítico: Nenhuma parte para enviar no turno atual (Chat {chat.id}). Texto final era '{final_text_for_api}'. Imagens API: {len(image_parts_for_api)}")
-        # Adiciona uma mensagem de erro suave se tudo falhar
-        current_prompt_parts.append({"text": "(Não foi possível processar o conteúdo enviado)"})
-        # Não retorna erro aqui, tenta enviar essa mensagem fallback
-
-    history_for_api.append({"role": "user", "parts": current_prompt_parts})
-
-    # Adicionar Instrução de Linguagem e Anti-Emoji (tentativa)
-    system_instruction = "Responda sempre em português do Brasil. Não use emojis. Analise o conteúdo dos arquivos anexados (indicados por [Conteúdo de:...]), se houver, para formular sua resposta."
-    try:
-        if history_for_api and history_for_api[-1].get("role") == "user":
-            parts = history_for_api[-1].get("parts", [])
-            text_part_index = -1
-            for i in range(len(parts) - 1, -1, -1):
-                if "text" in parts[i]:
-                    text_part_index = i
-                    break
-            if text_part_index != -1:
-                original_text = parts[text_part_index].get("text", "") or ""
-                parts[text_part_index]["text"] = f"{original_text}\n\n(Instrução: {system_instruction})"
-                logger.debug(f"Instrução adicionada ao text part existente.")
-            else:
-                parts.append({"text": f"(Instrução: {system_instruction})"})
-                logger.debug(f"Instrução adicionada como novo text part.")
-        else:
-            logger.warning("Não foi possível adicionar instrução: Histórico vazio ou último turno não é do usuário.")
-    except Exception as instr_err:
-        logger.error(f"Erro ao tentar adicionar instrução de sistema: {instr_err}")
-
-    # ───────── 5. Mapear Modelo e Chamar API Gemini ─────────
-    selected_model_key = request.POST.get("model", DEFAULT_GEMINI_MODEL_KEY)
-    model_name = MODEL_MAP.get(selected_model_key, DEFAULT_GEMINI_MODEL_NAME)
-    if model_name != MODEL_MAP.get(selected_model_key):
-        logger.warning(f"Modelo '{selected_model_key}' não mapeado, usando fallback '{model_name}' para chat {chat.id}.")
-    logger.debug(f"Modelo selecionado para API Gemini: {model_name}")
-
-    ai_text_raw = "(Erro: A IA não conseguiu gerar uma resposta.)"
-    ai_text = ai_text_raw
-    ai_msg = None
-    gemini_resp = None
-
-    try:
-        model = genai.GenerativeModel(model_name)
-        generation_config = genai.types.GenerationConfig(temperature=0.7)
-        safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-        ]
-
-        logger.debug(f"Enviando request para Gemini (modelo: {model_name}). Turno atual tem {len(image_parts_for_api)} imagem(ns) API e {len(extracted_content)} arquivo(s) com texto extraído/processado.")
-        # Log mais detalhado do payload (cuidado com dados sensíveis)
-        # logger.debug(f"Payload (histórico) para Gemini (simplificado): {json.dumps(history_for_api, indent=2, ensure_ascii=False)}")
-
-        # <<< CHAMA A API >>>
-        gemini_resp = model.generate_content(
-            history_for_api,
-            generation_config=generation_config,
-            safety_settings=safety_settings
+    # ------------------------------------------------------------------
+    # 2) Salva anexos – se houver – e prepara lista para OpenAI
+    # ------------------------------------------------------------------
+    dj_attachments: list[ChatAttachment] = []
+    for f in files:
+        dj_attachments.append(
+            ChatAttachment.objects.create(chat=chat, message=user_msg, file=f)
         )
 
-        # Processamento da Resposta da API
-        try:
-            if hasattr(gemini_resp, 'text') and gemini_resp.text:
-                ai_text_raw = gemini_resp.text.strip()
-            elif hasattr(gemini_resp, 'candidates') and gemini_resp.candidates and hasattr(gemini_resp.candidates[0], 'content') and gemini_resp.candidates[0].content.parts:
-                # Tenta obter texto da estrutura de 'candidates' se .text falhar
-                ai_text_raw = "".join(part.text for part in gemini_resp.candidates[0].content.parts if hasattr(part, 'text')).strip()
-                if not ai_text_raw:  # Verifica se ainda assim ficou vazio
-                    if gemini_resp.prompt_feedback and gemini_resp.prompt_feedback.block_reason:
-                        block_reason = gemini_resp.prompt_feedback.block_reason.name
-                        logger.warning(f"Resposta da IA bloqueada (Chat {chat.id}). Razão: {block_reason}")
-                        ai_text_raw = f"(A resposta foi bloqueada por segurança: {block_reason})"
-                    else:
-                        logger.warning(f"Resposta da IA via 'candidates' vazia (Chat {chat.id}). Resposta completa: {gemini_resp}")
-                        ai_text_raw = "(A IA retornou uma resposta vazia ou inválida.)"
-
-            elif gemini_resp.prompt_feedback and gemini_resp.prompt_feedback.block_reason:
-                block_reason = gemini_resp.prompt_feedback.block_reason.name
-                logger.warning(f"Resposta da IA bloqueada (Chat {chat.id}). Razão: {block_reason}")
-                ai_text_raw = f"(A resposta foi bloqueada por segurança: {block_reason})"
-            else:
-                logger.warning(f"Resposta da IA vazia ou sem texto/candidates válidos (Chat {chat.id}). Resposta: {gemini_resp}")
-                ai_text_raw = "(A IA retornou uma resposta vazia ou inválida.)"
-
-            ai_text = remove_emojis(ai_text_raw)
-            if not ai_text and ai_text_raw:
-                logger.warning(f"Resposta da IA para chat {chat.id} continha apenas emojis e foi removida.")
-                ai_text = "(A resposta da IA continha apenas emojis.)"
-            elif not ai_text:  # Se remove_emojis resultou em vazio
-                ai_text = "(A IA retornou uma resposta vazia.)"  # Mantém a mensagem de vazio
-
-        except ValueError as ve:  # Captura erro de bloqueio se response.text falhar
-            logger.warning(f"ValueError ao processar resposta da IA (provável bloqueio) para chat {chat.id}: {ve}. Feedback: {getattr(gemini_resp, 'prompt_feedback', 'N/A')}")
-            ai_text_raw = f"(A resposta foi bloqueada ou interrompida: {ve})"
-            ai_text = ai_text_raw  # Mantém a mensagem de erro
-        except Exception as generic_resp_err:
-            logger.error(f"Erro genérico ao processar a resposta da IA para chat {chat.id}: {generic_resp_err}", exc_info=True)
-            ai_text_raw = f"(Erro interno ao processar a resposta da IA: {type(generic_resp_err).__name__})"
-            ai_text = ai_text_raw  # Mantém a mensagem de erro
-
-    except Exception as api_err:
-        logger.error(f"Falha crítica na chamada da API Gemini (Chat {chat.id}, modelo: {model_name}): {api_err}", exc_info=True)
-        error_type_name = type(api_err).__name__
-        ai_text = f"(Erro na comunicação com o serviço de IA: {error_type_name})"
-        # Retorna erro 502/503 - NÃO logar custo aqui
-        return JsonResponse({
-            "error": ai_text,
-            "user_message_id": user_msg.id if user_msg else None,
-            "user_attachments": user_attachments_data,
-            "response": ai_text,  # Retorna o erro aqui também
-            "ai_message_id": None,
-            "upload_errors": upload_errors
-        }, status=502)  # Bad Gateway or 503 Service Unavailable
-
-    # ───────── 6. Salvar Resposta da IA E LOGAR USO ─────────
     try:
+        # ------------------------------------------------------------------
+        # 3) Garante thread e monta mensagem
+        # ------------------------------------------------------------------
+        thread_id = get_or_create_thread(chat)
+
+        msg_kwargs = {
+            "role": "user",
+            "content": prompt or "Descreva os dados enviados e gere análises.",
+        }
+
+        if dj_attachments:
+            msg_kwargs["attachments"] = [
+                {
+                    "file_id": ensure_oa_file(att),
+                    "tools": [{"type": "code_interpreter"}],
+                }
+                for att in dj_attachments
+            ]
+
+        oa_client.beta.threads.messages.create(thread_id, **msg_kwargs)
+
+        # ------------------------------------------------------------------
+        # 4) Executa o Assistant (blocking)
+        # ------------------------------------------------------------------
+        run = oa_client.beta.threads.runs.create_and_poll(
+            thread_id=thread_id,
+            assistant_id=settings.ASSISTANT_ID,
+        )
+
+        # ------------------------------------------------------------------
+        # 5) Recupera última resposta
+        # ------------------------------------------------------------------
+        last_msg = oa_client.beta.threads.messages.list(
+            thread_id, order="desc", limit=1
+        ).data[0]
+
+        def _to_str(part) -> str:
+            """Converte cada Fragmento retornado pela API em texto limpo."""
+            if isinstance(part, str):
+                return part
+            if hasattr(part, "text"):
+                txt_obj = part.text
+                return getattr(txt_obj, "value", str(txt_obj))
+            if hasattr(part, "value"):
+                return str(part.value)
+            return str(part)
+
+        ai_text: str = "".join(_to_str(p) for p in last_msg.content).strip() or (
+            "(A IA não retornou texto.)"
+        )
+        ai_text = remove_emojis(ai_text)
+
+        # ------------------------------------------------------------------
+        # 6) Grava mensagem da IA
+        # ------------------------------------------------------------------
         ai_msg = ChatMessage.objects.create(chat=chat, sender="ai", text=ai_text)
-        logger.debug(f"Mensagem da IA (ID: {ai_msg.id}, Texto: '{ai_text[:50]}...') salva para chat {chat.id}.")
 
-        # LOGAR USO DA API
-        if gemini_resp and hasattr(gemini_resp, 'usage_metadata'):
-            log_api_usage(
+        # ------------------------------------------------------------------
+        # 7) Log de uso (tokens / imagens)
+        # ------------------------------------------------------------------
+        if getattr(run, "usage", None):
+            usage_obj = run.usage
+            # A API usa input_tokens / output_tokens nos objetos Run
+            in_tok = getattr(usage_obj, "input_tokens", 0)
+            out_tok = getattr(usage_obj, "output_tokens", 0)
+
+            ApiUsageLog.objects.create(
                 user=user,
-                model_name=model_name,
+                model_name=run.model,
                 ai_message=ai_msg,
-                usage_metadata=gemini_resp.usage_metadata,
-                image_count=image_count_for_log  # Loga apenas imagens enviadas à API
+                input_tokens=in_tok,
+                output_tokens=out_tok,
+                image_count=len(dj_attachments),
+                estimated_cost=Decimal(0),  # calcule se desejar
+                estimated_cost_brl=Decimal(0),
+                timestamp=ai_msg.created_at,
             )
-        elif gemini_resp:
-            logger.warning(f"Resposta Gemini para msg {ai_msg.id} não continha 'usage_metadata'. Custo não registrado.")
 
-    except Exception as e:
-        logger.error(f"Erro ao salvar mensagem da IA ou logar uso para chat {chat.id}: {e}", exc_info=True)
-        # A resposta da IA foi recebida, mas não pôde ser salva. Retorna a resposta mas com erro.
-        return JsonResponse({
-            'error': 'Erro interno ao salvar a resposta da IA ou registrar uso.',
-            'user_message_id': user_msg.id if user_msg else None,
-            'user_attachments': user_attachments_data,
-            'response': ai_text,  # Retorna o texto que deveria ter sido salvo
-            'ai_message_id': None,  # Indica que não foi salvo
-            "upload_errors": upload_errors
-        }, status=500)
+        # ------------------------------------------------------------------
+        # 8) Atualiza conversa e devolve resposta
+        # ------------------------------------------------------------------
+        chat.updated_at = ai_msg.created_at
+        chat.save(update_fields=["updated_at"])
 
-    # ───────── 7. Gerar Título (Opcional) ─────────
-    generated_title = None
-    try:
-        message_count = chat.messages.count()
-        is_default_title = chat.title is None or chat.title.strip().lower().startswith("nova conversa")
+        return JsonResponse(
+            {
+                "response": ai_text,
+                "ai_message_id": ai_msg.id,
+                "user_message_id": user_msg.id,
+                "uploaded_files": [
+                    {
+                        "id": att.id,
+                        "filename": att.get_filename(),
+                        "url": att.file.url,
+                    }
+                    for att in dj_attachments
+                ],
+            }
+        )
 
-        # Tenta gerar título a partir do texto do usuário se for a primeira msg real
-        if message_count <= 2 and is_default_title and prompt_user_typed:
-            logger.info(f"Tentando gerar título via fallback para chat {chat.id}.")
-            words = prompt_user_typed.split()
-            fallback_title_raw = " ".join(words[:5])
-            if fallback_title_raw:
-                fallback_title_cleaned = re.sub(r"[.!?,;:]$", "", fallback_title_raw).strip().strip('"\'')
-                fallback_title = remove_emojis(fallback_title_cleaned)
-                if fallback_title and len(fallback_title) > 1:
-                    generated_title = fallback_title[0].upper() + fallback_title[1:]
-                    logger.info(f"Título fallback gerado para chat {chat.id}: '{generated_title}'")
-                else:
-                    logger.warning(f"Título fallback gerado para chat {chat.id} resultou vazio.")
-            else:
-                logger.warning(f"Não foi possível gerar título fallback para chat {chat.id}.")
-    except Exception as title_err:
-        logger.error(f"Erro durante a geração de título fallback para chat {chat.id}: {title_err}", exc_info=True)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Erro no Assistant: %s", exc, exc_info=True)
+        chat.updated_at = timezone.now()
+        chat.save(update_fields=["updated_at"])
+        return JsonResponse({"error": "Falha ao processar sua solicitação."}, status=500)
 
-    # ───────── 8. Atualizar Chat e Preparar Resposta Final ─────────
-    fields_to_update = ["updated_at"]
-    chat.updated_at = ai_msg.created_at if ai_msg and ai_msg.created_at else timezone.now()
-    if generated_title:
-        chat.title = generated_title
-        fields_to_update.append("title")
-
-    try:
-        chat.save(update_fields=fields_to_update)
-        logger.debug(f"Chat {chat.id} salvo. Campos atualizados: {fields_to_update}")
-    except Exception as final_save_err:
-        logger.error(f"Erro ao salvar campos finais ({fields_to_update}) do chat {chat.id}: {final_save_err}")
-
-    resp_data = {
-        "response": ai_text,
-        "user_message_id": user_msg.id if user_msg else None,
-        "ai_message_id": ai_msg.id if ai_msg else None,
-        "user_attachments": user_attachments_data,
-        "upload_errors": upload_errors
-    }
-    if "title" in fields_to_update and generated_title:
-        resp_data["new_title"] = generated_title
-
-    final_status_code = 207 if upload_errors else 200
-    logger.info(f"Processamento concluído para chat {chat.id}. Status: {final_status_code}. Anexos user: {len(user_attachments_data)}. Erros upload: {len(upload_errors)}")
-    return JsonResponse(resp_data, status=final_status_code)
-# ==============================================================================
-# == FIM DA VIEW COMBINADA ==
-# ==============================================================================
 
 
 @login_required

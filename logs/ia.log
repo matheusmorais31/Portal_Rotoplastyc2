@@ -1,0 +1,174 @@
+INFO 2025-06-17 15:54:45,205 views 17470 140321782445760 Chat 311 ('Nova Conversa') criado para usuário admin.
+INFO 2025-06-17 16:31:31,665 views 17470 140321320847040 Usuário admin editou msg 1275 (novo texto: 'o cliente stara tem quantos  produtos somando a co...') no chat 311.
+INFO 2025-06-17 16:31:31,672 views 17470 140321320847040 1 mensagens posteriores ({'ia.ChatMessage': 1}) deletadas após edição da msg 1275 no chat 311.
+DEBUG 2025-06-17 16:31:31,674 views 17470 140321320847040 Instruções adicionadas ao histórico pós-edição (Chat 311).
+DEBUG 2025-06-17 16:31:31,674 views 17470 140321320847040 Reprocessando com modelo gpt-4o para chat 311 após edição da msg 1275.
+ERROR 2025-06-17 16:31:32,403 views 17470 140321320847040 Falha ao reprocessar IA após edição da msg 1275 no chat 311: 404 models/gpt-4o is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Traceback (most recent call last):
+  File "/opt/Portal_Rotoplastyc/ia/views.py", line 734, in edit_user_message_view
+    gemini_resp_edit = model.generate_content(
+                       ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/generativeai/generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/ai/generativelanguage_v1beta/services/generative_service/client.py", line 835, in generate_content
+    response = rpc(
+               ^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/api_core/gapic_v1/method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/api_core/retry/retry_unary.py", line 293, in retry_wrapped_func
+    return retry_target(
+           ^^^^^^^^^^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/api_core/retry/retry_unary.py", line 153, in retry_target
+    _retry_error_helper(
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/api_core/retry/retry_base.py", line 212, in _retry_error_helper
+    raise final_exc from source_exc
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/api_core/retry/retry_unary.py", line 144, in retry_target
+    result = target()
+             ^^^^^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/api_core/timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/Portal_Rotoplastyc/venv/lib/python3.11/site-packages/google/api_core/grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.NotFound: 404 models/gpt-4o is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+INFO 2025-06-17 16:34:38,641 views 17470 140321320847040 Chat 310 ('Nova Conversa') excluído pelo usuário admin.
+INFO 2025-06-17 16:34:40,000 views 17470 140321320847040 Chat 309 ('Nova Conversa') excluído pelo usuário admin.
+INFO 2025-06-17 16:34:40,938 views 17470 140321320847040 Chat 308 ('Nova Conversa') excluído pelo usuário admin.
+INFO 2025-06-17 16:34:43,237 views 17470 140321320847040 Chat 307 ('Nova Conversa') excluído pelo usuário admin.
+INFO 2025-06-17 16:34:44,723 views 17470 140321320847040 Chat 306 ('Nova Conversa') excluído pelo usuário admin.
+INFO 2025-06-17 16:34:45,539 views 17470 140321320847040 Chat 305 ('Nova Conversa') excluído pelo usuário admin.
+INFO 2025-06-17 16:52:28,315 views 20118 140082937512640 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 16:54:02,137 views 20281 140539206546112 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 16:54:08,113 views 20334 139637372351168 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 16:54:13,782 views 20361 140537061520064 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:11:55,274 views 21121 139891889423040 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:12:00,485 views 21151 140647005422272 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:14:20,837 views 21549 140001172460224 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:18:27,510 views 22295 139848200086208 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:22:02,710 views 22493 140148790637248 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:23:02,697 views 22700 140338540733120 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:23:09,345 views 22760 139942658646720 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:24:57,458 views 23200 140001427014336 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:25:48,992 views 23463 140627304383168 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:32:34,373 views 23645 140522007601856 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:33:55,181 views 24031 140355104891584 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:35:49,908 views 24295 139820064125632 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:35:56,680 views 24577 139642252227264 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:35:59,733 views 24611 140222218363584 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:36:45,913 views 24820 139718241899200 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:36:51,918 views 24851 139771253048000 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:37:06,945 views 24922 140309612122816 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:39:24,674 views 25148 139675519021760 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:42:18,645 views 25730 139844667065024 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:43:18,339 views 25853 139790293652160 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:43:28,796 views 25914 139711078904512 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:49:20,185 views 26700 140015302054592 API Key do Gemini configurada com sucesso.
+INFO 2025-06-17 17:52:12,376 views 27169 140481283175104 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:21:01,309 views 3332 140139014947520 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:26:22,350 views 3361 140476066783936 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:26:40,086 views 3457 139830517506752 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:29:11,060 views 3870 140173154988736 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:33:26,710 views 4179 139904419508928 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:38:46,335 views 4311 140195556430528 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:38:56,583 views 4372 140632072417984 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:39:03,264 views 4421 139843275961024 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:39:09,361 views 4673 140630482232000 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:39:14,790 views 4689 140476180046528 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:39:35,117 views 4819 140252241142464 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:49:47,453 views 2121 139995271144128 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 08:50:34,977 views 2495 139975221310144 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 10:05:54,661 views 3229 140160349123264 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 11:18:43,441 views 6843 140371154862784 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 11:20:14,306 views 6986 140184564798144 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 11:41:41,085 views 8036 139646269997760 API Key do Gemini configurada com sucesso.
+INFO 2025-06-18 11:41:45,125 views 8055 140038196982464 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 11:02:43,900 views 18152 139963609854656 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 11:50:16,334 views 1817 140097892430528 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 11:50:35,860 views 2458 140181840380608 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:40:41,178 views 3695 139753128923840 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:40:58,035 views 4042 139848200139456 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:41:02,288 views 4058 139629194912448 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:41:08,004 views 4103 140474184254144 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:41:26,190 views 4154 140246043349696 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:41:45,162 views 4214 140162500870848 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:42:27,010 views 4374 139933134013120 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:42:42,749 views 4423 140653366948544 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:42:48,466 views 4465 139931221631680 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:42:55,912 views 4512 140664620585664 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:43:01,231 views 4558 140109602403008 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 14:43:06,730 views 4605 140047236330176 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:25:31,570 views 4964 140007309796032 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:26:00,937 views 5626 139978522612416 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:26:06,646 views 5643 139848260764352 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:26:11,612 views 5699 139996654793408 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:27:30,510 views 5768 139620799722176 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:27:41,934 views 5828 139823534027456 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:27:52,266 views 5888 139686834086592 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:28:54,282 views 5974 139946739278528 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:35:19,089 views 6614 140349386953408 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:35:25,667 views 6663 140072614671040 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:39:34,280 views 6891 140248268509888 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:44:43,112 views 7224 140505381348032 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:53:00,053 views 7782 139931505681088 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 15:53:46,517 views 7905 140538842800832 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 16:24:40,804 views 9202 139852303135424 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 16:41:38,610 views 9767 140148361724608 API Key do Gemini configurada com sucesso.
+INFO 2025-06-20 16:42:34,301 views 9869 140317729161920 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 10:13:26,524 views 18433 140097355555520 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:11:44,338 views 23799 140464056193728 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:26:42,356 views 25778 140671267132096 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:26:46,105 views 25820 139961026036416 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:26:52,331 views 25873 140650206868160 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:26:59,077 views 25933 140575109874368 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:27:15,056 views 26009 139868575949504 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:27:24,755 views 26080 140604503126720 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:29:08,010 views 26484 139814156620480 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:29:13,392 views 26548 140187026322112 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:29:24,264 views 26596 140644542628544 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:37:27,031 views 27378 140218369651392 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:37:31,152 views 27409 140016519316160 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:37:34,981 views 27440 140304145253056 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:38:22,028 views 27655 139737335751360 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:41:55,993 views 28154 139977114227392 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 14:42:24,353 views 28209 140562287555264 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:01:37,654 views 29508 140525455065792 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:02:00,737 views 29575 139750316057280 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:02:04,706 views 29606 140491673060032 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:02:28,991 views 29667 140416593314496 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:02:41,322 views 29727 140238929711808 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:02:48,144 views 29787 140553389388480 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:03:54,978 views 29883 140511097266880 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:04:02,095 views 29951 140490364179136 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:04:06,882 views 29986 140323778011840 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:09:13,173 views 30487 140565015044800 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:09:22,050 views 30556 140206077919936 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:09:27,477 views 30600 140014541312704 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:09:32,988 views 30633 140082851398336 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:21:22,465 views 31189 140619758482112 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:21:29,706 views 31231 140550317757120 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:21:33,457 views 31269 140158428902080 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:21:42,166 views 31311 140713365545664 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:22:28,793 views 31397 139767255306944 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:22:36,469 views 31458 139697331225280 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:29:02,408 views 31639 140561754145472 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:29:17,812 views 31699 140530432254656 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:29:23,541 views 31752 140685262107328 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:39:57,283 views 32056 139717239038656 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:40:00,857 views 32076 140395225502400 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:40:46,629 views 32176 139793486344896 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:40:54,956 views 32236 140561675760320 API Key do Gemini configurada com sucesso.
+INFO 2025-06-23 15:41:59,818 views 32300 139983845610176 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 08:42:25,072 views 38105 140605700985536 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 09:25:53,448 views 38979 140711272993472 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:47:29,552 views 939 140309936501440 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:49:59,298 views 2523 139842576331456 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:50:06,152 views 2558 139775501279936 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:50:21,346 views 2590 140074642821824 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:50:30,129 views 2392 140309936501440 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:54:25,370 views 3030 140614611149504 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:54:31,658 views 3066 139875325874880 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:54:48,322 views 3148 139883857044160 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:54:53,053 views 3169 140205646811840 API Key do Gemini configurada com sucesso.
+INFO 2025-06-24 14:54:58,007 views 3131 140309936501440 API Key do Gemini configurada com sucesso.

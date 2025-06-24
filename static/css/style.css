@@ -31,7 +31,7 @@
 
 body {
     font-family: 'Inter', Arial, sans-serif;
-    background: #0f1e24 url("/static/images/fundo2.png") center/100% 100% no-repeat fixed;
+    background: #0f1e24 url("/static/images/fundo.png") center/100% 100% no-repeat fixed;
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
@@ -642,12 +642,16 @@ body {
 }
 
 .personificar-alert {
-    background-color: #ff4040; /* cor de fundo de destaque */
-    color: #fff;
-    font-weight: bold;
-    text-align: center;
-    padding: 10px 20px;
-    margin-top: 50px; /* se quiser dar espaço abaixo da top-bar */
+    position: fixed;
+    top: 50px;          /* altura da top-bar */
+    left: 0;
+    width: 100%;
+    z-index: 9998;      /* um a menos que a top-bar (9999) */
+    background: #ff4040;
+    color:#fff;
+    font-weight:600;
+    text-align:center;
+    padding:10px 20px;
 }
 
 .personificar-alert a {
@@ -656,6 +660,12 @@ body {
     margin-left: 10px;
 }
 
+body.impersonating .side-bar { 
+    top: 90px; 
+}
+body.impersonating .main-content {
+     padding-top: 120px; 
+}
 
 /* Responsividade */
 @media (max-width: 992px) {
@@ -786,7 +796,7 @@ body {
 
 /* DEFINIÇÃO DO TEMA ESCURO (PADRÃO) */ 
 body.dark-theme {
-    background: #0f1e24 url("/static/images/fundo2.png") center/100% 100% fixed;
+    background: #0f1e24 url("/static/images/fundo.png") center/100% 100% fixed;
     color: var(--text-primary);
 }
 
@@ -920,5 +930,44 @@ body.light-theme .group-container {
 /* NOTIFICAÇÃO TEMA CLARO */
 body.light-theme .notification-dropdown li a{
     color: #ffffff;
+}
+
+.sidebar-logo-container {
+    margin-top: auto; /* Empurra a logo para o final da sidebar */
+    padding: 20px 0;  /* Espaçamento vertical (ajuste conforme necessário) */
+    width: 100%;
+    display: flex;     /* Para centralizar a imagem filha */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;    /* Centraliza verticalmente (se houver altura extra) */
+}
+
+.sidebar-logo {
+    width: 50px;  /* Ajuste o tamanho da logo conforme necessário */
+    height: 50px; /* Ajuste o tamanho da logo conforme necessário */
+    object-fit: contain;
+    display: none; /* Esconde ambas as logos por padrão */
+}
+
+/* Visibilidade da logo baseada no tema */
+body.dark-theme .sidebar-logo-container .logo-dark-theme {
+    display: block; /* Mostra a logo escura no tema escuro */
+}
+
+body.light-theme .sidebar-logo-container .logo-light-theme {
+    display: block; /* Mostra a logo clara no tema claro */
+}
+
+/* Garante que a outra logo esteja sempre escondida */
+body.dark-theme .sidebar-logo-container .logo-light-theme {
+    display: none;
+}
+
+body.light-theme .sidebar-logo-container .logo-dark-theme {
+    display: none;
+}
+
+/* Ajustes para a logo quando a sidebar não está expandida (opcional) */
+.side-bar:not(.expanded) .sidebar-logo-container {
+    padding: 15px 0; /* Pode querer um padding diferente quando colapsada */
 }
 

@@ -1,0 +1,624 @@
+/* --- Espaçamentos Comuns (mantidos como variáveis para reuso) --- */
+:root {
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+}
+
+/* Basic Reset & Font */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #2c2c2c; /* Fundo global escuro do corpo */
+    color: #f0f0f0; /* Cor do texto padrão do corpo (antes --row-text-color) */
+    line-height: 1.6;
+}
+
+/* Page Layout */
+.page-container {
+    max-width: 1200px;
+    margin: var(--spacing-lg) auto;
+    padding: 0 var(--spacing-sm);
+}
+
+h2 { /* Título principal da página */
+    color: #ffffff; /* antes --header-group-text */
+    margin-bottom: 20px;
+    text-align: left;
+    font-size: 24px;
+    font-weight: 700;
+    padding-left: var(--spacing-sm);
+    padding-top: var(--spacing-lg);
+}
+
+.light-theme h2{
+    color: black;
+}
+
+/* --- Estilos para a Navegação de Relatórios --- */
+.report-navigation {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background-color: #303030; /* antes --card-bg */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* antes --shadow-color */
+    max-width: 1200px;
+    margin: var(--spacing-md) auto;
+}
+
+.button-report {
+    background-color: #6c757d; /* antes --button-report-bg */
+    color: #ffffff; /* antes --header-group-text */
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.button-report:hover {
+    background-color: #5a6268; /* antes --button-report-hover-bg */
+}
+
+.button-report.active {
+    background-color: #2EC2D6; /* antes --button-report-active-bg */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.button-report.active:hover {
+    background-color: #2EC2D6; /* antes --button-report-active-hover-bg */
+}
+
+/* --- Estilos para o Formulário de Filtro --- */
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #424242; /* antes --card-border */
+    background-color: #303030; /* antes --card-bg */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* antes --shadow-color */
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.filters-container .filter-form {
+    display: contents;
+}
+
+/* Campo de Busca (Colaborador) */
+.search-container {
+    flex: 1 1 300px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc; /* antes --filter-input-border */
+    background-color: #ddd; /* antes --filter-input-bg */
+    color: #333; /* antes --filter-input-text */
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    background-color: #fff; /* antes --filter-input-focus-bg */
+    outline: none;
+    border-color: #2EC2D6; /* antes --filter-input-focus-border (que era primary-color) */
+}
+
+/* Filtro por Categoria (Status) */
+.filter-container {
+    flex: 0 1 200px;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc; /* antes --filter-input-border */
+    background-color: #ddd; /* antes --filter-input-bg */
+    color: #333; /* antes --filter-input-text */
+    font-size: 16px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg fill='%23333333' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    transition: background-color 0.3s ease;
+    box-sizing: border-box;
+    padding-right: 2.5rem;
+}
+
+.filter-select:focus {
+    background-color: #fff; /* antes --filter-input-focus-bg */
+    outline: none;
+    border-color: #2EC2D6; /* antes --filter-input-focus-border (que era primary-color) */
+}
+
+/* Contêiner para os outros filtros (Contrato, EPI, Datas) */
+.other-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    flex-grow: 1;
+    min-width: 100%;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    color: #f0f0f0; /* antes --filter-label-color */
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.filter-form input[type="text"],
+.filter-form input[type="number"],
+.filter-form input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc; /* antes --filter-input-border */
+    background-color: #ddd; /* antes --filter-input-bg */
+    color: #333; /* antes --filter-input-text */
+    font-size: 16px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.filter-form input[type="text"]:focus,
+.filter-form input[type="number"]:focus,
+.filter-form input[type="date"]:focus {
+    background-color: #fff; /* antes --filter-input-focus-bg */
+    outline: none;
+    border-color: #2EC2D6; /* antes --filter-input-focus-border (que era primary-color) */
+}
+
+.filter-actions-full-width {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.button-filter {
+    background-color: #2EC2D6; /* antes --filter-button-bg */
+    color: #ffffff; /* antes --header-group-text */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.button-clear-filter {
+    background-color: #c70707; /* antes --filter-button-clear-bg */
+    color: #ffffff; /* antes --header-group-text */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.button-filter:hover { background-color: #37dbf0; } /* antes --filter-button-hover-bg */
+.button-clear-filter:hover { background-color: #ff0400; } /* antes --filter-button-clear-hover-bg */
+
+
+/* Grouped Sections Container */
+.container-agrupado {
+    max-width: 1200px;
+    margin: var(--spacing-lg) auto;
+    padding: 0 var(--spacing-sm);
+}
+
+/* Individual Delivery Group Card */
+.grupo-centro-custo {
+    margin-bottom: var(--spacing-md);
+    border: 1px solid #424242; /* antes --card-border */
+    border-radius: 8px;
+    background-color: #303030; /* antes --card-bg */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* antes --shadow-color */
+    overflow: hidden;
+}
+
+/* Group Header Button (The clickable part) */
+.header-grupo {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: #424242; /* antes --header-group-bg */
+    color: #ffffff; /* antes --header-group-text */
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background-color 0.2s ease;
+}
+
+.header-grupo:hover,
+.header-grupo:focus {
+    background-color: #1a9fb2; /* antes --primary-dark-color */
+    outline: none;
+}
+
+.header-grupo .toggle-icon {
+    font-size: 1.5em;
+    line-height: 1;
+    font-weight: bold;
+    min-width: 1.5em;
+    text-align: center;
+    transition: transform 0.2s ease;
+    color: #61dafb; /* antes --header-group-icon */
+    margin-right: var(--spacing-xs);
+}
+
+/* Estilo para o ícone quando o conteúdo está expandido */
+.header-grupo[aria-expanded="true"] .toggle-icon {
+    transform: rotate(45deg);
+}
+
+.header-grupo .header-text {
+    flex-grow: 1;
+}
+
+/* Collapsible Content Area */
+.collapse-content {
+    padding: var(--spacing-sm);
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
+    overflow: hidden;
+    max-height: 1000px;
+    opacity: 1;
+}
+
+.collapse-content.hidden {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 var(--spacing-sm);
+    pointer-events: none;
+}
+
+/* Table Styling within groups */
+.overflow-x-auto {
+    overflow-x: auto;
+}
+
+.table-auto {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+    background-color: #303030; /* antes --card-bg */
+}
+
+.table-auto thead {
+    background-color: #2EC2D6; /* antes --table-header-bg (que era primary-color) */
+    border-bottom: 2px solid #1a9fb2; /* antes --primary-dark-color */
+}
+
+.table-auto th {
+    font-weight: 600;
+    color: #ffffff; /* antes --table-header-text */
+    white-space: nowrap;
+    padding: var(--spacing-sm);
+    text-align: left;
+}
+
+.table-auto th,
+.table-auto td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid #555; /* antes --table-border */
+    font-size: 0.95rem;
+    color: #f0f0f0; /* antes --row-text-color */
+}
+
+/* Alternating Row Colors */
+.table-auto tbody tr:nth-child(odd) {
+    background-color: #383838; /* antes --row-odd-bg */
+}
+
+.table-auto tbody tr:nth-child(even) {
+    background-color: #424242; /* antes --row-even-bg */
+}
+
+.table-auto tbody tr:hover {
+    background-color: #555;
+}
+
+/* Specific Alignment */
+.table-auto th.text-right,
+.table-auto td.text-right {
+    text-align: right;
+}
+
+.table-auto th.text-center,
+.table-auto td.text-center {
+    text-align: center;
+}
+
+/* --- Estilos para a Coluna de Ações --- */
+.actions-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    min-width: 130px;
+    padding: var(--spacing-xs);
+}
+
+/* --- Estilos para o Botão de Detalhes --- */
+.detail-toggle-button {
+    background-color: #4CAF50; /* antes --button-detail-bg */
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    width: auto;
+    min-width: 80px;
+}
+
+.detail-toggle-button:hover,
+.detail-toggle-button:focus {
+    background-color: #45a049; /* antes --button-detail-hover-bg */
+    outline: none;
+}
+
+/* --- Estilos para o Botão "Dar Baixa" na linha agrupada --- */
+.button-action.baixar-agrupado {
+    background-color: #4CAF50; /* antes --button-detail-bg */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    width: auto;
+    min-width: 90px;
+}
+
+.button-action.baixar-agrupado:hover {
+    background-color: #45a049; /* antes --button-detail-hover-bg */
+}
+
+/* --- Estilos para a Linha de Detalhes Expandida --- */
+.detail-row {
+    transition: all 0.3s ease-out;
+    background-color: #282828; /* antes --detail-row-bg */
+    color: #f0f0f0; /* antes --detail-text-color */
+    border-bottom: 2px solid #555;
+}
+
+.detail-row td {
+    padding: var(--spacing-sm);
+    border: none;
+}
+
+.detail-content {
+    padding: var(--spacing-sm);
+    font-size: 0.9rem;
+}
+
+.detail-content h4 {
+    color: #61dafb; /* antes --detail-title-color */
+    margin-top: 0;
+    margin-bottom: var(--spacing-xs);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.detail-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detail-list li {
+    margin-bottom: var(--spacing-xs);
+    padding-bottom: var(--spacing-xs);
+    position: relative;
+}
+
+.detail-list li strong {
+    color: #bdbdbd; /* antes --detail-label-color */
+    margin-right: var(--spacing-xs);
+}
+
+/* --- Estilos para o Status --- */
+.status-pendente {
+    color: #ffc107; /* antes --status-pendente-color */
+    font-weight: bold;
+}
+.status-baixado {
+    color: #28a745; /* antes --status-baixado-color */
+    font-weight: bold;
+}
+
+/* --- Estilos para Formulários de Ação (Apenas para Reverter nos Detalhes) --- */
+.form-reverter-status {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.button-action {
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.button-action.reverter {
+    background-color: #dc3545; /* antes --button-revert-bg */
+    color: white;
+}
+.button-action.reverter:hover {
+    background-color: #c82333; /* antes --button-revert-hover-bg */
+}
+
+/* Empty State Message */
+.text-center.py-4 {
+    text-align: center;
+    padding: var(--spacing-md);
+    color: #aaa; /* antes --no-data-text */
+    font-style: italic;
+    background-color: #303030; /* antes --no-data-bg */
+    border-radius: 8px;
+    margin-top: var(--spacing-sm);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* --- Estilos para a Linha Separadora de Colaborador --- */
+.collaborator-separator {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1); /* antes --separator-color */
+    margin: var(--spacing-xs) 0;
+    box-sizing: content-box;
+    height: 0;
+    overflow: visible;
+}
+
+/* --- Tema claro --- */
+
+.light-theme .report-navigation {
+    background-color: #515e6c;
+}
+
+.light-theme .report-navigation a {
+    color: #ffffff;
+}
+
+.light-theme .filters-container {
+    background-color: #515e6c;
+}
+
+.light-theme .header-grupo {
+    background-color: #515e6c;
+}
+
+.light-theme .collapse-content {
+    background-color: #515e6c;
+}
+
+.light-theme .header-grupo:hover {
+    background-color: #373f48;
+}
+
+.light-theme .table-auto td {
+    background-color: #373f48;
+}
+
+
+/* --- Responsividade Básica --- */
+@media (max-width: 768px) {
+    .page-container {
+        padding: var(--spacing-xs);
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        padding-left: var(--spacing-xs);
+    }
+
+    .report-navigation {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .button-report {
+        text-align: center;
+    }
+
+    /* Ajustes para o contêiner de filtros em telas menores */
+    .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-container,
+    .filter-container,
+    .other-filters-grid {
+        flex: 1 1 100%;
+        min-width: unset;
+    }
+
+    .other-filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions-full-width {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .button-filter,
+    .button-clear-filter {
+        width: 100%;
+    }
+
+    .header-grupo {
+        font-size: 1rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .table-auto th,
+    .table-auto td {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    /* Ajuste para a coluna de ações em telas pequenas */
+    .actions-column {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        min-width: unset;
+        padding: var(--spacing-xs);
+    }
+    
+    .detail-toggle-button,
+    .button-action.baixar-agrupado {
+        width: calc(50% - var(--spacing-xs) / 2);
+        font-size: 0.75rem;
+        padding: 0.3rem 0.5rem;
+        min-width: unset;
+    }
+
+    .form-reverter-status {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

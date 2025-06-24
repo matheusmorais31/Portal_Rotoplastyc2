@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-   <link rel="stylesheet" type="text/css" href="{% static 'css/home2.css' %}">
+   <link rel="stylesheet" type="text/css" href="{% static 'css/subhome.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
     </div>
 </a>
 
-<a href="/static/images/planoondonto.png" class="modal-content">
+<a href="{% url 'odonto' %}" class="modal-content">
     <div class="modal-container">
         <img src="/static/images/Odontologico.png" class="modal-img">
         <span class="modal-title">Plano Odontológico</span>

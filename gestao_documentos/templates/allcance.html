@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home2.css' %}">
+<link rel="stylesheet" href="{% static 'css/subhome.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -22,7 +22,15 @@
 <a href="{% url 'andon' %}" class="modal-content">
         <div class="modal-container">
                 <img src="/static/images/Andons.png" id="efect" class="modal-img">
-                <span class="modal-title">Andons</span>
+                <span class="modal-title">Andons Matriz</span>
+        </div>
+</a>
+
+
+<a href="{% url 'andonfilial' %}" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/Andons.png" id="efect" class="modal-img">
+                <span class="modal-title">Andons Filial</span>
         </div>
 </a>
 

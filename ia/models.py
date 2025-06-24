@@ -28,6 +28,25 @@ class Chat(models.Model):
         auto_now=True,
         verbose_name="Atualizado em"
     )
+    active_spreadsheet_attachment_id = models.PositiveIntegerField(
+        null=True, blank=True
+    )
+    
+    active_spreadsheet_columns_json = models.TextField(
+        null=True, blank=True
+    )
+
+    active_spreadsheet_original_columns_json = models.TextField(
+        null=True, blank=True
+    )
+
+
+    assistant_thread_id = models.CharField(
+        max_length=120, null=True, blank=True
+    )
+
+
+    
 
     class Meta:
         verbose_name = "Conversa IA"
@@ -66,6 +85,10 @@ class ChatMessage(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Enviado em"
+    )
+
+    metadata = models.JSONField(
+        null=True, blank=True
     )
 
     class Meta:
@@ -107,6 +130,14 @@ class ChatAttachment(models.Model):
         auto_now_add=True,
         verbose_name="Enviado em"
     )
+
+    metadata = models.JSONField(           
+        null=True,
+        blank=True,
+        help_text="Info auxiliar (ex.: {'oa_file_id': 'file_abc123'})"
+    )
+
+  
 
     class Meta:
         verbose_name = "Anexo IA"
@@ -204,6 +235,9 @@ class ApiUsageLog(models.Model):
             ('model_2.5_pro', 'Modelo mais caro Gemini 2.5 Pro'),
             ('model_1.5_pro', 'Modelo  Gemini 1.5 Pro'),
             ('rotoplastyc_ia', 'Modelo  Rotoplastyc IA para documentos'),
+            ('gpt_4o_mini', 'Modelo GPT-4o Mini'),
+            ('gpt_4o', 'Modelo GPT-4o'),
+            
         ]
         verbose_name = "Log de Uso da API"
         verbose_name_plural = "Logs de Uso da API"

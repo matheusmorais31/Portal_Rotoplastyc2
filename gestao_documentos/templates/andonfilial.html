@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subhome.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- LINK PARA O MES E ANDON -->
+<!-- RCTB010 -->
+<a href="http://mes.rotoplastyc.com.br/Analises/Andontv2/30" class="modal-content">
+    <div class="modal-container"><img src="/static/images/Producao.png" class="modal-img">
+        <span class="modal-title">RCTB010</span>
+    </div>
+</a>
+
+
+<!-- ACTB010 -->
+<a href="http://mes/Analises/Andon6/6" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/Acabamento.png" class="modal-img">
+        <span class="modal-title">ACTB010</span>
+    </div>
+</a>
+
+
+<!-- GAMBIARRA PARA ORGANIZAR 
+		<a href="http://mes.rotoplastyc.com.br/Analises/Andontv2/32" onclick="return false;"></a>
+
+		-->
+{% endblock %}

@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{# 1. CSS específico desta página #}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/entregas_epi.css' %}">
+{% endblock %}
+
+{# 2. <title> da página #}
+{% block title %}Entregas de EPI{% endblock %}
+
+{# 3. Conteúdo principal (Mantido como está) #}
+{% block content %}
+  <h2 class="mb-3">Entregas de EPI</h2>
+
+  {# Navegação entre relatórios #}
+  <nav class="report-navigation">
+    <a href="{% url 'rh:entregas_pendentes' %}" class="button-report {% if current_report_type == 'pendentes' %}active{% endif %}">Entregas Pendentes</a>
+    <a href="{% url 'rh:entregas_todas' %}" class="button-report {% if current_report_type == 'todas' %}active{% endif %}">Todas as Entregas</a>
+  </nav>
+
+  {# Formulário de Filtro - NOVO LAYOUT #}
+  <div class="filters-container">
+    <form method="get" action="" class="filter-form">
+      {# Campo de Busca de Colaborador (agora como input de busca) #}
+      <div class="search-container">
+          <input type="text" id="id_colaborador_search" name="colaborador" class="search-input" placeholder="Buscar Colaborador..." value="{{ filter_params.colaborador|default:'' }}">
+      </div>
+
+      {# Filtro por Status (agora como select de filtro) #}
+      <div class="filter-container">
+          <select name="status" id="id_status" class="filter-select">
+            <option value="todos" {% if not filter_params.status or filter_params.status == 'todos' %}selected{% endif %}>Todos os Status</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if filter_params.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+      </div>
+
+      {# Outros campos de filtro em um contêiner flexível #}
+      <div class="other-filters-grid">
+          <div class="filter-group">
+            <label for="id_contrato">Contrato:</label>
+            <input type="number" name="contrato" id="id_contrato" value="{{ filter_params.contrato|default:'' }}">
+          </div>
+
+          <div class="filter-group">
+            <label for="id_epi_tecnicon">Cód. EPI Tecnicon:</label>
+            <input type="text" name="epi_tecnicon" id="id_epi_tecnicon" value="{{ filter_params.epi_tecnicon|default:'' }}">
+          </div>
+
+          <div class="filter-group">
+            <label for="id_sequencial_erp">Sequencial ERP:</label>
+            <input type="text" name="sequencial_erp" id="id_sequencial_erp" value="{{ filter_params.sequencial_erp|default:'' }}">
+          </div>
+
+          <div class="filter-group">
+            <label for="id_data_inicio">Data Início:</label>
+            <input type="date" name="data_inicio" id="id_data_inicio" value="{{ filter_params.data_inicio|default:'' }}">
+          </div>
+
+          <div class="filter-group">
+            <label for="id_data_fim">Data Fim:</label>
+            <input type="date" name="data_fim" id="id_data_fim" value="{{ filter_params.data_fim|default:'' }}">
+          </div>
+      </div>
+
+      <div class="filter-actions-full-width">
+        <button type="submit" class="button-filter">Aplicar Filtros</button>
+        <button type="button" class="button-clear-filter" onclick="window.location.href = '{{ request.path }}'">Limpar Filtros</button>
+      </div>
+    </form>
+  </div>
+
+
+  <div class="container-agrupado">
+    {% if grouped_entregas %}
+      {% for centro_custo_key, entregas_list in grouped_entregas.items %}
+        <div class="grupo-centro-custo">
+
+          {# Cabeçalho clicável – acordeão #}
+          <h3 class="header-grupo"
+              data-toggle="collapse"
+              data-target="group-{{ forloop.counter }}">
+            <span class="toggle-icon">+</span>
+            {{ centro_custo_key }}
+          </h3>
+
+          {# Tabela (corpo do acordeão) #}
+          <div id="group-{{ forloop.counter }}"
+               class="collapse-content">
+            <div class="overflow-x-auto">
+              <table class="table-auto w-full text-sm border">
+                <thead>
+                  <tr>
+                    <th>Data Entrega</th>
+                    <th>Cód. EPI Tecnicon</th>
+                    <th>Descrição EPI</th>
+                    <th class="text-right">Quant. Soma</th>
+                    <th class="text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in entregas_list %}
+                    {% with first_detail=item.detalhes_individuais|first %}
+                    {# Adicionando uma classe para facilitar a manipulação via JS #}
+                    <tr class="entrega-agrupada-row" data-item-ids="{{ item.ids_originais|join:',' }}">
+                      <td>{{ item.data_entrega|date:"d/m/Y" }}</td>
+                      <td>{{ item.codigo_estoque|default:"Em branco no Metadados" }}</td>
+                      <td>{{ item.descricao_epi|default:"Em branco no Metadados" }}</td>
+                      <td class="text-right">
+                          {{ item.quantidade_total|intcomma }}
+                      </td>
+                      <td class="text-center actions-column">
+                        {# Botão para expandir/colapsar os detalhes individuais #}
+                        <button class="detail-toggle-button"
+                                aria-expanded="false"
+                                data-target-row="detail-row-{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                          Detalhes
+                        </button>
+                        
+                        {# Botão de Dar Baixa (APARECE APENAS SE FOR PENDENTE) #}
+                        {% if first_detail and first_detail.status == "Pendente" %}
+                            <button class="button-action baixar-agrupado"
+                                    data-item-ids="{{ item.ids_originais|join:',' }}"
+                                    data-action-url="{% url 'rh:baixar_entrega_epi' %}">
+                                Dar Baixa
+                            </button>
+                        {% endif %}
+
+                        {# Exibe o status "Baixado" se o item for baixado #}
+                        {% if first_detail and first_detail.status == 'Baixado' %}
+                            <span class="status-baixado">Baixado</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endwith %}
+                    {# LINHA DE DETALHES EXPANSÍVEL #}
+                    {# Adicionando uma classe e data-item-id ao LI para facilitar a manipulação via JS #}
+                    <tr id="detail-row-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" class="detail-row hidden">
+                      <td colspan="5">
+                        <div class="detail-content">
+                          <h4>Detalhes da Entrega Individual:</h4>
+                          {% if item.detalhes_individuais %}
+                            <ul class="detail-list">
+                              {% for detail in item.detalhes_individuais %}
+                                <li class="detail-item-card" data-item-id="{{ detail.id }}"> {# Adicionei data-item-id aqui #}
+                                  <strong>Status:</strong> <span class="status-{{ detail.status|lower }}">{{ detail.status }}</span> <br>
+                                  <strong>Contrato:</strong> {{ detail.contrato }} <br>
+                                  <strong>Colaborador:</strong> {{ detail.colaborador|default:"—" }} <br>
+                                  <strong>Cod. EPI Metadados:</strong> {{ detail.epi|default:"—" }} <br>
+                                  <strong>Qtd. Entregue:</strong> {{ detail.quantidade_entregue|intcomma }} <br>
+                                  <strong>Sequencial Baixa ERP:</strong> {{ detail.sequencial_baixa_erp|default:"—" }} <br>
+                                  <strong>Data Baixa ERP:</strong> {{ detail.data_baixa_erp|date:"d/m/Y H:i"|default:"—" }}
+                                  
+                                  {# Botão de Reverter Status (se estiver baixado, SEMPRE nos detalhes individuais) #}
+                                  {% if detail.status == "Baixado" %}
+                                    <form class="form-reverter-status" method="post" action="{% url 'rh:reverter_entrega_epi' detail.id %}">
+                                      {% csrf_token %}
+                                      <button type="submit" class="button-action reverter">Reverter para Pendente</button>
+                                    </form>
+                                  {% endif %}
+                                </li>
+                                {# LINHA SEPARADORA ENTRE COLABORADORES #}
+                                {% if not forloop.last %}
+                                  <hr class="collaborator-separator">
+                                {% endif %}
+                              {% endfor %}
+                            </ul>
+                          {% else %}
+                            <p>Nenhum detalhe individual disponível.</p>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center py-4">
+                        Nenhuma entrega de EPI encontrada.
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-center py-4">
+        Nenhuma entrega de EPI encontrada.
+      </p>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{# 4. Scripts adicionais #}
+{% block extra_js %}
+  {{ block.super }}
+
+  <script>
+    // Função auxiliar para obter o token CSRF
+    function getCsrfToken() {
+        const csrfElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfElement) {
+            return csrfElement.value;
+        }
+        console.error("CSRF token not found!");
+        return null;
+    }
+
+    /* Acordeão (+/–) – abre e fecha os grupos */
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.header-grupo').forEach(header => {
+        const icon   = header.querySelector('.toggle-icon');
+        const target = document.getElementById(header.dataset.target);
+
+        /* começa fechado */
+        if (target) {
+          target.style.display = 'none';
+        }
+
+        header.addEventListener('click', () => {
+          if (!target) return;
+          const hidden = target.style.display === 'none';
+          target.style.display = hidden ? 'block' : 'none';
+          icon.textContent     = hidden ? '—'    : '+';
+        });
+      });
+
+      /* Detalhes do item – abre e fecha a linha de detalhes */
+      document.querySelectorAll('.detail-toggle-button').forEach(button => {
+        const targetRow = document.getElementById(button.dataset.targetRow);
+
+        /* Começa oculto */
+        if (targetRow) {
+          targetRow.style.display = 'none';
+          button.setAttribute('aria-expanded', 'false');
+        }
+
+        button.addEventListener('click', () => {
+          if (!targetRow) return;
+          const hidden = targetRow.style.display === 'none';
+          targetRow.style.display = hidden ? 'table-row' : 'none';
+          button.setAttribute('aria-expanded', hidden ? 'true' : 'false');
+          button.textContent = hidden ? 'Ocultar Detalhes' : 'Detalhes';
+        });
+      });
+
+      // Funções auxiliares para remover linhas e grupos
+      function removeRowAndCheckGroup(rowElement) {
+        const detailRow = rowElement.nextElementSibling;
+        if (detailRow && detailRow.classList.contains('detail-row')) {
+          detailRow.remove();
+        }
+        
+        const parentTableBody = rowElement.closest('tbody');
+        const parentGroupContainer = rowElement.closest('.grupo-centro-custo');
+        
+        rowElement.remove();
+
+        if (parentTableBody && parentTableBody.querySelectorAll('.entrega-agrupada-row').length === 0) {
+          if (parentGroupContainer) {
+            parentGroupContainer.remove();
+          }
+        }
+      }
+
+      // Refatora a lógica de reverter status para ser uma função separada
+      function handleReverterStatusSubmit(event) {
+          event.preventDefault();
+
+          const form = this;
+          const actionUrl = form.action;
+          const formData = new FormData(form);
+          const button = form.querySelector('button[type="submit"]');
+          const detailCard = form.closest('.detail-item-card'); // Elemento <li> que contém os detalhes individuais
+          const detailRowElement = form.closest('.detail-row');
+          const mainRowElement = detailRowElement ? detailRowElement.previousElementSibling : null;
+
+          if (!getCsrfToken()) { // Verifica o token antes de prosseguir
+              alert("Erro de segurança: CSRF token não encontrado.");
+              return;
+          }
+
+          button.disabled = true;
+          button.textContent = 'Processando...';
+
+          fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': getCsrfToken()
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(errorData => {
+                throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              alert(data.message);
+              // Encontra o span do status na linha de detalhes e atualiza
+              const statusSpan = detailCard ? detailCard.querySelector('.status-baixado, .status-pendente') : null;
+              if (statusSpan) {
+                statusSpan.classList.remove('status-baixado');
+                statusSpan.classList.add('status-pendente');
+                statusSpan.textContent = 'Pendente';
+              }
+              // Adiciona o botão "Dar Baixa" na linha principal se for a página de "Todas as Entregas"
+              // Na página de pendentes, um item revertido ainda é pendente, então ele permaneceria.
+              const currentReportType = document.querySelector('.report-navigation .button-report.active').textContent;
+
+              if (currentReportType === 'Todas as Entregas') {
+                  if (mainRowElement) {
+                      const actionsColumn = mainRowElement.querySelector('.actions-column');
+                      if (actionsColumn && !actionsColumn.querySelector('.baixar-agrupado')) { // Verifica se já existe
+                          const newBaixarButton = document.createElement('button');
+                          newBaixarButton.className = 'button-action baixar-agrupado';
+                          newBaixarButton.textContent = 'Dar Baixa';
+                          newBaixarButton.dataset.itemIds = mainRowElement.dataset.itemIds;
+                          // A URL de baixar_entrega_epi é genérica, não precisa de PK
+                          newBaixarButton.dataset.actionUrl = "{% url 'rh:baixar_entrega_epi' %}"; 
+                          
+                          const detailToggleButton = actionsColumn.querySelector('.detail-toggle-button');
+                          if (detailToggleButton) {
+                              actionsColumn.insertBefore(newBaixarButton, detailToggleButton.nextSibling);
+                          } else {
+                              actionsColumn.appendChild(newBaixarButton);
+                          }
+                          newBaixarButton.addEventListener('click', handleBaixarAgrupadoClick);
+                      }
+                      const baixadoSpan = actionsColumn.querySelector('.status-baixado');
+                      if (baixadoSpan) {
+                          baixadoSpan.remove();
+                      }
+                  }
+              }
+              
+              // Remove o botão de reverter
+              form.remove();
+
+            } else {
+              alert('Erro: ' + data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Erro na requisição AJAX:', error);
+            alert('Ocorreu um erro: ' + error.message);
+          })
+          .finally(() => {
+            button.disabled = false;
+            button.textContent = 'Reverter para Pendente';
+          });
+      }
+
+      // Handler para o botão "Dar Baixa"
+      function handleBaixarAgrupadoClick() {
+        const button = this;
+        const itemIds = button.dataset.itemIds.split(',').map(Number);
+        const actionUrl = button.dataset.actionUrl;
+        const rowElement = button.closest('.entrega-agrupada-row');
+        const detailRow = rowElement.nextElementSibling; // Pega a linha de detalhes
+        
+        const sequencialBaixa = prompt("Por favor, insira o sequencial da baixa no ERP:");
+
+        if (sequencialBaixa === null || sequencialBaixa.trim() === '') {
+          alert('Operação cancelada ou sequencial da baixa não informado.');
+          return;
+        }
+
+        if (!getCsrfToken()) { // Verifica o token antes de prosseguir
+            alert("Erro de segurança: CSRF token não encontrado.");
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Processando...';
+
+        fetch(actionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCsrfToken()
+          },
+          body: JSON.stringify({ ids: itemIds, sequencial_baixa: sequencialBaixa })
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(errorData => {
+              throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            alert(data.message);
+            const currentReportType = document.querySelector('.report-navigation .button-report.active').textContent;
+            
+            if (currentReportType === 'Entregas Pendentes') {
+                removeRowAndCheckGroup(rowElement);
+            } else if (currentReportType === 'Todas as Entregas') {
+                // Atualiza o status na própria linha principal
+                const actionsColumn = rowElement.querySelector('.actions-column');
+                if (actionsColumn) {
+                    button.remove(); // Remove o botão de baixa
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = 'status-baixado';
+                    statusSpan.textContent = 'Baixado';
+                    actionsColumn.appendChild(statusSpan);
+                }
+
+                // Atualiza o status e adiciona o botão "Reverter" nos detalhes individuais
+                if (detailRow && detailRow.classList.contains('detail-row')) {
+                  detailRow.querySelectorAll('.detail-item-card').forEach(detailCard => {
+                    const statusSpan = detailCard.querySelector('.status-pendente, .status-baixado'); // Busca por ambos
+                    if (statusSpan) {
+                        statusSpan.classList.remove('status-pendente');
+                        statusSpan.classList.add('status-baixado');
+                        statusSpan.textContent = 'Baixado';
+                    }
+                    
+                    // Adiciona o botão "Reverter" se ainda não existir
+                    let reverterForm = detailCard.querySelector('.form-reverter-status');
+                    if (!reverterForm) {
+                        reverterForm = document.createElement('form');
+                        reverterForm.className = 'form-reverter-status';
+                        reverterForm.method = 'post';
+                        // Pega o ID do item individual do data-item-id do <li>
+                        const individualItemId = detailCard.dataset.itemId;
+                        reverterForm.action = `/rh/entregas-epi/reverter/${individualItemId}/`; 
+                        reverterForm.innerHTML = `
+                            {% csrf_token %}
+                            <button type="submit" class="button-action reverter">Reverter para Pendente</button>
+                        `;
+                        detailCard.appendChild(reverterForm);
+                        // Adiciona o event listener ao novo formulário de reverter
+                        reverterForm.addEventListener('submit', handleReverterStatusSubmit);
+                    }
+                  });
+                }
+            }
+          } else {
+            alert('Erro: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Erro na requisição AJAX:', error);
+          alert('Ocorreu um erro: ' + error.message);
+        })
+        .finally(() => {
+          button.disabled = false;
+          button.textContent = 'Dar Baixa';
+        });
+      }
+
+      // Adiciona o event listener para o botão "Dar Baixa" no DOMContentLoaded
+      document.querySelectorAll('.baixar-agrupado').forEach(button => {
+        button.addEventListener('click', handleBaixarAgrupadoClick);
+      });
+
+      // Adiciona o event listener para o formulário "Reverter Status"
+      // Garante que o handler seja anexado a formulários que já existem no carregamento
+      document.querySelectorAll('.form-reverter-status').forEach(form => {
+        form.addEventListener('submit', handleReverterStatusSubmit);
+      });
+
+    });
+  </script>
+{% endblock %}

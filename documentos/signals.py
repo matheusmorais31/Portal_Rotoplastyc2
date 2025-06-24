@@ -22,7 +22,7 @@ def index_doc_for_ai(sender, instance: Documento, created, **kwargs):
             raw = f.read()
         extracted = extract_text_from_file(os.path.basename(path), raw) or ""
         #    limita tamanho para banco (10k chars ≈ 3 pages)
-        instance.text_content = extracted[:10_000]
+        instance.text_content = extracted[:100_000]
         #  embedding opcional:
         instance.embedding = embed_text(instance.text_content)  # numpy.ndarray
         instance.save(update_fields=["text_content", "embedding"])

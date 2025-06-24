@@ -1,36 +1,39 @@
-/* home2.css */
+/* home2.css ───────────────────────────────────────────────────────────────
+   Estilos principais da Home + Widget de Previsão do Tempo
+   Compatível com escala de exibição 100 %-150 % sem scroll ou corte
+   Última revisão: 29-mai-2025
+*/
 
-/* Reset básico para remover margens e paddings padrões */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ---------------------------------------------------- Reset & Variáveis */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --top-bar-height: 3.5rem;   /* altura real da top-bar (~56 px) */
 }
 
-/* Estilo para o body */
+/* ---------------------------------------------------------------- Layout */
 body {
     font-family: Arial, sans-serif;
     display: grid;
-    grid-template-columns: 1fr 350px;
-    flex-wrap: wrap;
+    grid-template-columns: 1fr 21.875rem;   /* coluna dos atalhos + widget */
     justify-content: center;
-    align-items: center;
-    max-height: 100vh;
+    align-items: start;
+    min-height: 100vh;
+    padding-top: var(--top-bar-height);      /* mantém tudo abaixo da top-bar */
+    overflow-x: hidden;                      /* evita scroll horizontal       */
 }
 
+a { text-decoration: none; }
 
-a {
-    text-decoration: none;
+/* -------------------------------------- ÍCONES / ABAS (grid de atalhos) */
+.icon-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 145px);
+    gap: 2rem;
+    justify-content: center;
 }
 
-/* Estilos para as imagens dentro dos links */
-
-.modal-content {
-    display: inline-block;
-    text-decoration: none;
-    height: auto;
-}
-
+.modal-content { display: inline-block; }
 
 .modal-container {
     background-color: rgba(23, 23, 24, 0);
@@ -38,117 +41,103 @@ a {
     width: 145px;
     height: 145px;
     display: flex;
-    margin-right: 20px;
-    margin-top: 25%;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transition: 0.2s ease-in-out;
-    box-shadow: 0px 0px 8px #141212;
+    transition: .2s ease-in-out;
+    box-shadow: 0 0 8px #141212;
     border-radius: 10px;
     border: 1px solid #8d8989;
 }
 
 .modal-title {
-    margin: 15px 5px;
-    font-size: 16px;
-    color: #ffffff;
+    margin: .9375rem .3125rem;
+    font-size: 1rem;
+    color: #fff;
     text-align: center;
 }
 
 .modal-img {
-    display: block;
-    width: 55px;
-    height: 55px;
+    width: 3.4375rem;
+    height: 3.4375rem;
     object-fit: contain;
-    margin-top: 15px;
+    margin-top: .9375rem;
     cursor: pointer;
-    border-radius: 10px;
-    text-align: center;
+    border-radius: .625rem;
 }
 
 .modal-container:hover {
-    border-radius: 10px;
     transform: scale(1.05);
-    box-shadow: 0px 0px 17px #2EC2D6;
-    transition: 0.2s ease-in-out;
+    box-shadow: 0 0 1.0625rem #2EC2D6;
 }
 
+/* ------------------------------------------------------------ BOTÃO VOLTAR */
 .back-button {
-    margin-top: 5%;
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 1.25rem;
+    right: 1.25rem;
     background-color: #2EC2D6;
-    color: white;
-    padding: 10px 20px;
+    color: #fff;
+    padding: .625rem 1.25rem;
     border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
+    border-radius: .3125rem;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color .3s ease, box-shadow .3s ease;
 }
-
 .back-button:hover {
     background-color: #1EB2C1;
-    box-shadow: 0px 0px 10px #2EC2D6;
+    box-shadow: 0 0 .625rem #2EC2D6;
 }
 
-/* ----------------------------------------- API WEATHER ---------------------------------------- */
-
+/* --------------------------------------------- WIDGET DE PREVISÃO DO TEMPO */
 .weather-card {
-    position: absolute;
-    bottom: 10px;
-    right: 20px;
-    width: 350px;
-    max-height: calc(100vh - 20px); /* Ajusta altura com base na tela */
-    background-color: rgba(23, 23, 24, 0.06);
+    position: fixed;                /* preso à viewport, não empurra layout */
+    bottom: .625rem;
+    right: 1.25rem;
+    display: flex;                /* empilha os blocos internamente        */
+    flex-direction: column;
+    align-items: center;          /* ⬅️ força centralização horizontal      */
+    text-align: center;  
+    width: auto;
+    max-width: 21.875rem;           /* 350 px */
+    max-height: calc(100vh - var(--top-bar-height) - 1rem);
+
+    padding: .75rem;                /* compacto para caber em 150 %         */
+    overflow: hidden;               /* evita transbordo                     */
+    background-color: rgba(23, 23, 24, .06);
     backdrop-filter: blur(5px);
-    color: #ffffff;
-    padding: 15px;
-    border-radius: 15px;
-    font-family: 'Roboto', sans-serif;
+    color: #fff;
+    border-radius: .9375rem;
     border: 1px solid #8d8989;
-    box-shadow: 0px 0px 25px #000000;
-    overflow-y: auto; /* Adiciona rolagem vertical */
+    box-shadow: 0 0 1.5625rem #000;
+    font-family: 'Roboto', sans-serif;
     z-index: 999;
-    transition: transform 0.3s ease;
 }
 
-.current-weather-container h2,
-.forecast-container h2 {
-    font-size: 22px;
-    margin-bottom: 10px;
-    text-align: center;
-}
+/* ----------------------------- Clima Atual (fontes e ícone menores) */
+.current-weather-container h2 { font-size: 1.15rem; }
+.current-weather-container h1 { font-size: 1.9rem;  margin: .25rem 0; }
+.weather-icon                { width: 2.9rem;  height: auto; margin: .25rem auto; }
+.current-weather-container p  { font-size: .9rem; }
 
-.weather-icon {
-    width: 60px;
-    height: auto;
-    margin: 5px auto;
-    display: block;
-}
-
-.current-weather-container h1,
-.temp-container h1 {
-    font-size: 36px;
-    margin: 5px 0;
-    text-align: center;
-}
-
-.current-weather-container p,
-.temp-container p,
-#previsao-dia p {
-    font-size: 16px;
-    margin: 3px 0;
-    text-align: center;
-}
+/* ----------------------------- Previsão do Dia */
+.forecast-container h2  { font-size: 1.15rem; }
+#previsao-dia p         { font-size: .9rem; }
+.temp-container h1      { font-size: 1.9rem; }
 
 .forecast-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;                /* quebra linha se faltar largura */
+    gap: .15rem .3rem;
+}
+
+#previsao-dia {
+    flex: 1 1 10rem;
+    min-width: 10rem;
+    text-align: center;
 }
 
 .temp-container {
@@ -157,91 +146,78 @@ a {
     align-items: center;
 }
 
-.rain-icon {
-    width: 15px;
-    height: auto;
-    margin-right: 5px;
-}
+.rain-icon { width: .9375rem; height: auto; margin-right: .3125rem; }
 
 .prev-day,
 .next-day {
-    font-size: 28px;
+    font-size: 1.3rem;              /* setas menores */
     background: none;
     border: none;
-    color: #ffffff;
+    color: #fff;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color .3s ease;
 }
-
 .prev-day:hover,
-.next-day:hover {
-    color: #2EC2D6;
+.next-day:hover { color: #2EC2D6; }
+
+.separator-line { width: 100%; height: 1px; background: #8d8989; margin: 1rem 0; }
+
+/* ------------------------------------------------------- BREAKPOINTS W/H */
+@media (max-width: 120rem) {            /* 1920 px */
+    .weather-icon                { width: 2.7rem; }
 }
 
-.separator-line {
-    width: 100%;
-    height: 0.1px;
-    background-color: #8d8989;
-    margin: 20px 0;
+@media (max-width: 90rem) {             /* 1440 px */
+    .weather-card                { max-width: 20rem; }
 }
 
-/* Responsividade */
-@media (max-width: 1920px) {
+@media (max-width: 48rem) {             /* 768 px */
+    body                         { grid-template-columns: 1fr; }
+
     .weather-card {
-        transform: scale(0.9); /* Reduz ligeiramente para evitar cortes */
-        transform-origin: bottom right;
+        max-width: 17.5rem;
+        bottom: .3125rem;
+        right: .625rem;
     }
 
-    .weather-icon {
-        width: 50px;
-    }
-
-    .current-weather-container h1 {
-        font-size: 38px;
-    }
+    .modal-container             { width: 7.5rem; height: 7.5rem; }
+    .modal-img                   { width: 2.8125rem; height: 2.8125rem; }
+    .weather-icon                { width: 2.3rem; }
+    .current-weather-container h1,
+    .temp-container h1           { font-size: 1.7rem; }
 }
 
-@media (max-width: 1440px) {
-    .weather-card {
-        position: fixed;
-        width: 320px;
-    }
-
-    .current-weather-container h1 {
-        font-size: 36px;
-    }
+@media (max-width: 36.25rem) {          /* 580 px */
+    .weather-card  { display: none; }   /* oculta em telas muito estreitas */
 }
 
-@media (max-width: 768px) {
-    .weather-card {
-        width: 280px;
-        bottom: 5px; /* Ajusta posição vertical */
-        right: 10px; /* Ajusta posição horizontal */
-    }
+/* =================================================================== Hi-DPI */
+/* Ajustes extras para zoom/escala > 100 % ---------------------------------- */
 
-    .weather-icon {
-        width: 40px;
-    }
-
-    .current-weather-container h1 {
-        font-size: 30px;
-    }
+/* 125 % – 149 % (≈ 1.25-1.49 dppx) */
+@media (min-resolution: 1.25dppx) and (max-resolution: 1.49dppx) {
+    html            { font-size: 15px; }
+    .weather-card   { max-width: 21rem; }
+    .modal-container{ transform: scale(.96); transform-origin: center; }
 }
 
-@media (max-width: 580px) {
-    .weather-card {
-        display: none;
-    }
+/* 150 % – 174 % (≈ 1.5-1.74 dppx) */
+@media (min-resolution: 1.5dppx) and (max-resolution: 1.74dppx) {
+    html            { font-size: 14px; }
 
-    .modal-content{
-        margin-left: 110%;
-    }
+    .weather-card   { max-width: 20.5rem; }
+    .modal-container{ transform: scale(.93); }
+
+    .current-weather-container h1,
+    .temp-container h1 { font-size: 1.8rem; }
+    .weather-icon      { width: 2.5rem; }
+    .prev-day,
+    .next-day          { font-size: 1.2rem; }
 }
 
-/* Zoom Responsivo (Ajusta para escalas maiores que 100%) */
-@media (min-resolution: 2dppx) {
-    .weather-card {
-        transform: scale(0.9); /* Reduz ligeiramente para evitar cortes */
-        transform-origin: bottom right;
-    }
+/* 175 %+ (≥ 1.75 dppx) */
+@media (min-resolution: 1.75dppx) {
+    html            { font-size: 13px; }
+    .weather-card   { max-width: 19.5rem; }
+    .modal-container{ transform: scale(.90); }
 }

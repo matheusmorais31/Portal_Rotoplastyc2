@@ -20,10 +20,12 @@ urlpatterns = [
     path('mural/', views.mural, name='mural'),
     path('manuais/', views.manuais, name='manuais'),
     path('andon/', views.andon, name='andon'),
+    path('andonfilial/', views.andonfilial, name='andonfilial'),
     path('assinatura/', views.assinatura, name='assinatura'),
     path('descricao/', views.descricao, name='descricao'),
     path('indicadores/', views.indicadores, name='indicadores'),
     path('beneficios/', views.beneficios, name='beneficios'),
+    path('odonto/', views.odonto, name='odonto'),
     
     # Administração
     path('admin/', admin.site.urls),
@@ -43,6 +45,9 @@ urlpatterns = [
 
     #IA
     path('ia/', include('ia.urls', namespace='ia')),
+
+    #RH
+    path("rh/", include("rh.urls", namespace='rh')),
 
 ]
 

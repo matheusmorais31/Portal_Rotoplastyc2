@@ -145,6 +145,12 @@ h2 {
     background-color: #c82333;
 }
 
+.alert-success {
+
+    color: #02ff3d;
+
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
     .container {

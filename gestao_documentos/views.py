@@ -163,6 +163,9 @@ def manuais(request):
 def andon(request):
     return render(request, 'andon.html')
 
+def andonfilial(request):
+    return render(request, 'andonfilial.html')
+
 def assinatura(request):
     return render(request, 'assinatura.html')
 
@@ -174,3 +177,6 @@ def indicadores(request):
 
 def beneficios(request):
     return render(request, 'beneficios.html')
+
+def odonto(request):
+    return render(request, 'odonto.html')
