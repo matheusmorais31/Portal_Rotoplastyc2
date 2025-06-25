@@ -13,7 +13,4 @@ urlpatterns = [
     path('visualizar_acessos_bi/<int:pk>/', views.visualizar_acessos_bi, name='visualizar_acessos_bi'),
     path('buscar_grupos/', views.buscar_grupos, name='buscar_grupos'),  
 
-
-    
-
 ]

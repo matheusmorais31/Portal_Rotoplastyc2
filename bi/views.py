@@ -12,16 +12,11 @@ from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST
 
 from .forms import BIReportForm, BIReportEditForm
 from .models import BIReport, BIAccess
 from .utils import get_embed_params_user_owns_data
-
-from django.views.decorators.csrf import csrf_exempt
-from django.core.cache import cache
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +130,6 @@ def bi_report_detail(request, pk):
         "bi_report": bi_report,
         "embed_url": embed["embed_url"],
         "embed_token": embed["embed_token"],
-        "report_id": bi_report.report_id,
     }
     return render(request, "bi/visualizar_bi.html", context)
 
@@ -203,6 +197,3 @@ def buscar_grupos(request):
     grupos = Group.objects.filter(name__icontains=query)[:10]
     data = [{"id": g.id, "name": g.name} for g in grupos]
     return JsonResponse(data, safe=False)
-
-
-

@@ -1612,3 +1612,5 @@ INFO 2025-06-18 08:29:29,872 tasks 3913 140173154988736   Atualizado (metadados)
 INFO 2025-06-18 08:29:29,876 tasks 3913 140173154988736   SUCESSO: 'last_updated' do relatório 'ORCAMENTOS_MARKETING' ATUALIZADO no BD para data PBI: 2025-06-18 07:16:35.543000.
 INFO 2025-06-18 08:29:29,876 tasks 3913 140173154988736 Tarefa BI: Sincronização concluída. 40 relatórios da API foram processados.
 WARNING 2025-06-23 14:55:49,416 views 28209 140561310766784 BI: acesso negado – admin → INDICADORES GERAL
+INFO 2025-06-25 11:31:29,611 utils 962 140320948732608 PBI‑Auth: ROPC inicial (username+password).
+INFO 2025-06-25 11:31:31,839 utils 962 140320948732608 PBI: [TI] embed_token gerado e salvo em cache (3000 s) → pbi:embed:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:65c888d8-6d60-4abd-a0cb-4ad942e1ecc7

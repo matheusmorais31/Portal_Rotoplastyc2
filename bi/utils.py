@@ -1,26 +1,26 @@
-# bi/utils.py – versão com nome de relatório nos logs + cache de EmbedToken + proteção <5 min
-# -----------------------------------------------------------------------------------
-"""Power BI helper utils (App‑Owns‑Data – Master User)
-
-• Garante *access_token* válido via ROPC/refresh.
-• Gera *embed_token* 1×/h por relatório e guarda no Redis (50 min TTL¹).
-• Usa o nome do relatório nos logs.
-• **Descarta** token em cache se faltar < 5 min para expirar (evita 401/403 durante carregamento).
-
-¹ TTL = 50 min → sempre entrega token com ≥ 10 min de vida útil; 60 min é o limite imposto pela API.
-"""
+# bi/utils.py – helper Power BI  (App-Owns-Data — Master User)
+# ──────────────────────────────────────────────────────────────────────────────
+# • Mantém o *access_token* da conta mestre em memória.                  (ROPC)
+# • Gera/embed_token 1 vez por hora por relatório e guarda no Redis (50 min TTL)
+# • Descarta cache se restarem < 5 min de vida útil.                      (401 fix)
+# • Loga nome do relatório + flags RLS/OLS do dataset.
+#
+# Formato do embed_token (2024-↑) → 2 segmentos “header.payload” (gzip-base64).
+# Para ler exp precisamos descompactar a payload antes do ttl-check.
+# ──────────────────────────────────────────────────────────────────────────────
 
 from __future__ import annotations
 
+import base64
+import json
 import logging
 import time
 from typing import Any, Dict, Optional
 
-import jwt  # PyJWT – para ler a claim `exp` do embed_token
 import msal
 import requests
 from django.conf import settings
-from django.core.cache import cache  # configure Redis/Memcached em settings.py
+from django.core.cache import cache  # aponte para Redis em settings.py
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ _REFRESH_EXP: Optional[float] = None  # expiração do refresh_token (epoch seg)
 def _save_tokens(result: Dict[str, Any]) -> None:
     global _token_cache, _EXP, _REFRESH_EXP
     _token_cache = result
-    _EXP = time.time() + result.get("expires_in", 0) - 60  # 1 min folga
+    _EXP = time.time() + result.get("expires_in", 0) - 60
     _REFRESH_EXP = time.time() + result.get("ext_expires_in", 0) - 60
 
 
@@ -44,21 +44,21 @@ def _token_valid() -> bool:  # pragma: no cover
 
 
 def _acquire_token_ropc() -> Optional[Dict[str, Any]]:
-    logger.info("PBI‑Auth: ROPC inicial (username+password).")
+    logger.info("PBI-Auth: ROPC inicial (username+password).")
     app = msal.ConfidentialClientApplication(
         client_id=settings.POWERBI_CLIENT_ID,
         client_credential=settings.POWERBI_CLIENT_SECRET,
         authority=f"https://login.microsoftonline.com/{settings.POWERBI_TENANT_ID}",
     )
-    result = app.acquire_token_by_username_password(
+    res = app.acquire_token_by_username_password(
         username=settings.POWERBI_USERNAME,
         password=settings.POWERBI_PASSWORD,
         scopes=[settings.POWERBI_SCOPE],
     )
-    if "access_token" in result:
-        _save_tokens(result)
-        return result
-    logger.error("PBI‑Auth: falha ROPC – %s | %s", result.get("error"), result.get("error_description"))
+    if "access_token" in res:
+        _save_tokens(res)
+        return res
+    logger.error("PBI-Auth: falha ROPC – %s | %s", res.get("error"), res.get("error_description"))
     return None
 
 
@@ -68,20 +68,20 @@ def _refresh_token() -> Optional[Dict[str, Any]]:
     if _REFRESH_EXP and time.time() > _REFRESH_EXP:
         return None
 
-    logger.info("PBI‑Auth: tentando refresh_token.")
+    logger.info("PBI-Auth: tentando refresh_token.")
     app = msal.ConfidentialClientApplication(
         client_id=settings.POWERBI_CLIENT_ID,
         client_credential=settings.POWERBI_CLIENT_SECRET,
         authority=f"https://login.microsoftonline.com/{settings.POWERBI_TENANT_ID}",
     )
-    result = app.acquire_token_by_refresh_token(
+    res = app.acquire_token_by_refresh_token(
         refresh_token=_token_cache["refresh_token"],
         scopes=[settings.POWERBI_SCOPE],
     )
-    if "access_token" in result:
-        _save_tokens(result)
-        return result
-    logger.warning("PBI‑Auth: refresh_token falhou – voltando ao ROPC.")
+    if "access_token" in res:
+        _save_tokens(res)
+        return res
+    logger.warning("PBI-Auth: refresh_token falhou – voltando ao ROPC.")
     return None
 
 
@@ -96,71 +96,104 @@ def get_powerbi_access_token() -> Optional[str]:
 
 
 # ════════════════════════════════════════
-# 2) EMBED – token & url por relatório (com cache)
+# 2) EMBED – token & url por relatório
 # ════════════════════════════════════════
+_EMBED_TTL      = 50 * 60  # 50 min
+_MIN_LIFETIME   = 5 * 60   # 5 min
+_CACHE_PREFIX   = "pbi:embed:"
 
-_EMBED_TTL = 50 * 60       # 50 min => entrega token com >=10 min de vida
-_MIN_LIFETIME = 5 * 60     # 5 min – se faltar menos que isso descarta cache
-_CACHE_PREFIX = "pbi:embed:"
+
+# ------------ util para TTL (token com 2 segmentos) ---------------
+def _get_pbi_token_exp(token: str) -> Optional[float]:
+    """Extrai claim exp do embed_token PBI (gzip-base64, 2 segmentos)."""
+    try:
+        if isinstance(token, bytes):
+            token = token.decode()
+        parts = token.split(".")
+        if len(parts) < 2:
+            return None
+        payload_b64 = parts[1] + "=" * (-len(parts[1]) % 4)  # pad
+        payload_raw = base64.urlsafe_b64decode(payload_b64)
+        payload     = json.loads(payload_raw)
+        return float(payload.get("exp", 0))
+    except Exception:
+        return None
 
 
-def _generate_embed_token(report_id: str, group_id: str, access_token: str) -> Optional[Dict[str, str]]:
+def _is_token_still_safe(embed_token: str) -> bool:
+    exp = _get_pbi_token_exp(embed_token)
+    if not exp:
+        return False  # não conseguimos ler – gera novo
+    return (exp - time.time()) > _MIN_LIFETIME
+
+
+# ------------ geração de embed_token ------------------------------
+def _generate_embed_token(report_id: str, group_id: str, access_token: str) -> Optional[dict]:
     headers = {"Authorization": f"Bearer {access_token}"}
+
+    # 1️⃣  info do relatório
     info_url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/reports/{report_id}"
     try:
-        resp_info = requests.get(info_url, headers=headers, timeout=15)
-        resp_info.raise_for_status()
-        info = resp_info.json()
-        embed_url = info.get("embedUrl")
-        report_name = info.get("name", report_id)
+        info = requests.get(info_url, headers=headers, timeout=15)
+        info.raise_for_status()
     except requests.RequestException as exc:
         logger.error("PBI: erro ao obter embedUrl – %s", exc)
         return None
 
-    gen_url = f"{info_url}/GenerateToken"
-    payload = {"accessLevel": "View"}
+    meta        = info.json()
+    embed_url   = meta.get("embedUrl")
+    report_name = meta.get("name", report_id)
+    dataset_id  = meta.get("datasetId")
+
+    # 1.1  log de flags do dataset
+    if dataset_id:
+        ds_url = f"https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}"
+        try:
+            ds = requests.get(ds_url, headers=headers, timeout=15)
+            if ds.ok:
+                js = ds.json()
+                logger.info(
+                    "PBI-DBG: Dataset %s | identityRequired=%s | rolesRequired=%s",
+                    dataset_id,
+                    js.get("isEffectiveIdentityRequired"),
+                    js.get("isEffectiveIdentityRolesRequired"),
+                )
+        except requests.RequestException:
+            logger.warning("PBI-DBG: não consegui ler dataset %s", dataset_id)
+
+    # 2️⃣  GenerateToken
     try:
-        resp_gen = requests.post(gen_url, json=payload, headers=headers, timeout=15)
-        resp_gen.raise_for_status()
-        embed_token = resp_gen.json().get("token")
+        gen = requests.post(
+            f"{info_url}/GenerateToken",
+            json={"accessLevel": "View"},
+            headers=headers,
+            timeout=15,
+        )
+        gen.raise_for_status()
+        embed_token = gen.json().get("token")
     except requests.RequestException as exc:
         logger.error("PBI: erro GenerateToken – %s", exc)
         return None
 
     return {
-        "embed_url": embed_url,
+        "embed_url":   embed_url,
         "embed_token": embed_token,
         "report_name": report_name,
     }
 
 
-def _is_token_still_safe(embed_token: str) -> bool:
-    """Retorna True se o token tiver > _MIN_LIFETIME segundos restantes.
-    Se não conseguir decodificar (PyJWT “not enough segments” etc.), assume **seguro**—
-    dessa forma evitamos descartar cache indevidamente.
-    """
-    try:
-        if isinstance(embed_token, bytes):
-            embed_token = embed_token.decode()
-        if embed_token.count(".") < 2:
-            # token não parece JWT – mantém cache
-            return True
-        payload = jwt.decode(embed_token, options={"verify_signature": False, "verify_exp": False})
-        return (payload.get("exp", 0) - time.time()) > _MIN_LIFETIME
-    except Exception as exc:
-        logger.debug("PBI: falha ao decodificar exp do embed_token (%s) – assumindo ainda válido.", exc)
-        return True  # força regeneração
-
-
-def get_embed_params_user_owns_data(report_id: str, group_id: str) -> Optional[Dict[str, str]]:
+# ------------ API pública usada pelas views -----------------------
+def get_embed_params_user_owns_data(report_id: str, group_id: str) -> Optional[dict]:
     cache_key = f"{_CACHE_PREFIX}{group_id}:{report_id}"
-    cached: Optional[Dict[str, str]] = cache.get(cache_key)  # type: ignore[assignment]
+    cached: Optional[dict] = cache.get(cache_key)  # type: ignore[assignment]
 
     if cached and _is_token_still_safe(cached["embed_token"]):
-        logger.debug("PBI: [%s] embed_token vindo do cache → %s", cached.get("report_name", report_id), cache_key)
+        logger.debug("PBI: [%s] embed_token vindo do cache → %s",
+                     cached.get("report_name", report_id), cache_key)
         return cached
     elif cached:
-        logger.info("PBI: [%s] token a <5 min de expirar – descartando cache.", cached.get("report_name", report_id))
+        logger.info("PBI: [%s] token a <5min de expirar – descartando cache.",
+                    cached.get("report_name", report_id))
 
     access_token = get_powerbi_access_token()
     if not access_token:
@@ -170,5 +203,6 @@ def get_embed_params_user_owns_data(report_id: str, group_id: str) -> Optional[D
     embed = _generate_embed_token(report_id, group_id, access_token)
     if embed:
         cache.set(cache_key, embed, timeout=_EMBED_TTL)
-        logger.info("PBI: [%s] embed_token gerado e salvo em cache (%s s) → %s", embed["report_name"], _EMBED_TTL, cache_key)
+        logger.info("PBI: [%s] embed_token gerado e salvo em cache (%s s) → %s",
+                    embed["report_name"], _EMBED_TTL, cache_key)
     return embed

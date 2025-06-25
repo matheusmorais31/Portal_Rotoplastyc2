@@ -9,36 +9,48 @@
   <!-- Contêiner do relatório Power BI -->
   <div id="reportContainer" class="h-full w-full"></div>
 
-  <!-- Power BI Client SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.19.1/dist/powerbi.min.js"></script>
+  <!-- Power BI Client SDK (última versão estável) -->
+  <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.0/dist/powerbi.min.js"></script>
   <script>
     (() => {
-      const models   = window['powerbi-client'].models;
-      const reportId = '{{ report_id }}';
-      const groupId  = '{{ bi_report.group_id }}';
+      const models    = window['powerbi-client'].models;
+      const reportId  = '{{ report_id }}';
+      const groupId   = '{{ bi_report.group_id }}';
       const csrftoken = '{{ csrf_token }}';
 
-      /**
-       * Embeds the report and wires up auto‑renewal when the token expires.
-       * @param {string} embedUrl  - URL fornecida pela API Power BI.
-       * @param {string} embedToken – EmbedToken válido por ~60 min.
-       */
-      function embedReport (embedUrl, embedToken) {
+      // Intervalo de renovação (ms) — 50 min para garantir margem antes do expirar real (60 min)
+      const REFRESH_INTERVAL = 50 * 60 * 1000;
+
+      /** Gera nova token chamando a view Django */
+      async function fetchNewToken() {
+        const res = await fetch('{% url "bi:get_embed_params" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken' : csrftoken
+          },
+          body: JSON.stringify({ report_id: reportId, group_id: groupId })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.embed_token) throw new Error('Resposta sem embed_token');
+        return data.embed_token;
+      }
+
+      /** Embute relatório */
+      function embedReport(initialUrl, initialToken) {
         const config = {
           type: 'report',
           id:   reportId,
-          embedUrl,
-          accessToken: embedToken,
+          embedUrl:    initialUrl,
+          accessToken: initialToken,
           tokenType:   models.TokenType.Embed,
           permissions: models.Permissions.View,
           settings: {
-            panes: {
-              filters:        { visible: true },
-              pageNavigation: { visible: true }
-            },
+            panes: { filters: { visible: true }, pageNavigation: { visible: true } },
             navContentPaneEnabled: true,
-            layoutType: models.LayoutType.Custom,
-            customLayout: { displayOption: models.DisplayOption.FitToPage }
+            layoutType:  models.LayoutType.Custom,
+            customLayout:{ displayOption: models.DisplayOption.FitToPage }
           }
         };
 
@@ -46,33 +58,23 @@
         powerbi.reset(container);
         const report = powerbi.embed(container, config);
 
-        // ️♻️  Auto‑refresh token quando expirar (evento nativo do SDK)
-        report.on('tokenExpired', () => {
-          fetch('{% url "bi:get_embed_params" %}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({ report_id: reportId, group_id: groupId })
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.embed_token) {
-              report.setAccessToken(data.embed_token);
-            } else {
-              console.error('Falha ao obter novo embed_token', data);
-              alert('Sessão expirada. Recarregue a página.');
-            }
-          })
-          .catch(err => {
-            console.error('Erro ao renovar embed_token', err);
-            alert('Erro na renovação da sessão. Recarregue a página.');
-          });
-        });
+        // 🔄 Refresh periódica independente de "tokenExpired" (evita erro SDK)
+        const timer = setInterval(async () => {
+          try {
+            const newToken = await fetchNewToken();
+            await report.setAccessToken(newToken);
+          } catch (err) {
+            console.error('Falha ao renovar token:', err);
+            clearInterval(timer);
+            window.location.reload();
+          }
+        }, REFRESH_INTERVAL);
+
+        // Se o usuário sair da página, limpa o timer.
+        window.addEventListener('beforeunload', () => clearInterval(timer));
       }
 
-      // Embed inicial
+      // Embed inicial com dados vindos do servidor Django
       embedReport('{{ embed_url }}', '{{ embed_token }}');
     })();
   </script>
