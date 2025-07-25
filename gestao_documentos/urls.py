@@ -26,6 +26,7 @@ urlpatterns = [
     path('indicadores/', views.indicadores, name='indicadores'),
     path('beneficios/', views.beneficios, name='beneficios'),
     path('odonto/', views.odonto, name='odonto'),
+    path('regulamentos/', views.regulamentos, name='regulamentos'),
     
     # Administração
     path('admin/', admin.site.urls),
@@ -48,6 +49,8 @@ urlpatterns = [
 
     #RH
     path("rh/", include("rh.urls", namespace='rh')),
+
+    
 
 ]
 

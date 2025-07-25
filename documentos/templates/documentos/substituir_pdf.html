@@ -16,20 +16,19 @@
         </div>
         <div class="form-buttons">
             <a href="{% url 'documentos:listar_documentos_aprovados' %}">
-                <button type="button">Cancelar</button>
+                <button class="btn-exclude-cancel" type="button">Cancelar</button>
             </a>
-            <button type="submit">OK</button>
+            <button class="btn-exclude" type="submit">OK</button>
         </div>
     </form>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('.select2').select2({
             width: 'resolve',
             language: 'pt-BR'
@@ -37,10 +36,10 @@
     });
 
     // Desativa o botão de envio após a submissão do formulário
-    $('form').on('submit', function() {
+    $('form').on('submit', function () {
         var isValid = true;
         {% if form.errors %}
-            isValid = false;
+        isValid = false;
         {% endif %}
 
         if (isValid) {

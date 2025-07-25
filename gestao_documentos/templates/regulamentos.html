@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subhome.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+
+<a href="/static/pdfs/Colaborador.pdf" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/ManualColab.png" class="modal-img">
+                <span class="modal-title">Manual do Colaborador</span>
+        </div>
+</a>
+
+<a href="/static/pdfs/CodigoDeConduta.pdf" class="modal-content">
+        <div class="modal-container">
+                <img src="/static/images/codigo-de-conduta.png" class="modal-img">
+                <span class="modal-title">Código de conduta</span>
+        </div>
+</a>
+
+
+<a href="/static/pdfs/Convenção Coletiva.pdf" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/conv_coletiva.png" class="modal-img">
+        <span class="modal-title">Convenção Coletiva</span>
+    </div>
+</a>
+
+<a href="http://portal.rotoplastyc.com.br/documentos/visualizar_pdfjs/400/" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/p_viagens.png" class="modal-img">
+        <span class="modal-title">Política de Viagem</span>
+    </div>
+</a>
+
+{% endblock %}

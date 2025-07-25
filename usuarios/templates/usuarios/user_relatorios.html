@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subhome.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+<a href="{% url 'usuarios:relatorio_permissoes' %}" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/relatorios_icon.png" class="modal-img">
+        <span class="modal-title">Permissões de Acessos</span>
+    </div>
+</a>
+
+
+
+
+{% endblock %}

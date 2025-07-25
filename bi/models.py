@@ -49,6 +49,6 @@ class BIAccess(models.Model):
             ('view_bi', 'Lista geral BI'),
             ('edit_bi', 'Editar BI'),
             ('view_access', 'Visualizar Acessos'),
+            ('permission_report', 'Relatório de permissões de BI'),
 
-        
         ]

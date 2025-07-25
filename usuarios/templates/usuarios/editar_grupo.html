@@ -12,7 +12,7 @@
 <div class="register-container">
     <h2>Editar Grupo: {{ group.name }}</h2>
 
-    <!-- Exibição de mensagens de feedback -->
+    {# ---------------- Mensagens de feedback ---------------- #}
     {% if messages %}
         <div>
             {% for message in messages %}
@@ -23,21 +23,30 @@
 
     <form id="form-grupo" method="POST" action="{% url 'usuarios:editar_grupo' group.id %}">
         {% csrf_token %}
-        
-        <!-- Nome do Grupo -->
+
+        {# ---------------- Nome do grupo ---------------- #}
         <div class="form-group">
             <label for="nome_grupo">Nome do Grupo:</label>
-            <input type="text" id="nome_grupo" name="nome_grupo" value="{{ group.name }}" required class="form-control">
+            <input type="text"
+                   id="nome_grupo"
+                   name="nome_grupo"
+                   value="{{ group.name }}"
+                   required
+                   class="form-control">
         </div>
 
-        <!-- Buscar Participante -->
+        {# ---------------- Campo de busca ---------------- #}
         <div class="form-group">
             <label for="buscar_participante">Adicionar Participante:</label>
-            <input type="text" id="buscar_participante" placeholder="Buscar participante..." autocomplete="off" class="form-control">
+            <input type="text"
+                   id="buscar_participante"
+                   placeholder="Buscar participante…"
+                   autocomplete="off"
+                   class="form-control">
             <ul id="resultados_pesquisa" class="list-group resultados-pesquisa"></ul>
         </div>
 
-        <!-- Participantes Adicionados -->
+        {# ---------------- Participantes já adicionados ---------------- #}
         <div class="form-group">
             <label>Participantes:</label>
             <table class="table table-bordered">
@@ -53,20 +62,31 @@
                         <tr data-id="{{ participante.id }}">
                             <td>{{ participante.id }}</td>
                             <td>{{ participante.username }}</td>
-                            <td><button type="button" class="btn-secondary btn-form">Remover</button></td>
+                            <td>
+                              
+                                <button type="button"
+                                        class="btn btn-danger btn-sm remover-participante">
+                                    Remover
+                                </button>
+                            </td>
                         </tr>
-                        <!-- Campo oculto para participantes existentes -->
-                        <input type="hidden" name="participantes" value="{{ participante.id }}">
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <!-- Botões do Formulário -->
+        {# ---- Campos ocultos iniciais (fora da tabela, mas dentro do form) ---- #}
+        {% for participante in group.user_set.all %}
+            <input type="hidden" name="participantes" value="{{ participante.id }}">
+        {% endfor %}
+
+        {# ---------------- Botões de ação ---------------- #}
         <div class="form-buttons">
-            <!-- Botão Cancelar -->
-            <button type="button" class="btn btn-secondary btn-form" onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">Cancelar</button>
-            <!-- Botão Salvar -->
+            <button type="button"
+                    class="btn btn-secondary btn-form"
+                    onclick="window.location.href='{% url 'usuarios:lista_grupos' %}'">
+                Cancelar
+            </button>
             <button type="submit" class="btn btn-primary btn-form-ok">Salvar</button>
         </div>
     </form>
@@ -75,99 +95,99 @@
 
 {% block extra_js %}
 {{ block.super }}
-<!-- Inclua o jQuery localmente -->
+
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 
-<!-- Seu código JavaScript -->
 <script>
-    $(document).ready(function () {
-        var participantesAdicionados = [];
+$(document).ready(function () {
+    /* ---------------- Variáveis de apoio ---------------- */
+    let participantesAdicionados = [];
 
-        // Adicionar os IDs dos participantes existentes
-        {% for participante in group.user_set.all %}
-            participantesAdicionados.push("{{ participante.id }}");
-        {% endfor %}
+    /* IDs que já vieram do back‑end */
+    {% for participante in group.user_set.all %}
+        participantesAdicionados.push("{{ participante.id }}");
+    {% endfor %}
 
-        var buscarParticipantesUrl = "{% url 'usuarios:buscar_participantes' %}";
+    const buscarParticipantesUrl = "{% url 'usuarios:buscar_participantes' %}";
 
-        // Função para buscar participantes
-        $('#buscar_participante').on('input', function () {
-            var query = $(this).val();
+    /* ------------- Autocomplete / busca ------------- */
+    $('#buscar_participante').on('input', function () {
+        const query = $(this).val().trim();
 
-            if (query.length > 0) {
-                $.ajax({
-                    url: buscarParticipantesUrl,
-                    data: {
-                        'q': query
-                    },
-                    success: function (data) {
-                        $('#resultados_pesquisa').empty();
-
-                        if (data.length === 0) {
-                            $('#resultados_pesquisa').append('<li class="list-group-item">Nenhum participante encontrado.</li>');
-                            return;
-                        }
-
-                        data.forEach(function (usuario) {
-                            var li = $('<li></li>')
-                                .text(usuario.username)
-                                .attr('data-id', usuario.id)
-                                .addClass('list-group-item list-group-item-action');
-                            $('#resultados_pesquisa').append(li);
-                        });
-                    },
-                    error: function (xhr) {
-                        console.error("Erro ao buscar participantes:", xhr.responseText);
-                    }
-                });
-            } else {
-                $('#resultados_pesquisa').empty();
-            }
-        });
-
-        // Adicionar participante ao clicar no nome da lista de resultados
-        $('#resultados_pesquisa').on('click', 'li', function () {
-            var usuarioId = $(this).attr('data-id');
-            var usuarioNome = $(this).text();
-
-            // Verificar se o participante já foi adicionado
-            if (!participantesAdicionados.includes(usuarioId)) {
-                participantesAdicionados.push(usuarioId);
-
-                // Criar nova linha na tabela de participantes adicionados
-                var row = '<tr data-id="' + usuarioId + '">' +
-                            '<td>' + usuarioId + '</td>' +
-                            '<td>' + usuarioNome + '</td>' +
-                            '<td><button type="button" class="btn btn-danger btn-sm remover-participante">Remover</button></td>' +
-                          '</tr>';
-
-                $('#participantes_adicionados').append(row);
-
-                // Adicionar um campo oculto para enviar o ID do participante no formulário
-                $('#form-grupo').append('<input type="hidden" name="participantes" value="' + usuarioId + '">');
-            } else {
-                alert("Este participante já foi adicionado ao grupo.");
-            }
-
-            // Limpar os resultados de busca após adicionar o participante
+        if (!query.length) {
             $('#resultados_pesquisa').empty();
-            $('#buscar_participante').val('');
-        });
+            return;
+        }
 
-        // Remover participante ao clicar no botão "Remover"
-        $('#participantes_adicionados').on('click', '.remover-participante', function () {
-            var row = $(this).closest('tr');
-            var usuarioId = row.attr('data-id');
+        $.ajax({
+            url: buscarParticipantesUrl,
+            data: { q: query },
+            success: function (data) {
+                const $lista = $('#resultados_pesquisa').empty();
 
-            // Remover da tabela e do array de IDs
-            row.remove();
-            participantesAdicionados = participantesAdicionados.filter(function(id) {
-                return id !== usuarioId;
-            });
+                if (!data.length) {
+                    $lista.append('<li class="list-group-item">Nenhum participante encontrado.</li>');
+                    return;
+                }
 
-            // Remover o campo oculto correspondente
-            $('input[name="participantes"][value="' + usuarioId + '"]').remove();
+                data.forEach(usuario => {
+                    $('<li>', {
+                        text: usuario.username,
+                        'data-id': usuario.id,
+                        class: 'list-group-item list-group-item-action'
+                    }).appendTo($lista);
+                });
+            },
+            error: xhr => console.error('Erro ao buscar participantes:', xhr.responseText)
         });
     });
+
+    /* ------------- Adicionar participante ------------- */
+    $('#resultados_pesquisa').on('click', 'li', function () {
+        const usuarioId = $(this).data('id').toString();
+        const usuarioNome = $(this).text();
+
+        if (participantesAdicionados.includes(usuarioId)) {
+            alert('Este participante já foi adicionado ao grupo.');
+            return;
+        }
+
+        participantesAdicionados.push(usuarioId);
+
+        $('#participantes_adicionados').append(`
+            <tr data-id="${usuarioId}">
+                <td>${usuarioId}</td>
+                <td>${usuarioNome}</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remover-participante">
+                        Remover
+                    </button>
+                </td>
+            </tr>
+        `);
+
+        /* campo oculto p/ submit */
+        $('#form-grupo').append(
+            `<input type="hidden" name="participantes" value="${usuarioId}">`
+        );
+
+        /* Limpar busca */
+        $('#resultados_pesquisa').empty();
+        $('#buscar_participante').val('');
+    });
+
+    /* ------------- Remover participante ------------- */
+    $('#participantes_adicionados').on('click', '.remover-participante', function () {
+        const $row = $(this).closest('tr');
+        const usuarioId = $row.data('id').toString();
+
+        /* Tira da tabela e da lista */
+        $row.remove();
+        participantesAdicionados = participantesAdicionados.filter(id => id !== usuarioId);
+
+        /* Remove campo hidden */
+        $(`input[name="participantes"][value="${usuarioId}"]`).remove();
+    });
+});
 </script>
 {% endblock %}

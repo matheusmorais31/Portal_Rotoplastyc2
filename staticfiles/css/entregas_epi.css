@@ -291,7 +291,7 @@ h2 { /* Título principal da página */
     padding: var(--spacing-sm);
     transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
     overflow: hidden;
-    max-height: 1000px;
+    
     opacity: 1;
 }
 

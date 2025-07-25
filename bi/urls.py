@@ -11,6 +11,8 @@ urlpatterns = [
     path('<int:pk>/', views.bi_report_detail, name='bi_report_detail'),
     path('get_embed_params/', views.get_embed_params, name='get_embed_params'),
     path('visualizar_acessos_bi/<int:pk>/', views.visualizar_acessos_bi, name='visualizar_acessos_bi'),
-    path('buscar_grupos/', views.buscar_grupos, name='buscar_grupos'),  
+    path('buscar_grupos/', views.buscar_grupos, name='buscar_grupos'),
+    path('bi_relatorios/', views.bi_relatorios, name='bi_relatorios'),
+    path('permissoes/', views.relatorio_permissoes, name='relatorio_permissoes'),
 
 ]

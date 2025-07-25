@@ -27,4 +27,7 @@ urlpatterns = [
     path('buscar_entidade/', views.buscar_entidade, name='buscar_entidade'),
     path('personificar/<int:usuario_id>/', views.personificar_usuario, name='personificar_usuario'),
     path('reverter-personificacao/', views.reverter_personificacao, name='reverter_personificacao'),
+    path('user_relatorios/', views.user_relatorios, name='user_relatorios'),
+    path('relatorio/permissoes/', views.relatorio_permissoes, name='relatorio_permissoes'),
+
 ]

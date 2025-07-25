@@ -24,6 +24,7 @@ class Usuario(AbstractUser):
             ('can_add_group', 'Cadastra Grupo'),
             ('can_edit_group', 'Editar Grupo'),
             ('can_delete_group', 'Excluir Grupo'),
+            ('permission_report', 'Relatório de permissões de Usuários'),
             
         ]
 

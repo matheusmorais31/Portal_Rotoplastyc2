@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/relatorio_permissoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Voltar -->
+    <a href="javascript:history.back()" class="back-button">Voltar</a>
+    <h1>Relatório de permissões de BI</h1>
+
+    <!-- Botão Exportar CSV (mantém os filtros) -->
+    <div  class="icons-bar">      
+        <a href="{{ export_url }}" class="icon-link">
+            <img src="{% static 'images/spreadsheet.png' %}" alt="Exportar" class="icon">
+           <!-- <span class="tooltip-text">Exportar</span> -->
+        </a>
+    </div>
+
+    <!-- ======================  F I L T R O S  ====================== -->
+    <form method="get"
+          id="filtros"
+          class="filters-card"
+          autocomplete="off">
+
+        <!-- BI -->
+        <div class="search-container">
+            <label class="form-label" for="id_bi">BI</label>
+            <input  id="id_bi"
+                    name="bi"
+                    type="text"
+                    class="search-input"
+                    list="bi_list"
+                    placeholder="Digite ou selecione o BI…"
+                    value="{{ bi_text|default_if_none:'' }}">
+            <datalist id="bi_list">
+                {% for t in bi_opts %}<option value="{{ t }}">{% endfor %}
+            </datalist>
+        </div>
+
+        <!-- Grupo -->
+        <div class="search-container">
+            <label class="form-label" for="id_group">Grupo</label>
+            <input  id="id_group"
+                    name="group"
+                    type="text"
+                    class="search-input"
+                    list="group_list"
+                    placeholder="Digite ou selecione o grupo…"
+                    value="{{ group_text|default_if_none:'' }}">
+            <datalist id="group_list">
+                {% for t in group_opts %}<option value="{{ t }}">{% endfor %}
+            </datalist>
+        </div>
+
+        <!-- Usuário -->
+        <div class="search-container">
+            <label class="form-label" for="id_user">Usuário</label>
+            <input  id="id_user"
+                    name="user"
+                    type="text"
+                    class="search-input"
+                    list="user_list"
+                    placeholder="Digite ou selecione o usuário…"
+                    value="{{ user_text|default_if_none:'' }}">
+            <datalist id="user_list">
+                {% for t in user_opts %}<option value="{{ t }}">{% endfor %}
+            </datalist>
+        </div>
+
+        <!-- Apenas “Limpar” (autofiltro é automático) -->
+        <div class="filter-buttons">
+            <a href="{% url 'bi:relatorio_permissoes' %}"
+               class="btn btn-secondary">Limpar</a>
+        </div>
+    </form>
+
+    <!-- ======================  T A B E L A  ======================= -->
+    <table class="table table-bordered">
+        <thead>
+            <tr><th>BI</th><th>Usuário</th><th>Via</th></tr>
+        </thead>
+        <tbody>
+        {% if permissoes %}
+            {% for p in permissoes %}
+            <tr>
+                <td>{{ p.bi_title }}</td>
+                <td>{{ p.username }}</td>
+                <td>{{ p.via }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr><td colspan="3">Nenhum resultado encontrado.</td></tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+</div>
+
+<!-- ======================  A U T O ‑ S U B M I T  ====================== -->
+<script>
+(function () {
+    const form   = document.getElementById('filtros');
+    const inputs = form.querySelectorAll('.search-input');
+    let timer;
+
+    // disparo com debounce e salvando o input ativo
+    function autoSubmit() {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            const active = document.activeElement;
+            if (active && active.id) {
+                sessionStorage.setItem('perm_last_focused', active.id);
+            }
+            form.requestSubmit();              // faz o GET com filtros
+        }, 400);                               // 400 ms de respiro
+    }
+
+    inputs.forEach(el => {
+        el.addEventListener('input',  autoSubmit); // digitação
+        el.addEventListener('change', autoSubmit); // seleção datalist
+    });
+
+    // restaura o foco quando a nova página carregar
+    window.addEventListener('DOMContentLoaded', () => {
+        const lastId = sessionStorage.getItem('perm_last_focused');
+        if (lastId) {
+            const el = document.getElementById(lastId);
+            if (el) {
+                el.focus();
+                const v = el.value;
+                el.setSelectionRange(v.length, v.length); // cursor no fim
+            }
+            sessionStorage.removeItem('perm_last_focused');
+        }
+    });
+})();
+</script>
+{% endblock %}

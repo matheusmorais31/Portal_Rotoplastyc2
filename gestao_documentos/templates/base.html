@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,27 +11,35 @@
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="dark-theme"> <script>
-    (function() {
-        const savedTheme = localStorage.getItem("theme");
-        if (savedTheme === "light-theme") {
-            document.body.classList.remove("dark-theme");
-            document.body.classList.add("light-theme");
-        }
-    })();
+
+<body class="dark-theme">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "light-theme") {
+                document.body.classList.remove("dark-theme");
+                document.body.classList.add("light-theme");
+            }
+        })();
     </script>
 
     <header class="top-bar light-theme">
         <div class="menu-icon" onclick="toggleMenu()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
         </div>
 
-        <button id="theme-toggle" class="theme-toggle-btn" title="Alterar Tema">🌙</button> <div class="top-bar-right">
+        <button id="theme-toggle" class="theme-toggle-btn" title="Alterar Tema">🌙</button>
+        <div class="top-bar-right">
             <div class="notification-bell">
                 <a href="#" onclick="toggleNotificationDropdown(event)" class="notification-link">
                     <img src="{% static 'images/notificacao.png' %}" alt="Notificações" class="bell-icon">
                     {% if notificacoes_nao_lidas|length > 0 %}
-                        <span class="notification-count" id="notification-count">{{ notificacoes_nao_lidas|length }}</span>
+                    <span class="notification-count" id="notification-count">{{ notificacoes_nao_lidas|length }}</span>
                     {% endif %}
                 </a>
                 <div id="notification-dropdown" class="notification-dropdown">
@@ -42,22 +51,24 @@
                     <div class="notification-list-body">
                         <ul id="notification-list">
                             {% for notificacao in notificacoes_nao_lidas %}
-                                <li id="notificacao-{{ notificacao.id }}">
-                                    <button class="close-notification" data-id="{{ notificacao.id }}" aria-label="Fechar notificação">✖</button>
-                                    <div class="notification-content">
-                                        <div class="notification-message">
-                                            <img src="{% if notificacao.solicitante and notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Solicitante" class="user-avatar">
-                                            <p>{{ notificacao.mensagem }}</p>
-                                        </div>
-                                        {% if notificacao.link %}
-                                        <div class="notification-controls">
-                                            <a href="{{ notificacao.link }}" class="notification-action">Ir para</a>
-                                        </div>
-                                        {% endif %}
+                            <li id="notificacao-{{ notificacao.id }}">
+                                <button class="close-notification" data-id="{{ notificacao.id }}"
+                                    aria-label="Fechar notificação">✖</button>
+                                <div class="notification-content">
+                                    <div class="notification-message">
+                                        <img src="{% if notificacao.solicitante and notificacao.solicitante.profile_photo and notificacao.solicitante.profile_photo.url != '' %}{{ notificacao.solicitante.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}"
+                                            alt="Foto do Solicitante" class="user-avatar">
+                                        <p>{{ notificacao.mensagem }}</p>
                                     </div>
-                                </li>
+                                    {% if notificacao.link %}
+                                    <div class="notification-controls">
+                                        <a href="{{ notificacao.link }}" class="notification-action">Ir para</a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </li>
                             {% empty %}
-                                <li class="no-notifications">Nenhuma notificação pendente.</li>
+                            <li class="no-notifications">Nenhuma notificação pendente.</li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -66,7 +77,8 @@
 
             <div class="profile-dropdown">
                 <div class="profile-icon" onclick="toggleProfileMenu(event)">
-                    <img src="{% if user.profile_photo and user.profile_photo.url != '' %}{{ user.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}" alt="Foto do Usuário" class="profile-photo">
+                    <img src="{% if user.profile_photo and user.profile_photo.url != '' %}{{ user.profile_photo.url }}{% else %}{% static 'images/default_user.png' %}{% endif %}"
+                        alt="Foto do Usuário" class="profile-photo">
                 </div>
                 <div id="profile-menu" class="profile-menu">
                     <div class="profile-info">
@@ -76,10 +88,12 @@
                     <ul>
                         <li><a href="{% url 'usuarios:perfil_usuario' %}">Perfil do Usuário</a></li>
                         <li>
-                            <form id="logout-form" action="{% url 'usuarios:logout' %}" method="POST" style="display: none;">
+                            <form id="logout-form" action="{% url 'usuarios:logout' %}" method="POST"
+                                style="display: none;">
                                 {% csrf_token %}
                             </form>
-                            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sair</a>
+                            <a href="#"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sair</a>
                         </li>
                     </ul>
                 </div>
@@ -89,111 +103,165 @@
     {# Alerta no topo caso exista impersonificação #}
     {% with orig_id=request.session.original_user_id|default:"" %}
     {% with imp_type=request.session.impersonation_type|default:"" %}
-        {% if orig_id %}
-            <div class="personificar-alert">
-                Você está personificando <strong>{{ user.get_full_name }}</strong>.
-                {% if imp_type == "cliente" %}
-                    <a href="{% url 'clientes:reverter_personificacao' %}">Voltar ao seu usuário original</a>
-                {% elif imp_type == "usuario" %}
-                    <a href="{% url 'usuarios:reverter_personificacao' %}">Voltar ao seu usuário original</a>
-                {% endif %}
-            </div>
+    {% if orig_id %}
+    <div class="personificar-alert">
+        Você está personificando <strong>{{ user.get_full_name }}</strong>.
+        {% if imp_type == "cliente" %}
+        <a href="{% url 'clientes:reverter_personificacao' %}">Voltar ao seu usuário original</a>
+        {% elif imp_type == "usuario" %}
+        <a href="{% url 'usuarios:reverter_personificacao' %}">Voltar ao seu usuário original</a>
         {% endif %}
+    </div>
+    {% endif %}
     {% endwith %}
     {% endwith %}
 
     <nav class="side-bar light-theme" id="side-bar">
         <ul>
             <li>
-                
-                <a href="{% url 'home' %}" 
-                     class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                     <img src="{% static 'images/home-icon.png' %}" alt="Home">
                     <span class="menu-label">Home</span>
                 </a>
             </li>
             {% if perms.documentos %}
             <li>
-                <a href="#" onclick="toggleSubmenu(event, this)" class="{% if request.resolver_match.namespace == 'documentos' %}active{% endif %}">
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                    class="{% if request.resolver_match.namespace == 'documentos' %}active{% endif %}">
                     <img src="{% static 'images/documento.png' %}" alt="Documentos">
                     <span class="menu-label">Documentos</span>
                 </a>
                 <ul class="submenu">
-                    {% if perms.documentos.view_documentos %}<li><a href="{% url 'documentos:listar_documentos_aprovados' %}" class="{% if request.resolver_match.url_name == 'listar_documentos_aprovados' %}active{% endif %}">Listar Documentos</a></li>{% endif %}
-                    {% if perms.documentos.list_pending_approvals %}<li><a href="{% url 'documentos:listar_aprovacoes_pendentes' %}" class="{% if request.resolver_match.url_name == 'listar_aprovacoes_pendentes' %}active{% endif %}">Aprovações Pendentes</a></li>{% endif %}
-                    {% if perms.documentos.can_analyze %}<li><a href="{% url 'documentos:listar_documentos_para_analise' %}" class="{% if request.resolver_match.url_name == 'listar_documentos_para_analise' %}active{% endif %}">Análise SGQ</a></li>{% endif %}
-                    {% if perms.documentos.can_view_editables %}<li><a href="{% url 'documentos:listar_documentos_editaveis' %}" class="{% if request.resolver_match.url_name == 'listar_documentos_editaveis' %}active{% endif %}">Editáveis</a></li>{% endif %}
-                    {% if perms.documentos.list_reproaches %}<li><a href="{% url 'documentos:listar_documentos_reprovados' %}" class="{% if request.resolver_match.url_name == 'listar_documentos_reprovados' %}active{% endif %}">Reprovações</a></li>{% endif %}
-                    {% if perms.documentos.view_categoria %}<li><a href="{% url 'documentos:listar_categorias' %}" class="{% if request.resolver_match.url_name == 'listar_categorias' %}active{% endif %}">Categorias</a></li>{% endif %}
-                    {% if perms.documentos.view_documentos_ina %}<li><a href="{% url 'documentos:listar_documentos_inativos' %}" class="{% if request.resolver_match.url_name == 'listar_documentos_inativos' %}active{% endif %}">Documentos Inativos</a></li>{% endif %}
-                    {% if perms.documentos.monitor_documents%}<li><a href="{% url 'documentos:monitorar_pendentes' %}" class="{% if request.resolver_match.url_name == 'monitorar_pendentes' %}active{% endif %}">Monitorar Documentos</a></li>{% endif %}
+                    {% if perms.documentos.view_documentos %}<li><a
+                            href="{% url 'documentos:listar_documentos_aprovados' %}"
+                            class="{% if request.resolver_match.url_name == 'listar_documentos_aprovados' %}active{% endif %}">Listar
+                            Documentos</a></li>{% endif %}
+                    {% if perms.documentos.list_pending_approvals %}<li><a
+                            href="{% url 'documentos:listar_aprovacoes_pendentes' %}"
+                            class="{% if request.resolver_match.url_name == 'listar_aprovacoes_pendentes' %}active{% endif %}">Aprovações
+                            Pendentes</a></li>{% endif %}
+                    {% if perms.documentos.can_analyze %}<li><a
+                            href="{% url 'documentos:listar_documentos_para_analise' %}"
+                            class="{% if request.resolver_match.url_name == 'listar_documentos_para_analise' %}active{% endif %}">Análise
+                            SGQ</a></li>{% endif %}
+                    {% if perms.documentos.can_view_editables %}<li><a
+                            href="{% url 'documentos:listar_documentos_editaveis' %}"
+                            class="{% if request.resolver_match.url_name == 'listar_documentos_editaveis' %}active{% endif %}">Editáveis</a>
+                    </li>{% endif %}
+                    {% if perms.documentos.list_reproaches %}<li><a
+                            href="{% url 'documentos:listar_documentos_reprovados' %}"
+                            class="{% if request.resolver_match.url_name == 'listar_documentos_reprovados' %}active{% endif %}">Reprovações</a>
+                    </li>{% endif %}
+                    {% if perms.documentos.view_categoria %}<li><a href="{% url 'documentos:listar_categorias' %}"
+                            class="{% if request.resolver_match.url_name == 'listar_categorias' %}active{% endif %}">Categorias</a>
+                    </li>{% endif %}
+                    {% if perms.documentos.view_documentos_ina %}<li><a
+                            href="{% url 'documentos:listar_documentos_inativos' %}"
+                            class="{% if request.resolver_match.url_name == 'listar_documentos_inativos' %}active{% endif %}">Documentos
+                            Inativos</a></li>{% endif %}
+                    {% if perms.documentos.monitor_documents%}<li><a href="{% url 'documentos:monitorar_pendentes' %}"
+                            class="{% if request.resolver_match.url_name == 'monitorar_pendentes' %}active{% endif %}">Monitorar
+                            Documentos</a></li>{% endif %}
                 </ul>
             </li>
             {% endif %}
 
             {% if perms.ia %}
             <li>
-                <a href="#" onclick="toggleSubmenu(event, this)" class="{% if request.resolver_match.namespace == 'ia' %}active{% endif %}">
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                    class="{% if request.resolver_match.namespace == 'ia' %}active{% endif %}">
                     <img src="{% static 'images/ia.png' %}" alt="IA">
                     <span class="menu-label">IA</span>
                 </a>
                 <ul class="submenu">
-                    {% if perms.ia.chat_pag %}<li><a href="{% url 'ia:chat_page' %}" class="{% if request.resolver_match.url_name == 'chat_page' %}active{% endif %}">Chat IA</a></li>{% endif %}
-                    {% if perms.ia.cost_monitor %}<li><a href="{% url 'ia:api_cost_monitor' %}" class="{% if request.resolver_match.url_name == 'api_cost_monitor' %}active{% endif %}">Custos IA</a></li>{% endif %}
+                    {% if perms.ia.chat_pag %}<li><a href="{% url 'ia:chat_page' %}"
+                            class="{% if request.resolver_match.url_name == 'chat_page' %}active{% endif %}">Chat IA</a>
+                    </li>{% endif %}
+                    {% if perms.ia.cost_monitor %}<li><a href="{% url 'ia:api_cost_monitor' %}"
+                            class="{% if request.resolver_match.url_name == 'api_cost_monitor' %}active{% endif %}">Custos
+                            IA</a></li>{% endif %}
                 </ul>
             </li>
             {% endif %}
 
-            {% if perms.bi %}
-            <li> 
-                <a href="#" onclick="toggleSubmenu(event, this)" class="{% if request.resolver_match.namespace == 'bi' %}active{% endif %}">
+
+            <li>
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                    class="{% if request.resolver_match.namespace == 'bi' %}active{% endif %}">
                     <img src="{% static 'images/indicador.png' %}" alt="BI">
                     <span class="menu-label">BI</span>
                 </a>
 
                 <ul class="submenu">
-                    <li><a href="{% url 'bi:my_bi_report_list' %}" class="{% if request.resolver_match.url_name == 'my_bi_report_list' %}active{% endif %}">Lista de BI's</a></li>
+                    <li><a href="{% url 'bi:my_bi_report_list' %}"
+                            class="{% if request.resolver_match.url_name == 'my_bi_report_list' %}active{% endif %}">Lista
+                            de BI's</a></li>
                     {% if perms.bi.view_bi %}
-                    <li><a href="{% url 'bi:bi_report_list' %}" class="{% if request.resolver_match.url_name == 'bi_report_list' %}active{% endif %}" >Lista geral de BI's</a></li>
+                    <li><a href="{% url 'bi:bi_report_list' %}"
+                            class="{% if request.resolver_match.url_name == 'bi_report_list' %}active{% endif %}">Lista
+                            geral de BI's</a></li>
+                    {% endif %}
+
+                    {% if perms.bi.permission_report %}
+                    <li><a href="{% url 'bi:bi_relatorios' %}"
+                            class="{% if request.resolver_match.url_name == 'bi_relatorios' %}active{% endif %}">Relatórios</a></li>
                     {% endif %}
                 </ul>
             </li>
-            {% endif %}
-            
+
+
             {% if perms.rh %}
-            <li> 
-                <a href="#" onclick="toggleSubmenu(event, this)" class="{% if request.resolver_match.namespace == 'rh' %}active{% endif %}">
+            <li>
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                    class="{% if request.resolver_match.namespace == 'rh' %}active{% endif %}">
                     <img src="{% static 'images/rh.png' %}" alt="RH">
                     <span class="menu-label">RH</span>
                 </a>
-            
-                
+
+
                 <ul class="submenu">
                     {% if perms.rh.delivery_epis %}
-                    <li><a href="{% url 'rh:entregas_pendentes' %}" class="{% if request.resolver_match.url_name == 'entregas' %}active{% endif %}">Entregas de EPIs</a></li>
+                    <li><a href="{% url 'rh:entregas_pendentes' %}"
+                            class="{% if request.resolver_match.url_name == 'entregas' %}active{% endif %}">Entregas de
+                            EPIs</a></li>
                     {% endif %}
-                </ul>   
+                
+                </ul>
             </li>
             {% endif %}
 
             {% if perms.usuarios %}
             <li>
-                <a href="#" onclick="toggleSubmenu(event, this)" class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name != 'perfil_usuario' %}active{% endif %}">
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                    class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name != 'perfil_usuario' %}active{% endif %}">
                     <img src="{% static 'images/administracao.png' %}" alt="Administração">
                     <span class="menu-label">Administração</span>
                 </a>
                 <ul class="submenu">
-                    {% if perms.usuarios.list_user %}<li><a href="{% url 'usuarios:lista_usuarios' %}" class="{% if request.resolver_match.url_name == 'lista_usuarios' %}active{% endif %}">Usuários</a></li>{% endif %}
-                    {% if perms.usuarios.can_view_list_group %}<li><a href="{% url 'usuarios:lista_grupos' %}" class="{% if request.resolver_match.url_name == 'lista_grupos' %}active{% endif %}">Grupos de Usuários</a></li>{% endif %}
-                    {% if perms.usuarios.change_permission %}<li><a href="{% url 'usuarios:liberar_permissoes' %}" class="{% if request.resolver_match.url_name == 'liberar_permissoes' %}active{% endif %}">Permissões</a></li>{% endif %}
+                    {% if perms.usuarios.list_user %}<li><a href="{% url 'usuarios:lista_usuarios' %}"
+                            class="{% if request.resolver_match.url_name == 'lista_usuarios' %}active{% endif %}">Usuários</a>
+                    </li>{% endif %}
+                    {% if perms.usuarios.can_view_list_group %}<li><a href="{% url 'usuarios:lista_grupos' %}"
+                            class="{% if request.resolver_match.url_name == 'lista_grupos' %}active{% endif %}">Grupos
+                            de Usuários</a></li>{% endif %}
+                    {% if perms.usuarios.change_permission %}<li><a href="{% url 'usuarios:liberar_permissoes' %}"
+                            class="{% if request.resolver_match.url_name == 'liberar_permissoes' %}active{% endif %}">Permissões</a>
+                    </li>{% endif %}
+                    
+                    <li><a href="{% url 'usuarios:user_relatorios' %}"
+                            class="{% if request.resolver_match.url_name == 'user_relatorios' %}active{% endif %}">Relatórios</a></li>
+                    
                 </ul>
             </li>
             {% endif %}
         </ul>
 
         <div class="sidebar-logo-container">
-            <img src="{% static 'images/logo-dark.png' %}" alt="Logo Rotoplastyc Dark" class="sidebar-logo logo-dark-theme">
-            <img src="{% static 'images/logo-whit.png' %}" alt="Logo Rotoplastyc Light" class="sidebar-logo logo-light-theme">
+            <img src="{% static 'images/logo-dark.png' %}" alt="Logo Rotoplastyc Dark"
+                class="sidebar-logo logo-dark-theme">
+            <img src="{% static 'images/logo-whit.png' %}" alt="Logo Rotoplastyc Light"
+                class="sidebar-logo logo-light-theme">
         </div>
     </nav>
 
@@ -212,13 +280,13 @@
             const openSubmenus = sideBar.querySelectorAll('.submenu.open');
             if (!sideBar.classList.contains("expanded")) {
                 openSubmenus.forEach(submenu => {
-                    if (!submenu.closest('li').matches(':hover')) { 
+                    if (!submenu.closest('li').matches(':hover')) {
                         submenu.classList.remove('open');
                         submenu.style.maxHeight = null;
                     }
                 });
             } else {
-                 openSubmenus.forEach(submenu => {
+                openSubmenus.forEach(submenu => {
                     if (submenu.classList.contains('open')) {
                         submenu.style.maxHeight = submenu.scrollHeight + "px";
                     }
@@ -258,7 +326,7 @@
                 if (s !== exceptThisSubmenu && s.classList.contains('open')) {
                     s.classList.remove('open');
                     if (sideBar.classList.contains("expanded")) {
-                        s.style.maxHeight = null; 
+                        s.style.maxHeight = null;
                     }
                 }
             });
@@ -271,7 +339,7 @@
 
             if (sideBar.classList.contains("expanded")) {
                 const isOpen = submenu.classList.contains('open');
-                closeAllSubmenus(submenu); 
+                closeAllSubmenus(submenu);
                 if (!isOpen) {
                     submenu.classList.add('open');
                     submenu.style.maxHeight = submenu.scrollHeight + "px";
@@ -282,18 +350,18 @@
             }
         }
 
-        document.addEventListener('click', function(event) {
-            if (profileMenu && profileMenu.classList.contains('open') && 
-                !profileMenu.contains(event.target) && 
+        document.addEventListener('click', function (event) {
+            if (profileMenu && profileMenu.classList.contains('open') &&
+                !profileMenu.contains(event.target) &&
                 !event.target.closest('.profile-icon')) {
                 profileMenu.classList.remove('open');
             }
-            if (notificationDropdown && notificationDropdown.classList.contains('open') && 
-                !notificationDropdown.contains(event.target) && 
+            if (notificationDropdown && notificationDropdown.classList.contains('open') &&
+                !notificationDropdown.contains(event.target) &&
                 !event.target.closest('.notification-bell')) {
                 notificationDropdown.classList.remove('open');
             }
-            
+
             if (!sideBar.classList.contains("expanded") && !sideBar.contains(event.target)) {
                 const openFloatingSubmenus = sideBar.querySelectorAll('.submenu.open');
                 openFloatingSubmenus.forEach(submenu => {
@@ -329,19 +397,19 @@
                 }
             }
         }
-        
+
         async function fetchNotificationCount() {
             const initialCountElement = document.getElementById('notification-count');
             if (initialCountElement && initialCountElement.textContent.trim() !== "") {
-                try { 
+                try {
                     const count = parseInt(initialCountElement.textContent);
-                    updateNotificationCount(count); 
+                    updateNotificationCount(count);
                 }
-                catch (e) { 
+                catch (e) {
                     console.warn("Não foi possível ler a contagem inicial de notificações.", e);
-                    updateNotificationCount(0); 
+                    updateNotificationCount(0);
                 }
-            } else { 
+            } else {
                 updateNotificationCount(0);
             }
         }
@@ -349,138 +417,139 @@
 
     {% block extra_js %}
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const themeToggleButton = document.getElementById("theme-toggle");
-        const bodyElement = document.body;
-    
-        if (bodyElement.classList.contains("light-theme")) {
-            themeToggleButton.textContent = "🌞";
-        } else {
-            themeToggleButton.textContent = "🌙";
-        }
-    
-        themeToggleButton.addEventListener("click", () => {
-            if (bodyElement.classList.contains("dark-theme")) {
-                bodyElement.classList.replace("dark-theme", "light-theme");
+        document.addEventListener("DOMContentLoaded", () => {
+            const themeToggleButton = document.getElementById("theme-toggle");
+            const bodyElement = document.body;
+
+            if (bodyElement.classList.contains("light-theme")) {
                 themeToggleButton.textContent = "🌞";
-                localStorage.setItem("theme", "light-theme");
             } else {
-                bodyElement.classList.replace("light-theme", "dark-theme");
                 themeToggleButton.textContent = "🌙";
-                localStorage.setItem("theme", "dark-theme");
             }
-        });
 
-        fetchNotificationCount();
-
-        document.querySelectorAll('.close-notification').forEach(function(button) {
-            button.addEventListener('click', function() {
-                var notificacaoId = this.getAttribute('data-id');
-                var url = "{% url 'notificacoes:marcar_notificacao_como_lida' notificacao_id=0 %}".replace('/0/', '/' + notificacaoId + '/'); 
-                if (!url.includes(notificacaoId)) { 
-                    url = "{% url 'notificacoes:marcar_notificacao_como_lida' 999999 %}".replace('999999', notificacaoId);
+            themeToggleButton.addEventListener("click", () => {
+                if (bodyElement.classList.contains("dark-theme")) {
+                    bodyElement.classList.replace("dark-theme", "light-theme");
+                    themeToggleButton.textContent = "🌞";
+                    localStorage.setItem("theme", "light-theme");
+                } else {
+                    bodyElement.classList.replace("light-theme", "dark-theme");
+                    themeToggleButton.textContent = "🌙";
+                    localStorage.setItem("theme", "dark-theme");
                 }
-
-                fetch(url, {
-                    method: 'POST',
-                    headers: { 
-                        'X-CSRFToken': csrftoken, 
-                        'Content-Type': 'application/json', 
-                        'Accept': 'application/json' 
-                    },
-                    body: JSON.stringify({})
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok ' + response.statusText);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.status === 'success') {
-                        const listItem = this.closest('li');
-                        if (listItem) {
-                            listItem.style.transition = 'opacity 0.25s ease, max-height 0.25s ease, padding 0.25s ease, margin-bottom 0.25s ease, border-width 0.25s ease';
-                            listItem.style.opacity = '0'; 
-                            listItem.style.maxHeight = '0';
-                            listItem.style.paddingTop = '0'; 
-                            listItem.style.paddingBottom = '0';
-                            listItem.style.marginBottom = '0'; 
-                            listItem.style.borderWidth = '0';
-                            
-                            setTimeout(() => {
-                                listItem.remove();
-                                updateNotificationCount(data.unread_count);
-                                const notificationList = document.getElementById('notification-list');
-                                const clearAllBtn = document.getElementById('clear-all-notifications');
-                                const headerClearBtn = document.querySelector('.notification-dropdown-header');
-
-                                if (notificationList && notificationList.querySelectorAll('li:not(.no-notifications)').length === 0) {
-                                    notificationList.innerHTML = '<li class="no-notifications">Nenhuma notificação pendente.</li>';
-                                    if(clearAllBtn) clearAllBtn.style.display = 'none';
-                                    if(headerClearBtn && clearAllBtn) headerClearBtn.style.display = 'none'; 
-                                }
-                            }, 250);
-                        }
-                    } else { 
-                        console.error('Erro ao marcar notificação como lida:', data.message || 'Status não foi success'); 
-                    }
-                })
-                .catch(error => console.error('Erro na requisição para marcar notificação:', error));
             });
-        });
 
-        const clearAllButton = document.getElementById('clear-all-notifications');
-        const headerClearButtonContainer = document.querySelector('.notification-dropdown-header'); 
-        
-        if (clearAllButton) {
-            if (document.querySelectorAll('#notification-list li:not(.no-notifications)').length === 0){
-                clearAllButton.style.display = 'none';
-                if (headerClearButtonContainer) headerClearButtonContainer.style.display = 'none';
-            }
+            fetchNotificationCount();
 
-            clearAllButton.addEventListener('click', function() {
-                if (confirm('Tem certeza de que deseja limpar todas as notificações?')) {
-                    fetch("{% url 'notificacoes:limpar_todas_notificacoes' %}", {
+            document.querySelectorAll('.close-notification').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var notificacaoId = this.getAttribute('data-id');
+                    var url = "{% url 'notificacoes:marcar_notificacao_como_lida' notificacao_id=0 %}".replace('/0/', '/' + notificacaoId + '/');
+                    if (!url.includes(notificacaoId)) {
+                        url = "{% url 'notificacoes:marcar_notificacao_como_lida' 999999 %}".replace('999999', notificacaoId);
+                    }
+
+                    fetch(url, {
                         method: 'POST',
-                        headers: { 
-                            'X-CSRFToken': csrftoken, 
-                            'Content-Type': 'application/json', 
-                            'Accept': 'application/json' 
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify({})
                     })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok ' + response.statusText);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.status === 'success') {
-                            const notificationList = document.getElementById('notification-list');
-                            if (notificationList) {
-                                notificationList.querySelectorAll('li:not(.no-notifications)').forEach(function(li) {
-                                    li.style.transition = 'opacity 0.25s ease'; 
-                                    li.style.opacity = '0';
-                                });
-                                setTimeout(() => {
-                                    notificationList.innerHTML = '<li class="no-notifications">Nenhuma notificação pendente.</li>';
-                                    updateNotificationCount(0);
-                                    clearAllButton.style.display = 'none';
-                                    if (headerClearButtonContainer) headerClearButtonContainer.style.display = 'none';
-                                }, 250);
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok ' + response.statusText);
                             }
-                        } else { 
-                            console.error('Erro ao limpar notificações:', data.message || 'Status não foi success'); 
-                        }
-                    })
-                    .catch(error => console.error('Erro na requisição para limpar notificações:', error));
-                }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                const listItem = this.closest('li');
+                                if (listItem) {
+                                    listItem.style.transition = 'opacity 0.25s ease, max-height 0.25s ease, padding 0.25s ease, margin-bottom 0.25s ease, border-width 0.25s ease';
+                                    listItem.style.opacity = '0';
+                                    listItem.style.maxHeight = '0';
+                                    listItem.style.paddingTop = '0';
+                                    listItem.style.paddingBottom = '0';
+                                    listItem.style.marginBottom = '0';
+                                    listItem.style.borderWidth = '0';
+
+                                    setTimeout(() => {
+                                        listItem.remove();
+                                        updateNotificationCount(data.unread_count);
+                                        const notificationList = document.getElementById('notification-list');
+                                        const clearAllBtn = document.getElementById('clear-all-notifications');
+                                        const headerClearBtn = document.querySelector('.notification-dropdown-header');
+
+                                        if (notificationList && notificationList.querySelectorAll('li:not(.no-notifications)').length === 0) {
+                                            notificationList.innerHTML = '<li class="no-notifications">Nenhuma notificação pendente.</li>';
+                                            if (clearAllBtn) clearAllBtn.style.display = 'none';
+                                            if (headerClearBtn && clearAllBtn) headerClearBtn.style.display = 'none';
+                                        }
+                                    }, 250);
+                                }
+                            } else {
+                                console.error('Erro ao marcar notificação como lida:', data.message || 'Status não foi success');
+                            }
+                        })
+                        .catch(error => console.error('Erro na requisição para marcar notificação:', error));
+                });
             });
-        }
-    });
+
+            const clearAllButton = document.getElementById('clear-all-notifications');
+            const headerClearButtonContainer = document.querySelector('.notification-dropdown-header');
+
+            if (clearAllButton) {
+                if (document.querySelectorAll('#notification-list li:not(.no-notifications)').length === 0) {
+                    clearAllButton.style.display = 'none';
+                    if (headerClearButtonContainer) headerClearButtonContainer.style.display = 'none';
+                }
+
+                clearAllButton.addEventListener('click', function () {
+                    if (confirm('Tem certeza de que deseja limpar todas as notificações?')) {
+                        fetch("{% url 'notificacoes:limpar_todas_notificacoes' %}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrftoken,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({})
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok ' + response.statusText);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    const notificationList = document.getElementById('notification-list');
+                                    if (notificationList) {
+                                        notificationList.querySelectorAll('li:not(.no-notifications)').forEach(function (li) {
+                                            li.style.transition = 'opacity 0.25s ease';
+                                            li.style.opacity = '0';
+                                        });
+                                        setTimeout(() => {
+                                            notificationList.innerHTML = '<li class="no-notifications">Nenhuma notificação pendente.</li>';
+                                            updateNotificationCount(0);
+                                            clearAllButton.style.display = 'none';
+                                            if (headerClearButtonContainer) headerClearButtonContainer.style.display = 'none';
+                                        }, 250);
+                                    }
+                                } else {
+                                    console.error('Erro ao limpar notificações:', data.message || 'Status não foi success');
+                                }
+                            })
+                            .catch(error => console.error('Erro na requisição para limpar notificações:', error));
+                    }
+                });
+            }
+        });
     </script>
     {% endblock %}
 </body>
+
 </html>

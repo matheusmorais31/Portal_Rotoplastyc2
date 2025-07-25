@@ -180,3 +180,8 @@ def beneficios(request):
 
 def odonto(request):
     return render(request, 'odonto.html')
+
+def regulamentos(request):
+    return render(request, 'regulamentos.html')
+
+

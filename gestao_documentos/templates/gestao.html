@@ -40,7 +40,7 @@
 
 <!--Pesquisa de Clima -->
 <!--Comentar o trexo abaixo para desativar -->
-<a href="http://vmphp.rotoplastyc.com.br/pesquisa/" class="modal-content" >
+<a href="http://vmphp.rotoplastyc.com.br/pesquisa/" class="modal-content">
     <div class="modal-container">
         <img src="/static/images/PesquisaClima.png" class="modal-img">
         <span class="modal-title">Pesquisa de Clima</span>
@@ -67,7 +67,16 @@
         <span class="modal-title">Organograma Filial</span>
     </div>
 </a>
-<a href="https://docs.google.com/spreadsheets/d/1BFGvkG_lBjijd4ApVFilr1MhKfzJ0IXo/edit?usp=sharing&ouid=113990058410784231155&rtpof=true&sd=true" class="modal-content">
+
+<a href="/static/pdfs/organograma-matriz.pdf" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/hierarchical-structure.png" class="modal-img">
+        <span class="modal-title">Organograma Matriz</span>
+    </div>
+</a>
+
+<a href="https://docs.google.com/spreadsheets/d/1BFGvkG_lBjijd4ApVFilr1MhKfzJ0IXo/edit?usp=sharing&ouid=113990058410784231155&rtpof=true&sd=true"
+    class="modal-content">
     <div class="modal-container">
         <img src="/static/images/calendario_1.png" class="modal-img">
         <span class="modal-title">Agenda de Treinamentos</span>
@@ -80,5 +89,21 @@
         <span class="modal-title">Benefícios</span>
     </div>
 </a>
+
+<a href="/static/images/trilha-carreira.jpg" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/carrer-trail.png" class="modal-img">
+        <span class="modal-title">Trilha de Carreira</span>
+    </div>
+</a>
+
+<a href="{% url 'regulamentos' %}" class="modal-content">
+    <div class="modal-container">
+        <img src="/static/images/regulamentos.png" class="modal-img">
+        <span class="modal-title">Regulamentos</span>
+    </div>
+</a>
+
+
 
 {% endblock %}

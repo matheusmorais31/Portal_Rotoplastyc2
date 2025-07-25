@@ -1,0 +1,172 @@
+/* ---------------- TIPOGRAFIA / CORES BÁSICAS ------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+
+*{box-sizing:border-box;margin:0}
+body{font-family:'Inter',sans-serif;color:#eee;background:#0e141a}
+
+/* ================= CONTAINER PRINCIPAL ========================= */
+.container{
+    position:relative;
+    padding:20px;margin:50px auto;width:100%;
+    border-radius:20px;
+    background:rgba(17,16,16,0.60);
+    box-shadow:0 0 30px rgba(0,0,0,0.30);
+    color:#fff;
+    overflow:visible;
+}
+
+/* ---------------- CABEÇALHO / VOLTAR --------------------------- */
+h1{font-size:28px;margin:40px 0 20px;color:#fff;}
+.back-button{
+    position:absolute;top:20px;right:20px;
+    background:#2EC2D6;color:#fff;padding:10px 20px;
+    border:none;border-radius:5px;text-decoration:none;
+    font-size:16px;cursor:pointer;transition:background .3s;
+}
+.back-button:hover{background:#1EB2C1;box-shadow:0 0 10px #2EC2D6;}
+
+/* ================ CARTÃO DE FILTROS ============================ */
+.filters-card{
+    display:flex;flex-wrap:wrap;gap:20px;
+    padding:20px;margin-bottom:25px;
+}
+
+.search-container{flex:1 1 240px;display:flex;flex-direction:column;}
+.form-label{font-size:14px;color:#fff;margin-bottom:4px;}
+.search-input{
+    padding:10px;font-size:16px;border-radius:5px;
+    border:1px solid #ccc;background:#fff;color:#333;
+    transition:border .2s;width:100%;
+}
+.search-input:focus{outline:none;border-color:#2EC2D6;}
+
+.filter-buttons{display:flex;align-items:flex-end;gap:10px;}
+
+/* --------------------- BOTÕES ---------------------------------- */
+.btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:140px;                 /* mesma largura p/ todos */
+    height:42px;                 /* mesma altura  p/ todos */
+    padding:0 18px;
+    border-radius:6px;
+    font-size:16px;
+    cursor:pointer;
+    box-sizing:border-box;
+    line-height:1;
+}
+
+.btn-primary{
+    background:#2EC2D6;
+    color:#fff;
+    border:1px solid transparent;
+}
+.btn-primary:hover{background:#1EB2C1;}
+
+.btn-secondary{
+    background:#ff0000;
+    color:#ffffff;
+    text-decoration:none;
+}
+.btn-secondary:hover{
+    background:#f92727;
+    color:#ffffff;
+}
+
+/* ---------------------- TABELA -------------------------------- */
+.table{
+    width:100%;border-collapse:collapse;border-radius:10px;
+    overflow:hidden;background:rgba(17,16,16,0.44);color:#fff;
+    box-shadow:0 0 4px rgba(0,0,0,0.2);
+}
+.table thead{background:#2EC2D6;}
+.table thead th{padding:10px;font-size:18px;text-align:left;}
+.table tbody tr{border-bottom:1px solid #555;}
+.table tbody td{padding:10px;font-size:16px;}
+.table tbody tr:nth-child(even){background:rgba(255,255,255,0.08);}
+.table tbody tr:hover{background:#2EC2D6;color:#000;}
+.table tbody tr td[colspan]{text-align:center;font-style:italic;color:#ffcccc;}
+/* static/css/relatorio_permissoes.css */
+
+/* … estilos existentes … */
+
+/* ===== Tabela com bordas em todas as células ===== */
+.table-bordered, .table-bordered th, .table-bordered td {
+    border: 1px solid #d0d0d0;       /* cor discreta; ajuste à sua paleta */
+}
+.table-bordered {
+    border-collapse: collapse;        /* elimina duplas bordas */
+}
+
+
+/* -------- Datalist fix (WebKit) ------------------------------- */
+@supports (-webkit-overflow-scrolling:touch){
+    input[list]::-webkit-calendar-picker-indicator{display:none;}
+    datalist{max-height:280px;}
+}
+
+/* ---------------- RESPONSIVO ---------------------------------- */
+@media(max-width:768px){
+    .search-container{flex:1 1 100%;}
+    .filter-buttons{width:100%;justify-content:flex-end;}
+}
+
+/* -------------- relatorio permissoes ------------------------------------ */
+body.light-theme .container{background:none;
+    color:#fff;
+    box-shadow: none;
+    
+
+}
+
+body.light-theme .form-label{
+    color: #000;
+}
+body.light-theme .search-input{background:#fff;color:#000;}
+body.light-theme .filters-card{background:none;}
+
+/* --- NOVO: mantém texto branco no botão secundário no tema claro --- */
+body.light-theme .btn-secondary,
+body.light-theme .btn-secondary:hover{
+    background:#ff0000;          /* mantém o mesmo vermelho        */
+    color:#ffffff;               /* força texto branco             */
+}
+
+
+.action-icon, .icon-link {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.action-icon img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.action-icon img:hover, .icon:hover {
+    transform: scale(1.5);
+}
+
+.icons-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.icon-link {
+    margin-right: 10px;
+}

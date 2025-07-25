@@ -8,11 +8,16 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
+from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+
+from itertools import chain
+from django.db.models import F, Value, CharField, IntegerField
+
 
 from .forms import BIReportForm, BIReportEditForm
 from .models import BIReport, BIAccess
@@ -197,3 +202,140 @@ def buscar_grupos(request):
     grupos = Group.objects.filter(name__icontains=query)[:10]
     data = [{"id": g.id, "name": g.name} for g in grupos]
     return JsonResponse(data, safe=False)
+
+
+def bi_relatorios(request):
+    return render(request, 'bi/bi_relatorios.html')
+
+
+@login_required
+@permission_required("bi.permission_report", raise_exception=True)
+def relatorio_permissoes(request):
+    """
+    Relatório de permissões de BI.
+
+    Filtros texto (pelo NOME, não id):
+        bi=<parte do nome do BI>
+        group=<parte do nome do grupo>
+        user=<parte do username>
+
+    Exportação:
+        formato=csv | json
+    """
+
+    # 1. Filtros recebidos
+    bi_text    = (request.GET.get("bi")    or "").strip().lower()
+    group_text = (request.GET.get("group") or "").strip().lower()
+    user_text  = (request.GET.get("user")  or "").strip().lower()
+
+    # 2. Permissões
+    # 2.1 Individuais
+    direct_qs = (
+        BIReport.objects.filter(allowed_users__isnull=False)
+        .values(
+            bi_id    = F("id"),
+            bi_title = F("title"),
+            user_id  = F("allowed_users__id"),
+            username = F("allowed_users__username"),
+        )
+        .annotate(
+            via           = Value("Acesso individual", output_field=CharField()),
+            perm_group_id = Value(None, output_field=IntegerField()),
+        )
+    )
+
+    # 2.2 Via grupo
+    group_qs = (
+        BIReport.objects.filter(allowed_groups__user__isnull=False)
+        .values(
+            bi_id         = F("id"),
+            bi_title      = F("title"),
+            user_id       = F("allowed_groups__user__id"),
+            username      = F("allowed_groups__user__username"),
+            perm_group_id = F("allowed_groups__id"),
+            via           = F("allowed_groups__name"),
+        )
+    )
+
+    # 2.3 Públicos
+    public_qs = (
+        BIReport.objects.filter(all_users=True)
+        .values(
+            bi_id    = F("id"),
+            bi_title = F("title"),
+        )
+        .annotate(
+            user_id       = Value(None,                output_field=IntegerField()),
+            username      = Value("— todos —",         output_field=CharField()),
+            via           = Value("Todos os usuários", output_field=CharField()),
+            perm_group_id = Value(None,                output_field=IntegerField()),
+        )
+    )
+
+    permissoes = list(chain(direct_qs, group_qs, public_qs))
+
+    # 3. Aplica filtros
+    if bi_text:
+        permissoes = [p for p in permissoes if bi_text in p["bi_title"].lower()]
+    if user_text:
+        permissoes = [
+            p for p in permissoes
+            if p["username"] and user_text in p["username"].lower()
+        ]
+    if group_text:
+        permissoes = [p for p in permissoes if group_text in p["via"].lower()]
+
+    # 4. Ordena
+    permissoes.sort(key=lambda p: (
+        p["bi_title"].lower(),
+        (p["username"] or "").lower(),
+        p["via"].lower(),
+    ))
+
+    # 5. Opções para datalist
+    bi_opts = list(BIReport.objects.order_by("title")
+                   .values_list("title", flat=True))
+    group_opts = list(Group.objects.order_by("name")
+                      .values_list("name", flat=True))
+    User = get_user_model()
+    user_opts = list(User.objects.order_by("username")
+                     .values_list("username", flat=True))
+
+    # 6. Exportações
+    fmt = request.GET.get("formato", "html").lower()
+    if fmt == "json":
+        return JsonResponse(permissoes, safe=False)
+
+    if fmt == "csv":
+        from csv import writer
+        resp = HttpResponse(content_type="text/csv")
+        resp["Content-Disposition"] = 'attachment; filename="permissoes_bi.csv"'
+        w = writer(resp)
+        w.writerow(["bi", "usuario", "via"])
+        for p in permissoes:
+            w.writerow([p["bi_title"], p["username"], p["via"]])
+        return resp
+
+    # 6½. URL para o botão Exportar CSV (com filtros)
+    qs_csv = request.GET.copy()
+    qs_csv["formato"] = "csv"
+    export_url = f"{request.path}?{qs_csv.urlencode()}"
+
+    # 7. Renderiza
+    return render(
+        request,
+        "bi/relatorio_permissoes.html",
+        {
+            "permissoes": permissoes,
+
+            "bi_opts":    bi_opts,
+            "group_opts": group_opts,
+            "user_opts":  user_opts,
+
+            "bi_text":    request.GET.get("bi", ""),
+            "group_text": request.GET.get("group", ""),
+            "user_text":  request.GET.get("user", ""),
+
+            "export_url": export_url,
+        },
+    )

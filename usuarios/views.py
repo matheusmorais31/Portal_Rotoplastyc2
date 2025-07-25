@@ -1,30 +1,45 @@
+# --------------------------- Padrão Python ---------------------------
 import logging
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, get_user_model
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib import messages
-from django.http import JsonResponse, HttpResponseNotAllowed
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.views import LogoutView
-from django.contrib.auth.models import Permission
-from django.utils.translation import gettext as _
-from django.urls import reverse_lazy
-from ldap3 import Server, Connection, ALL
+from itertools import chain
 from collections import defaultdict
+
+# -------------------------- Bibliotecas 3rd‑party --------------------
+from ldap3 import Server, Connection, ALL
+
+# -------------------------------- Django -----------------------------
 from django.apps import apps
+from django.contrib import admin, messages
+from django.contrib.auth import (
+    authenticate,
+    get_user_model,
+    login,
+    models as auth_models,
+)
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.views import LogoutView
 from django.contrib.contenttypes.models import ContentType
-from .forms import UsuarioCadastroForm, UsuarioChangeForm, GrupoForm, UsuarioPermissaoForm, ProfileForm
-from .models import Usuario
-from django.contrib.auth.models import Group
-from .forms import DuplicarAcessoForm
-from django.contrib import admin
-from django.contrib.sessions.models import Session
-from django.utils.timezone import localtime
+from django.db.models import CharField, F, IntegerField, Value
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.contrib.auth import login
-from .models import Usuario 
+from django.utils.timezone import localtime
+from django.utils.translation import gettext as _
+from django.views.generic import TemplateView
+
+# --------------------------- Apps locais -----------------------------
+from .forms import (
+    DuplicarAcessoForm,
+    GrupoForm,
+    ProfileForm,
+    UsuarioCadastroForm,
+    UsuarioChangeForm,
+    UsuarioPermissaoForm,
+)
+from .models import Usuario
 
 
 
@@ -683,3 +698,137 @@ def reverter_personificacao(request):
         messages.warning(request, "Nenhum usuário original foi encontrado para reverter.")
 
     return redirect('usuarios:lista_usuarios')
+
+
+def user_relatorios(request):
+    return render(request, 'usuarios/user_relatorios.html')
+
+
+
+
+@login_required
+@permission_required("usuarios.permission_report", raise_exception=True)
+def relatorio_permissoes(request):
+    """
+    Relatório de permissões de USUÁRIOS.
+
+    Query‑string (texto livre):
+        app=<parte do app_label>
+        group=<parte do nome do grupo>
+        user=<parte do username>
+        desc=<parte da descrição da permissão>
+        formato=csv|json   (exportações)
+    """
+
+    # 1. Filtros enviados
+    app_text   = (request.GET.get("app")   or "").strip().lower()
+    group_text = (request.GET.get("group") or "").strip().lower()
+    user_text  = (request.GET.get("user")  or "").strip().lower()
+    desc_text  = (request.GET.get("desc")  or "").strip().lower()
+
+    User = get_user_model()
+
+    # 2. Permissões (diretas e via grupo)
+    direct_qs = (
+        User.objects.filter(user_permissions__isnull=False)
+        .annotate(
+            app_label     = F("user_permissions__content_type__app_label"),
+            codename      = F("user_permissions__codename"),
+            descricao     = F("user_permissions__name"),
+            via           = Value("Acesso individual", output_field=CharField()),
+            user_id       = F("id"),
+            perm_group_id = Value(None, output_field=IntegerField()),
+        )
+        .values(
+            "username", "user_id", "app_label", "codename",
+            "descricao", "via", "perm_group_id",
+        )
+        .distinct()
+    )
+
+    group_qs = (
+        User.objects.filter(groups__permissions__isnull=False)
+        .annotate(
+            app_label     = F("groups__permissions__content_type__app_label"),
+            codename      = F("groups__permissions__codename"),
+            descricao     = F("groups__permissions__name"),
+            via           = F("groups__name"),
+            user_id       = F("id"),
+            perm_group_id = F("groups__id"),
+        )
+        .values(
+            "username", "user_id", "app_label", "codename",
+            "descricao", "via", "perm_group_id",
+        )
+        .distinct()
+    )
+
+    permissoes = list(chain(direct_qs, group_qs))
+
+    # 3. Aplica filtros
+    if app_text:
+        permissoes = [p for p in permissoes if app_text in p["app_label"].lower()]
+    if user_text:
+        permissoes = [p for p in permissoes if user_text in p["username"].lower()]
+    if group_text:
+        permissoes = [p for p in permissoes if group_text in p["via"].lower()]
+    if desc_text:
+        permissoes = [p for p in permissoes if desc_text in p["descricao"].lower()]
+
+    # 4. Ordenação padrão
+    permissoes.sort(key=lambda p: (
+        p["app_label"].lower(),
+        p["username"].lower(),
+        p["via"].lower(),
+        p["codename"],
+    ))
+
+    # 5. Opções para datalist
+    app_opts   = sorted({p["app_label"] for p in permissoes})
+    group_opts = list(Group.objects.order_by("name")
+                      .values_list("name", flat=True))
+    user_opts  = list(User.objects.order_by("username")
+                      .values_list("username", flat=True))
+
+    # 6. Exportações CSV / JSON
+    fmt = request.GET.get("formato", "html").lower()
+    if fmt == "json":
+        return JsonResponse(permissoes, safe=False)
+
+    if fmt == "csv":
+        from csv import writer
+        resp = HttpResponse(content_type="text/csv")
+        resp["Content-Disposition"] = 'attachment; filename="permissoes_usuarios.csv"'
+        w = writer(resp)
+        w.writerow(["usuario", "aplicacao", "codename", "descricao", "via"])
+        for p in permissoes:
+            w.writerow([
+                p["username"], p["app_label"], p["codename"],
+                p["descricao"], p["via"],
+            ])
+        return resp
+
+    # 6½. URL do botão “Exportar CSV” mantendo filtros atuais
+    qs_csv = request.GET.copy()
+    qs_csv["formato"] = "csv"
+    export_url = f"{request.path}?{qs_csv.urlencode()}"
+
+    # 7. Renderiza
+    return render(
+        request,
+        "usuarios/relatorio_permissoes.html",
+        {
+            "permissoes": permissoes,
+
+            "app_opts":   app_opts,
+            "group_opts": group_opts,
+            "user_opts":  user_opts,
+
+            "app_text":   request.GET.get("app", ""),
+            "group_text": request.GET.get("group", ""),
+            "user_text":  request.GET.get("user", ""),
+            "desc_text":  request.GET.get("desc", ""),
+
+            "export_url": export_url,
+        },
+    )

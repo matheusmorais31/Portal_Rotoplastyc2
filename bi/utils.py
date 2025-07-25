@@ -1,14 +1,4 @@
-# bi/utils.py – helper Power BI  (App-Owns-Data — Master User)
-# ──────────────────────────────────────────────────────────────────────────────
-# • Mantém o *access_token* da conta mestre em memória.                  (ROPC)
-# • Gera/embed_token 1 vez por hora por relatório e guarda no Redis (50 min TTL)
-# • Descarta cache se restarem < 5 min de vida útil.                      (401 fix)
-# • Loga nome do relatório + flags RLS/OLS do dataset.
-#
-# Formato do embed_token (2024-↑) → 2 segmentos “header.payload” (gzip-base64).
-# Para ler exp precisamos descompactar a payload antes do ttl-check.
-# ──────────────────────────────────────────────────────────────────────────────
-
+# bi/utils.py 
 from __future__ import annotations
 
 import base64
