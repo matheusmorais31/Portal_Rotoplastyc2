@@ -1,0 +1,224 @@
+/* ======================================================================
+   LISTA DE FORMULÁRIOS – UI escura (RESPONSIVO REVISADO)
+   ====================================================================== */
+:root{
+  --bg-main:#1f1f1f;
+  --bg-layer:#242424;
+  --bg-input:#2a2a2a;
+
+  --bg-container:#515e6c;
+
+  --accent:#2EC2D6;
+  --accent-d:#24a3b4;
+
+  --text-light:#e8e8e8;
+  --text-muted:#b5b5b5;
+  --danger:#ff4d4f;
+}
+
+/* ========= CONTÊINER / TÍTULO ========= */
+.form-card{
+  background:var(--bg-main);
+  padding:2rem 2.5rem;
+  border-radius:1rem;
+  max-width:1400px;
+  margin:2.5rem auto;
+  box-shadow:0 4px 14px rgba(0,0,0,.45);
+}
+.form-card h1{
+  color:var(--text-light);
+  font-size:1.6rem;
+  margin:0 0 1.25rem 0;
+  font-weight:700;
+}
+
+/* ========= TABELA (DESKTOP) ========= */
+.tabela-formularios{
+  width:100%;
+  border-collapse:separate;            /* precisa ser separate p/ bordas internas */
+  border-spacing:0;
+  background:var(--bg-layer);
+  border:1px solid #3a3a3a;
+  border-radius:.75rem;
+  overflow:hidden;                     /* mantém cantos arredondados */
+}
+
+.tabela-formularios thead th{
+  text-align:left;
+  color:var(--text-light);
+  font-weight:700;
+  padding:.9rem 1rem;
+  border-bottom:1px solid #3a3a3a;
+  background:var(--accent);
+}
+.tabela-formularios thead th+th{
+  border-left:1px solid rgba(255,255,255,.9); /* linhas no header */
+}
+
+.tabela-formularios tbody td{
+  color:var(--text-light);
+  padding:.8rem 1rem;
+  border-bottom:1px solid #333;
+  vertical-align:middle;
+
+}
+.tabela-formularios tbody td+td{
+  border-left:1px solid rgba(255,255,255,.7); /* linhas no corpo */
+}
+.tabela-formularios tbody tr:last-child td{ border-bottom:none; }
+.tabela-formularios tbody tr:hover{ background:#2a2a2a; }
+
+/* larguras apenas para desktop amplo */
+.tabela-formularios th:nth-child(1),
+.tabela-formularios td:nth-child(1){ width:50%; }
+.tabela-formularios th:nth-child(2),
+.tabela-formularios td:nth-child(2){ width:220px; white-space:nowrap; }
+.tabela-formularios th:nth-child(3),
+.tabela-formularios td:nth-child(3){ width:100%; white-space:nowrap; }
+
+/* coluna Ações – espaçamento consistente via flex + gap (desktop também) */
+.tabela-formularios td.actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:.6rem;           /* << aqui dá o espaço entre os botões */
+  flex-wrap:nowrap;
+  min-width:0;
+}
+.tabela-formularios td.actions a{
+  margin:0;            /* garantimos que o gap que manda */
+  white-space:nowrap;
+}
+
+/* ========= BOTÕES ========= */
+.btn-primario,
+.btn-secundario{
+  border:none;
+  text-decoration:none;
+  padding:.6rem 1.1rem;
+  border-radius:.55rem;
+  font-weight:600;
+  transition:background .2s, transform .02s, box-shadow .2s;
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  min-height:38px;
+}
+.btn-primario{ background:var(--accent); color:#fff; }
+.btn-primario:hover{ background:var(--accent-d); }
+.btn-primario:active{ transform:translateY(1px); }
+.btn-primario:focus-visible{
+  outline:none; box-shadow:0 0 0 3px rgba(46,194,214,.35);
+}
+.btn-secundario{ background:#555; color:#fff; }
+.btn-secundario:hover{ background:#6b6b6b; }
+.btn-secundario:active{ transform:translateY(1px); }
+.btn-secundario:focus-visible{
+  outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.2);
+}
+
+/* ========= UTIL ========= */
+.mt-2{ margin-top:1rem; }
+.form-card>p{ color:var(--text-muted); }
+
+/* ========= ESTADO VAZIO ========= */
+.form-card>p:only-child{
+  background:#232323;
+  border:1px dashed #3a3a3a;
+  color:var(--text-muted);
+  padding:1rem;
+  border-radius:.6rem;
+  text-align:center;
+}
+
+/* ========= BREAKPOINT 1 – até 1100px (tabela flexível) ========= */
+@media (max-width:1100px){
+  .form-card{ padding:1.75rem; }
+
+  /* solta larguras e permite quebra de texto */
+  .tabela-formularios th:nth-child(n),
+  .tabela-formularios td:nth-child(n){
+    width:auto; white-space:normal;
+  }
+
+  /* ações podem quebrar em duas linhas */
+  .tabela-formularios td.actions{
+    flex-wrap:wrap;
+  }
+  .tabela-formularios td.actions .btn-primario,
+  .tabela-formularios td.actions .btn-secundario{
+    flex:0 1 160px;    /* tenta colocar lado a lado; quebra se não couber */
+  }
+}
+
+/* ========= BREAKPOINT 2 – até 680px (modo CARTÕES) ========= */
+@media (max-width:680px){
+  .form-card{ padding:1.25rem; }
+
+  .tabela-formularios thead{ display:none; }
+
+  .tabela-formularios,
+  .tabela-formularios tbody,
+  .tabela-formularios tr,
+  .tabela-formularios td{
+    display:block;
+    width:100%;
+  }
+
+  .tabela-formularios{ border:none; background:transparent; }
+
+  .tabela-formularios tbody tr{
+    background:var(--bg-layer);
+    border:1px solid #333;
+    border-radius:.75rem;
+    margin-bottom:.9rem;
+    overflow:hidden;
+  }
+
+  .tabela-formularios tbody td{
+    border:none;
+    border-bottom:1px solid #2e2e2e;
+    padding:.75rem 1rem .75rem 7.2rem; /* espaço para o rótulo */
+    position:relative;
+  }
+  .tabela-formularios tbody td:last-child{ border-bottom:none; }
+
+  /* rótulo da célula (nome da coluna) via data attribute */
+  .tabela-formularios tbody td::before{
+    content:attr(data-th);
+    position:absolute;
+    left:0; top:0;
+    height:100%; width:7rem;
+    display:flex; align-items:center;
+    padding-left:.9rem;
+    font-weight:700;
+    color:var(--text-muted);
+  }
+
+  /* seção Ações no cartão */
+  .tabela-formularios tbody td.actions{
+    padding:.8rem;
+    padding-left:.8rem;     /* sem rótulo */
+    display:flex; gap:.5rem; flex-wrap:wrap;
+  }
+  .tabela-formularios tbody td.actions::before{ content:none; }
+
+  .tabela-formularios td.actions .btn-primario,
+  .tabela-formularios td.actions .btn-secundario{
+    flex:1 1 140px;         /* botões fluidos e alinhados */
+    justify-content:center;
+    text-align:center;
+  }
+}
+
+/* ========= TEMA CLARO ========= */
+body.light-theme .form-card{ background-color:var(--bg-container); }
+body.light-theme td{ background-color:#677480; }
+body.light-theme h1{ color:#ffffff; }
+body.light-theme a{ color:#ffffff; }
+body.light-theme h2{ color:#ffffff; }
+
+/* Acessibilidade: reduz animação */
+@media (prefers-reduced-motion:reduce){
+  .btn-primario, .btn-secundario{ transition:none; }
+}

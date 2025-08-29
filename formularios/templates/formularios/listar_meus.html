@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Meus formulários{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/listar_meus.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <h1>Meus formulários</h1>
+
+  {% if formularios %}
+    <table class="tabela-formularios">
+      <thead>
+        <tr><th>Título</th><th>Criado em</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for f in formularios %}
+          <tr>
+            <td data-th="Título">{{ f.titulo }}</td>
+            <td data-th="Criado em">{{ f.criado_em|date:"d/m/Y H:i" }}</td>
+            <td class="actions" data-th="Ações">
+              <a href="{% url 'formularios:construtor_formulario' f.pk %}" class="btn-secundario">Editar</a>
+              <a href="{% url 'formularios:exibir_formulario' f.pk %}" class="btn-primario">Responder</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Você ainda não criou nenhum formulário.</p>
+  {% endif %}
+
+  <h2 style="margin-top:1.5rem">Compartilhados comigo</h2>
+  {% if compartilhados %}
+    <table class="tabela-formularios">
+      <thead>
+        <tr><th>Título</th><th>Dono</th><th>Papel</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for f in compartilhados %}
+          <tr>
+            <td data-th="Título">{{ f.titulo }}</td>
+            <td data-th="Dono">
+              {% if f.dono.get_full_name %}{{ f.dono.get_full_name }}{% else %}{{ f.dono.username }}{% endif %}
+            </td>
+            <td data-th="Papel">
+              {% if f.my_role == "editor" %}
+                <span class="badge" style="background:#3b82f6;color:#fff;border-radius:6px;padding:.125rem .5rem">Editor</span>
+              {% else %}
+                <span class="badge" style="background:#6b7280;color:#fff;border-radius:6px;padding:.125rem .5rem">Somente responder</span>
+              {% endif %}
+            </td>
+            <td class="actions" data-th="Ações">
+              {% if f.my_role == "editor" %}
+                <a href="{% url 'formularios:construtor_formulario' f.pk %}" class="btn-secundario">Editar</a>
+              {% endif %}
+              <a href="{% url 'formularios:exibir_formulario' f.pk %}" class="btn-primario">Responder</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Nenhum formulário compartilhado com você.</p>
+  {% endif %}
+
+  {% if perms.formularios.criar_formulario %}
+  <p class="mt-2">
+    <a href="{% url 'formularios:criar_formulario' %}" class="btn-primario">+ Novo formulário</a>
+  </p>
+  {% endif %}
+</div>
+{% endblock %}

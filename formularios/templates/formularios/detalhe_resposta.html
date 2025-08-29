@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static form_extras %}
+
+{% block title %}Resposta #{{ resposta.id }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/detalhe_resposta.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+  <div class="cabecalho-card">
+    <h1>{{ resposta.formulario.titulo|default:"Resposta enviada" }}</h1>
+    {% if resposta.formulario.descricao %}
+      <p class="form-descricao">{{ resposta.formulario.descricao|linebreaksbr }}</p>
+    {% endif %}
+  </div>
+
+  <div class="pergunta-card">
+    <div class="pergunta-header">
+      <label>Informações da resposta</label>
+    </div>
+    <div class="pergunta-body">
+      <p><strong>ID:</strong> {{ resposta.id }}</p>
+      <p><strong>Enviada em:</strong> {{ resposta.enviado_em }}</p>
+
+      {# Mostra APENAS quando coletar_nome=True (sem fallback do usuário) #}
+      {% if resposta.formulario.coletar_nome %}
+        <p><strong>Nome:</strong> {{ resposta.nome_coletado|default:"Não informado" }}</p>
+      {% endif %}
+
+      
+    </div>
+  </div>
+
+  {# ============= Campos: sempre renderiza, mesmo sem resposta ============= #}
+  {% for campo in campos_da_resposta %}
+    {% with txt=valores_resposta|primeiro_texto:campo.id sel=valores_resposta|selecoes_checkbox:campo.id arquivos=valores_resposta|arquivos_do_campo:campo.id %}
+    <div class="pergunta-card {% if campo.obrigatorio %}required{% endif %} {% if not campo.ativo %}is-archived{% endif %}">
+      <div class="pergunta-header">
+        <label for="campo-{{ campo.id }}">
+          {{ campo.rotulo }}{% if campo.obrigatorio %}<span class="asterisk">*</span>{% endif %}
+          {% if not campo.ativo %}<span class="badge badge-stop">Deletado</span>{% endif %}
+        </label>
+        {% if campo.ajuda %}<small class="texto-ajuda">{{ campo.ajuda }}</small>{% endif %}
+      </div>
+
+      <div class="pergunta-body">
+
+        {% if campo.tipo == "texto_curto" %}
+          <input type="text" id="campo-{{ campo.id }}" class="input-texto" value="{{ txt }}" placeholder="—" disabled readonly>
+          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "paragrafo" %}
+          <textarea id="campo-{{ campo.id }}" rows="4" class="input-texto" disabled readonly placeholder="—">{{ txt }}</textarea>
+          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "multipla" %}
+          <div class="options-block radios">
+            {% for opcao in campo.opcoes.all %}{% with val_op=opcao.valor|default:opcao.texto %}
+              <label class="option">
+                <input type="radio" name="campo-{{ campo.id }}" value="{{ val_op }}" disabled {% if txt == val_op %}checked{% endif %}>
+                {{ opcao.texto }}
+              </label>
+            {% endwith %}{% empty %}
+              <div class="texto-ajuda">Sem opções configuradas.</div>
+            {% endfor %}
+          </div>
+          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "checkbox" %}
+          <div class="options-block checks">
+            {% for opcao in campo.opcoes.all %}{% with val_op=opcao.valor|default:opcao.texto %}
+              <label class="option">
+                <input type="checkbox" name="campo-{{ campo.id }}" value="{{ val_op }}" disabled {% if val_op in sel %}checked{% endif %}>
+                {{ opcao.texto }}
+              </label>
+            {% endwith %}{% empty %}
+              <div class="texto-ajuda">Sem opções configuradas.</div>
+            {% endfor %}
+          </div>
+          {% if not sel %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "lista" %}
+          <select id="campo-{{ campo.id }}" class="input-select" disabled>
+            <option value="">Escolha…</option>
+            {% for opcao in campo.opcoes.all %}{% with val_op=opcao.valor|default:opcao.texto %}
+              <option value="{{ val_op }}" {% if txt == val_op %}selected{% endif %}>{{ opcao.texto }}</option>
+            {% endwith %}{% endfor %}
+          </select>
+          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "escala" %}
+          <div class="options-block radios escala">
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="1" disabled {% if txt == "1" %}checked{% endif %}>
+              <span class="scale-num">1</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="2" disabled {% if txt == "2" %}checked{% endif %}>
+              <span class="scale-num">2</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="3" disabled {% if txt == "3" %}checked{% endif %}>
+              <span class="scale-num">3</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="4" disabled {% if txt == "4" %}checked{% endif %}>
+              <span class="scale-num">4</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="5" disabled {% if txt == "5" %}checked{% endif %}>
+              <span class="scale-num">5</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="6" disabled {% if txt == "6" %}checked{% endif %}>
+              <span class="scale-num">6</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="7" disabled {% if txt == "7" %}checked{% endif %}>
+              <span class="scale-num">7</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="8" disabled {% if txt == "8" %}checked{% endif %}>
+              <span class="scale-num">8</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="9" disabled {% if txt == "9" %}checked{% endif %}>
+              <span class="scale-num">9</span>
+            </label>
+            <label class="option">
+              <input type="radio" name="campo-{{ campo.id }}" value="10" disabled {% if txt == "10" %}checked{% endif %}>
+              <span class="scale-num">10</span>
+            </label>
+          </div>
+          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "data" %}
+          <input type="date" id="campo-{{ campo.id }}" class="input-texto" disabled readonly value="{{ txt }}">
+          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "hora" %}
+          <input type="time" id="campo-{{ campo.id }}" class="input-texto" disabled readonly value="{{ txt }}">
+          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+
+        {% elif campo.tipo == "arquivo" %}
+          <div class="media-carousel-wrapper">
+            <div class="media-carousel" data-campo-id="{{ campo.id }}">
+              <div class="carousel-track">
+                {% for v in arquivos %}
+                  <div class="carousel-slide">
+                    {% with fname=v.valor_arquivo.name|lower %}
+                      {% if fname|slice:"-4:" == ".png" or fname|slice:"-4:" == ".jpg" or fname|slice:"-5:" == ".jpeg" or fname|slice:"-5:" == ".webp" or fname|slice:"-4:" == ".gif" %}
+                        <a href="{{ v.valor_arquivo.url }}" target="_blank" rel="noopener">
+                          <img src="{{ v.valor_arquivo.url }}" alt="Arquivo de imagem" class="carousel-media">
+                        </a>
+                      {% elif fname|slice:"-4:" == ".mp4" or fname|slice:"-5:" == ".webm" or fname|slice:"-4:" == ".ogg" %}
+                        <video src="{{ v.valor_arquivo.url }}" controls playsinline preload="metadata" class="carousel-media"></video>
+                      {% else %}
+                        <a class="btn-primario" href="{{ v.valor_arquivo.url }}" target="_blank" rel="noopener">Baixar: {{ v.valor_arquivo.name|truncatechars:30 }}</a>
+                      {% endif %}
+                    {% endwith %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            <button class="carousel-button prev" aria-label="Mídia anterior"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <button class="carousel-button next" aria-label="Próxima mídia"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
+          </div>
+          {% if not arquivos %}<p class="nao-respondido" style="margin-top:.5rem">Nenhum arquivo enviado.</p>{% endif %}
+
+        {% else %}
+          <p class="texto-ajuda">Tipo de campo ‘{{ campo.get_tipo_display }}’ não suportado.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endwith %}
+  {% endfor %}
+
+  {# Valores órfãos (se algum campo foi removido) #}
+  {% with orfaos=resposta.valores.all|dictsort:"id" %}
+    {% for v in orfaos %}
+      {% if not v.campo %}
+        <div class="pergunta-card is-archived">
+          <div class="pergunta-header"><label>(Pergunta removida)</label></div>
+          <div class="pergunta-body">
+            {% if v.valor_arquivo %}
+              <a class="btn-primario" href="{{ v.valor_arquivo.url }}" target="_blank" rel="noopener">Baixar arquivo</a>
+            {% else %}
+              <p class="input-texto" style="white-space:pre-wrap">{{ v.valor_texto|default:"—" }}</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endwith %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.media-carousel-wrapper').forEach(wrapper => {
+    const track = wrapper.querySelector('.carousel-track');
+    const slides = Array.from(track.children);
+    const nextButton = wrapper.querySelector('.carousel-button.next');
+    const prevButton = wrapper.querySelector('.carousel-button.prev');
+
+    if (slides.length <= 1) {
+      if (nextButton) nextButton.style.display = 'none';
+      if (prevButton) prevButton.style.display = 'none';
+      if (slides.length === 0) {
+        track.innerHTML = '<p class="texto-ajuda" style="padding: 1rem;">Nenhum arquivo enviado.</p>';
+      }
+      return;
+    }
+
+    let slideWidth = 0, currentIndex = 0;
+    const moveTo = (i) => {
+      track.style.transform = 'translateX(-' + (slideWidth * i) + 'px)';
+      currentIndex = i;
+      prevButton.classList.toggle('is-hidden', i === 0);
+      nextButton.classList.toggle('is-hidden', i === slides.length - 1);
+    };
+    const setup = () => { slideWidth = slides[0].getBoundingClientRect().width; moveTo(currentIndex); };
+
+    nextButton.addEventListener('click', () => { if (currentIndex < slides.length - 1) moveTo(currentIndex + 1); });
+    prevButton.addEventListener('click', () => { if (currentIndex > 0) moveTo(currentIndex - 1); });
+
+    const firstImg = track.querySelector('img');
+    if (firstImg && !firstImg.complete) firstImg.addEventListener('load', setup, { once: true }); else setup();
+    window.addEventListener('resize', setup);
+  });
+});
+</script>
+{% endblock %}

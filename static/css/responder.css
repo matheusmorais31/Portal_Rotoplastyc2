@@ -1,0 +1,537 @@
+/* ===============================================================
+   RESET BÁSICO + BOX-SIZING
+   =============================================================== */
+*,
+
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===============================================================
+   PALETA & TOKENS
+   =============================================================== */
+:root {
+  /* Fundo geral e camadas */
+  --bg-main: #383434;         /* página */
+  --bg-layer: #242424;        /* cards */
+  --bg-input: #2a2a2a;        /* campos dentro dos cards */
+  --bg-input-focus: #373232;
+
+  --bg-container-child: #677480;
+  --bg-container: #515e6c;
+
+  /* Acentos */
+  --accent: #3a89b7;          /* primário */
+  --accent-light: #60a4cf;    /* hover/ativo */
+  --accent-dark: #2c6a8c;     /* press */
+
+  /* Texto e borda */
+  --text-main: #ffffff;
+  --text-muted: #bdbdbd;
+  --border-color: #6c6c6c;
+
+  /* Estados */
+  --danger: #ff5252;
+  --success: #4caf50;
+  --radius: 8px;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  --transition: .2s ease;
+}
+
+/* ===============================================================
+   BASE TYPOGRAPHY & BODY
+   =============================================================== */
+body {
+  background: var(--bg-main);
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===============================================================
+   WRAPPER
+   =============================================================== */
+.form-wrapper {
+  max-width: 760px;
+  margin: 2.5rem auto;
+  padding: 0 1rem;
+}
+
+/* ===============================================================
+   CARDS (cabeçalho + pergunta)
+   =============================================================== */
+.cabecalho-card,
+.pergunta-card {
+  background: var(--bg-layer);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  padding: 24px;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.pergunta-card:hover,
+.pergunta-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.cabecalho-card {
+  padding: 32px 24px 28px;
+  border-top: 10px solid var(--accent);
+}
+
+.cabecalho-card h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: .75rem;
+}
+
+.cabecalho-card .form-descricao {
+  color: var(--text-muted);
+  white-space: pre-wrap;
+}
+
+/* ===============================================================
+   ESTRUTURA DA PERGUNTA (HEADER, BODY, AJUDA)
+   =============================================================== */
+.pergunta-header label {
+  font-size: 1rem;
+  font-weight: 500;
+  display: inline-block;
+  /* Garante que o display seja bloco para margin funcionar */
+}
+
+.asterisk {
+  color: var(--danger);
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.texto-ajuda {
+  display: block;
+  /* Garante que fique em uma nova linha */
+  color: var(--text-muted);
+  font-size: .8rem;
+  font-weight: 400;
+  margin-top: 6px;
+  /* Espaçamento entre o rótulo e a ajuda */
+}
+
+.pergunta-body {
+  margin-top: 12px;
+  /* Espaço consistente entre o header e o campo de input */
+}
+
+
+/* ===============================================================
+   CAMPOS DE TEXTO / SELECT / FILE
+   =============================================================== */
+.input-texto,
+.input-select,
+.input-file {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid #444;
+  color: var(--text-main);
+  padding: .55rem .8rem;
+  border-radius: .55rem;
+  transition: border .2s, box-shadow .2s;
+}
+
+.input-texto::placeholder {
+  color: var(--text-muted);
+}
+
+/* Melhoria no foco para acessibilidade */
+.input-texto:focus,
+.input-select:focus {
+  outline: none;
+  border-color: var(--accent-light);
+  background-color: var(--bg-input-focus);
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+  /* Anel de foco */
+}
+
+/* Estilização específica do <input type="file"> */
+.input-file {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.input-file::file-selector-button {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: .8rem;
+  font-weight: 500;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.input-file::file-selector-button:hover {
+  background-color: var(--accent-dark);
+}
+
+/* ===============================================================
+   TEXTAREA
+   =============================================================== */
+textarea.input-texto {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ===============================================================
+   RADIO & CHECKBOX CUSTOMIZADOS
+   =============================================================== */
+.options-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.option input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  /* Previne que o input encolha */
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-input);
+  margin: 0;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+/* Radio redondo / Checkbox quadrado */
+.options-block.radios .option input {
+  border-radius: 50%;
+}
+
+.options-block.checks .option input {
+  border-radius: 4px;
+}
+
+/* Estado :checked */
+.option input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Marcador interno (ponto para radio, V para checkbox) */
+.option input:checked::after {
+  content: "";
+  position: absolute;
+  display: block;
+}
+
+/* Ponto para Radio */
+.options-block.radios .option input:checked::after {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* V para Checkbox */
+.options-block.checks .option input:checked::after {
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* ===============================================================
+   ESCALA 1–10 (melhor layout + acessibilidade)
+   =============================================================== */
+:root{
+  --scale-size: 26px;     /* diâmetro do radio */
+  --scale-gap-y: .5rem;   /* espaço entre número e bolinha */
+}
+
+.options-block.escala{
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0,1fr));
+  gap: .35rem 8px;
+  align-items: center;
+  position: relative;
+  padding: 1rem .25rem .75rem;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+
+
+.options-block.escala .option{
+  display: flex;
+  flex-direction: column-reverse; /* número acima */
+  align-items: center;
+  justify-content: center;
+  gap: var(--scale-gap-y);
+  text-align: center;
+  cursor: pointer;
+}
+
+.options-block.escala .scale-num{
+  font-size: .9rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums; /* alinhamento uniforme */
+  line-height: 1;
+}
+
+/* bolinha maior + melhor foco/hover */
+.options-block.escala .option input{
+  appearance: none;
+  -webkit-appearance: none;
+  width: var(--scale-size);
+  height: var(--scale-size);
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background: var(--bg-input);
+  margin: 0;
+  position: relative;
+  transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.options-block.escala .option input:hover{
+  box-shadow: 0 0 0 4px rgba(96,164,207,.25);
+  border-color: var(--accent-light);
+}
+
+.options-block.escala .option input:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96,164,207,.35);
+}
+
+/* selecionado */
+.options-block.escala .option input:checked{
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(.98);
+}
+.options-block.escala .option input:checked::after{
+  content: "";
+  position: absolute;
+  width: 10px; height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* realça número do valor escolhido */
+.options-block.escala .option input:checked + .scale-num{
+  color: #fff;
+  font-weight: 600;
+}
+
+/* responsivo: quebra em 2 linhas no mobile */
+@media (max-width: 640px){
+  .options-block.escala{
+    grid-template-columns: repeat(5, minmax(0,1fr));
+  }
+}
+
+/* ===============================================================
+   BOTÕES
+   =============================================================== */
+.btn-group {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 2rem;
+}
+
+.btn-primario {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  font-weight: 600;
+  font-size: .95rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.btn-primario:hover {
+  background: var(--accent-light);
+}
+
+.btn-primario:active {
+  background: var(--accent-dark);
+  transform: scale(.97);
+}
+
+.btn-primario:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+/* ===============================================================
+   LEGENDA CUSTOM DOS GRÁFICOS (aba de respostas isolada)
+   =============================================================== */
+#aba-respostas .legend-col {
+  color: #fff;
+}
+
+#aba-respostas .legend-list {
+  list-style: none;
+  margin: 0;
+  padding: .25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+#aba-respostas .legend-list li {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+#aba-respostas .legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, .25);
+}
+
+#aba-respostas .legend-text {
+  color: #fff;
+}
+
+#aba-respostas .legend-text strong {
+  color: #fff;
+}
+
+/* ===============================================================
+   RESPONSIVO
+   =============================================================== */
+@media (max-width: 600px) {
+  body {
+    font-size: 15px;
+  }
+
+  .cabecalho-card h1 {
+    font-size: 1.6rem;
+  }
+}
+
+/* ===============================================================
+   ESTADOS DE ERRO (validação)
+   =============================================================== */
+.has-error {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 1px rgba(255, 77, 79, .25), var(--shadow);
+}
+
+.has-error .pergunta-header label,
+.has-error .texto-ajuda {
+  color: #ffb8b8;
+}
+
+.has-error .input-texto,
+.has-error .input-select,
+.has-error .input-file {
+  border-color: #ff4d4f !important;
+  background-color: #2b2323;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, .18);
+}
+
+.field-errors {
+  list-style: disc;
+  margin: .5rem 0 0 1.25rem;
+  color: #ff9191;
+  line-height: 1.35;
+  font-size: .9rem;
+}
+
+.options-block[aria-invalid="true"] .option input {
+  border-color: #ff4d4f;
+}
+
+
+/* ====================
+
+   TEMA CLARO PARTIALS
+
+   ==================== */
+
+
+
+body.light-theme .options-block.escala .option input{
+background: var(--bg-container);
+
+}
+
+body.light-theme .options-block.escala {
+ border-top: 1px solid #a3a1a1;
+ border-bottom: 1px solid #a3a1a1; 
+}
+
+
+body.light-theme .cabecalho-card {
+  background-color: var(--bg-container-child);
+}
+
+body.light-theme .cabecalho-card h1{
+  color: #fff;
+}
+
+body.light-theme .pergunta-card {
+  background-color: var(--bg-container-child);
+}
+
+body.light-theme .pergunta-card input{
+  background-color: var(--bg-container);
+}
+
+body.light-theme .pergunta-card textarea{
+  background-color: var(--bg-container);
+}
+
+body.light-theme .pergunta-card select{
+  background-color: var(--bg-container);
+}
+
+body.light-theme .pergunta-card label{
+  color: #fff;
+}
+
+body.light-theme .texto-ajuda {
+  color: #fff;
+}
+
+body.light-theme .top-row {
+  background-color: #4caf50;
+}

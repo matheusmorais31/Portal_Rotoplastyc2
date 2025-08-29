@@ -1,0 +1,539 @@
+{% load static %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/responder.css' %}">
+
+<div class="form-card" id="aba-respostas" data-has-charts="1">
+  <!-- CSRF helper -->
+  <form id="csrf-helper" style="display:none">{% csrf_token %}</form>
+
+  <!-- Cabeçalho / ações -->
+  <div class="cabecalho-card responses-top">
+    <div class="top-row">
+      <div>
+        <h1 style="margin-bottom:.25rem">{{ total_filtrado }} respostas</h1>
+        <p class="form-descricao">Últimas 24h: {{ ult_24h }}</p>
+      </div>
+      <div class="top-actions">
+        <span class="toggle-status">
+          Aceitando respostas:
+          {% if formulario.aceita_respostas %}
+            <span class="badge badge-ok">Sim</span>
+          {% else %}
+            <span class="badge badge-stop">Não</span>
+          {% endif %}
+        </span>
+        <button
+          type="button"
+          id="btn-toggle-filtros"
+          class="chip chip-ghost"
+          hx-on="click: document.getElementById('filtros-resps').classList.toggle('hidden')">
+          Filtros
+        </button>
+      </div>
+    </div>
+
+    <!-- Abas -->
+    <div class="tabs">
+      <button class="tab active" type="button" data-target="tab-resumo">Resumo</button>
+      <button class="tab" type="button" data-target="tab-pergunta">Pergunta</button>
+      <button class="tab" type="button" data-target="tab-individual">Individual</button>
+    </div>
+
+    <!-- Filtros compactos -->
+    <form id="filtros-resps"
+          class="filters-panel hidden"
+          hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
+          hx-target="#resp-section"
+          hx-swap="innerHTML"
+          hx-trigger="change, keyup changed delay:450 from:.auto">
+
+      <div class="filters-grid">
+        <div class="f-item grow">
+          <label>Busca</label>
+          <input class="auto input-texto" type="text" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="texto, usuário, IP ou #ID">
+        </div>
+        <div class="f-item">
+          <label>De</label>
+          <input class="auto input-texto" type="date" name="de" value="{{ request.GET.de|default_if_none:'' }}">
+        </div>
+        <div class="f-item">
+          <label>Até</label>
+          <input class="auto input-texto" type="date" name="ate" value="{{ request.GET.ate|default_if_none:'' }}">
+        </div>
+        <div class="f-item">
+          <label>Anexos</label>
+          <select class="auto input-select" name="tem_anexo">
+            <option value="" {% if not request.GET.tem_anexo %}selected{% endif %}>Todos</option>
+            <option value="s" {% if request.GET.tem_anexo == 's' %}selected{% endif %}>Com anexos</option>
+            <option value="n" {% if request.GET.tem_anexo == 'n' %}selected{% endif %}>Sem anexos</option>
+          </select>
+        </div>
+
+        <div class="f-item">
+          <label>Ordenar</label>
+          <select class="auto input-select" name="ord">
+            <option value="-enviado_em" {% if request.GET.ord|default:'-enviado_em' == '-enviado_em' %}selected{% endif %}>Mais recentes</option>
+            <option value="enviado_em"  {% if request.GET.ord == 'enviado_em' %}selected{% endif %}>Mais antigas</option>
+            <option value="-id"         {% if request.GET.ord == '-id' %}selected{% endif %}>ID desc</option>
+            <option value="id"          {% if request.GET.ord == 'id' %}selected{% endif %}>ID asc</option>
+          </select>
+        </div>
+        <div class="f-item">
+          <label>Por página</label>
+          <select class="auto input-select" name="pp">
+            {% for n in page_size_options %}
+              <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="f-item">
+          <label>Campo</label>
+          <select class="auto input-select" name="campo">
+            <option value="">(opcional)</option>
+            {% for c in formulario.campos.all %}
+              <option value="{{ c.id }}" {% if request.GET.campo|default_if_none:'' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.ordem }}. {{ c.rotulo }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="f-item">
+          <label>Valor contém</label>
+          <input class="auto input-texto" type="text" name="valor" value="{{ request.GET.valor|default_if_none:'' }}" placeholder="conteúdo do campo escolhido">
+        </div>
+
+        <div class="f-item actions">
+          <a class="btn-primario {% if not total_filtrado %}btn-disabled{% endif %}"
+             {% if total_filtrado %}href="{% url 'formularios:exportar_respostas_csv' formulario.pk %}?{{ request.GET.urlencode }}"{% endif %}>Exportar CSV</a>
+          <a class="btn-secundario {% if not total_filtrado %}btn-disabled{% endif %}"
+             {% if total_filtrado %}href="{% url 'formularios:exportar_anexos_zip' formulario.pk %}?{{ request.GET.urlencode }}"{% endif %}>Baixar anexos</a>
+          {# botão Excluir selecionadas removido #}
+        </div>
+      </div>
+
+      <div class="quick-range">
+        <span>Atalhos:</span>
+        <button type="button" class="chip chip-ghost" data-range="today">Hoje</button>
+        <button type="button" class="chip chip-ghost" data-range="7d">Últimos 7 dias</button>
+        <button type="button" class="chip chip-ghost" data-range="30d">Últimos 30 dias</button>
+        <a class="chip chip-clear"
+           hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
+           hx-target="#resp-section"
+           hx-swap="innerHTML">Limpar</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- CONTEÚDO DAS ABAS -->
+  <div class="tabs-content">
+
+    <!-- ========== RESUMO ========== -->
+    <section id="tab-resumo" class="tab-pane active">
+      {% for c in campos_resumo %}
+        {% if c.tipo in "multipla checkbox lista escala" %}
+          <div class="pergunta-card {% if not c.ativo %}is-archived{% endif %}" data-campo-id="{{ c.id }}">
+            <div class="card-title-row">
+              <h3>
+                {{ c.ordem }}. {{ c.rotulo }}
+                {% if not c.ativo %}<span class="badge badge-stop">Deletado</span>{% endif %}
+                <small class="texto-ajuda" id="m-{{ c.id }}"></small>
+              </h3>
+              <button type="button" class="link-btn" data-copy="#chart-{{ c.id }}">Copiar gráfico</button>
+            </div>
+
+            <div class="chart-row">
+              <div class="chart-area">
+                <canvas id="chart-{{ c.id }}"
+                        data-kind="{% if c.tipo == 'escala' %}scale{% else %}choice{% endif %}"
+                        data-tipo="{{ c.tipo }}"></canvas>
+              </div>
+              <div class="legend-col" id="legend-{{ c.id }}"></div>
+            </div>
+          </div>
+
+        {% elif c.tipo != "arquivo" %}
+          <!-- TEXTO LIVRE -->
+          <div class="pergunta-card {% if not c.ativo %}is-archived{% endif %}" data-campo-id="{{ c.id }}">
+            <div class="card-title-row">
+              <h3>
+                {{ c.ordem }}. {{ c.rotulo }}
+                {% if not c.ativo %}<span class="badge badge-stop">Deletado</span>{% endif %}
+              </h3>
+              <span class="muted">{{ c.text_count|default:0 }} respostas</span>
+            </div>
+
+            {% if c.text_vals %}
+              <ul class="text-list">
+                {% for t in c.text_vals %}
+                  <li class="text-item">{{ t }}</li>
+                {% endfor %}
+              </ul>
+              {% if c.text_count > c.text_vals|length %}
+                <p class="texto-ajuda muted" style="margin-top:.4rem">
+                  Mostrando {{ c.text_vals|length }} de {{ c.text_count }} respostas.
+                  Refine os filtros para ver mais.
+                </p>
+              {% endif %}
+            {% else %}
+              <p class="texto-ajuda muted">Sem respostas.</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      {% if not campos_resumo %}
+        <p class="texto-ajuda">Nenhuma pergunta configurada.</p>
+      {% endif %}
+    </section>
+
+    <!-- ========== PERGUNTA ========== -->
+    <section id="tab-pergunta" class="tab-pane">
+      <div class="pergunta-card">
+        <div class="card-title-row">
+          <h3 id="titulo-pergunta">Por pergunta</h3>
+          <div class="right" style="display:flex;gap:.5rem;align-items:center">
+            <select id="sel-campo-choices" class="input-select"></select>
+            <button type="button" class="link-btn" data-copy="#chart-choices-q">Copiar gráfico</button>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-area">
+            <canvas id="chart-choices-q"></canvas>
+          </div>
+          <div class="legend-col" id="legend-q"></div>
+        </div>
+
+        <p class="texto-ajuda" id="msg-sem-grafico" style="display:none;margin-top:.75rem">
+          Selecione um campo do tipo múltipla/checkbox/lista ou escala para visualizar.
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== INDIVIDUAL ========== -->
+    <section id="tab-individual" class="tab-pane">
+      {% if qs_page.object_list %}
+        {% for r in qs_page.object_list %}
+          <div class="pergunta-card resp-card" data-id="{{ r.id }}">
+            <div class="card-title-row">
+              <h3>#{{ r.id }} — {{ r.enviado_em|date:"d/m/Y H:i" }}</h3>
+              <a class="btn-secundario" href="{% url 'formularios:detalhe_resposta' r.pk %}" target="_blank" rel="noopener">Abrir</a>
+            </div>
+            <ul class="preview-ul">
+              {% for v in r.valores.all %}
+                <li><em>{% if v.campo %}{{ v.campo.rotulo }}{% else %}(Pergunta removida){% endif %}:</em>
+                  {% if v.valor_arquivo %}
+                    <span class="file-pill">arquivo</span>
+                  {% else %}
+                    {{ v.valor_texto|default:"—" }}
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+
+        {% if qs_page.paginator.num_pages > 1 %}
+        <div class="paginacao">
+          {% with start=qs_page.start_index end=qs_page.end_index %}
+            <span class="range">Mostrando {{ start }}–{{ end }} de {{ qs_page.paginator.count }}</span>
+          {% endwith %}
+          <div class="pager-btns">
+            {% if qs_page.has_previous %}
+              <a class="pager"
+                 hx-get="{% url 'formularios:aba_respostas' formulario.pk %}?page={{ qs_page.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}"
+                 hx-target="#resp-section" hx-swap="innerHTML">« Anterior</a>
+            {% endif %}
+            {% if qs_page.has_next %}
+              <a class="pager"
+                 hx-get="{% url 'formularios:aba_respostas' formulario.pk %}?page={{ qs_page.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}"
+                 hx-target="#resp-section" hx-swap="innerHTML">Próxima »</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="pergunta-card empty-state">
+          <p>Nenhuma resposta com os filtros atuais.</p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  {# JSON para gráficos #}
+  <script id="data-choices" type="application/json">
+  {
+    {% for k, rows in dist_por_campo.items %}
+      "{{ k }}": {
+        "rotulo": "{% for c in formulario.campos.all %}{% if c.id == k %}{{ c.rotulo|escapejs }}{% endif %}{% endfor %}",
+        "rows": [
+          {% for row in rows %}
+            {"label": "{{ row.valor_texto|default:'(vazio)'|escapejs }}", "count": {{ row.qtd }} }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ]
+      }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  }
+  </script>
+
+  <script id="data-escala-dist" type="application/json">
+  {
+    {% for k, rows in dist_escala_por_campo.items %}
+      "{{ k }}": [
+        {% for row in rows %}
+          {"valor": "{{ row.valor|escapejs }}", "qtd": {{ row.qtd|default:0 }} }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  }
+  </script>
+
+  <script id="data-escalas-media" type="application/json">
+  {
+    {% for k, media in medias_escala.items %}
+      "{{ k }}": {{ media|default:0 }}{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  }
+  </script>
+</div>
+
+<!-- Inicialização: usa o init do builder se existir; senão, fallback mínimo + cópia com fallback -->
+<script>
+(function(){
+  const root = document.getElementById('aba-respostas');
+  if (!root) return;
+
+  // ------- util exposta: builder pode chamar também -------
+  window.setupCopyButtonsClipboardFallback = function(scope){
+    scope = scope || document;
+    function canvasToBlob(canvas) {
+      return new Promise((resolve) => {
+        if (canvas.toBlob) return canvas.toBlob(resolve, 'image/png');
+        const dataURL = canvas.toDataURL('image/png');
+        fetch(dataURL).then(r => r.blob()).then(resolve);
+      });
+    }
+    async function copyCanvasOrDownload(canvas, filename){
+      try{
+        const blob = await canvasToBlob(canvas);
+        if (window.isSecureContext && navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+          alert('Copiado para a área de transferência!');
+          return;
+        }
+        throw new Error('clipboard-not-available');
+      }catch(e){
+        try{
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = filename || 'grafico.png';
+          document.body.appendChild(a); a.click(); a.remove();
+          alert('Não foi possível copiar. Baixei o PNG.');
+        }catch{ alert('Não foi possível copiar.'); }
+      }
+    }
+    scope.querySelectorAll('.link-btn[data-copy]').forEach(btn=>{
+      if (btn._copyBound) return;
+      btn._copyBound = true;
+      btn.addEventListener('click', ()=>{
+        const sel = btn.getAttribute('data-copy');
+        const cv  = scope.querySelector(sel);
+        if (!cv) { alert('Canvas não encontrado.'); return; }
+        const name = (btn.dataset.filename || 'grafico') + '.png';
+        copyCanvasOrDownload(cv, name);
+      });
+    });
+  };
+
+  if (window.initAbaRespostas) {
+    // o builder fará init completo; garantimos apenas o fallback de cópia
+    window.setupCopyButtonsClipboardFallback(root);
+    window.initAbaRespostas(root);
+    return;
+  }
+
+  // --- Fallback simples (para acesso direto a esta página sem o builder) ---
+  function setupTabs(){
+    const tabs = root.querySelectorAll('.tab');
+    const panes = root.querySelectorAll('.tab-pane');
+    tabs.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        tabs.forEach(b=>b.classList.remove('active'));
+        panes.forEach(p=>p.classList.remove('active'));
+        btn.classList.add('active');
+        root.querySelector('#'+btn.dataset.target).classList.add('active');
+      });
+    });
+  }
+  function setupFilters(){
+    const panel = root.querySelector('#filtros-resps');
+    const de  = panel?.querySelector('input[name="de"]');
+    const ate = panel?.querySelector('input[name="ate"]');
+    function fmt(d){ return d.toISOString().slice(0,10); }
+    panel?.querySelectorAll('.quick-range .chip[data-range]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const n = new Date(), r=b.dataset.range;
+        if(r==='today'){ de.value=fmt(n); ate.value=fmt(n); }
+        else if(r==='7d'){ const d=new Date(n); d.setDate(n.getDate()-6); de.value=fmt(d); ate.value=fmt(n); }
+        else if(r==='30d'){ const d=new Date(n); d.setDate(n.getDate()-29); de.value=fmt(d); ate.value=fmt(n); }
+        panel.dispatchEvent(new Event('change',{bubbles:true}));
+      });
+    });
+  }
+  function parseJSON(id){ try{ return JSON.parse(document.getElementById(id)?.textContent||''); }catch{ return null; } }
+
+  const CH = 260; // altura compacta
+  const PALETTE = ["#4aa3ff","#ff6b8a","#ffa143","#f4c04d","#7bd8a4","#b98bff","#6ed0fb","#ff8f5e","#9fe17d","#e0b3ff"];
+
+  function doughnutOptions(){ return {
+    responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#2a2a2a',titleColor:'#fff',bodyColor:'#fff',
+      callbacks:{label(c){ const v=c.raw??0; const t=c.dataset.data.reduce((a,b)=>a+(+b||0),0)||0; const p=t?(v*100/t).toFixed(1).replace('.0',''):0; return `${c.label}: ${v} (${p}%)`;}}}}
+  }; }
+  function barOptions(){ return {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    scales:{ x:{ beginAtZero:true, ticks:{ color:'#e8e8e8', precision:0 }, grid:{ color:'#4444' } },
+            y:{ ticks:{ color:'#e8e8e8' }, grid:{ color:'#4444' } } },
+    plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#2a2a2a',titleColor:'#fff',bodyColor:'#fff',
+      callbacks:{label(c){ const v=c.raw??0; const t=c.dataset.data.reduce((a,b)=>a+(+b||0),0)||0; const p=t?(v*100/t).toFixed(1).replace('.0',''):0; return `${c.label}: ${v} (${p}%)`;}}}}
+  }; }
+
+  function renderLegend(holder, labels, values, colors){
+    if(!holder) return;
+    const tot = values.reduce((a,b)=>a+(+b||0),0) || 0;
+    let html = '<ul class="legend-list">';
+    labels.forEach((lb, i)=>{
+      const v = +values[i] || 0;
+      const pct = tot ? ((v*100/tot).toFixed(1).replace('.0','')) : 0;
+      html += `<li><span class="legend-swatch" style="background:${colors[i]}"></span>
+               <span class="legend-text">${lb || '(vazio)'}: <strong>${v}</strong> • ${pct}%</span></li>`;
+    });
+    html += '</ul>';
+    holder.innerHTML = html;
+  }
+
+  function setH(el){ el.style.height = CH+'px'; el.style.maxHeight = CH+'px'; }
+
+  function draw(){
+    const choicesData = parseJSON('data-choices') || {};
+    const scaleDist   = parseJSON('data-escala-dist') || {};
+    const scaleAvg    = parseJSON('data-escalas-media') || {};
+
+    // carrega Chart.js se preciso
+    const ensure = () => window.Chart ? Promise.resolve() : new Promise((ok,err)=>{ const s=document.createElement('script'); s.src="https://cdn.jsdelivr.net/npm/chart.js@4"; s.onload=ok; s.onerror=err; document.head.appendChild(s); });
+
+    ensure().then(()=>{
+      // textos brancos no tema escuro
+      Chart.defaults.color = '#fff';
+      Chart.defaults.plugins.legend.labels.color = '#fff';
+      Chart.defaults.plugins.tooltip.titleColor = '#fff';
+      Chart.defaults.plugins.tooltip.bodyColor  = '#fff';
+
+      root.querySelectorAll('#tab-resumo canvas[data-kind]').forEach(cv=>{
+        setH(cv);
+        const fid  = cv.id.replace('chart-','');
+        const tipo = cv.dataset.tipo;
+        const legendHolder = document.getElementById(`legend-${fid}`);
+        if(cv.dataset.kind === 'choice'){
+          const rows = (choicesData?.[fid]?.rows)||[];
+          const labels = rows.map(r=>r.label);
+          const values = rows.map(r=>r.count);
+          const colors = labels.map((_,i)=>PALETTE[i%PALETTE.length]);
+          new Chart(cv, {
+            type: (tipo==='checkbox') ? 'bar' : 'doughnut',
+            data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderColor:'#222', borderWidth:1 }] },
+            options: (tipo==='checkbox') ? barOptions() : doughnutOptions()
+          });
+          renderLegend(legendHolder, labels, values, colors);
+        }else{
+          const dist = scaleDist?.[fid] || [];
+          const labels = dist.map(r=>r.valor);
+          const values = dist.map(r=>r.qtd||0);
+          const colors = labels.map((_,i)=>PALETTE[i%PALETTE.length]);
+          new Chart(cv, {
+            type:'bar',
+            data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderColor:'#222', borderWidth:1 }] },
+            options: barOptions()
+          });
+          renderLegend(legendHolder, labels, values, colors);
+          const avg = scaleAvg?.[fid];
+          const holder = document.getElementById(`m-${fid}`);
+          if(holder && typeof avg === 'number'){ holder.textContent = `• média: ${avg}`; }
+        }
+      });
+
+      // Select da aba "Pergunta"
+      const sel = root.querySelector('#sel-campo-choices');
+      const chartTarget = root.querySelector('#chart-choices-q');
+      const legendQ = root.querySelector('#legend-q');
+      const msg = root.querySelector('#msg-sem-grafico');
+      const titulo = root.querySelector('#titulo-pergunta');
+      if(!sel) return;
+
+      sel.innerHTML = '';
+      for(const k in choicesData){
+        const opt = document.createElement('option');
+        opt.value = `choice:${k}`;
+        opt.textContent = choicesData[k]?.rotulo || `Campo ${k}`;
+        sel.appendChild(opt);
+      }
+      for(const k in scaleDist){
+        const opt = document.createElement('option');
+        opt.value = `scale:${k}`;
+        opt.textContent = (root.querySelector(`[data-campo-id="${k}"] h3`)?.childNodes?.[0]?.nodeValue?.trim() || `Campo ${k}`) + ' (escala)';
+        sel.appendChild(opt);
+      }
+      if(!sel.options.length){ msg.style.display='block'; return; }
+
+      let single = null;
+      sel.addEventListener('change', ()=>{
+        single?.destroy?.();
+        legendQ.innerHTML = '';
+        setH(chartTarget);
+        const [kind, fid] = sel.value.split(':');
+        if(kind==='choice'){
+          const rows = choicesData?.[fid]?.rows || [];
+          const labels = rows.map(r=>r.label);
+          const values = rows.map(r=>r.count);
+          const colors = labels.map((_,i)=>PALETTE[i%PALETTE.length]);
+          single = new Chart(chartTarget, {
+            type:'doughnut',
+            data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderColor:'#222', borderWidth:1 }] },
+            options: doughnutOptions()
+          });
+          renderLegend(legendQ, labels, values, colors);
+          titulo.textContent = choicesData?.[fid]?.rotulo || 'Por pergunta';
+        }else{
+          const dist = scaleDist?.[fid] || [];
+          const labels = dist.map(r=>r.valor);
+          const values = dist.map(r=>r.qtd||0);
+          const colors = labels.map((_,i)=>PALETTE[i%PALETTE.length]);
+          single = new Chart(chartTarget, {
+            type:'bar',
+            data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderColor:'#222', borderWidth:1 }] },
+            options: barOptions()
+          });
+          renderLegend(legendQ, labels, values, colors);
+          titulo.textContent = `Escala — média: ${(parseJSON('data-escalas-media')?.[fid] ?? 0)}`;
+        }
+        msg.style.display='none';
+      });
+      sel.dispatchEvent(new Event('change'));
+    });
+
+  } // fim fallback
+
+  function init(){
+    setupTabs();
+    setupFilters();
+    window.setupCopyButtonsClipboardFallback(root); // copiar/baixar gráficos
+    draw();
+  }
+  init();
+
+  // rebind após swaps HTMX (paginador/filtros)
+  document.addEventListener('htmx:afterSwap', (e)=>{
+    if (e.target && e.target.id === 'resp-section'){
+      window.setupCopyButtonsClipboardFallback(e.target);
+    }
+  });
+})();
+</script>

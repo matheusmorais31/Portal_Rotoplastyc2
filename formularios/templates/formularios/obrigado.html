@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/obrigado.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="thanks-wrap" role="status" aria-live="polite">
+  <div class="thanks-card">
+    
+    <h1 class="thanks-title">Resposta enviada!</h1>
+    <p class="thanks-subtitle">
+      Obrigado por preencher <strong>{{ formulario.titulo }}</strong>.
+    </p>
+
+    <div class="thanks-actions">
+      <!-- Responder novamente -->
+      <a class="btn btn-primary" href="{% url 'formularios:exibir_formulario' formulario.pk %}">
+        Responder novamente
+      </a>
+
+      <!-- Ir para a lista de formulários -->
+      <a class="btn btn-ghost" href="{% url 'formularios:listar_meus' %}">
+        Ir para Lista de formulários
+      </a>
+    </div>
+
+    <p class="thanks-meta">
+      Nº da resposta: {{ resposta.pk }}
+      · Enviado em: {{ resposta.enviado_em|date:"d/m/Y H:i" }}
+    </p>
+  </div>
+</div>
+{% endblock %}

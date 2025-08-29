@@ -1,0 +1,117 @@
+/* obrigado.css – estilo exclusivo da página de "Obrigado"
+   Usa tokens caso existam (com fallback) para integrar com seu tema. */
+
+:root {
+  --bg-card: var(--bg-layer, #1f1f1f);
+  --bg-page: var(--bg-main, #121212);
+  --border:  var(--border-color, #303030);
+  --text:    var(--fg, #eaeaea);
+  --muted:   var(--fg-muted, #bdbdbd);
+  --accent:  var(--accent, #3a89bf);
+  --shadow:  0 6px 30px rgba(0,0,0,.25);
+}
+
+html, body {
+  background: var(--bg-page);
+}
+
+.thanks-wrap {
+  max-width: 880px;
+  margin: clamp(24px, 5vh, 56px) auto;
+  padding: 0 16px;
+}
+
+.thanks-card {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: clamp(20px, 3vw, 28px);
+  box-shadow: var(--shadow);
+}
+
+.thanks-icon {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.thanks-title {
+  font-size: clamp(22px, 2.2vw, 28px);
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.thanks-subtitle {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.thanks-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .04s ease, filter .2s ease, background-color .2s ease;
+  will-change: transform;
+  
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+    background: #2EC2D6;
+    color: #fff;
+}
+
+
+
+.btn-primario, .btn-ghost {
+    border: none;
+    text-decoration: none;
+    padding: .6rem 1.1rem;
+    border-radius: .55rem;
+    font-weight: 600;
+    transition: background .2s, transform .02s, box-shadow .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 38px;
+}
+
+.btn-ghost {
+    background: #555;
+    color: #fff;
+
+}
+
+.btn-primary:hover { background: #24a3b4; }
+
+
+.btn-ghost:hover {
+  background:#6b6b6b;
+}
+
+.thanks-meta {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+/* Layout compacto em telas menores */
+@media (max-width: 520px) {
+  .thanks-actions { flex-direction: column; }
+  .btn { width: 100%; }
+}

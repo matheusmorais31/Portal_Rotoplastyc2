@@ -2,7 +2,7 @@
 import logging
 from itertools import chain
 from collections import defaultdict
-
+from django.db.models import Q 
 # -------------------------- Bibliotecas 3rd‑party --------------------
 from ldap3 import Server, Connection, ALL
 
@@ -304,14 +304,32 @@ def excluir_grupo(request, grupo_id):
 
 
 # Função para buscar participantes (usuários) via AJAX
+
 @login_required
 def buscar_participantes(request):
-    query = request.GET.get('q', '')
-    if query:
-        usuarios = Usuario.objects.filter(username__icontains=query)
-        resultados = [{'id': usuario.id, 'username': usuario.username} for usuario in usuarios]
-    else:
-        resultados = []
+    q = (request.GET.get('q') or '').strip()
+    resultados = []
+    if q:
+        usuarios = (
+            Usuario.objects
+            .filter(
+                Q(ativo=True),           # seu flag de "ativo" (modelo custom)
+                Q(is_active=True),       # flag do Django (bom garantir os dois)
+                Q(username__icontains=q) |
+                Q(first_name__icontains=q) |
+                Q(last_name__icontains=q) |
+                Q(email__icontains=q)
+            )
+            .order_by('username')[:20]
+        )
+        resultados = [
+            {
+                'id': u.id,
+                'username': u.username,
+                'name': (u.get_full_name() or u.username),
+                'email': (u.email or ''),
+            } for u in usuarios
+        ]
     return JsonResponse(resultados, safe=False)
 
 # Função para sugerir usuários ou grupos conforme a busca

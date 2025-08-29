@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/responder.css' %}">
+{% endblock %}
+
+{% block content %}
+  {% include "formularios/partials/_responder_form.html" %}
+{% endblock %}

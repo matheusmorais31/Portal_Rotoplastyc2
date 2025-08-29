@@ -1,0 +1,6 @@
+<label for="campo_{{ campo.id }}">{{ campo.rotulo }}{% if campo.obrigatorio %}*{% endif %}</label>
+<input type="text"
+       id="campo_{{ campo.id }}"
+       name="{{ campo.id }}"
+       {% if campo.obrigatorio %}required{% endif %}
+       placeholder="{{ campo.ajuda }}">

@@ -1,0 +1,43 @@
+{# Fragmento carregado via HTMX dentro de #colabs-box #}
+
+<div class="pergunta-card">
+  <div class="pergunta-header"><label>Adicionar colaborador</label></div>
+  <div class="pergunta-body">
+    <form
+      id="form-add-colab"
+      hx-post="{% url 'formularios:add_colab' formulario.pk %}"
+      hx-target="#colabs-list"
+      hx-swap="outerHTML"
+      style="display:flex;flex-direction:column;gap:.75rem"
+    >
+      {% csrf_token %}
+
+      {# Busca + resultados (igual ao “selecionar manualmente”) #}
+      <div style="max-width:520px">
+        <input type="text" id="buscar_usuario_colab" class="input-texto"
+               placeholder="Buscar usuário (nome, login ou e-mail)"
+               autocomplete="off" aria-autocomplete="list">
+        <ul id="resultados_usuarios_colab"
+            class="list-group resultados-pesquisa"
+            style="margin-top:.5rem"></ul>
+      </div>
+
+
+      <input type="hidden" name="user_ref" id="user_ref_hidden">
+
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+        <label class="option"><input type="radio" name="role" value="edit" checked> Editor</label>
+        <label class="option"><input type="radio" name="role" value="view"> Somente responder</label>
+
+        <button type="submit" class="btn-primario btn-sm">Adicionar</button>
+        <small class="texto-ajuda">O acesso é liberado imediatamente (sem convite).</small>
+      </div>
+    </form>
+
+    {# URL da busca usada pelo JS #}
+    <input type="hidden" id="url_buscar_usuarios_colab" value="{% url 'usuarios:buscar_participantes' %}">
+  </div>
+</div>
+
+{# Lista de colaboradores #}
+{% include "formularios/partials/colabs_list.html" with formulario=formulario %}

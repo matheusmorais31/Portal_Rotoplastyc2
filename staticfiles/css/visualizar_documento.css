@@ -1,200 +1,130 @@
-/* ----- Estilos básicos (desktop) ----- */
-
-
-/* Container principal */
-.container-visualize {
-    width: 100%;
-    max-width: none;
-    background-color: rgba(17,16,16,0.44);
-    padding: 20px;
-    border-radius: 20px;
-    margin: 50px auto;
-    box-shadow: 0 0 4px rgba(0,0,0,0.3);
-    position: relative;
+/* ---------- Tokens ---------- */
+:root{
+  --container-pad: 20px;
+  --container-radius: 20px;
+  --container-shadow: 0 0 4px rgba(0,0,0,0.3);
+  --brand: #2EC2D6;
+  --brand-hover: #1EB2C1;
+  --divider: rgba(255,255,255,0.12);
 }
 
-/* Botão de Voltar */
-.back-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: #2EC2D6;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
-}
-.back-button:hover {
-    background-color: #1EB2C1;
-    box-shadow: 0 0 10px #2EC2D6;
+/* ---------- Layout geral ---------- */
+.container-visualize{
+  width: 100%;
+  max-width: none;
+  background: rgba(17,16,16,0.44);
+  padding: var(--container-pad);
+  border-radius: var(--container-radius);
+  margin: 32px auto;
+  box-shadow: var(--container-shadow);
+  position: relative;
+  color: #fff;
 }
 
-/* Título e textos */
-h1 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #fff;
-}
-p {
-    font-size: 16px;
-    margin: 6px 0;
+h1{ font-size: 28px; margin-bottom: 12px; }
+p{ margin: 6px 0; font-size: 16px; }
+.divider{
+  border: 0;
+  height: 1px;
+  background: var(--divider);
+  margin: 10px 0 14px;
 }
 
-/* Botões de ação */
-.button-container {
-    margin-bottom: 20px;
-    text-align: center;
+/* ---------- Botões ---------- */
+.button-container{
+  margin: 10px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  align-items: center;
 }
-.btn {
-    background-color: #2EC2D6;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 0 5px;
-    transition: background-color 0.3s, box-shadow 0.3s;
-}
-.btn:hover {
-    background-color: #1EB2C1;
-    box-shadow: 0 0 10px #2EC2D6;
+.viewer-controls{
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
 }
 
-/* Container fixo para Zoom e Instrução */
-.fixed-controls {
-    position: fixed;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(255, 0, 0, 0.519);
-    padding: 10px 15px;
+.btn{
+  background: var(--brand);
+  color: #fff;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color .2s, box-shadow .2s, transform .05s ease-in-out;
+}
+.btn:hover{ background: var(--brand-hover); box-shadow: 0 0 10px var(--brand); }
+.btn:active{ transform: translateY(1px); }
+
+/* Botão estilo "fantasma" para controles */
+.btn-ghost{
+  
+  background: var(--brand);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+
+/* ---------- Botão de voltar ---------- */
+.back-button{
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--brand);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 15px;
+  transition: background-color .2s, box-shadow .2s;
+  z-index: 3;
+}
+.back-button:hover{ background: var(--brand-hover); box-shadow: 0 0 10px var(--brand); }
+
+/* ---------- Wrapper do PDF.js (controla a ALTURA) ---------- */
+/* Altura grande por padrão (quase a janela toda) */
+.pdfjs-wrapper{
+  /* Fallback */
+  height: 900px;
+
+  /* Preferencial */
+  height: clamp(720px, 92dvh, 98dvh);
+
+  background: #0b0b0b;
+  border-radius: 12px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.pdfjs-iframe{
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #111;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 992px){
+  .container-visualize{ margin: 16px auto; }
+  .pdfjs-wrapper{ height: clamp(600px, 90dvh, 96dvh); }
+}
+
+@media (max-width: 768px){
+  .back-button{ display: none; }
+  .container-visualize{
+    margin: 0;
+    border-radius: 0;
+    padding: 12px;
+    box-shadow: none;
+    background: transparent;
+  }
+  .pdfjs-wrapper{
     border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 999999;
-    color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    height: clamp(520px, 92dvh, 98dvh);
+  }
 }
 
-.fixed-controls .zoom-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.fixed-controls .zoom-controls input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 120px;
-    height: 6px;
-    background: #2EC2D6;
-    border-radius: 5px;
-    outline: none;
-    opacity: 0.9;
-    transition: opacity .15s ease-in-out;
-}
-.fixed-controls .zoom-controls input[type="range"]:hover {
-    opacity: 1;
-}
-.fixed-controls .zoom-controls span {
-    font-size: 14px;
-    font-weight: bold;
-}
-
-/* PDF Container */
-.pdf-container {
-    width: 100%;
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0 0 6px rgba(0,0,0,0.5);
-    color: #000;
-    overflow-x: auto;
-}
-
-.pdf-container .pdf-message {
-    background-color: #fff;
-    border: 2px solid #2EC2D6;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 16px;
-    text-align: center;
-    font-weight: bold;
-    margin-top: 20px;
-}
-
-/* Canvas (cada página do PDF) */
-canvas {
-    display: block;
-    margin: 20px auto;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
-
-/* Camada de Texto (sobreposição) */
-.textLayer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    color: transparent;
-}
-.textLayer span {
-    position: absolute;
-    white-space: pre;
-    transform-origin: 0 0;
-    color: transparent;
-}
-
-/* ----- Responsivo para Mobile (max-width: 768px) ----- */
-@media (max-width: 768px) {
-
-    /* Esconde o botão de voltar (opcional) */
-    .back-button {
-        display: none;
-    }
-
-    /* Container ocupa toda a tela */
-    .container {
-        margin: 0;
-        padding: 0;
-        border-radius: 0;
-        box-shadow: none;
-        background-color: transparent;
-    }
-
-    /* PDF Container sem bordas extras */
-    .pdf-container {
-        border-radius: 0;
-        box-shadow: none;
-        padding: 0;
-    }
-
-    /* Canvas sem bordas */
-    canvas {
-        margin: 0 auto;
-        border: none;
-    }
-
-    /* Ajuste da Barra de Zoom para Mobile: fixa na parte inferior */
-    .fixed-controls {
-        top: auto;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.9);
-        padding: 8px 12px;
-        border-radius: 6px;
-        z-index: 999999;
-    }
-    .fixed-controls .zoom-controls input[type="range"] {
-        width: 100px;
-    }
+@media (max-width: 420px){
+  .pdfjs-wrapper{ height: clamp(460px, 94dvh, 98dvh); }
 }

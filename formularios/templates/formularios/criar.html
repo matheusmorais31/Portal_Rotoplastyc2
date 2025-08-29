@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Novo formulário{% endblock %}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/formularios.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="{% static 'formularios/js/formset-din.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <form method="post" novalidate
+        hx-post="{% url 'formularios:criar_formulario' %}"
+        hx-trigger="change from:#id_titulo"
+        hx-target="body"
+        hx-indicator="#save-indicator">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div id="edit-section">
+      <div class="campo-linha">
+        <label for="{{ form.titulo.id_for_label }}">Título do Formulário</label>
+        {{ form.titulo }}
+      </div>
+      <div class="campo-linha">
+        <label for="{{ form.descricao.id_for_label }}">Descrição (opcional)</label>
+        {{ form.descricao }}
+      </div>
+      <p class="text-muted" style="text-align: center; margin-top: 2rem;">
+        Digite um título e clique fora do campo para criar o formulário e começar a adicionar perguntas.
+      </p>
+    </div>
+    
+    <div class="btn-group">
+      <a href="{% url 'formularios:listar_meus' %}" class="btn-secundario">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<div id="save-indicator">Salvando...</div>
+{% endblock %}

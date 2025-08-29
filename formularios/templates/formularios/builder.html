@@ -1,0 +1,736 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar formulário{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/formularios.css' %}">
+<style>
+  /* Exibição simples de erros de campo (caso ainda não exista no seu CSS) */
+  .field-errors{color:#ff8c8c;margin:.35rem 0 0;list-style:disc;padding-left:1.1rem;font-size:.95rem}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+
+<!-- libs -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="{% static 'formularios/js/formset-din.js' %}"></script>
+
+<!-- Chart.js  -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+<script>
+  /* =====================  Chart.js defaults (tema escuro)  ===================== */
+  if (window.Chart) {
+    Chart.defaults.color = '#fff';
+    Chart.defaults.plugins.legend.labels.color = '#fff';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor  = '#fff';
+  }
+
+  /* =====================  Helpers de gráficos  ===================== */
+  const CHART_HEIGHT_PX = 260;
+  const DEFAULT_COLORS = [
+    "#4aa3ff","#ff6b8a","#ffa143","#f4c04d","#7bd8a4",
+    "#b98bff","#6ed0fb","#ff8f5e","#9fe17d","#e0b3ff"
+  ];
+  function setSmallChartHeight(canvas){
+    if(!canvas) return;
+    canvas.style.height    = CHART_HEIGHT_PX + 'px';
+    canvas.style.maxHeight = CHART_HEIGHT_PX + 'px';
+    if(canvas.parentElement){ canvas.parentElement.style.height = CHART_HEIGHT_PX + 'px'; }
+  }
+  function renderLegend(holder, labels, values, colors){
+    if(!holder) return;
+    const tot = (values||[]).reduce((a,b)=>a+(+b||0),0) || 0;
+    let html = '<ul class="legend-list">';
+    (labels||[]).forEach((lb, i)=>{
+      const v   = +values[i] || 0;
+      const pct = tot ? ((v*100/tot).toFixed(1).replace('.0','')) : 0;
+      html += `
+        <li>
+          <span class="legend-swatch" style="background:${colors[i]}"></span>
+          <span class="legend-text">${lb ?? '(vazio)'}: <strong>${v}</strong> • ${pct}%</span>
+        </li>`;
+    });
+    html += '</ul>';
+    holder.innerHTML = html;
+  }
+
+  /* ========================================================================
+     ABA RESPOSTAS – Inicializador (roda após o fragmento HTMX ser injetado)
+     ======================================================================== */
+  window.initAbaRespostas = function(root){
+    if(!root) return;
+
+    // Tabs internas (Resumo / Pergunta / Individual)
+    (function(){
+      const tabs  = root.querySelectorAll('.tab');
+      const panes = root.querySelectorAll('.tab-pane');
+      tabs.forEach(btn=>{
+        btn.setAttribute('type','button');
+        btn.addEventListener('click', (ev)=>{
+          ev.preventDefault();
+          tabs.forEach(b=>b.classList.remove('active'));
+          panes.forEach(p=>p.classList.remove('active'));
+          btn.classList.add('active');
+          root.querySelector('#'+btn.dataset.target).classList.add('active');
+        });
+      });
+    })();
+
+    // Painel de filtros (toggle + atalhos de data)
+    (function(){
+      const panel = root.querySelector('#filtros-resps');
+      const btn   = root.querySelector('#btn-toggle-filtros');
+      btn?.addEventListener('click', (e)=>{ e.preventDefault(); panel.classList.toggle('hidden'); });
+
+      const de  = panel?.querySelector('input[name="de"]');
+      const ate = panel?.querySelector('input[name="ate"]');
+      function fmt(d){ return d.toISOString().slice(0,10); }
+      panel?.querySelectorAll('.quick-range .chip[data-range]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const now = new Date();
+          const r = b.dataset.range;
+          if(r==='today'){ de.value=fmt(now); ate.value=fmt(now); }
+          else if(r==='7d'){ const d=new Date(now); d.setDate(now.getDate()-6); de.value=fmt(d); ate.value=fmt(now); }
+          else if(r==='30d'){ const d=new Date(now); d.setDate(now.getDate()-29); de.value=fmt(d); ate.value=fmt(now); }
+          panel.dispatchEvent(new Event('change',{bubbles:true}));
+        });
+      });
+    })();
+
+    // Utils
+    function parseJSONById(id){ try{ return JSON.parse(root.querySelector('#'+id)?.textContent||''); } catch{ return null; } }
+    function setupCopyButtons(){
+      root.querySelectorAll('[data-copy]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const canvas = root.querySelector(btn.getAttribute('data-copy'));
+          if(!canvas) return;
+          canvas.toBlob(async (blob)=>{
+            try{
+              await navigator.clipboard.write([new ClipboardItem({[blob.type]: blob})]);
+              btn.textContent = 'Copiado!';
+              setTimeout(()=>btn.textContent='Copiar gráfico',1200);
+            }catch{ alert('Não foi possível copiar.'); }
+          });
+        });
+      });
+    }
+
+    // Builders
+    function buildChoiceChart(canvas, rows, tipo, legendHolder){
+      if(!canvas) return null;
+      setSmallChartHeight(canvas);
+      const labels = rows.map(r => (r.label ?? '(vazio)'));
+      const values = rows.map(r => Number(r.count) || 0);
+      const isCheckbox = (tipo === 'checkbox');
+      const colors = labels.map((_,i)=> DEFAULT_COLORS[i % DEFAULT_COLORS.length]);
+      const chart = new Chart(canvas, {
+        type: isCheckbox ? 'bar' : 'doughnut',
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#222', borderWidth: 1, label: 'Respostas' }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: isCheckbox ? undefined : '62%', layout: { padding: 6 },
+          plugins: { legend: { display:false }, tooltip: { displayColors:false, titleColor:'#fff', bodyColor:'#fff', callbacks: { title: () => [], label: (ctx) => {
+            const label = ctx.label ?? ''; const value = Number(ctx.parsed) || 0;
+            if (!isCheckbox) { const arr = ctx.dataset.data || []; const sum = arr.reduce((a,b)=> a + (Number(b)||0), 0) || 1; const pct = ((value/sum) * 100).toFixed(1); return `${label}: ${value} (${pct}%)`; }
+            return `${label}: ${value}`; } } } },
+          scales: isCheckbox ? { y: { beginAtZero:true, ticks:{ color:'#fff', precision:0 } }, x: { ticks:{ color:'#fff' } } } : {}
+        }
+      });
+      renderLegend(legendHolder, labels, values, colors);
+      return chart;
+    }
+    function buildScaleChart(canvas, dist15, legendHolder){
+      if(!canvas) return null;
+      setSmallChartHeight(canvas);
+      const labels = dist15.map(r=>r.valor);
+      const values = dist15.map(r=>r.qtd || 0);
+      const colors = labels.map((_,i)=> DEFAULT_COLORS[i % DEFAULT_COLORS.length]);
+      const chart = new Chart(canvas, {
+        type:'bar',
+        data:{ labels, datasets:[{ data:values, label:'Respostas', backgroundColor: colors, borderColor: '#222', borderWidth:1 }] },
+        options:{ responsive:true, maintainAspectRatio:false, layout:{ padding:6 }, plugins:{ legend:{ display:false }, tooltip:{ titleColor:'#fff', bodyColor:'#fff' } }, scales:{ y:{ beginAtZero:true, ticks:{ color:'#fff', precision:0 } }, x:{ ticks:{ color:'#fff' } } } }
+      });
+      renderLegend(legendHolder, labels, values, colors);
+      return chart;
+    }
+
+    const choicesData = parseJSONById('data-choices')       || {};
+    const scaleDist   = parseJSONById('data-escala-dist')   || {};
+    const scaleAvg    = parseJSONById('data-escalas-media') || {};
+
+    // RESUMO – desenha todos os gráficos (um card por pergunta), com legenda HTML
+    root.querySelectorAll('#tab-resumo canvas[data-kind]').forEach(cv=>{
+      const fid  = cv.id.replace('chart-','');
+      const tipo = cv.dataset.tipo;
+      const legendHolder = root.querySelector(`#legend-${fid}`);
+      if(cv.dataset.kind === 'choice'){
+        const rows = (choicesData?.[fid]?.rows)||[];
+        buildChoiceChart(cv, rows, tipo, legendHolder);
+      }else{
+        const dist = scaleDist?.[fid] || [];
+        buildScaleChart(cv, dist, legendHolder);
+        const avg = scaleAvg?.[fid];
+        const holder = root.querySelector(`#m-${fid}`);
+        if(holder && typeof avg === 'number'){ holder.textContent = `• média: ${avg}`; }
+      }
+    });
+
+    // PERGUNTA – gráfico único trocando pelo select (também com legenda HTML)
+    (function(){
+      const sel         = root.querySelector('#sel-campo-choices');
+      const chartTarget = root.querySelector('#chart-choices-q');
+      const legendQ     = root.querySelector('#legend-q');
+      const msg         = root.querySelector('#msg-sem-grafico');
+      const titulo      = root.querySelector('#titulo-pergunta');
+      if(!sel) return;
+
+      sel.innerHTML = '';
+      for(const k in choicesData){
+        const r = choicesData[k];
+        const opt = document.createElement('option');
+        opt.value = `choice:${k}`; opt.textContent = r?.rotulo || `Campo ${k}`; sel.appendChild(opt);
+      }
+      for(const k in scaleDist){
+        const opt = document.createElement('option');
+        opt.value = `scale:${k}`;
+        const tituloCampo = (root.querySelector(`[data-campo-id="${k}"] h3`)?.childNodes?.[0]?.nodeValue?.trim() || `Campo ${k}`);
+        opt.textContent = `${tituloCampo} (escala)`; sel.appendChild(opt);
+      }
+
+      if(!sel.options.length){ msg.style.display='block'; return; }
+
+      let singleChart = null;
+      sel.addEventListener('change', ()=>{
+        singleChart?.destroy?.(); legendQ.innerHTML = '';
+        const [kind, fid] = sel.value.split(':');
+        if(kind === 'choice'){
+          const rows = (choicesData?.[fid]?.rows)||[];
+          singleChart = buildChoiceChart(chartTarget, rows, 'multipla', legendQ);
+          titulo.textContent = choicesData?.[fid]?.rotulo || 'Por pergunta';
+        }else{
+          const d = scaleDist?.[fid]||[];
+          singleChart = buildScaleChart(chartTarget, d, legendQ);
+          const media = scaleAvg?.[fid];
+          titulo.textContent = (typeof media === 'number') ? `Escala — média: ${media}` : 'Escala';
+        }
+        msg.style.display='none';
+      });
+      sel.dispatchEvent(new Event('change'));
+    })();
+
+    setupCopyButtons();
+  };
+
+  /* =====================  NAV BUILDER  ===================== */
+  function builderShowTab(tab){
+    const edit   = document.getElementById('edit-section');
+    const resp   = document.getElementById('resp-section');
+    const conf   = document.getElementById('conf-section');
+    const colabs = document.getElementById('colabs-section'); // mostra junto com Config
+
+    edit?.classList.add('hide');
+    resp?.classList.add('hide');
+    conf?.classList.add('hide');
+
+    if(tab === 'edit') edit?.classList.remove('hide');
+    if(tab === 'resp')  resp?.classList.remove('hide');
+    if(tab === 'conf') conf?.classList.remove('hide');
+
+    if(colabs){ colabs.classList.toggle('hide', tab !== 'conf'); }
+
+    document.querySelectorAll('.gform-toolbar .tb-link').forEach(a=>{
+      a.classList.toggle('active', a.dataset.tab === tab);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // habilita "Adicionar pergunta"
+    const addBtn = document.getElementById('btn-add-question');
+    if(addBtn) addBtn.disabled = false;
+
+    // navegação da toolbar
+    const respSection = document.getElementById('resp-section');
+    document.querySelectorAll('.gform-toolbar .tb-link').forEach(a=>{
+      a.addEventListener('click', (ev)=>{
+        const tab = a.dataset.tab; if(!tab) return;
+        if(tab === 'resp'){
+          if(respSection && respSection.children.length > 0){ ev.preventDefault(); builderShowTab('resp'); }
+        }else{ ev.preventDefault(); builderShowTab(tab); }
+      });
+    });
+
+    // estado inicial
+    builderShowTab('edit');
+
+    // quando HTMX injetar a aba de respostas / colaboradores
+    document.addEventListener('htmx:afterSwap', (e)=>{
+      if(e.target && e.target.id === 'resp-section'){
+        builderShowTab('resp');
+        const root = document.getElementById('aba-respostas');
+        if(root) window.initAbaRespostas(root);
+      }
+      if(e.target && e.target.id === 'colabs-box'){
+        initColabsBox(e.target);
+      }
+    });
+
+    // fallback: se a página já chegou com a aba carregada
+    const existingRoot = document.getElementById('aba-respostas');
+    if(existingRoot) window.initAbaRespostas(existingRoot);
+
+    // fallback: se colaboradores já veio renderizado
+    const existingColabs = document.getElementById('colabs-box');
+    if(existingColabs) initColabsBox(existingColabs);
+  });
+
+  /* =====================  Autosave do form-main  ===================== */
+  document.addEventListener('htmx:configRequest', (e)=>{
+    const elt = e.detail.elt;
+    if(elt && elt.id === 'form-main'){
+      const main = document.getElementById('form-main');
+      if(!main) return;
+      const fd = new FormData(main);
+      e.detail.parameters = Object.fromEntries(fd.entries());
+    }
+  });
+
+  /* =====================  Inicializador do fragmento COLABORADORES  ===================== */
+  function initColabsBox(root){
+    const form    = root.querySelector('#form-add-colab');
+    const inpBusca= root.querySelector('#buscar_usuario_colab');
+    const ulRes   = root.querySelector('#resultados_usuarios_colab');
+    const urlEl   = root.querySelector('#url_buscar_usuarios_colab');
+    const hidden  = root.querySelector('#user_ref_hidden');
+    if(!form || !inpBusca || !ulRes || !urlEl || !hidden) return;
+
+    function clear(){ ulRes.innerHTML=''; }
+
+    let t=null;
+    inpBusca.addEventListener('input', ()=>{
+      const q=(inpBusca.value||'').trim();
+      hidden.value='';
+      clearTimeout(t);
+      if(!q){ clear(); return; }
+      t=setTimeout(async ()=>{
+        try{
+          const u=new URL(urlEl.value, window.location.origin);
+          u.searchParams.set('q', q);
+          const r=await fetch(u,{headers:{'X-Requested-With':'XMLHttpRequest'}});
+          if(!r.ok) throw 0;
+          const data=await r.json();
+          clear();
+          if(!Array.isArray(data) || !data.length){
+            ulRes.innerHTML='<li class="list-group-item">Nenhum usuário encontrado.</li>';
+            return;
+          }
+          data.forEach(usuario=>{
+            const li=document.createElement('li');
+            li.className='list-group-item list-group-item-action';
+            li.dataset.id=usuario.id;
+            const nome=usuario.username||usuario.name||('ID '+usuario.id);
+            const email=usuario.email?` — ${usuario.email}`:'';
+            li.textContent=`${nome}${email}`;
+            ulRes.appendChild(li);
+          });
+        }catch(e){ clear(); }
+      },300);
+    });
+
+    ulRes.addEventListener('click',(e)=>{
+      const li=e.target.closest('li[data-id]');
+      if(!li) return;
+      hidden.value=String(li.dataset.id);
+      inpBusca.value=li.textContent;
+      clear();
+    });
+
+    form.addEventListener('submit',()=>{
+      if(!hidden.value && inpBusca.value){
+        hidden.value=inpBusca.value.trim();
+      }
+    });
+  }
+
+  /* =====================  Picker MANUAL (Home) – busca só usuários ativos  ===================== */
+  (function(){
+    const wrap   = document.getElementById('wrap-alvo-manual');
+    if(!wrap) return;
+
+    const input   = document.getElementById('buscar_usuario_manual');
+    const list    = document.getElementById('resultados_usuarios_manual');
+    const urlEl   = document.getElementById('url_buscar_usuarios_manual');
+    const tbody   = document.getElementById('alvo_usuarios_lista');
+    const hiddenC = document.getElementById('alvo_usuarios_hidden');
+    if(!input || !list || !urlEl || !tbody || !hiddenC) return;
+
+    const urlBase = urlEl.value;
+    const debounce = (fn,ms=350)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
+
+    function renderEmpty(msg){ list.innerHTML = `<li class="list-group-item">${msg}</li>`; }
+
+    async function doSearch(q){
+      if(!q){ list.innerHTML = ''; return; }
+      try{
+        const u = new URL(urlBase, window.location.origin);
+        u.searchParams.set('q', q);
+        const r = await fetch(u, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
+        if(!r.ok) throw 0;
+        const data = await r.json();
+        if(!Array.isArray(data) || data.length === 0){
+          renderEmpty('Nenhum usuário ativo encontrado.');
+          return;
+        }
+        list.innerHTML = '';
+        data.forEach(item=>{
+          const li = document.createElement('li');
+          li.className = 'list-group-item list-group-item-action';
+          li.dataset.id = item.id;
+          li.dataset.username = item.username;
+          li.innerHTML = `${item.name || item.username}${item.email ? ' <small class="muted">— ' + item.email + '</small>' : ''}`;
+          list.appendChild(li);
+        });
+      }catch(e){
+        renderEmpty('Erro ao buscar. Tente novamente.');
+      }
+    }
+
+    const debounced = debounce(()=> doSearch((input.value||'').trim()), 350);
+    input.addEventListener('input', debounced);
+
+    // Selecionar um resultado → adiciona na tabela + hidden e dispara autosave
+    list.addEventListener('click', (e)=>{
+      const li = e.target.closest('li[data-id]');
+      if(!li) return;
+      const id = String(li.dataset.id);
+
+      // Evita duplicados
+      if(tbody.querySelector(`tr[data-id="${id}"]`)){
+        list.innerHTML=''; input.value=''; return;
+      }
+
+      const tr = document.createElement('tr');
+      tr.dataset.id = id;
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td>${li.textContent}</td>
+        <td><button type="button" class="btn-danger btn-sm remover-usuario-manual">Remover</button></td>
+      `;
+      tbody.appendChild(tr);
+
+      const hid = document.createElement('input');
+      hid.type = 'hidden';
+      hid.name = 'alvo_usuarios';
+      hid.value = id;
+      hiddenC.appendChild(hid);
+
+      list.innerHTML = '';
+      input.value = '';
+
+      document.body.dispatchEvent(new Event('autosave'));
+    });
+
+    // Remover usuário da lista
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.remover-usuario-manual');
+      if(!btn) return;
+      const tr = btn.closest('tr[data-id]');
+      const id = tr?.dataset.id;
+      tr?.remove();
+      hiddenC.querySelectorAll(`input[name="alvo_usuarios"][value="${id}"]`).forEach(el=>el.remove());
+      document.body.dispatchEvent(new Event('autosave'));
+    });
+  })();
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="builder-wrapper">
+
+  <!-- ────────── TOOLBAR ────────── -->
+  <div class="gform-toolbar">
+    <div class="tb-group">
+      <a href="#" class="tb-link active" data-tab="edit">Editar</a>
+      <a class="tb-link"
+         data-tab="resp"
+         hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
+         hx-target="#resp-section"
+         hx-swap="innerHTML"
+         hx-trigger="click once">Ver respostas</a>
+      <a href="#" class="tb-link" data-tab="conf">Configurações</a>
+    </div>
+
+    <div class="tb-group">
+      <label class="toggle-label tb-toggle" title="Pausar/retomar recebimento">
+        Aceitando respostas
+        <input type="checkbox" {% if formulario.aceita_respostas %}checked{% endif %}>
+        <span class="toggle-custom"></span>
+      </label>
+
+      <a href="{% url 'formularios:exibir_formulario' formulario.pk %}"
+         target="_blank" class="tb-eye" title="Visualizar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- ────────── FORM PRINCIPAL ────────── -->
+  <form method="post" id="form-main"
+        hx-post="{% url 'formularios:construtor_formulario' formulario.pk %}"
+        hx-trigger="autosave from:body"
+        hx-swap="none"
+        hx-indicator="#save-indicator"
+        hx-include="#edit-section * , .header-card * , #conf-section input, #conf-section select, #conf-section textarea">
+    {% csrf_token %}
+
+    {# Erros não associados a um campo específico #}
+    {% if form.non_field_errors %}
+      <ul class="field-errors">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    <!-- checkbox SHADOW que é enviado de fato -->
+    <input type="checkbox" name="aceita_respostas" id="aceita_respostas_shadow"
+           style="display:none" {% if formulario.aceita_respostas %}checked{% endif %}>
+
+    <!-- Cabeçalho -->
+    <div class="header-card">
+      <div class="campo-linha">
+        <label for="{{ form.titulo.id_for_label }}" class="form-title-label">Título do Formulário</label>
+        {{ form.titulo }}
+        {% if form.titulo.errors %}
+          <ul class="field-errors">{% for e in form.titulo.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      <div class="campo-linha">
+        {{ form.descricao.label_tag }}
+        {{ form.descricao }}
+        {% if form.descricao.errors %}
+          <ul class="field-errors">{% for e in form.descricao.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ========== EDITAR ========== -->
+    <div id="edit-section">
+      <h2>Perguntas</h2>
+      <div id="campos-formset" data-prefix="{{ campos_formset.prefix }}">
+        {{ campos_formset.management_form }}
+        {% for subform in campos_formset %}
+          {% include "formularios/partials/campo_inline.html" with subform=subform %}
+        {% endfor %}
+      </div>
+      <button type="button" id="btn-add-question" class="btn-secundario"
+              data-endpoint="{% url 'formularios:campo_vazio' %}" disabled>
+        ➕ Adicionar pergunta
+      </button>
+    </div>
+
+    <!-- ========== CONFIGURAÇÕES ========== -->
+    <div id="conf-section" class="hide">
+      <div class="campo-linha">
+        <label class="toggle-label" for="id_publico">Visível sem login?
+          {{ form.publico }}<span class="toggle-custom"></span>
+        </label>
+        {% if form.publico.errors %}
+          <ul class="field-errors">{% for e in form.publico.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+        <small class="muted">Se desligado, apenas usuários autenticados poderão acessar/responder.</small>
+      </div>
+
+      <div class="campo-duplo">
+        <div>
+          {{ form.abre_em.label_tag }} {{ form.abre_em }}
+          {% if form.abre_em.errors %}
+            <ul class="field-errors">{% for e in form.abre_em.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div>
+          {{ form.fecha_em.label_tag }} {{ form.fecha_em }}
+          {% if form.fecha_em.errors %}
+            <ul class="field-errors">{% for e in form.fecha_em.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <hr class="sep">
+
+      <div class="campo-linha">
+        <label class="toggle-label" for="id_aparece_home">Aparece na home?
+          {{ form.aparece_home }}<span class="toggle-custom"></span>
+        </label>
+        {% if form.aparece_home.errors %}
+          <ul class="field-errors">{% for e in form.aparece_home.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div id="home-opts" class="{% if not form.instance.aparece_home %}hide{% endif %}">
+        <div class="campo-linha">
+          <label for="id_repetir_cada_str">Repetir a cada (DD:HH:MM)</label>
+          {{ form.repetir_cada_str }}
+          {% if form.repetir_cada_str.errors %}
+            <ul class="field-errors">{% for e in form.repetir_cada_str.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+          <small>Use o formato <strong>dias:horas:minutos</strong>. Ex.: <code>00:04:00</code> (a cada 4h). <code>00:00:00</code> = reaparece na próxima visita.</small>
+        </div>
+
+        <div class="campo-linha">
+          {{ form.alvo_resposta.label_tag }} {{ form.alvo_resposta }}
+          {% if form.alvo_resposta.errors %}
+            <ul class="field-errors">{% for e in form.alvo_resposta.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+          <small>Define quem verá o popup em cada disparo.</small>
+        </div>
+
+        <!-- BLOCO: seleção manual de usuários (HOME) -->
+        <div class="campo-linha" id="wrap-alvo-manual" style="{% if form.instance.alvo_resposta != 'MAN' %}display:none{% endif %}">
+          <label>Selecionar usuários (manual)</label>
+          <input type="text" id="buscar_usuario_manual" class="input-texto" placeholder="Buscar usuário…" autocomplete="off" style="max-width:480px">
+          <ul id="resultados_usuarios_manual" class="list-group resultados-pesquisa" style="max-width:480px; margin-top:.5rem"></ul>
+
+          <div style="margin-top:1rem">
+            <table class="tabela-formularios" style="width:auto; min-width:480px">
+              <thead><tr><th style="width:80px">ID</th><th>Usuário</th><th style="width:120px">Ações</th></tr></thead>
+              <tbody id="alvo_usuarios_lista">
+                {% for u in formulario.alvo_usuarios.all %}
+                  <tr data-id="{{ u.id }}">
+                    <td>{{ u.id }}</td>
+                    <td>
+                      {% if u.get_full_name %}{{ u.get_full_name }}{% else %}{{ u.username }}{% endif %}
+                      {% if u.email %}<small class="muted"> — {{ u.email }}</small>{% endif %}
+                    </td>
+                    <td><button type="button" class="btn-danger btn-sm remover-usuario-manual">Remover</button></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div id="alvo_usuarios_hidden">
+              {% for u in formulario.alvo_usuarios.all %}
+                <input type="hidden" name="alvo_usuarios" value="{{ u.id }}">
+              {% endfor %}
+            </div>
+            {# Erros do ManyToMany exibidos abaixo do bloco #}
+            {% if form.alvo_usuarios.errors %}
+              <ul class="field-errors">{% for e in form.alvo_usuarios.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          <input type="hidden" id="url_buscar_usuarios_manual" value="{% url 'usuarios:buscar_participantes' %}">
+        </div>
+        <!-- /BLOCO HOME -->
+      </div>
+
+      <hr class="sep">
+
+      <div class="campo-linha">
+        <label class="toggle-label" for="id_coletar_nome">Coletar o nome do usuário?
+          {{ form.coletar_nome }}<span class="toggle-custom"></span>
+        </label>
+        {% if form.coletar_nome.errors %}
+          <ul class="field-errors">{% for e in form.coletar_nome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <hr class="sep">
+
+      <h3 style="margin:.5rem 0 1rem">Compartilhar</h3>
+      <p class="muted" style="margin-top:-.5rem">Convide pessoas para editar ou apenas responder.</p>
+      
+    </div>
+
+    <!-- ========== RESPOSTAS (HTMX injeta aqui) ========== -->
+    <div id="resp-section" class="hide"><!-- conteúdo injetado via HTMX --></div>
+  </form>
+
+  <!-- ======= BLOCO COMPARTILHAR (fora do #form-main, exibido junto com "Config") ======= -->
+  <div id="colabs-section" class="hide">
+    <div class="pergunta-card">
+      <div class="pergunta-body">
+        <div id="colabs-box"
+             hx-get="{% url 'formularios:colabs_fragment' formulario.pk %}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+          <em>Carregando colaboradores…</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div> <!-- /.builder-wrapper -->
+
+<div id="save-indicator">Salvando...</div>
+
+<!-- Sincroniza toggle da toolbar com o checkbox shadow (dispara autosave) -->
+<script>
+  (function(){
+    const tb = document.querySelector('.tb-toggle input');
+    const shadow = document.getElementById('aceita_respostas_shadow');
+    if(tb && shadow){
+      tb.addEventListener('change', ()=>{
+        shadow.checked = tb.checked;
+        document.body.dispatchEvent(new Event('autosave'));
+      });
+    }
+  })();
+</script>
+
+<!-- Mostra/esconde opções da home e alvo manual + autosave + autosave do Título/Descrição e Datas -->
+<script>
+  (function(){
+    const chkHome  = document.getElementById('id_aparece_home');
+    const homeOpts = document.getElementById('home-opts');
+    const selAlvo  = document.getElementById('id_alvo_resposta');
+    const wrapMan  = document.getElementById('wrap-alvo-manual');
+
+    function refresh(){
+      if(homeOpts){ homeOpts.classList.toggle('hide', !(chkHome && chkHome.checked)); }
+      if(selAlvo && wrapMan){
+        const showManual = chkHome && chkHome.checked && selAlvo.value === 'MAN';
+        wrapMan.style.display = showManual ? '' : 'none';
+      }
+    }
+    function autoSave(){ document.body.dispatchEvent(new Event('autosave')); }
+
+    chkHome?.addEventListener('change', ()=>{ refresh(); autoSave(); });
+    selAlvo?.addEventListener('change', ()=>{ refresh(); autoSave(); });
+    document.getElementById('id_coletar_nome')?.addEventListener('change', autoSave);
+    document.getElementById('id_repetir_cada_str')?.addEventListener('blur', autoSave);
+    document.getElementById('id_publico')?.addEventListener('change', autoSave);
+
+    // Autosave do Título e Descrição (debounced + blur)
+    const titulo = document.getElementById('id_titulo');
+    const desc   = document.getElementById('id_descricao');
+    const debounce = (fn,ms=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
+    const debouncedSave = debounce(()=> document.body.dispatchEvent(new Event('autosave')), 600);
+    [titulo, desc].forEach(el=>{
+      if(!el) return;
+      el.addEventListener('input', debouncedSave);
+      el.addEventListener('blur', ()=> document.body.dispatchEvent(new Event('autosave')));
+    });
+
+    // Autosave das datas deve funcionar independentemente de outros campos
+    const abre = document.getElementById('id_abre_em');
+    const fecha= document.getElementById('id_fecha_em');
+    [abre, fecha].forEach(el=>{
+      if(!el) return;
+      el.addEventListener('change', autoSave);
+      el.addEventListener('blur', autoSave);
+    });
+
+    refresh();
+  })();
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('id_repetir_cada_str');
+    if (el && !el.value) el.value = '00:00:00';
+  });
+
+</script>
+{% endblock %}

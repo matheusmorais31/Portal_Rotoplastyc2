@@ -4,77 +4,139 @@
 <link rel="stylesheet" href="{% static 'css/visualizar_documento.css' %}">
 {% endblock %}
 {% block content %}
-<div class="container-visualize">
+<div class="container-visualize" id="pdfPage">
   <!-- Botão de Voltar -->
   <a href="javascript:history.back()" class="back-button">Voltar</a>
 
-  <!-- Dados do Documento -->
+  <!-- Cabeçalho / Metadados -->
   <h1>{{ documento.nome }} - Revisão {{ documento.revisao|default:"N/A" }}</h1>
-  <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
-  <p><strong>Elaborador:</strong>
-    {% if documento.elaborador %}
-      {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
-    {% else %}
-      Não definido
-    {% endif %}
-  </p>
-  <p><strong>Aprovador:</strong>
-    {% if documento.aprovador1 %}
-      {{ documento.aprovador1.get_full_name|default:documento.aprovador1.username }}
-    {% else %}
-      Não definido
-    {% endif %}
-  </p>
-  <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y H:i" }}</p>
 
-
-
-  <div class="button-container">
-    {% if documento.documento_pdf and not documento.categoria.bloqueada %}
-        <a href="{% url 'documentos:baixar_pdf' documento.id %}" class="btn">Baixar PDF</a>
-        <button id="print-button" class="btn">Imprimir</button>
-    {% elif documento.documento_pdf and documento.categoria.bloqueada %}
-        <p><em>Download e impressão estão desabilitados para este documento.</em></p>
-    {% endif %}
+  <div class="doc-meta">
+    <p><strong>Categoria:</strong> {{ documento.categoria.nome }}</p>
+    <p>
+      <strong>Elaborador:</strong>
+      {% if documento.elaborador %}
+        {{ documento.elaborador.get_full_name|default:documento.elaborador.username }}
+      {% else %}Não definido{% endif %}
+    </p>
+    <p>
+      <strong>Aprovador:</strong>
+      {% if documento.aprovador1 %}
+        {{ documento.aprovador1.get_full_name|default:documento.aprovador1.username }}
+      {% else %}Não definido{% endif %}
+    </p>
+    <p><strong>Data de Criação:</strong> {{ documento.data_criacao|date:"d/m/Y H:i" }}</p>
+    <p><strong>Data de Publicação:</strong> {{ documento.data_aprovado_aprovador|date:"d/m/Y H:i" }}</p>
   </div>
 
-  <hr>
+  <!-- Ações -->
+  <div class="button-container">
+    {% if documento.documento_pdf and not documento.categoria.bloqueada %}
+      <a href="{% url 'documentos:baixar_pdf' documento.id %}" class="btn">Baixar PDF</a>
+      <button id="print-button" class="btn">Imprimir</button>
+    {% elif documento.documento_pdf and documento.categoria.bloqueada %}
+      <p><em>Download e impressão estão desabilitados para este documento.</em></p>
+    {% endif %}
 
-  <!-- IFRAME do Viewer PDF.js com o parâmetro disablePrint se bloqueado -->
-  <div style="margin-top: 20px;">
+    <!-- Apenas Tela Cheia -->
+    <div class="viewer-controls">
+      <button id="fullscreen-btn" class="btn btn-ghost" title="Tela cheia">Tela cheia</button>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Wrapper que controla a ALTURA do viewer -->
+  <div class="pdfjs-wrapper" id="pdfWrapper">
     <iframe
+      class="pdfjs-iframe"
       src="{{ pdfjs_viewer_url }}?file={{ pdf_file_url|urlencode }}{% if documento.categoria.bloqueada %}&disablePrint=true{% endif %}"
-      width="100%"
-      height="800"
-      style="border: none;"
       allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer"
     ></iframe>
   </div>
 </div>
 
 {% if not documento.categoria.bloqueada %}
-<!-- Script para tratar o clique do botão de impressão (quando permitido) -->
 <script>
-  document.getElementById("print-button").addEventListener("click", function() {
-    const iframe = document.querySelector("iframe");
-    if (!iframe) {
-      alert("Visualizador não encontrado.");
-      return;
-    }
-    function executePrint() {
-      const printButtonInternal = iframe.contentWindow.document.getElementById("print");
-      if (printButtonInternal) {
-        printButtonInternal.click();
-      } else {
-        iframe.contentWindow.print();
+  // Botão imprimir: dispara o print do viewer interno do PDF.js
+  (function () {
+    const btn = document.getElementById("print-button");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      const iframe = document.querySelector(".pdfjs-iframe");
+      if (!iframe) return alert("Visualizador não encontrado.");
+      function doPrint() {
+        const w = iframe.contentWindow;
+        const doc = w?.document;
+        const pdfjsPrintBtn = doc?.getElementById("print");
+        if (pdfjsPrintBtn) pdfjsPrintBtn.click(); else w?.print();
       }
-    }
-    if (iframe.contentWindow.document.readyState === "complete") {
-      executePrint();
-    } else {
-      iframe.addEventListener("load", executePrint);
-    }
-  });
+      if (iframe.contentWindow?.document?.readyState === "complete") {
+        doPrint();
+      } else {
+        iframe.addEventListener("load", doPrint, { once: true });
+      }
+    });
+  })();
 </script>
 {% endif %}
+
+<script>
+  // ====== Tela cheia + bloqueio global de Ctrl+P quando categoria for bloqueada ======
+  (function () {
+    const wrapper   = document.getElementById("pdfWrapper");
+    const fullBtn   = document.getElementById("fullscreen-btn");
+    const iframe    = document.querySelector(".pdfjs-iframe");
+
+    const PRINT_BLOCKED = {% if documento.categoria.bloqueada %}true{% else %}false{% endif %};
+
+    // Alterna texto do botão de tela cheia
+    function syncFullBtn() {
+      fullBtn.textContent = document.fullscreenElement ? "Sair da tela cheia" : "Tela cheia";
+    }
+
+    fullBtn.addEventListener("click", () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.();
+      } else {
+        wrapper.requestFullscreen?.();
+      }
+    });
+
+    document.addEventListener("fullscreenchange", syncFullBtn);
+
+    // Bloqueia Ctrl/Cmd + P (página inteira) quando bloqueado
+    function addPrintBlockers(win) {
+      if (!win || !PRINT_BLOCKED) return;
+      try {
+        win.addEventListener("keydown", function (e) {
+          const k = (e.key || "").toLowerCase();
+          if ((e.ctrlKey || e.metaKey) && k === "p") {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            alert("Impressão desabilitada para este documento.");
+          }
+        }, true);
+      } catch (_) {}
+    }
+
+    // Página hospedeira
+    addPrintBlockers(window);
+
+    // Iframe (viewer) — redundante ao bloqueio interno do viewer, mas garante no fullscreen
+    function attachToIframe() {
+      try { addPrintBlockers(iframe.contentWindow); } catch (_) {}
+    }
+    if (iframe?.contentWindow?.document?.readyState === "complete") {
+      attachToIframe();
+    } else {
+      iframe?.addEventListener("load", attachToIframe, { once: true });
+    }
+
+    // Inicializa rótulo do botão
+    syncFullBtn();
+  })();
+</script>
 {% endblock %}

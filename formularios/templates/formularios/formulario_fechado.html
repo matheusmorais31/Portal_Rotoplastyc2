@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Formulário indisponível{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/formularios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="closed-wrap">
+  <div class="closed-head">
+    <div class="closed-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <circle cx="12" cy="16" r="1"></circle>
+      </svg>
+    </div>
+    <h1 class="closed-title">Formulário indisponível</h1>
+  </div>
+
+  <div class="closed-body">
+    {% comment %}
+      A view envia "motivo" = 'paused'|'not_open'|'closed' (opcional).
+    {% endcomment %}
+    {% if motivo == 'paused' %}
+      <p>Este formulário está <strong>pausado</strong> e não está aceitando respostas no momento.</p>
+    {% elif motivo == 'not_open' %}
+      <p>Este formulário <strong>ainda não está recebendo respostas</strong>.</p>
+      {% if formulario.abre_em %}
+        <p>Disponível a partir de <span class="chip-info">{{ formulario.abre_em|date:"d/m/Y H:i" }}</span>.</p>
+      {% endif %}
+    {% elif motivo == 'closed' %}
+      <p>Este formulário <strong>encerrou</strong> e não está mais aceitando respostas.</p>
+      {% if formulario.fecha_em %}
+        <p>Encerrado em <span class="chip-info">{{ formulario.fecha_em|date:"d/m/Y H:i" }}</span>.</p>
+      {% endif %}
+    {% else %}
+      <p>Este formulário <strong>não está aceitando respostas</strong> no momento.</p>
+    {% endif %}
+  </div>
+
+  <div class="btn-row">
+    {% if request.user == formulario.dono %}
+      <a class="btn btn-primary" href="{% url 'formularios:construtor_formulario' formulario.pk %}">Abrir no Editar</a>
+    {% endif %}
+    <a class="btn btn-secondary" href="{% url 'home' %}">Voltar para a página inicial</a>
+  </div>
+</div>
+{% endblock %}

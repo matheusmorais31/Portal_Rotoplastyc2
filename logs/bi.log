@@ -7,3 +7,9 @@ INFO 2025-07-25 11:46:43,820 utils 72712 139759494092480 PBI: [TI] embed_token g
 INFO 2025-07-25 11:49:09,587 utils 72712 139759494092480 PBI-DBG: Dataset 17128da0-166b-4578-8eee-db679d65bd16 | identityRequired=False | rolesRequired=False
 INFO 2025-07-25 11:49:09,813 utils 72712 139759494092480 PBI: [INDICADORES GERAL] embed_token gerado e salvo em cache (3000 s) → pbi:embed:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:0479dfcd-ca58-4fc6-a5ea-5df8796672cf
 WARNING 2025-07-25 16:39:51,397 views 79491 140143698470592 BI: acesso negado – matheus.oliveira → SOL
+INFO 2025-08-01 11:40:10,267 utils 42068 140639802894016 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-08-01 11:40:11,564 utils 42068 140639802894016 PBI-DBG: Dataset 17128da0-166b-4578-8eee-db679d65bd16 | identityRequired=False | rolesRequired=False
+INFO 2025-08-01 11:40:11,862 utils 42068 140639802894016 PBI: [INDICADORES GERAL] embed_token gerado e salvo em cache (3000 s) → pbi:embed:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:0479dfcd-ca58-4fc6-a5ea-5df8796672cf
+INFO 2025-08-26 14:23:17,292 utils 15299 140206976059072 PBI-Auth: ROPC inicial (username+password).
+INFO 2025-08-26 14:23:18,486 utils 15299 140206976059072 PBI-DBG: Dataset 8ac0c4d9-4409-472f-8412-e7465fcdb839 | identityRequired=False | rolesRequired=False
+INFO 2025-08-26 14:23:18,662 utils 15299 140206976059072 PBI: [TI] embed_token gerado e salvo em cache (3000 s) → pbi:embed:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:65c888d8-6d60-4abd-a0cb-4ad942e1ecc7

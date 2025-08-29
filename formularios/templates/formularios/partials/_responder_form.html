@@ -1,0 +1,366 @@
+{% load static %}
+<div class="form-wrapper">
+  <div class="cabecalho-card">
+    <h1>{{ formulario.titulo }}</h1>
+    {% if formulario.descricao %}
+      <p class="form-descricao">{{ formulario.descricao|linebreaksbr }}</p>
+    {% endif %}
+  </div>
+
+  <form method="post"
+        action="{% url 'formularios:enviar_resposta_formulario' formulario.pk %}{% if embed or request.GET.embed == '1' %}?embed=1{% endif %}"
+        enctype="multipart/form-data"
+        novalidate>
+    {% csrf_token %}
+
+    {# Modo embed #}
+    {% if embed or request.GET.embed == '1' %}
+      <input type="hidden" name="__embed" value="1">
+    {% endif %}
+
+    {# ===================== RESUMO DE ERROS (TOPO) ===================== #}
+    {% if erros or nome_erros %}
+      <div class="pergunta-card" style="border-color:#ff4d4f">
+        <strong style="color:#ff9191;display:block;margin-bottom:.5rem">Corrija os itens abaixo:</strong>
+        <ul style="margin-left:1rem;line-height:1.35">
+          {% for e in erros %}<li>{{ e }}</li>{% endfor %}
+          {% for e in nome_erros %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {# ================== COLETA DE NOME (apenas anônimo) ================== #}
+    {% if formulario.coletar_nome and not request.user.is_authenticated %}
+    <div class="pergunta-card required {% if nome_erros %}has-error{% endif %}">
+      <div class="pergunta-header">
+        <label for="campo-nome">Seu nome</label>
+        <small class="texto-ajuda">Informe seu nome para registrar a resposta.</small>
+      </div>
+      <div class="pergunta-body">
+        <input type="text" name="__nome__" id="campo-nome"
+               class="input-texto" placeholder="Seu nome completo"
+               value="{{ nome_informado|default_if_none:'' }}"
+               aria-invalid="{% if nome_erros %}true{% else %}false{% endif %}"
+               required>
+        {% if nome_erros %}
+          <ul class="field-errors">
+            {% for e in nome_erros %}<li>{{ e }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {# ===================== CAMPOS ATIVOS ===================== #}
+    {% for campo in formulario.campos.all %}
+      {% if campo.ativo %}
+      <div class="pergunta-card {% if campo.obrigatorio %}required{% endif %} {% if campo.errors %}has-error{% endif %}">
+        <div class="pergunta-header">
+          <label for="campo-{{ campo.id }}">
+            {{ campo.rotulo }}{% if campo.obrigatorio %}<span class="asterisk">*</span>{% endif %}
+          </label>
+          {% if campo.ajuda %}
+            <small class="texto-ajuda">{{ campo.ajuda }}</small>
+          {% endif %}
+        </div>
+
+        <div class="pergunta-body">
+          {# ========= TEXTO CURTO ========= #}
+          {% if campo.tipo == "texto_curto" %}
+            <input type="text" name="{{ campo.id }}" id="campo-{{ campo.id }}"
+                   class="input-texto" placeholder="Sua resposta"
+                   value="{{ campo.posted|default_if_none:'' }}"
+                   aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                   {% if campo.obrigatorio %}required{% endif %}>
+
+          {# ========= PARÁGRAFO ========= #}
+          {% elif campo.tipo == "paragrafo" %}
+            <textarea name="{{ campo.id }}" id="campo-{{ campo.id }}" rows="4"
+                      class="input-texto" placeholder="Sua resposta"
+                      aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                      {% if campo.obrigatorio %}required{% endif %}>{{ campo.posted|default_if_none:'' }}</textarea>
+
+          {# ========= MÚLTIPLA (RADIO) ========= #}
+          {% elif campo.tipo == "multipla" %}
+            <div class="options-block radios"
+                 aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+              {% for opcao in campo.opcoes.all %}
+                {% with val_op=opcao.valor|default:opcao.texto %}
+                <label class="option">
+                  <input type="radio" name="{{ campo.id }}"
+                         value="{{ val_op }}"
+                         {% if campo.posted == val_op %}checked{% endif %}
+                         {% if campo.obrigatorio %}required{% endif %}>
+                  {{ opcao.texto }}
+                </label>
+                {% endwith %}
+              {% empty %}
+                <div class="texto-ajuda">Sem opções.</div>
+              {% endfor %}
+            </div>
+
+          {# ========= CHECKBOX ========= #}
+          {% elif campo.tipo == "checkbox" %}
+            <div class="options-block checks"
+                 aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+              {% for opcao in campo.opcoes.all %}
+                {% with val_op=opcao.valor|default:opcao.texto %}
+                <label class="option">
+                  <input type="checkbox" name="{{ campo.id }}"
+                         value="{{ val_op }}"
+                         {% if campo.posted_multi and val_op in campo.posted_multi %}checked{% endif %}>
+                  {{ opcao.texto }}
+                </label>
+                {% endwith %}
+              {% empty %}
+                <div class="texto-ajuda">Sem opções.</div>
+              {% endfor %}
+            </div>
+
+          {# ========= LISTA (SELECT) ========= #}
+          {% elif campo.tipo == "lista" %}
+            <select name="{{ campo.id }}" id="campo-{{ campo.id }}"
+                    class="input-select"
+                    aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                    {% if campo.obrigatorio %}required{% endif %}>
+              <option value="" disabled {% if not campo.posted %}selected{% endif %}>Escolha…</option>
+              {% for opcao in campo.opcoes.all %}
+                {% with val_op=opcao.valor|default:opcao.texto %}
+                <option value="{{ val_op }}" {% if campo.posted == val_op %}selected{% endif %}>
+                  {{ opcao.texto }}
+                </option>
+                {% endwith %}
+              {% endfor %}
+            </select>
+
+          {# ========= ESCALA 1–10 ========= #}
+          {% elif campo.tipo == "escala" %}
+            <div class="options-block radios escala"
+                 aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="1"
+                       {% if campo.posted == "1" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">1</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="2"
+                       {% if campo.posted == "2" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">2</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="3"
+                       {% if campo.posted == "3" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">3</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="4"
+                       {% if campo.posted == "4" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">4</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="5"
+                       {% if campo.posted == "5" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">5</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="6"
+                       {% if campo.posted == "6" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">6</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="7"
+                       {% if campo.posted == "7" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">7</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="8"
+                       {% if campo.posted == "8" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">8</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="9"
+                       {% if campo.posted == "9" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">9</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="{{ campo.id }}" value="10"
+                       {% if campo.posted == "10" %}checked{% endif %}
+                       {% if campo.obrigatorio %}required{% endif %}>
+                <span class="scale-num">10</span>
+              </label>
+            </div>
+
+          {# ========= DATA ========= #}
+          {% elif campo.tipo == "data" %}
+            <input type="date" name="{{ campo.id }}" id="campo-{{ campo.id }}"
+                   class="input-texto"
+                   value="{{ campo.posted|default_if_none:'' }}"
+                   aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                   {% if campo.obrigatorio %}required{% endif %}>
+
+          {# ========= HORA ========= #}
+          {% elif campo.tipo == "hora" %}
+            <input type="time" name="{{ campo.id }}" id="campo-{{ campo.id }}"
+                   class="input-texto"
+                   value="{{ campo.posted|default_if_none:'' }}"
+                   aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                   {% if campo.obrigatorio %}required{% endif %}>
+
+          {# ========= ARQUIVO (multi-uploader incremental) ========= #}
+          {% elif campo.tipo == "arquivo" %}
+            {% with cfg=campo.validacao_json %}
+            <div class="multi-uploader {% if campo.errors %}has-error{% endif %}"
+                 data-name="{{ campo.id }}"
+                 data-accept="{{ campo.accept_string|default_if_none:'' }}"
+                 data-max="{{ cfg.max_arquivos|default:1 }}"
+                 data-required="{% if campo.obrigatorio %}1{% else %}0{% endif %}">
+              <div class="fu-input-holder" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+                <noscript>
+                  <input type="file"
+                         name="{{ campo.id }}"
+                         class="input-file"
+                         accept="{{ campo.accept_string|default_if_none:'' }}"
+                         {% if cfg.max_arquivos and cfg.max_arquivos > 1 %}multiple{% endif %}
+                         {% if campo.obrigatorio %}required{% endif %}>
+                </noscript>
+              </div>
+
+              <small class="texto-ajuda">
+                {% if cfg.max_arquivos %}Máx {{ cfg.max_arquivos }} arquivo(s). {% endif %}
+                {% if cfg.max_mb %}{{ cfg.max_mb }} MB cada. {% endif %}
+                {% if cfg and not cfg.tipos_livres and cfg.categorias %}
+                  Tipos permitidos: {{ cfg.categorias|join:", " }}.
+                {% endif %}
+                <span class="fu-hint-max">Selecionados: <span class="fu-count">0</span></span>
+                {% if campo.errors %}<br>Atenção: por segurança do navegador, os arquivos precisam ser selecionados novamente.{% endif %}
+              </small>
+
+              <ul class="fu-list"></ul>
+              <div class="fu-bucket" aria-hidden="true" style="display:none"></div>
+            </div>
+            {% endwith %}
+
+          {# ========= FALLBACK ========= #}
+          {% else %}
+            <p class="campo-nao-suportado">
+              Tipo de campo ‘{{ campo.get_tipo_display }}’ não suportado.
+            </p>
+          {% endif %}
+
+          {# ====== ERROS DO CAMPO (ABAIXO DO INPUT) ====== #}
+          {% if campo.errors %}
+            <ul class="field-errors">
+              {% for e in campo.errors %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <div class="btn-group">
+      <button type="submit" class="btn-primario">Enviar</button>
+    </div>
+  </form>
+</div>
+
+{# ===================== JS para “multi-uploader” incremental ===================== #}
+<script>
+(function(){
+  function initUploader(box){
+    const name = box.dataset.name;
+    const accept = box.dataset.accept || "";
+    const max = parseInt(box.dataset.max || "1");
+    const required = box.dataset.required === "1";
+
+    const holder = box.querySelector('.fu-input-holder');
+    const list = box.querySelector('.fu-list');
+    const bucket = box.querySelector('.fu-bucket');
+    const countEl = box.querySelector('.fu-count');
+
+    function totalSelected(){
+      let t = 0;
+      bucket.querySelectorAll('input[type="file"]').forEach(i => {
+        t += (i.files ? i.files.length : 0);
+      });
+      return t;
+    }
+
+    function update(){
+      const t = totalSelected();
+      if (countEl) countEl.textContent = t;
+
+      const active = holder.querySelector('input[type="file"]');
+      if (active){
+        active.required = required && t === 0;
+        active.disabled = (max && t >= max);
+      }
+    }
+
+    function newInput(){
+      const inp = document.createElement('input');
+      inp.type = 'file';
+      inp.name = name;
+      inp.className = 'input-file fu-input';
+      if (accept) inp.setAttribute('accept', accept);
+      if (max > 1) inp.setAttribute('multiple', 'multiple');
+      inp.id = 'campo-' + name; // id visível para <label>
+
+      holder.innerHTML = '';
+      holder.appendChild(inp);
+
+      inp.addEventListener('change', () => {
+        if (!inp.files || inp.files.length === 0) return;
+
+        const current = totalSelected();
+        if (max && (current + inp.files.length) > max){
+          alert(`Você pode enviar no máximo ${max} arquivo(s).`);
+          inp.value = '';
+          return;
+        }
+
+        // lista visual
+        const li = document.createElement('li');
+        li.className = 'fu-item';
+        const names = Array.from(inp.files).map(f => f.name).join(', ');
+        li.innerHTML = `<span class="fu-names">${names}</span>
+                        <button type="button" class="btn-danger btn-sm fu-remove">Remover</button>`;
+        list.appendChild(li);
+
+        // mover input preenchido para o “balde”
+        inp.removeAttribute('id'); // evita ids duplicados quando criarmos o próximo input
+        bucket.appendChild(inp);
+
+        // remover lote
+        li.querySelector('.fu-remove').addEventListener('click', () => {
+          try { bucket.removeChild(inp); } catch(e){}
+          try { list.removeChild(li); } catch(e){}
+          update();
+        });
+
+        // novo input vazio p/ próxima seleção incremental
+        newInput();
+        update();
+      });
+
+      update();
+    }
+
+    newInput();
+    update();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.multi-uploader').forEach(initUploader);
+  });
+})();
+</script>

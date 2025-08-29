@@ -230,7 +230,40 @@
                 </ul>
             </li>
             {% endif %}
+            {# -------- Formulários (CORRIGIDO) -------- #}
+            {% if perms.formularios %}
+            <li class="menu-formularios">
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                class="{% if request.resolver_match.namespace == 'formularios' %}active{% endif %}">
+                    <img src="{% static 'images/forms.png' %}" alt="Formulários">
+                    <span class="menu-label">Formulários</span>
+                </a>
 
+                <ul class="submenu">
+                    {% if perms.formularios.listar_meus %}
+                    <li>
+                        <a href="{% url 'formularios:listar_meus' %}"
+                        class="{% if request.resolver_match.url_name == 'listar_meus' %}active{% endif %}">
+                            Meus formulários
+                        </a>
+                    </li>
+                    {% endif %}
+
+
+
+                    {% if perms.formularios.pode_gerenciar %}
+                    <li>
+                        <a href="{% url 'formularios:todos_formularios' %}"
+                        class="{% if request.resolver_match.url_name == 'todos_formularios' %}active{% endif %}">
+                            Todos (admin)
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
+            
+            <!--Usuários-->
             {% if perms.usuarios %}
             <li>
                 <a href="#" onclick="toggleSubmenu(event, this)"
@@ -255,7 +288,10 @@
                 </ul>
             </li>
             {% endif %}
+        
+
         </ul>
+        
 
         <div class="sidebar-logo-container">
             <img src="{% static 'images/logo-dark.png' %}" alt="Logo Rotoplastyc Dark"

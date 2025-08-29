@@ -1,0 +1,94 @@
+{% load static %}
+<div class="pergunta-card" id="pergunta-{{ subform.prefix }}" data-prefix="{{ subform.prefix }}">
+  {{ subform.id }}{{ subform.DELETE }}{{ subform.ordem }}
+
+  <div class="pergunta-head">
+    <span class="drag-handle" title="Arrastar">☰</span>
+
+    <label class="toggle-label obrig-toggle">
+      {{ subform.obrigatorio }}<span class="toggle-custom"></span>
+      <span class="lbl-text">Obrigatório</span>
+    </label>
+
+    <button type="button" class="btn-trash" title="Remover"
+            onclick="
+              const c=this.closest('.pergunta-card');
+              c.querySelector('input[name$=-DELETE]').checked=true;
+              c.style.display='none';
+              document.dispatchEvent(new CustomEvent('rowDeleted'));
+              triggerAutosave?.();
+            ">🗑️</button>
+  </div>
+
+  <div class="pergunta-body">
+    <div class="campo-duplo">
+      <div class="campo-full">
+        {{ subform.rotulo.label_tag }} {{ subform.rotulo }}
+      </div>
+      <div class="tipo-col">
+        {{ subform.tipo.label_tag }} {{ subform.tipo }}
+      </div>
+    </div>
+
+    <div class="campo-full">
+      {{ subform.ajuda.label_tag }} {{ subform.ajuda }}
+    </div>
+
+    <div class="options-block hide">
+      <label>Opções</label>
+      <div class="options-list">
+        {% if subform.instance.pk %}
+          {% for opc in subform.instance.opcoes.all %}
+            <div class="opt-row">
+              <input type="text" value="{{ opc.texto }}"
+                     class="form-control" placeholder="Texto da opção">
+              <button type="button" class="opt-del" title="Remover">×</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <button type="button" class="btn-add-option">+ Adicionar opção</button>
+      {{ subform.opcoes_json }}
+    </div>
+
+    <div class="file-config hide">
+      <label class="toggle-label">
+        <input type="checkbox" class="cfg-tipos-toggle">
+        <span class="toggle-custom"></span>
+        <span class="lbl-text">Permitir apenas tipos específicos</span>
+      </label>
+
+      <div class="cfg-tipos-list hide">
+        {% for cat in FILE_CAT_LABELS %}
+          <label class="cfg-type-item">
+            <input type="checkbox" value="{{ cat|lower }}">
+            <span>{{ cat }}</span>
+          </label>
+        {% endfor %}
+      </div>
+
+      <div class="campo-duplo">
+        <div class="campo-full">
+          <label>Nº máx. de arquivos</label>
+          <input type="number" class="cfg-max-arqs" min="1" placeholder="1">
+        </div>
+        <div class="campo-full">
+          <label>Tam. máx. por arquivo</label>
+          <select class="cfg-max-mb">
+            <option value="1">1&nbsp;MB</option>
+            <option value="10" selected>10&nbsp;MB</option>
+            <option value="100">100&nbsp;MB</option>
+            <option value="1024">1&nbsp;GB</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {{ subform.valid_json }}
+  </div>
+
+  <div class="form-errors">
+    {{ subform.non_field_errors }}
+    {{ subform.rotulo.errors }} {{ subform.tipo.errors }}
+  </div>
+</div>

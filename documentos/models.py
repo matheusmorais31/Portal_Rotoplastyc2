@@ -1,8 +1,4 @@
-"""
-models.py – app documentos
-Cada documento raiz e suas revisões compartilham um único UUID (`codigo`)
-e a combinação (`codigo`, `revisao`) é única no banco.
-"""
+
 from __future__ import annotations
 
 import logging
@@ -19,7 +15,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.utils import timezone               # <— importação adicionada
+from django.utils import timezone               
 from django.utils.text import slugify
 
 logger = logging.getLogger("documentos")
@@ -235,17 +231,61 @@ class Documento(models.Model):
                 return self.documento_pdf.path
 
             src = self.documento.path
-            soffice = settings.LIBREOFFICE_PATH
-            with tempfile.TemporaryDirectory() as tmp:
-                cmd = [soffice, "--headless", "--convert-to", "pdf", "--outdir", tmp, src]
-                proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            soffice = getattr(settings, "LIBREOFFICE_PATH", "/usr/bin/soffice") or "/usr/bin/soffice"
+
+            # Ambiente: **sempre** garanta diretórios padrão no PATH
+            env = os.environ.copy()
+            base_path = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            env["PATH"] = f"{base_path}:{env.get('PATH','')}"
+            env["HOME"] = env.get("HOME") or "/tmp"
+
+            with tempfile.TemporaryDirectory(prefix="lo_profile_") as lo_profile, \
+                tempfile.TemporaryDirectory(prefix="lo_out_") as tmp_out:
+
+                user_install = f"file://{lo_profile}"
+                cmd = [
+                    soffice,
+                    "--headless",
+                    "--norestore",
+                    f"-env:UserInstallation={user_install}",
+                    "--convert-to", "pdf:writer_pdf_Export",
+                    "--outdir", tmp_out,
+                    src,
+                ]
+
+                logger.debug(f"[gerar_pdf] Executando: {' '.join(cmd)}")
+                logger.debug(f"[gerar_pdf] PATH efetivo: {env['PATH']}  HOME={env['HOME']}")
+
+                proc = subprocess.run(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    env=env,
+                    timeout=180,
+                )
+
                 if proc.returncode != 0:
-                    raise RuntimeError(f"Erro na conversão: {proc.stderr}")
+                    logger.error(
+                        f"[gerar_pdf] LO falhou: rc={proc.returncode}\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
+                    )
+                    # rc=127 é “command not found” dentro do wrapper → tipicamente PATH parcial
+                    if proc.returncode == 127:
+                        raise RuntimeError(
+                            "Falha na conversão LibreOffice (rc=127). "
+                            "PATH do processo provavelmente está sem /usr/bin. "
+                            "Reveja o unit do systemd e/ou mantenha o ajuste de PATH dentro do método."
+                        )
+                    raise RuntimeError("Falha na conversão LibreOffice.")
 
                 nome_pdf = Path(src).with_suffix(".pdf").name
-                pdf_tmp = Path(tmp) / nome_pdf
+                pdf_tmp = Path(tmp_out) / nome_pdf
                 if not pdf_tmp.exists():
-                    raise FileNotFoundError("PDF não gerado.")
+                    candidates = list(Path(tmp_out).glob("*.pdf"))
+                    if len(candidates) == 1:
+                        pdf_tmp = candidates[0]
+                    else:
+                        raise FileNotFoundError("PDF não gerado pelo LibreOffice.")
 
                 if self.documento_pdf and self.documento_pdf.storage.exists(self.documento_pdf.name):
                     self.documento_pdf.delete(save=False)
@@ -261,6 +301,9 @@ class Documento(models.Model):
                 return self.documento_pdf.path
 
         raise ValueError(f"Tipo inválido: {self.document_type}")
+
+
+
 
 
 class DocumentoNomeHistorico(models.Model):

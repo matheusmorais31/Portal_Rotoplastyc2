@@ -50,7 +50,10 @@ urlpatterns = [
     #RH
     path("rh/", include("rh.urls", namespace='rh')),
 
-    
+    # Formulários
+    path('formularios/', include('formularios.urls', namespace='formularios')),
+
+
 
 ]
 

@@ -3,14 +3,101 @@ import requests
 import time
 import logging
 from django.contrib.auth.decorators import login_required
+from django.db import models  # mantido caso use noutras views
+from datetime import datetime, timedelta
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
+from django.conf import settings
+
+from formularios.models import Formulario
 
 logger = logging.getLogger(__name__)
 
-# Variáveis para armazenar o cache e o tempo da última atualização
+# ========================== CACHE DO CLIMA ==========================
 previsao_cache = None
 ultima_atualizacao = 0
 
-# Função para mapear a condição ao ícone
+
+# ========================== HELPERS POPUP ==========================
+
+def _safe_local_date(dt: datetime | None):
+    """
+    Retorna a data local de forma tolerante a datetime naive/aware
+    e a USE_TZ True/False.
+    """
+    if dt is None:
+        dt = timezone.now()
+    try:
+        return timezone.localtime(dt).date()
+    except Exception:
+        return dt.date()
+
+
+def _form_esta_aberto(form: Formulario, now: datetime) -> bool:
+    """Checa janela de disponibilidade e se está aceitando respostas."""
+    if hasattr(form, "aceita_respostas") and not form.aceita_respostas:
+        return False
+    if form.abre_em and form.abre_em > now:
+        return False
+    if form.fecha_em and form.fecha_em < now:
+        return False
+    return True
+
+
+def _eligivel_por_alvo(request, form: Formulario, now: datetime) -> bool:
+    """
+    Decide se o visitante deve ver o popup conforme alvo_resposta:
+
+      - ALL (100%): todos (logados ou anônimos).
+      - HALF (50%): metade vê em cada *ciclo*. O ciclo é calculado por
+        'Repetir a cada' se > 0; caso contrário, cai no ciclo diário.
+      - MAN (manual): somente usuários selecionados (exige autenticado).
+
+    Para HALF usamos uma semente estável:
+      user.pk (se logado) OU session_key (anônimo) OU IP,
+    combinada com o id do formulário. Alterna grupos por ciclo.
+    """
+    alvo = getattr(form, "alvo_resposta", Formulario.AlvoChoices.ALL)
+
+    # 100% – todos
+    if alvo == Formulario.AlvoChoices.ALL:
+        return True
+
+    # Manual – apenas os escolhidos
+    if alvo == Formulario.AlvoChoices.MAN:
+        return (
+            request.user.is_authenticated
+            and form.alvo_usuarios.filter(pk=request.user.pk).exists()
+        )
+
+    # 50% – alterna por ciclo baseado no repetir_cada
+    if alvo == Formulario.AlvoChoices.HALF:
+        interval = getattr(form, "repetir_cada", timedelta(0)) or timedelta(0)
+        start = form.abre_em or form.criado_em or now
+
+        if interval.total_seconds() > 0:
+            # ciclo = inteiro desde o início, com base no intervalo configurado
+            cycle = int((now - start) / interval)
+        else:
+            # sem intervalo definido: alterna diariamente
+            cycle = _safe_local_date(now).toordinal()
+
+        # Semente estável por visitante
+        seed = (
+            str(getattr(request.user, "pk", ""))  # id se logado
+            or (request.session.session_key or request.META.get("REMOTE_ADDR", "0"))
+        )
+        import hashlib
+        digest = int(hashlib.sha256(f"{seed}:{form.pk}".encode()).hexdigest(), 16)
+        group = digest % 2  # 0 ou 1
+
+        return group == (cycle % 2)
+
+    # fallback
+    return True
+
+
+# ========================== ÍCONE / CLIMA ==========================
 def selecionar_icone(condicao):
     condicao_map = {
         'sol com algumas nuvens': '2',
@@ -37,24 +124,20 @@ def selecionar_icone(condicao):
         'algumas nuvens': 'nublado',
     }
 
-    condicao_normalizada = condicao.lower()
-
+    condicao_normalizada = (condicao or "").lower()
     for chave, icone in condicao_map.items():
         if chave in condicao_normalizada:
             return icone
-
     return 'default'
 
-# Função para obter o clima atual
+
 def obter_clima_atual(cidade_id, api_key):
     url_atual = f"https://apiadvisor.climatempo.com.br/api/v1/weather/locale/{cidade_id}/current?token={api_key}"
     try:
-        # Desabilita a verificação SSL
         resposta = requests.get(url_atual, verify=False)
         resposta.raise_for_status()
         dados = resposta.json()
         condicao_clima = dados['data']['condition']
-        print(f"Condição climática recebida: {condicao_clima}")
         clima_atual = {
             'temperatura_atual': dados['data']['temperature'],
             'sensacao': dados['data']['sensation'],
@@ -69,14 +152,13 @@ def obter_clima_atual(cidade_id, api_key):
         logger.error(f"Erro ao obter clima atual: {e}")
         return None
 
-# Função para obter a previsão de 15 dias com cache
+
 def obter_previsao_15_dias(cidade_id, api_key, intervalo_cache=3600):
     global previsao_cache, ultima_atualizacao
 
     if time.time() - ultima_atualizacao > intervalo_cache or previsao_cache is None:
         url_previsao = f"https://apiadvisor.climatempo.com.br/api/v1/forecast/locale/{cidade_id}/days/15?token={api_key}"
         try:
-            # Desabilita a verificação SSL
             resposta = requests.get(url_previsao, verify=False)
             resposta.raise_for_status()
             dados = resposta.json()
@@ -101,18 +183,90 @@ def obter_previsao_15_dias(cidade_id, api_key, intervalo_cache=3600):
 
     return previsao_cache
 
+
+# ========================== HOME ==========================
 @login_required
 def home(request):
+    # --------- Parâmetro opcional para testes: ?force_popup=1 ---------
+    force_popup = request.GET.get("force_popup") == "1"
+
+    agora = timezone.now()
+    form_popup = None
+
+    candidatos = (
+        Formulario.objects
+        .filter(aparece_home=True, aceita_respostas=True)
+        .order_by('-criado_em')
+    )
+
+    for f in candidatos:
+        if not _form_esta_aberto(f, agora):
+            continue
+
+        # se o form não é público e o visitante está anônimo, não mostra
+        if not getattr(f, "publico", True) and not request.user.is_authenticated:
+            continue
+
+        # alvo (100% / 50% / manual), a menos que esteja forçando para teste
+        if not force_popup and not _eligivel_por_alvo(request, f, agora):
+            continue
+
+        # ===== NOVO: respeita "Repetir a cada" em relação à ÚLTIMA RESPOSTA do usuário =====
+        intervalo = getattr(f, "repetir_cada", timedelta(0)) or timedelta(0)
+
+        # pega a última resposta do usuário (se logado)
+        last_answer_dt = None
+        if request.user.is_authenticated:
+            last = (
+                f.respostas.filter(enviado_por=request.user)
+                .only("enviado_em").order_by("-enviado_em").first()
+            )
+            if last:
+                last_answer_dt = last.enviado_em
+        else:
+            # anônimo: usa horário salvo na sessão (se você gravar isso ao enviar)
+            last_iso = request.session.get(f"form_last_answer_{f.pk}")
+            if last_iso:
+                try:
+                    last_answer_dt = datetime.fromisoformat(last_iso)
+                except Exception:
+                    last_answer_dt = None
+
+        # se respondeu recentemente, só reabrir depois do intervalo
+        if not force_popup and last_answer_dt and intervalo.total_seconds() > 0:
+            if (agora - last_answer_dt) < intervalo:
+                continue
+
+        # ===== também respeita intervalo entre exibições (para não abrir repetidamente) =====
+        if not force_popup and intervalo.total_seconds() > 0:
+            last_show_iso = request.session.get(f"form_last_show_{f.pk}")
+            if last_show_iso:
+                try:
+                    last_show_dt = datetime.fromisoformat(last_show_iso)
+                except Exception:
+                    last_show_dt = None
+                else:
+                    if (agora - last_show_dt) < intervalo:
+                        continue
+
+        # selecionado!
+        form_popup = f
+        # marca exibição agora (controle de “repetir a cada” por exibição)
+        try:
+            request.session[f"form_last_show_{f.pk}"] = agora.isoformat()
+            request.session.modified = True
+        except Exception:
+            pass
+        break
+
+    # --------- Clima (mantido) ---------
     cidade_id = 5585  # Carazinho, RS
     api_key = '5f713c18b31aee4d7a93df6a3220cfb8'
 
-    # Obter clima atual e previsão com cache
     clima_atual = obter_clima_atual(cidade_id, api_key)
     previsao = obter_previsao_15_dias(cidade_id, api_key)
 
-    dia_atual = int(request.GET.get('dia', 0))  # Controle dos dias na previsão
-
-    # Impedir dias negativos
+    dia_atual = int(request.GET.get('dia', 0) or 0)
     if dia_atual < 0:
         dia_atual = 0
 
@@ -132,13 +286,16 @@ def home(request):
         'previsao': previsao_atual,
         'dia_atual': dia_atual,
         'erro': erro,
+        'form_popup': form_popup,
     }
 
-    logger.debug(f"Contexto enviado para o template: {context}")
-
+    logger.debug(
+        "HOME ctx: popup=%s, dia=%s, erro=%s, force=%s",
+        getattr(form_popup, "pk", None), dia_atual, bool(erro), force_popup
+    )
     return render(request, 'home.html', context)
 
-
+# ========================== PÁGINAS DIVERSAS ==========================
 def tecnicon(request):
     return render(request, 'tecnicon.html')
 

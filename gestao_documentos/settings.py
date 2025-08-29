@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'bi',
     'ia',
     'rh',
+    'formularios',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -61,6 +62,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'usuarios.session_timeout_middleware.SessionIdleTimeoutMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
+    'usuarios.session_timeout_middleware.SessionIdleTimeoutMiddleware',
+
 ]
 
 ROOT_URLCONF = 'gestao_documentos.urls'
@@ -208,6 +212,14 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple', # Formato simples para o console
         },
+        'file_formularios': {
+            'level': 'DEBUG',                        # queremos capturar DEBUG
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'formularios.log',
+            'maxBytes': 5 * 1024 * 1024,             # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
@@ -237,6 +249,12 @@ LOGGING = {
             'propagate': False,        # Impede que as mensagens sejam passadas para loggers pai (root ou django)
                                        # Isso mantém o ia.log mais limpo e focado.
         },
+        'formularios': {
+            'handlers': ['file_formularios', 'console'],
+            'level': 'DEBUG',          # habilita DEBUG
+            'propagate': False,        # não envia para o logger “django”
+        },
+        
         # --- FIM DO NOVO LOGGER ---
     },
     # Opcional: Configuração do logger raiz para capturar logs não tratados por loggers específicos

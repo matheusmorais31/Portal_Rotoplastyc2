@@ -3,144 +3,277 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home2.css' %}">
+
+<style>
+  /* ===== Modal do Formulário (popup) ===== */
+  .modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 1rem;
+  }
+  .modal-card{
+    width: min(920px, 95vw);
+    background: #1f1f1f;
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0,0,0,.6);
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+  }
+  .modal-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #2a2a2a;
+    background: #202020;
+  }
+  .modal-header h3{
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #eaeaea;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .modal-actions{ display:flex; align-items:center; gap:.5rem; }
+  .modal-btn{
+    appearance: none;
+    border: 1px solid #3a3a3a;
+    background: #2b2b2b;
+    color: #fff;
+    padding: .4rem .7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .9rem;
+  }
+  .modal-btn:hover{ filter: brightness(1.05); }
+  .modal-close{
+    border: 0; background: transparent; color: #bbb;
+    cursor: pointer; font-size: 1.2rem; line-height: 1; padding: .2rem .4rem;
+  }
+  .modal-close[disabled]{ opacity:.5; cursor:not-allowed; }
+  .modal-close:hover:not([disabled]){ color: #fff; }
+  .modal-body{ padding: 0; }
+  .modal-iframe{
+    width: 100%;
+    height: 72vh; /* ajustado via postMessage também */
+    border: 0;
+    background: #111;
+  }
+
+  /* efeito opcional de "shake" quando tentar fechar antes da hora */
+  @keyframes shake { 10%, 90% {transform: translateX(-1px);} 20%, 80% {transform: translateX(2px);}
+    30%, 50%, 70% {transform: translateX(-4px);} 40%, 60% {transform: translateX(4px);} }
+  .shake { animation: shake .4s linear; }
+</style>
 {% endblock %}
 
 {% block content %}
 
-
-    <div class="icon-grid-container">
-        <a href="{% url 'tecnicon' %}" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Tecnicon.png" class="modal-img">
-                <span class="modal-title">Tecnicon</span>
-            </div>
-        </a>
-        <a href="{% url 'allcance' %}" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Allcance.png" class="modal-img">
-                <span class="modal-title">Allcance</span>
-            </div>
-        </a>
-        <a href="https://mail.google.com/mail" target="_blank" id="email-link" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/gmail.png" class="modal-img">
-                <span class="modal-title">Gmail</span>
-            </div>
-        </a>
-        <a href="https://rotoview.irp.rotoplastyc.com/" target="_blank" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Rotoview.png" class="modal-img">
-                <span class="modal-title">Rotoview</span>
-            </div>
-        </a>
-        <a href="{% url 'glpi' %}" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/GLPI.png" class="modal-img">
-                <span class="modal-title">GLPI</span>
-            </div>
-        </a>
-        <a href="https://irp.rotoplastyc.com/sistemas/" target="_blank" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Sistemas Rotoplastyc.png" class="modal-img">
-                <span class="modal-title">Sistemas Rotoplastyc</span>
-            </div>
-        </a>
-        <a href="{% url 'gestao' %}" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/GestaoPessoas.png" class="modal-img">
-                <span class="modal-title">Gestão de Pessoas</span>
-            </div>
-        </a>
-        <a href="https://irp.rotoplastyc.com/agenda/" target="_blank" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Tarifador.png" class="modal-img">
-                <span class="modal-title">Tarifador</span>
-            </div>
-        </a>
-        <a href="{% url 'mural' %}" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Mural.png" class="modal-img">
-                <span class="modal-title">Mural de sugestões</span>
-            </div>
-        </a>
-        <a href="{% url 'indicadores' %}" target="_blank" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Indicadores.png" class="modal-img">
-                <span class="modal-title">Indicadores</span>
-            </div>
-        </a>
-        <a href="https://sig.grupoadvis.com.br/login" target="_blank" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/SIG.png" class="modal-img">
-                <span class="modal-title">SIG</span>
-            </div>
-        </a>
-        <a href="{% url 'manuais' %}" class="modal-content">
-            <div class="modal-container">
-                <img src="/static/images/Manuais.png" class="modal-img">
-                <span class="modal-title">Manuais</span>
-            </div>
-        </a>
-    </div> <div class="weather-card">
-        {% if erro %}
-            <p>{{ erro }}</p>
-        {% else %}
-            {% if clima_atual %}
-                <div class="current-weather-container">
-                    <h2>Clima Atual</h2>
-                    <p>{{ clima_atual.data }}</p>
-                    {% if clima_atual.icone %}
-                        <img src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="Ícone do tempo" class="weather-icon">
-                    {% endif %}
-                    <h1 class="title-weather">{{ clima_atual.temperatura_atual }}°C</h1>
-                    <p>Sensação: {{ clima_atual.sensacao }}°C</p>
-                    <p>Umidade: {{ clima_atual.humidade }}%</p>
-                    <p>{{ clima_atual.condicao }}</p>
-                </div>
-            {% else %}
-                <p>Dados do clima atual não disponíveis.</p>
-            {% endif %}
-
-            <div class="separator-line"></div>
-
-            {% if previsao %}
-                <div class="forecast-container">
-                    <h2>Previsão do Dia</h2>
-                    <div class="forecast-content">
-                        <button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
-                        <div id="previsao-dia">
-                            <p>{{ previsao.data_br }}</p>
-                            {% if previsao.condicao_icone %}
-                                <img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
-                            {% else %}
-                                <p>Sem ícone para a condição: {{ previsao.condicao }}</p>
-                            {% endif %}
-                            <div class="temp-container">
-                                <h1 class="title-weather">{{ previsao.temperatura_max }}°C</h1>
-                                <p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
-                            </div>
-                            <p>
-                                <img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon">
-                                {{ previsao.probabilidade_chuva }}%
-                            </p>
-                            <p>{{ previsao.condicao }}</p>
-                        </div>
-                        <button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
-                    </div>
-                </div>
-            {% else %}
-                <p>Dados de previsão não disponíveis.</p>
-            {% endif %}
-        {% endif %}
+  {# ===== Modal do Formulário (exibe 1 pendente) ===== #}
+  {% if form_popup %}
+  <div class="modal-overlay" id="form-popup-overlay">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="form-popup-title">
+      <div class="modal-header">
+        <h3 id="form-popup-title">{{ form_popup.titulo }}</h3>
+        <div class="modal-actions">
+          <button class="modal-btn" onclick="document.getElementById('form-popup-iframe')?.contentWindow?.location.reload()">Recarregar</button>
+          <button class="modal-close" id="modal-close-btn" aria-label="Fechar" onclick="fecharFormPopup()" disabled title="Feche após enviar a resposta">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <iframe
+          id="form-popup-iframe"
+          class="modal-iframe"
+          src="{% url 'formularios:exibir_formulario' form_popup.pk %}?embed=1">
+        </iframe>
+      </div>
     </div>
+  </div>
+  {% endif %}
 
-    <script>
+  <div class="icon-grid-container">
+    <a href="{% url 'tecnicon' %}" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Tecnicon.png' %}" class="modal-img">
+        <span class="modal-title">Tecnicon</span>
+      </div>
+    </a>
+    <a href="{% url 'allcance' %}" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Allcance.png' %}" class="modal-img">
+        <span class="modal-title">Allcance</span>
+      </div>
+    </a>
+    <a href="https://mail.google.com/mail" target="_blank" id="email-link" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/gmail.png' %}" class="modal-img">
+        <span class="modal-title">Gmail</span>
+      </div>
+    </a>
+    <a href="https://rotoview.irp.rotoplastyc.com/" target="_blank" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Rotoview.png' %}" class="modal-img">
+        <span class="modal-title">Rotoview</span>
+      </div>
+    </a>
+    <a href="{% url 'glpi' %}" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/GLPI.png' %}" class="modal-img">
+        <span class="modal-title">GLPI</span>
+      </div>
+    </a>
+    <a href="https://irp.rotoplastyc.com/sistemas/" target="_blank" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Sistemas Rotoplastyc.png' %}" class="modal-img">
+        <span class="modal-title">Sistemas Rotoplastyc</span>
+      </div>
+    </a>
+    <a href="{% url 'gestao' %}" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/GestaoPessoas.png' %}" class="modal-img">
+        <span class="modal-title">Gestão de Pessoas</span>
+      </div>
+    </a>
+    <a href="https://irp.rotoplastyc.com/agenda/" target="_blank" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Tarifador.png' %}" class="modal-img">
+        <span class="modal-title">Tarifador</span>
+      </div>
+    </a>
+    <a href="{% url 'mural' %}" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Mural.png' %}" class="modal-img">
+        <span class="modal-title">Mural de sugestões</span>
+      </div>
+    </a>
+    <a href="{% url 'indicadores' %}" target="_blank" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Indicadores.png' %}" class="modal-img">
+        <span class="modal-title">Indicadores</span>
+      </div>
+    </a>
+    <a href="https://sig.grupoadvis.com.br/login" target="_blank" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/SIG.png' %}" class="modal-img">
+        <span class="modal-title">SIG</span>
+      </div>
+    </a>
+    <a href="{% url 'manuais' %}" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/Manuais.png' %}" class="modal-img">
+        <span class="modal-title">Manuais</span>
+      </div>
+    </a>
+      <a href="http://plmpro01:3000/" class="modal-content">
+      <div class="modal-container">
+        <img src="{% static 'images/teamcenter.png' %}" class="modal-img">
+        <span class="modal-title">Teamcenter</span>
+      </div>
+    </a>
+  </div>
 
+  <div class="weather-card">
+    {% if erro %}
+      <p>{{ erro }}</p>
+    {% else %}
+      {% if clima_atual %}
+        <div class="current-weather-container">
+          <h2>Clima Atual</h2>
+          <p>{{ clima_atual.data }}</p>
+          {% if clima_atual.icone %}
+            <img src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="Ícone do tempo" class="weather-icon">
+          {% endif %}
+          <h1 class="title-weather">{{ clima_atual.temperatura_atual }}°C</h1>
+          <p>Sensação: {{ clima_atual.sensacao }}°C</p>
+          <p>Umidade: {{ clima_atual.humidade }}%</p>
+          <p>{{ clima_atual.condicao }}</p>
+        </div>
+      {% else %}
+        <p>Dados do clima atual não disponíveis.</p>
+      {% endif %}
 
-        function mudarDia(dia) {
-            const queryString = new URLSearchParams(window.location.search);
-            queryString.set('dia', dia);
-            window.location.search = queryString.toString();
+      <div class="separator-line"></div>
+
+      {% if previsao %}
+        <div class="forecast-container">
+          <h2>Previsão do Dia</h2>
+          <div class="forecast-content">
+            <button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
+            <div id="previsao-dia">
+              <p>{{ previsao.data_br }}</p>
+              {% if previsao.condicao_icone %}
+                <img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
+              {% else %}
+                <p>Sem ícone para a condição: {{ previsao.condicao }}</p>
+              {% endif %}
+              <div class="temp-container">
+                <h1 class="title-weather">{{ previsao.temperatura_max }}°C</h1>
+                <p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
+              </div>
+              <p>
+                <img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon">
+                {{ previsao.probabilidade_chuva }}%
+              </p>
+              <p>{{ previsao.condicao }}</p>
+            </div>
+            <button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
+          </div>
+        </div>
+      {% else %}
+        <p>Dados de previsão não disponíveis.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <script>
+    let canCloseForm = false;
+
+    function mudarDia(dia) {
+      const queryString = new URLSearchParams(window.location.search);
+      queryString.set('dia', dia);
+      window.location.search = queryString.toString();
+    }
+
+    function fecharFormPopup(){
+      if(!canCloseForm){
+        const btn = document.getElementById('modal-close-btn');
+        if(btn){ btn.classList.add('shake'); setTimeout(()=>btn.classList.remove('shake'), 400); }
+        return;
+      }
+      const el = document.getElementById('form-popup-overlay');
+      if(el) el.remove();
+    }
+
+    // Ajusta altura do iframe e libera Fechar quando enviado
+    window.addEventListener('message', (e)=>{
+      if(e && e.data){
+        if(e.data.type === 'formHeight'){
+          const ifr = document.getElementById('form-popup-iframe');
+          if(ifr){
+            const maxH = Math.floor(window.innerHeight * 0.9);
+            ifr.style.height = Math.min(e.data.h, maxH) + 'px';
+          }
         }
-    </script>
+        if(e.data.type === 'formSubmitted'){
+          canCloseForm = true;
+          const btn = document.getElementById('modal-close-btn');
+          if(btn){
+            btn.disabled = false;
+            btn.title = 'Fechar';
+          }
+          // fecha sozinho após 900ms (deixe ou remova conforme preferir)
+          setTimeout(()=>fecharFormPopup(), 900);
+        }
+      }
+    });
+  </script>
 {% endblock %}

@@ -2823,3 +2823,38 @@ dialog :link {
 #editorStamp {
   display: none !important;
 }
+
+/* ===== Top horizontal scrollbar (nativo) ===== */
+.top-hscroll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 32px; /* mesma altura da toolbar */
+  padding: 0 0;              /* sem padding para a barra encostar nas bordas */
+  background-color: var(--toolbar-bg-color);
+  box-shadow: var(--toolbar-box-shadow);
+  border-bottom: var(--toolbar-border-bottom);
+  z-index: 9999;
+  
+}
+
+.top-hscroll-inner {
+  overflow-x: auto;          /* usa o scroll nativo (igual ao vertical) */
+  overflow-y: hidden;
+  height: 14px;              /* altura típica da barra; OS pode ajustar */
+  scrollbar-color: var(--scrollbar-color) var(--scrollbar-bg-color); /* FF */
+}
+
+/* Em navegadores WebKit (Chrome/Edge/Safari), garante altura da barra */
+.top-hscroll-inner::-webkit-scrollbar { height: 14px; }
+
+/* Empurra o viewerContainer para baixo quando a barra aparece (32 + 14 = 46) */
+#outerContainer.hasTopScroller #viewerContainer {
+  inset: 46px 0 0;
+}
+
+/* Esconde a barra horizontal nativa de baixo */
+#viewerContainer { 
+  overflow-y: auto;
+  overflow-x: hidden;
+}

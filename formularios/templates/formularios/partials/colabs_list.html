@@ -1,0 +1,59 @@
+{% comment %}
+Lista de colaboradores com seletor de papel (salva via HTMX ao mudar).
+{% endcomment %}
+
+<div id="colabs-list">
+  <table class="tabela-formularios" style="max-width:880px">
+    <thead>
+      <tr>
+        <th style="width:80px">ID</th>
+        <th>Usuário</th>
+        <th style="width:260px">Papel</th>
+        <th style="width:120px">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in formulario.colaboradores.all %}
+        <tr>
+          <td>{{ c.usuario.id }}</td>
+          <td>
+            {% if c.usuario.get_full_name %}{{ c.usuario.get_full_name }}{% else %}{{ c.usuario.username }}{% endif %}
+            {% if c.usuario.email %}<div class="muted">{{ c.usuario.email }}</div>{% endif %}
+          </td>
+          <td>
+            <form
+              hx-post="{% url 'formularios:set_colab_role' formulario.pk c.id %}"
+              hx-target="#colabs-list"
+              hx-swap="outerHTML"
+              hx-trigger="change"
+              style="display:inline"
+            >
+              {% csrf_token %}
+              <select name="role" class="role-select">
+                <option value="view" {% if not c.pode_editar %}selected{% endif %}>
+                  Somente responder
+                </option>
+                <option value="edit" {% if c.pode_editar %}selected{% endif %}>
+                  Editor
+                </option>
+              </select>
+            </form>
+          </td>
+          <td class="td-actions">
+            <form
+              hx-post="{% url 'formularios:remove_colab' formulario.pk c.id %}"
+              hx-target="#colabs-list"
+              hx-swap="outerHTML"
+              onsubmit="return confirm('Remover este colaborador?')"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn-danger btn-sm">Remover</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4"><em>Nenhum colaborador adicionado.</em></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

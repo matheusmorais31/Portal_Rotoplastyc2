@@ -1,0 +1,495 @@
+/* ===============================================================
+   RESET BÁSICO + BOX-SIZING
+   =============================================================== */
+*,
+
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===============================================================
+   PALETA & TOKENS
+   =============================================================== */
+:root {
+  /* Fundo geral e camadas */
+  --bg-main: #383434;         /* página */
+  --bg-layer: #242424;        /* cards */
+  --bg-input: #2a2a2a;        /* campos dentro dos cards */
+  --bg-input-focus: #373232;
+
+  --bg-container-child: #677480;
+  --bg-container: #515e6c;
+
+  /* Acentos */
+  --accent: #3a89b7;          /* primário */
+  --accent-light: #60a4cf;    /* hover/ativo */
+  --accent-dark: #2c6a8c;     /* press */
+
+  /* Texto e borda */
+  --text-main: #ffffff;
+  --text-muted: #bdbdbd;
+  --border-color: #6c6c6c;
+
+  /* Estados */
+  --danger: #ff5252;
+  --success: #4caf50;
+  --radius: 8px;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  --transition: .2s ease;
+}
+
+/* ===============================================================
+   BASE TYPOGRAPHY & BODY
+   =============================================================== */
+body {
+  background: var(--bg-main);
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===============================================================
+   WRAPPER
+   =============================================================== */
+.form-wrapper {
+  max-width: 760px;
+  margin: 2.5rem auto;
+  padding: 0 1rem;
+}
+
+/* ===============================================================
+   CARDS (cabeçalho + pergunta)
+   =============================================================== */
+.cabecalho-card,
+.pergunta-card {
+  background: var(--bg-layer);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  padding: 24px;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.pergunta-card:hover,
+.pergunta-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.cabecalho-card {
+  padding: 32px 24px 28px;
+  border-top: 10px solid var(--accent);
+}
+
+.cabecalho-card h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: .75rem;
+}
+
+.cabecalho-card .form-descricao {
+  color: var(--text-muted);
+  white-space: pre-wrap;
+}
+
+/* ===============================================================
+   ESTRUTURA DA PERGUNTA (HEADER, BODY, AJUDA)
+   =============================================================== */
+.pergunta-header label {
+  font-size: 1rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.asterisk {
+  color: var(--danger);
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.texto-ajuda  {
+  display: block;
+  color: var(--text-muted);
+  font-size: .8rem;
+  font-weight: 400;
+  margin-top: 6px;
+}
+
+.nao-respondido {
+  display: block;
+  color: #d11414cc;
+  font-size: .8rem;
+  font-weight: 400;
+  margin-top: 6px;
+}
+
+.pergunta-body {
+  margin-top: 12px;
+}
+
+/* ===============================================================
+   CAMPOS DE TEXTO / SELECT / FILE
+   =============================================================== */
+.input-texto,
+.input-select,
+.input-file {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid #444;
+  color: var(--text-main);
+  padding: .55rem .8rem;
+  border-radius: .55rem;
+  transition: border .2s, box-shadow .2s;
+}
+
+.input-texto::placeholder {
+  color: var(--text-muted);
+}
+
+.input-texto:focus,
+.input-select:focus {
+  outline: none;
+  border-color: var(--accent-light);
+  background-color: var(--bg-input-focus);
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
+
+/* ===============================================================
+   TEXTAREA
+   =============================================================== */
+textarea.input-texto {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ===============================================================
+   RADIO & CHECKBOX CUSTOMIZADOS
+   =============================================================== */
+.options-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.option input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-input);
+  margin: 0;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.options-block.radios .option input {
+  border-radius: 50%;
+}
+
+.options-block.checks .option input {
+  border-radius: 4px;
+}
+
+.option input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.option input:checked::after {
+  content: "";
+  position: absolute;
+  display: block;
+}
+
+.options-block.radios .option input:checked::after {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.options-block.checks .option input:checked::after {
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* ===============================================================
+   ESCALA 1–10 (read-only bonito no detalhe)
+   =============================================================== */
+:root{
+  --scale-size: 26px;
+  --scale-gap-y: .5rem;
+}
+
+.options-block.escala{
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0,1fr));
+  gap: .35rem 8px;
+  align-items: center;
+  position: relative;
+  padding: 1rem .25rem .75rem;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+
+.options-block.escala .option{
+  display: flex; flex-direction: column-reverse; align-items: center;
+  gap: var(--scale-gap-y); text-align: center; cursor: default;
+}
+
+.options-block.escala .scale-num{
+  font-size: .9rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+
+/* manter contraste mesmo disabled */
+.options-block.escala .option input{
+  appearance: none; -webkit-appearance: none;
+  width: var(--scale-size); height: var(--scale-size);
+  border-radius: 50%; border: 2px solid var(--border-color);
+  background: var(--bg-input);
+}
+.options-block.escala .option input[disabled]{ opacity: 1; }
+.options-block.escala .option input[disabled]:hover{ box-shadow: none; }
+
+.options-block.escala .option input:checked{
+  background: var(--accent); border-color: var(--accent);
+}
+.options-block.escala .option input:checked::after{
+  content: ""; position: absolute; width:10px; height:10px;
+  background:#fff; border-radius:50%; top:50%; left:50%;
+  transform: translate(-50%,-50%);
+}
+.options-block.escala .option input:checked + .scale-num{
+  color:#fff; font-weight:600;
+}
+
+@media (max-width: 640px){
+  .options-block.escala{ grid-template-columns: repeat(5, minmax(0,1fr)); }
+}
+
+/* ===============================================================
+   BOTÕES
+   =============================================================== */
+.btn-primario {
+  background: var(--accent);
+  text-decoration: none;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  font-weight: 600;
+  font-size: .95rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  display: inline-block;
+}
+
+.btn-primario:hover {
+  background: var(--accent-light);
+}
+
+.btn-primario:active {
+  background: var(--accent-dark);
+  transform: scale(.97);
+}
+
+/* ===============================================================
+   ESTILOS DO CARROSSEL DE MÍDIA (CORRIGIDO)
+   =============================================================== */
+.media-carousel-wrapper {
+  position: relative;
+  max-width: 100%;
+}
+
+.media-carousel {
+  overflow: hidden;
+  border-radius: var(--radius);
+  background-color: var(--bg-input);
+  /* Fundo para quando a imagem está carregando */
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  /* Pequeno espaçamento interno */
+}
+
+.carousel-media {
+  max-width: 100%;
+  max-height: 500px;
+  height: auto;
+  border-radius: calc(var(--radius) - 2px);
+  display: block;
+  object-fit: contain;
+}
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(36, 36, 36, 0.7);
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  transition: background-color 0.2s, transform 0.2s, opacity 0.3s;
+  z-index: 10;
+
+  /* Começa invisível, JS torna visível */
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: .75rem;
+  line-height: 1.2;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, .2);
+  color: #fff;
+  vertical-align: middle;
+}
+
+.badge-stop {
+  color: #ff0000;
+  background: #84202933;
+  border: 1px solid #84202955;
+}
+
+
+
+.media-carousel-wrapper:hover .carousel-button {
+  opacity: 1;
+  /* Aparece no hover do wrapper */
+}
+
+.carousel-button.prev {
+  left: 10px;
+}
+
+.carousel-button.next {
+  right: 10px;
+}
+
+.carousel-button svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  stroke: currentColor; 
+}
+
+.carousel-button.is-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+  /* Impede cliques quando escondido */
+}
+
+/* ---------------------------------------------------------------
+   TEMA CLARO
+   --------------------------------------------------------------- */
+
+body.light-theme .options-block.escala .option input{
+background: var(--bg-container);
+
+}
+
+body.light-theme .options-block.escala {
+ border-top: 1px solid #a3a1a1;
+ border-bottom: 1px solid #a3a1a1; 
+}
+
+body.light-theme .nao-respondido{
+  color: #842121;
+  
+}
+body.light-theme .cabecalho-card {
+  background-color: var(--bg-container-child);
+}
+
+body.light-theme .cabecalho-card h1 {
+  color: #fff;
+}
+
+body.light-theme .pergunta-card {
+  background-color: var(--bg-container-child);
+  color: #fff;
+}
+
+body.light-theme .pergunta-card input {
+  background-color: var(--bg-container);
+}
+
+body.light-theme .pergunta-card select {
+  background-color: var(--bg-container);
+}
+
+body.light-theme .pergunta-card textarea {
+  background-color: var(--bg-container);
+}
+
+body.light-theme .carousel-slide {
+  background-color: var(--bg-container);
+  border: solid 1px #404040;
+}
+
+body.light-theme .carousel-slide a {
+  color: #fff;
+}
+
+
+/* ===============================================================
+   RESPONSIVO
+   =============================================================== */
+@media (max-width: 600px) {
+  body {
+    font-size: 15px;
+  }
+
+  .cabecalho-card h1 {
+    font-size: 1.6rem;
+  }
+}

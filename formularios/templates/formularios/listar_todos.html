@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Todos os formulários{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/listar_meus.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <h1>Todos os formulários</h1>
+
+  {% if formularios %}
+    <table class="tabela-formularios">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Dono</th>
+          <th>Criado em</th>
+          <th>Respostas</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in formularios %}
+          <tr>
+            <td data-th="Título">{{ f.titulo }}</td>
+            <td data-th="Dono">
+              {% if f.dono.get_full_name %}{{ f.dono.get_full_name }}{% else %}{{ f.dono.username }}{% endif %}
+            </td>
+            <td data-th="Criado em">{{ f.criado_em|date:"d/m/Y H:i" }}</td>
+            <td data-th="Respostas">{{ f.respostas.count }}</td>
+            <td data-th="Status">
+              {% if f.aceita_respostas %}
+                <span class="badge" style="background:#0f513233;color:#00ff88;border:1px solid #0f513255">Aceitando</span>
+              {% else %}
+                <span class="badge" style="background:#84202933;color:#ff0000;border:1px solid #84202955">Pausado</span>
+              {% endif %}
+            </td>
+            <td class="actions" data-th="Ações">
+              <a href="{% url 'formularios:construtor_formulario' f.pk %}" class="btn-secundario">Editar</a>
+              <a href="{% url 'formularios:exibir_formulario' f.pk %}" class="btn-primario">Responder</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Nenhum formulário encontrado.</p>
+  {% endif %}
+
+  {% if perms.formularios.criar_formulario %}
+  <p class="mt-2">
+    <a href="{% url 'formularios:criar_formulario' %}" class="btn-primario">+ Novo formulário</a>
+  </p>
+  {% endif %}
+</div>
+{% endblock %}
