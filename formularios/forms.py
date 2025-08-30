@@ -23,8 +23,10 @@ class FormularioForm(forms.ModelForm):
       formato HTML5 (YYYY-MM-DDTHH:MM) para não sumirem após reload.
     - 'repetir_cada_str' exibe/recebe DD:HH:MM e é convertido para
       DurationField (repetir_cada) no clean().
-    - 'alvo_usuarios' fica obrigatório quando aparece_home=True e
-      alvo_resposta='MAN'.
+    - Quando aparece_home=True e alvo_resposta='MAN', não bloqueamos
+      o save se ainda não houver 'alvo_usuarios' — a própria lógica
+      de exibição na home impedirá que apareça para alguém até que
+      a lista seja preenchida.
     """
 
     # Campos de data/hora com widget já no formato correto
@@ -57,7 +59,7 @@ class FormularioForm(forms.ModelForm):
                 "title": "Use o formato DD:HH:MM (ex.: 00:04:00)",
             }
         ),
-        help_text="Use DD:HH:MM. Ex.: 00:04:00 (4h). 00:00:00 = reaparece na próxima visita.",
+        help_text="Use DD:HH:MM. Ex.: 00:04:00 (4h). 00:00:00 = não repete (mostra uma única vez por usuário).",
     )
 
     class Meta:
@@ -69,7 +71,7 @@ class FormularioForm(forms.ModelForm):
             "abre_em",
             "fecha_em",
             "aceita_respostas",
-            # ==== Config ====
+            # ==== Config (Home) ====
             "aparece_home",
             "coletar_nome",
             "alvo_resposta",
@@ -77,7 +79,6 @@ class FormularioForm(forms.ModelForm):
             # repetir_cada é populado via repetir_cada_str
         ]
         widgets = {
-            # Os DateTimeInput já foram definidos acima com format correto
             "alvo_usuarios": forms.SelectMultiple(attrs={"size": 8}),
         }
 
@@ -96,8 +97,8 @@ class FormularioForm(forms.ModelForm):
     def _parse_duration(s: str) -> timedelta | None:
         """
         Converte 'DD:HH:MM' -> timedelta.
-        '00:00:00' => timedelta(0).
-        Vazio => None.
+        '00:00:00' => timedelta(0)  (não repete).
+        Vazio => None (tratado como não repetir na lógica de exibição).
         """
         s = (s or "").strip()
         if not s:
@@ -142,11 +143,13 @@ class FormularioForm(forms.ModelForm):
         if abre and fecha and fecha < abre:
             self.add_error("fecha_em", "A data de fechamento deve ser igual ou posterior à data de abertura.")
 
-        # Se vai aparecer na home e alvo é MAN, exige seleção de usuários
+        # NÃO bloquear o save quando alvo = MAN sem usuários.
+        # A exibição na home já impede aparecer para alguém até que a lista seja preenchida.
+        # (Se preferir fallback automático para 100%, troque o 'pass' por: data["alvo_resposta"] = Formulario.AlvoChoices.ALL)
         if data.get("aparece_home") and data.get("alvo_resposta") == "MAN":
             usuarios = data.get("alvo_usuarios")
             if not usuarios or len(usuarios) == 0:
-                self.add_error("alvo_usuarios", "Selecione pelo menos 1 usuário.")
+                pass
 
         return data
 

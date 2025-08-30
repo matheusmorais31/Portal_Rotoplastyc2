@@ -578,7 +578,8 @@
           {% if form.repetir_cada_str.errors %}
             <ul class="field-errors">{% for e in form.repetir_cada_str.errors %}<li>{{ e }}</li>{% endfor %}</ul>
           {% endif %}
-          <small>Use o formato <strong>dias:horas:minutos</strong>. Ex.: <code>00:04:00</code> (a cada 4h). <code>00:00:00</code> = reaparece na próxima visita.</small>
+          <small>Use o formato <strong>dias:horas:minutos</strong>. Ex.: <code>00:04:00</code> (a cada 4h). <code>00:00:00</code> = não repete (mostra uma única vez por usuário).</small>
+
         </div>
 
         <div class="campo-linha">

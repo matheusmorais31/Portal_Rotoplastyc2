@@ -30,7 +30,7 @@ from django.views.generic import DetailView, FormView, ListView, UpdateView
 from .forms import CampoForm, CampoFormSetBuilder, CampoFormSetCreate, FormularioForm
 from .models import (
     Campo, Formulario, OpcaoCampo, Resposta, ValorResposta,
-    FILE_CATS, Colaborador
+    FILE_CATS, Colaborador, FormularioUserState
 )
 
 logger = logging.getLogger(__name__)
@@ -406,7 +406,6 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
         return redirect("formularios:construtor_formulario", self.object.pk)
 
 
-
 # --------------------------------------------------------------------------- #
 # HTMX – Form “vazio”                                                         #
 # --------------------------------------------------------------------------- #
@@ -694,6 +693,19 @@ def enviar_resposta_formulario(request: HttpRequest, pk: int):
 
     logger.info("Resposta %s salva no form %s (embed=%s)", resposta.pk, form.pk, embed_mode)
 
+    # ===================== ATUALIZAR ESTADO POR USUÁRIO =====================
+    # Marca que este usuário respondeu agora. Isso não roda em F5, somente no POST válido.
+    if request.user.is_authenticated:
+        st, created = FormularioUserState.objects.get_or_create(
+            formulario=form,
+            usuario=request.user,
+            defaults={"last_answered_at": timezone.now(), "answered_count": 1},
+        )
+        if not created:
+            st.last_answered_at = timezone.now()
+            st.answered_count = (st.answered_count or 0) + 1
+            st.save(update_fields=["last_answered_at", "answered_count"])
+
     # ===================== RESPOSTA AO CLIENTE =====================
     if embed_mode:
         # Página compacta para uso embutido
@@ -709,7 +721,6 @@ def enviar_resposta_formulario(request: HttpRequest, pk: int):
         "formularios/obrigado.html",
         {"formulario": form, "resposta": resposta},
     )
-
 
 
 # --------------------------------------------------------------------------- #
@@ -762,6 +773,7 @@ class DetalheRespostaView(DetailView):
             len(valores), len(campos_do_form)
         )
         return ctx
+
 
 # --------------------------------------------------------------------------- #
 # HELPERS – acesso + filtros compartilhados                                   #
@@ -1137,7 +1149,6 @@ def set_colab_role(request: HttpRequest, pk: int, colab_id: int):
     return HttpResponse(html)
 
 
-
 @login_required
 @require_POST
 @transaction.atomic
@@ -1155,10 +1166,7 @@ def remove_colab(request: HttpRequest, pk: int, colab_id: int):
     return HttpResponse(html)
 
 
-
-
-
-    # --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
 # Helper: localizar usuário por ID, username ou e-mail
 # --------------------------------------------------------------------------- #
 def _find_user_by_ref(ref: str):
@@ -1192,5 +1200,3 @@ def _find_user_by_ref(ref: str):
     )
     logger.debug("_find_user_by_ref: lookup '%s' -> %s", ref, getattr(u, "pk", None))
     return u
-
-
