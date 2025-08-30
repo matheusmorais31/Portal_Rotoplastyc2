@@ -1,4 +1,8 @@
-
+"""
+models.py – app documentos
+Cada documento raiz e suas revisões compartilham um único UUID (`codigo`)
+e a combinação (`codigo`, `revisao`) é única no banco.
+"""
 from __future__ import annotations
 
 import logging
@@ -15,7 +19,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.utils import timezone               
+from django.utils import timezone               # <— importação adicionada
 from django.utils.text import slugify
 
 logger = logging.getLogger("documentos")
