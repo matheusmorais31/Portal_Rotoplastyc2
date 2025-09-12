@@ -1,11 +1,14 @@
 {% load static %}
+{% url 'sqlhub:api_connections' as url_sqlhub_conns %}
+{% url 'sqlhub:api_queries' as url_sqlhub_queries %}
+
 <div class="pergunta-card" id="pergunta-{{ subform.prefix }}" data-prefix="{{ subform.prefix }}">
   {{ subform.id }}{{ subform.DELETE }}{{ subform.ordem }}
 
   <div class="pergunta-head">
     <span class="drag-handle" title="Arrastar">☰</span>
 
-    <label class="toggle-label obrig-toggle">
+    <label class="toggle-label obrig-toggle" title="Tornar esta pergunta obrigatória">
       {{ subform.obrigatorio }}<span class="toggle-custom"></span>
       <span class="lbl-text">Obrigatório</span>
     </label>
@@ -34,14 +37,38 @@
       {{ subform.ajuda.label_tag }} {{ subform.ajuda }}
     </div>
 
+    <div class="options-origin hide">
+      <label style="margin-bottom:.35rem;">Origem das opções</label>
+      <div class="campo-duplo" style="align-items:center;">
+        <div class="campo-full" style="display:flex;gap:1rem;align-items:center;">
+          <label class="toggle-label" style="margin:0;gap:.4rem;cursor:pointer;">
+            <input type="radio" name="{{ subform.prefix }}-origem_choice" value="manual">
+            <span class="toggle-custom"></span>
+            <span class="lbl-text">Manual</span>
+          </label>
+
+          <label class="toggle-label" style="margin:0;gap:.4rem;cursor:pointer;">
+            <input type="radio" name="{{ subform.prefix }}-origem_choice" value="sqlhub">
+            <span class="toggle-custom"></span>
+            <span class="lbl-text">SQLHub</span>
+          </label>
+        </div>
+        <div class="campo-full"></div>
+      </div>
+      {{ subform.origem_opcoes }}
+      {{ subform.sqlhub_connection_id }}
+      {{ subform.sqlhub_query_id }}
+      {{ subform.sqlhub_value_field }}
+      {{ subform.sqlhub_label_field }}
+    </div>
+
     <div class="options-block hide">
       <label>Opções</label>
       <div class="options-list">
         {% if subform.instance.pk %}
           {% for opc in subform.instance.opcoes.all %}
             <div class="opt-row">
-              <input type="text" value="{{ opc.texto }}"
-                     class="form-control" placeholder="Texto da opção">
+              <input type="text" value="{{ opc.texto }}" class="form-control" placeholder="Texto da opção">
               <button type="button" class="opt-del" title="Remover">×</button>
             </div>
           {% endfor %}
@@ -51,37 +78,38 @@
       {{ subform.opcoes_json }}
     </div>
 
-    <div class="file-config hide">
-      <label class="toggle-label">
-        <input type="checkbox" class="cfg-tipos-toggle">
-        <span class="toggle-custom"></span>
-        <span class="lbl-text">Permitir apenas tipos específicos</span>
-      </label>
-
-      <div class="cfg-tipos-list hide">
-        {% for cat in FILE_CAT_LABELS %}
-          <label class="cfg-type-item">
-            <input type="checkbox" value="{{ cat|lower }}">
-            <span>{{ cat }}</span>
-          </label>
-        {% endfor %}
+    <div class="sqlhub-config hide">
+      <div class="campo-duplo">
+        <div class="campo-full">
+          <label>Conexão</label>
+          <select class="input-select sel-conn">
+            <option value="">Carregando…</option>
+          </select>
+        </div>
+        <div class="campo-full">
+          <label>Consulta salva</label>
+          <select class="input-select sel-query">
+            <option value="">Selecione…</option>
+          </select>
+        </div>
       </div>
 
       <div class="campo-duplo">
         <div class="campo-full">
-          <label>Nº máx. de arquivos</label>
-          <input type="number" class="cfg-max-arqs" min="1" placeholder="1">
+          <label>Campo (valor)</label>
+          <select class="input-select sel-val">
+            <option value="">Selecione…</option>
+          </select>
         </div>
         <div class="campo-full">
-          <label>Tam. máx. por arquivo</label>
-          <select class="cfg-max-mb">
-            <option value="1">1&nbsp;MB</option>
-            <option value="10" selected>10&nbsp;MB</option>
-            <option value="100">100&nbsp;MB</option>
-            <option value="1024">1&nbsp;GB</option>
+          <label>Campo (rótulo)</label>
+          <select class="input-select sel-lbl">
+            <option value="">Selecione…</option>
           </select>
         </div>
       </div>
+
+      <small class="muted">As opções serão carregadas de <code>/sqlhub/api/query/&lt;id&gt;/options/</code> usando os campos escolhidos.</small>
     </div>
 
     {{ subform.valid_json }}
@@ -92,3 +120,295 @@
     {{ subform.rotulo.errors }} {{ subform.tipo.errors }}
   </div>
 </div>
+
+<script>
+(function(){
+  const card    = document.getElementById('pergunta-{{ subform.prefix }}');
+  if(!card) return;
+
+  const prefix  = card.dataset.prefix;
+  const selTipo = card.querySelector('#id_' + prefix + '-tipo');
+
+  const optionsOrigin = card.querySelector('.options-origin');
+  const optionsBlock  = card.querySelector('.options-block');
+  const sqlBlock      = card.querySelector('.sqlhub-config');
+  const fileBlock     = card.querySelector('.file-config');
+
+  const inpRotulo     = card.querySelector('#id_' + prefix + '-rotulo');
+  const inpAjuda      = card.querySelector('#id_' + prefix + '-ajuda');
+
+  const hidOpcoes     = card.querySelector('#id_' + prefix + '-opcoes_json');
+  const hidValid      = card.querySelector('#id_' + prefix + '-valid_json');
+
+  const hidOrigem     = card.querySelector('#id_' + prefix + '-origem_opcoes');
+  const hidConn       = card.querySelector('#id_' + prefix + '-sqlhub_connection_id');
+  const hidQ          = card.querySelector('#id_' + prefix + '-sqlhub_query_id');
+  const hidV          = card.querySelector('#id_' + prefix + '-sqlhub_value_field');
+  const hidL          = card.querySelector('#id_' + prefix + '-sqlhub_label_field');
+
+  const radsOrig      = card.querySelectorAll(`input[name="${prefix}-origem_choice"]`);
+
+  const listEl        = card.querySelector('.options-list');
+
+  const ckTipos       = card.querySelector('.cfg-tipos-toggle');
+  const boxTipos      = card.querySelector('.cfg-tipos-list');
+  const maxArqsEl     = card.querySelector('.cfg-max-arqs');
+  const maxMbEl       = card.querySelector('.cfg-max-mb');
+
+  const selConn       = card.querySelector('.sel-conn');
+  const selQuery      = card.querySelector('.sel-query');
+  const selVal        = card.querySelector('.sel-val');
+  const selLbl        = card.querySelector('.sel-lbl');
+
+  const URL_CONNS     = "{{ url_sqlhub_conns }}";
+  const URL_QUERIES   = "{{ url_sqlhub_queries }}";
+  const URL_COLUMNS   = (qid) => `/sqlhub/queries/${qid}/columns/`;
+
+  const autosave = () => document.body.dispatchEvent(new Event('autosave'));
+
+  let queriesById = {};
+
+  function show(el, yes){ if(!el) return; el.classList.toggle('hide', !yes); }
+  function getTipo(){ return (selTipo?.value || '').trim(); }
+
+  function fillSelect(sel, items, vKey, tKey, firstLabel, decorate){
+    if(!sel) return;
+    sel.innerHTML = '';
+    const o0 = document.createElement('option');
+    o0.value = ''; o0.textContent = firstLabel || 'Selecione…';
+    sel.appendChild(o0);
+    (items||[]).forEach(it=>{
+      const o = document.createElement('option');
+      o.value = String(it[vKey] ?? '');
+      o.textContent = String(it[tKey] ?? it[vKey] ?? '');
+      if(typeof decorate === 'function') decorate(o, it);
+      sel.appendChild(o);
+    });
+  }
+
+  function currentOrigem(){
+    const h = (hidOrigem?.value || '').trim();
+    return (h === 'sqlhub') ? 'sqlhub' : 'manual';
+  }
+
+  function setRadiosFromHidden(){
+    const val = currentOrigem();
+    radsOrig.forEach(r => r.checked = (r.value === val));
+  }
+
+  function updateHiddenOrigem(from){
+    const v = (from || currentOrigem());
+    if(hidOrigem) hidOrigem.value = v;
+  }
+
+  function optsToHidden(){
+    if(!hidOpcoes || !listEl) return;
+    const vals = Array.from(listEl.querySelectorAll('input[type="text"]'))
+      .map(i => (i.value || '').trim())
+      .filter(Boolean);
+    hidOpcoes.value = JSON.stringify(vals);
+    autosave();
+  }
+  listEl?.addEventListener('input', (e)=>{
+    if(e.target.matches('.opt-row input')) optsToHidden();
+  });
+
+  function loadValidToUI(){
+    try{
+      const cfg = JSON.parse(hidValid?.value || '{}') || {};
+      const livres = (cfg.tipos_livres !== false);
+      if(ckTipos){ ckTipos.checked = !livres; }
+      show(boxTipos, !livres);
+
+      const cats = new Set((cfg.categorias || []).map(String));
+      boxTipos?.querySelectorAll('input[type="checkbox"]').forEach(ch=>{
+        ch.checked = cats.has((ch.value||'').trim());
+      });
+
+      if(maxArqsEl){ maxArqsEl.value = cfg.max_arquivos ?? 1; }
+      if(maxMbEl){ maxMbEl.value = cfg.max_mb ?? 10; }
+    }catch{}
+  }
+
+  function saveUIToValid(){
+    const livres = ckTipos ? !ckTipos.checked : true;
+    const cats = [];
+    if(boxTipos && !livres){
+      boxTipos.querySelectorAll('input[type="checkbox"]:checked').forEach(ch=> cats.push((ch.value||'').trim()));
+    }
+    const cfg = {
+      tipos_livres: livres,
+      categorias: cats,
+      max_arquivos: Math.max(1, parseInt(maxArqsEl?.value || '1',10) || 1),
+      max_mb: Math.max(1, parseInt(maxMbEl?.value || '10',10) || 10),
+    };
+    if(hidValid) hidValid.value = JSON.stringify(cfg);
+    autosave();
+  }
+
+  ckTipos?.addEventListener('change', ()=>{ show(boxTipos, ckTipos.checked); saveUIToValid(); });
+  boxTipos?.addEventListener('change', saveUIToValid);
+  maxArqsEl?.addEventListener('input', saveUIToValid);
+  maxMbEl?.addEventListener('change', saveUIToValid);
+
+  async function loadConnections(){
+    if(!selConn) return;
+    try{
+      const r = await fetch(URL_CONNS, {headers:{'X-Requested-With':'fetch'}});
+      const j = await r.json();
+      const items = (j && j.connections) || [];
+      fillSelect(selConn, items, 'id', 'name', 'Conexão…');
+      if(hidConn?.value){ selConn.value = String(hidConn.value); }
+    }catch{
+      fillSelect(selConn, [], 'id', 'name', 'Falha ao carregar');
+    }
+  }
+
+  async function loadQueries(connId){
+    if(!selQuery) return;
+    queriesById = {};
+    try{
+      const url = connId ? `${URL_QUERIES}?connection=${encodeURIComponent(connId)}` : URL_QUERIES;
+      const r = await fetch(url, {headers:{'X-Requested-With':'fetch'}});
+      const j = await r.json();
+      const items = (j && j.queries) || [];
+      items.forEach(it => { if(it && it.id != null) queriesById[String(it.id)] = it; });
+      fillSelect(
+        selQuery,
+        items,
+        'id',
+        'name',
+        'Consulta…',
+        (opt, it) => { opt.dataset.conn = it.connection_id ?? it.connection ?? it.connectionId ?? ''; }
+      );
+      if(hidQ?.value){ selQuery.value = String(hidQ.value); }
+    }catch{
+      fillSelect(selQuery, [], 'id', 'name', 'Falha ao carregar');
+    }
+  }
+
+  async function loadColumns(qid){
+    if(!qid){
+      fillSelect(selVal, [], 'name', 'name', 'Valor');
+      fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
+      return;
+    }
+    try{
+      const r = await fetch(`/sqlhub/queries/${qid}/columns/`, {headers:{'X-Requested-With':'fetch'}});
+      const j = await r.json();
+      const cols = (j && j.ok && j.columns) ? j.columns : [];
+      const items = cols.map(c => ({name:c}));
+      fillSelect(selVal, items, 'name', 'name', 'Valor');
+      fillSelect(selLbl, items, 'name', 'name', 'Rótulo');
+
+      if(hidV?.value) selVal.value = hidV.value;
+      if(hidL?.value) selLbl.value = hidL.value;
+    }catch{
+      fillSelect(selVal, [], 'name', 'name', 'Falha ao carregar');
+      fillSelect(selLbl, [], 'name', 'name', 'Falha ao carregar');
+    }
+  }
+
+  async function restoreFromHidden(){
+    const qid = (hidQ?.value || '').trim();
+    const connId = (hidConn?.value || '').trim();
+
+    if(connId){ selConn.value = String(connId); }
+    await loadQueries(connId || '');
+
+    if(qid){
+      selQuery.value = qid;
+      const item = queriesById[qid];
+      const connFromItem = (item && (item.connection_id ?? item.connection ?? item.connectionId)) || '';
+      if(!connId && connFromItem && selConn){ selConn.value = String(connFromItem); if(hidConn) hidConn.value = String(connFromItem); }
+      await loadColumns(qid);
+      if(hidV?.value) selVal.value = hidV.value;
+      if(hidL?.value) selLbl.value = hidL.value;
+    }
+  }
+
+  selConn?.addEventListener('change', async (e)=>{
+    const cid = (e.target.value || '').trim();
+    if(hidConn){ hidConn.value = cid; }
+    await loadQueries(cid);
+    if(hidQ) hidQ.value = '';
+    fillSelect(selVal, [], 'name', 'name', 'Valor');
+    fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
+    autosave();
+  });
+
+  selQuery?.addEventListener('change', async (e)=>{
+    const qid = (e.target.value || '').trim();
+    if(hidQ) hidQ.value = qid;
+
+    const opt = e.target.selectedOptions?.[0];
+    const connFromOpt = opt?.dataset?.conn;
+    if(connFromOpt){
+      if(selConn) selConn.value = String(connFromOpt);
+      if(hidConn) hidConn.value = String(connFromOpt);
+    }
+
+    await loadColumns(qid);
+    autosave();
+  });
+
+  selVal?.addEventListener('change', (e)=>{ if(hidV){ hidV.value = e.target.value; autosave(); }});
+  selLbl?.addEventListener('change', (e)=>{ if(hidL){ hidL.value = e.target.value; autosave(); }});
+
+  async function syncVisibility(){
+    const t = (selTipo?.value || '').trim();
+
+    show(fileBlock, t === 'arquivo');
+    if(t === 'arquivo'){ /* loadValidToUI(); se tiver file-config no markup */ }
+
+    const isChoice = (t === 'multipla' || t === 'checkbox' || t === 'lista');
+    const isLista  = (t === 'lista');
+    show(optionsOrigin, isLista);
+
+    const origem = (hidOrigem?.value || 'manual');
+    if(isLista){
+      const useSql = (origem === 'sqlhub');
+      show(optionsBlock, !useSql);
+      show(sqlBlock, useSql);
+
+      if(useSql){
+        await loadConnections();
+        await loadQueries(hidConn?.value || '');
+        await restoreFromHidden();
+      }
+    }else{
+      show(optionsBlock, isChoice);
+      show(sqlBlock, false);
+      if(hidOrigem) hidOrigem.value = 'manual';
+      setRadiosFromHidden();
+    }
+  }
+
+  radsOrig.forEach(r=>{
+    r.addEventListener('change', ()=>{
+      if(hidOrigem) hidOrigem.value = r.value;
+      syncVisibility();
+      autosave();
+    });
+  });
+
+  selTipo?.addEventListener('change', ()=>{
+    syncVisibility();
+    autosave();
+  });
+
+  inpRotulo?.addEventListener('blur', autosave);
+  inpAjuda?.addEventListener('blur', autosave);
+
+  if(hidOrigem && !hidOrigem.value){ hidOrigem.value = 'manual'; }
+  setRadiosFromHidden();
+
+  if(listEl && hidOpcoes && !hidOpcoes.value){
+    const texts = Array.from(listEl.querySelectorAll('input[type="text"]'))
+                  .map(i => (i.value||'').trim()).filter(Boolean);
+    if(texts.length){ hidOpcoes.value = JSON.stringify(texts); }
+  }
+
+  syncVisibility();
+})();
+</script>

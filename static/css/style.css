@@ -971,3 +971,20 @@ body.light-theme .sidebar-logo-container .logo-dark-theme {
     padding: 15px 0; /* Pode querer um padding diferente quando colapsada */
 }
 
+
+
+
+/*REMOVER*/
+.container .card { background: var(--card, #151515); border: 1px solid #2a2a2a; border-radius: 10px; }
+.card-body { padding: 1rem; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: .5rem .6rem; border-bottom: 1px solid #2a2a2a; text-align: left; }
+.btn { padding: .45rem .8rem; border-radius: 8px; border: 1px solid #2a2a2a; background: #1e1e1e; cursor: pointer; }
+.btn:hover { filter: brightness(1.15); }
+.btn-primary { background: #3b82f6; border-color: #3b82f6; color: white; }
+.btn-sm { font-size: .85rem; padding: .3rem .6rem; }
+.input, select, textarea { width: 100%; padding: .45rem .6rem; border-radius: 6px; border: 1px solid #2a2a2a; background: #0f0f0f; color: #ddd; }
+.alert { padding: .5rem .75rem; border-radius: 8px; margin-bottom: .5rem; }
+.alert.success { background: #0f2d17; border: 1px solid #1c8b41; }
+.badge { padding: .15rem .45rem; border-radius: 6px; border: 1px solid #2a2a2a; }
+.badge.success { background: #0f2d17; border-color: #1c8b41; }

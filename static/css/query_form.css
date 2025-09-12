@@ -1,0 +1,188 @@
+/* =========================================================
+   SQLHub – Query Form (dark) alinhado ao tema "formularios"
+   Usa tokens já existentes no portal:
+   --bg-main, --bg-layer, --bg-input, --accent, --accent-d,
+   --text-light, --text-muted, --border-color, --border-2,
+   --danger, --ok  (com fallbacks seguros)
+   ========================================================= */
+
+/* ======== Layout base / cards ======== */
+.sqlhub-wrap{
+  display:grid;gap:16px;grid-template-columns:1fr;
+}
+.sqlhub-wrap > * { min-width: 0; } /* evita estouro horizontal em grid */
+
+.card{
+  background:var(--bg-main,#1f1f1f);
+  border:1px solid var(--border-color,#2d2d2d);
+  border-radius:12px;
+  color:var(--text-light,#e8e8e8);
+  min-height:0; /* permite filhos rolarem */
+  margin-top: 5%;
+}
+.card .card-hd{
+  padding:.9rem 1rem;
+  border-bottom:1px solid var(--border-color,#2d2d2d);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg-layer,#242424);
+}
+.card .card-bd{ padding:1rem; min-height:0; }
+
+.muted{ color:var(--text-muted,#b5b5b5); font-size:.92rem; }
+.badge{
+  background:#2a2a2a;border:1px solid var(--border-2,#444);
+  color:var(--text-light,#e8e8e8);
+  padding:.25rem .6rem;border-radius:999px;font-size:.85rem;
+}
+
+.flex-between{display:flex;align-items:center;justify-content:space-between;}
+.self-end{align-self:end;}
+.mt-10{margin-top:10px}.mt-12{margin-top:12px}.mb-6{margin-bottom:.6rem}.mt-6{margin-top:.6rem}
+
+/* ======== Form / inputs ======== */
+.form-row{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.form-row>div{display:flex;flex-direction:column}
+.form-row label{font-size:.92rem;color:var(--text-light,#e8e8e8);margin-bottom:6px}
+
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row select,
+.form-row textarea{
+  background:var(--bg-input,#2a2a2a);
+  border:1px solid var(--border-2,#444);
+  border-radius:10px;
+  color:var(--text-light,#e8e8e8);
+  padding:.55rem .7rem;
+  transition:border .2s, box-shadow .2s, background-color .2s;
+}
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus{
+  outline:none;
+  border-color:var(--accent,#2EC2D6);
+  box-shadow:0 0 0 3px rgba(46,194,214,.25);
+  background-color:#2f2f2f;
+}
+
+textarea#id_sql_text{
+  width:100%;min-height:180px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:13px;line-height:1.45;
+}
+.checkbox{display:flex;align-items:center;gap:8px}
+.mini{width:110px}
+@media (max-width:920px){ .form-row{grid-template-columns:1fr} .mini{width:100px} }
+
+/* ======== Botões (alinhados ao padrão do portal) ======== */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{
+  border:1px solid var(--border-2,#444);
+  background:var(--bg-layer,#242424);
+  color:var(--text-light,#e8e8e8);
+  padding:.55rem .85rem;border-radius:10px;cursor:pointer;
+  transition:transform .06s ease, background .15s ease, border-color .2s, opacity .2s;
+}
+.btn:hover{transform:translateY(-1px);background:#2c2c2c}
+.btn.primary{
+  background:var(--accent,#2EC2D6);
+  border-color:var(--accent,#2EC2D6);
+  color:#fff;
+}
+.btn.primary:hover{background:var(--accent-d,#24a3b4)}
+.btn.warn{background:var(--danger,#ff4d4f);border-color:var(--danger,#ff4d4f);color:#fff}
+.btn.ghost{background:transparent;border-style:dashed;color:#bbb}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+
+/* ======== Messages ======== */
+.error-box{
+  background:rgba(132,32,41,.2); /* ~#842029 */
+  border:1px solid rgba(132,32,41,.35);
+  color:#ffb3b6; padding:.6rem .9rem;border-radius:10px;display:none;
+}
+.ok-box{
+  background:rgba(15,81,50,.2);
+  border:1px solid rgba(15,81,50,.35);
+  color:#bfe2ca; padding:.45rem .7rem;border-radius:10px;display:none;
+}
+
+/* =========================================================
+   PREVIEW – estrutura com scroll vertical e horizontal
+   Cabeçalho/rodapé fixos, tabela rola no miolo
+   ========================================================= */
+
+/* Card do preview em grid: head / area rolável / foot */
+.preview-card{
+  background:var(--bg-layer,#242424);
+  border:1px solid var(--border-color,#2d2d2d);
+  border-radius:12px;
+  overflow:hidden; /* evita vazamento visual do header sticky */
+  display:grid;
+  grid-template-rows: auto minmax(0,1fr) auto; /* o meio pode rolar */
+}
+
+/* Cabeçalho e rodapé do preview */
+.preview-head{
+  padding:.6rem .9rem;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border-color,#2d2d2d);
+  background:linear-gradient(180deg, var(--bg-layer,#242424), #1f1f1f);
+}
+.preview-foot{
+  padding:.6rem .9rem;border-top:1px solid var(--border-color,#2d2d2d);color:var(--text-muted,#b5b5b5);
+  display:flex;justify-content:space-between;align-items:center;gap:8px
+}
+.pager{display:flex;gap:8px;align-items:center}
+
+/* Área rolável (X e Y) com altura fixa */
+.table-wrap{
+  height:min(62vh, 650px);  /* ajuste a gosto: 70vh se quiser mais alto */
+  min-height:0;             /* ESSENCIAL quando o pai é grid/flex */
+  min-width:0;              /* garante scroll horizontal também */
+  overflow:auto;            /* barras X e Y */
+  scrollbar-gutter:stable both-edges;
+  border-top:1px solid #0b1012;
+  background:var(--bg-main,#1f1f1f);
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* Tabela ocupa no mínimo 100% e cresce além (gera overflow-x) */
+table.preview{
+  border-collapse:separate;border-spacing:0;font-size:.92rem;line-height:1.35;
+  table-layout:auto;
+  width:max-content;   /* largura conforme conteúdo (permite crescer) */
+  min-width:100%;      /* nunca menor que o contêiner */
+  color:var(--text-light,#e8e8e8);
+}
+
+/* Cabeçalho fixo */
+table.preview thead th{
+  position:sticky;top:0;z-index:3;
+  background:var(--bg-layer,#242424);color:#fff;
+  border-bottom:1px solid var(--border-2,#444);text-align:left;
+  padding:.5rem .65rem;font-weight:600;letter-spacing:.02em;white-space:nowrap;
+}
+
+/* Células */
+table.preview tbody td{
+  border-bottom:1px dashed var(--border-2,#444);
+  padding:.45rem .65rem;color:var(--text-light,#e8e8e8);white-space:nowrap;
+  max-width:360px;overflow:hidden;text-overflow:ellipsis; /* evita colunas gigantes */
+}
+table.preview tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
+table.preview tbody tr:hover{background:#13212833}
+
+/* ===== Opção: primeira coluna fixa (ativar com .sticky-firstcol na <table>) */
+table.preview.sticky-firstcol thead th:first-child,
+table.preview.sticky-firstcol tbody td:first-child{
+  position:sticky;left:0;z-index:2;background:var(--bg-main,#1f1f1f);
+  box-shadow:1px 0 0 0 var(--border-color,#2d2d2d) inset;
+}
+
+/* ===== Robustez cross-browser ===== */
+table.preview thead{ display: table-header-group; }
+table.preview tbody{ display: table-row-group; }
+
+/* ===== Scrollbar (webkit) ===== */
+.table-wrap::-webkit-scrollbar{height:12px;width:12px}
+.table-wrap::-webkit-scrollbar-thumb{background:#3b3b3b;border-radius:8px}
+.table-wrap::-webkit-scrollbar-track{background:var(--bg-main,#1f1f1f)}

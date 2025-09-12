@@ -1,0 +1,469 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar Consulta{% else %}Nova Consulta{% endif %} · SQL Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/query_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sqlhub-wrap">
+
+  <!-- Form principal -->
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-hd">
+        <div><strong>{% if form.instance.pk %}Editar Consulta{% else %}Nova Consulta{% endif %}</strong></div>
+        <div class="btn-row">
+          <button type="submit" class="btn primary">Salvar</button>
+          <a href="{% url 'sqlhub:query_list' %}" class="btn ghost">Voltar</a>
+        </div>
+      </div>
+      <div class="card-bd">
+        {% if form.non_field_errors %}<div class="error-box" style="display:block">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="form-row">
+          <div>
+            <label for="{{ form.name.id_for_label }}">Nome</label>
+            {{ form.name }}
+          </div>
+          <div>
+            <label for="{{ form.connection.id_for_label }}">Conexão</label>
+            {{ form.connection }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="{{ form.default_limit.id_for_label }}">Default limit</label>
+            {{ form.default_limit }}
+            <div class="muted">Usado quando outro módulo consome esta consulta (não afeta CSV). No preview você escolhe outro limite.</div>
+          </div>
+          <div class="self-end">
+            <label for="{{ form.is_active.id_for_label }}">Ativa?</label>
+            <div class="checkbox">
+              {{ form.is_active }} <span class="muted">Disponível para uso</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10">
+          <label for="{{ form.sql_text.id_for_label }}">SQL (somente SELECT)</label>
+          {{ form.sql_text }}
+          {% if form.sql_text.errors %}<div class="error-box" style="display:block">{{ form.sql_text.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Ferramentas de preview -->
+  <div class="card">
+    <div class="card-hd">
+      <div class="btn-row">
+        <button class="btn" id="btn-run" title="Ctrl+Enter">Executar</button>
+
+        <label class="muted">Preview limit:(Máx 5000 linhas)</label>
+        <input type="number" id="preview-limit" class="mini" value="{{ form.instance.default_limit|default:1000 }}" min="1" max="5000">
+
+        <div class="checkbox">
+          <input type="checkbox" id="auto-preview">
+          <label for="auto-preview" class="muted">Auto preview</label>
+        </div>
+
+        <button class="btn" id="btn-cols" title="Inferir colunas do SQL">Carregar campos</button>
+
+        <button class="btn" id="btn-export">Baixar CSV</button>
+        <span class="muted">CSV traz todos os dados (respeita filtros) — sem limite.</span>
+      </div>
+    </div>
+    <div class="card-bd">
+
+      <!-- Filtros (WHERE) -->
+      <div class="flex-between mb-6">
+
+        <div class="btn-row">
+          <button class="btn" id="btn-add-filter" type="button">Adicionar filtro</button>
+          <button class="btn ghost" id="btn-clear-filters" type="button">Limpar</button>
+        </div>
+      </div>
+
+      <datalist id="dl-columns"></datalist>
+      <div id="filters-container"></div>
+      
+
+      <div class="ok-box" id="ok-box"></div>
+      <div class="error-box" id="error-box"></div>
+
+      <!-- Preview (HTML truncado) -->
+      <div class="preview-card mt-12">
+        <div class="preview-head">
+          <div>Preview (HTML, truncado)</div>
+          <div id="meta-info" class="badge" style="display:none;"></div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="preview" id="preview-table">
+            <thead><tr id="thead-row"></tr></thead>
+            <tbody id="tbody-rows"></tbody>
+          </table>
+        </div>
+
+        <div class="preview-foot">
+          <div class="pager">
+            <button class="btn" id="btn-prev" disabled>◀ Anterior</button>
+            <button class="btn" id="btn-next" disabled>Próxima ▶</button>
+          </div>
+          <div id="foot-status" class="muted"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function(){
+  // ===== Utils =====
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  function showOk(msg){ const el=document.getElementById("ok-box"); if(!msg){ el.style.display='none'; return;} el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',2000); }
+  function showErr(msg){ const el=document.getElementById("error-box"); if(!msg){ el.style.display='none'; return;} el.textContent=msg; el.style.display='block'; }
+  function setFoot(msg){ document.getElementById("foot-status").textContent = msg || ""; }
+
+  const elConn   = document.getElementById("id_connection");
+  const elSql    = document.getElementById("id_sql_text");
+  const elLimit  = document.getElementById("preview-limit");
+  const elAuto   = document.getElementById("auto-preview");
+  const elMeta   = document.getElementById("meta-info");
+  const filtersBoxEl = document.getElementById("filters-container");
+  const dlColumns  = document.getElementById("dl-columns");
+
+  const theadRow = document.getElementById("thead-row");
+  const tbody = document.getElementById("tbody-rows");
+
+  let columns = [];
+  let totalCount = null;   // inteiro ou null se não conseguiu contar
+  let offset = 0;
+
+  function pageSize(){
+    const v = parseInt(elLimit.value || "1000", 10);
+    return Math.max(10, Math.min(v, 5000));
+  }
+
+  function updateMeta(rowsShown){
+    if (!columns.length){ elMeta.style.display='none'; return; }
+    const shown = rowsShown ?? tbody.children.length;
+    let txt = "";
+    if (Number.isFinite(totalCount)){
+      // Ex.: "1000 linhas de 50000 (página 1)"
+      const pg = Math.floor(offset / pageSize()) + 1;
+      txt = `${shown} linhas de ${totalCount} (página ${pg})`;
+    } else {
+      txt = `${shown} linhas (total desconhecido)`;
+    }
+    elMeta.textContent = txt;
+    elMeta.style.display = "inline-flex";
+  }
+
+  function clearTable(){
+    theadRow.innerHTML = "";
+    tbody.innerHTML = "";
+    columns = [];
+  }
+
+  function renderHeader(cols){
+    theadRow.innerHTML = "";
+    const frag = document.createDocumentFragment();
+    cols.forEach(c=>{
+      const th = document.createElement("th");
+      th.textContent = c;
+      frag.appendChild(th);
+    });
+    theadRow.appendChild(frag);
+  }
+
+  function renderRows(cols, rows){
+    tbody.innerHTML = "";
+    const frag = document.createDocumentFragment();
+    for (const r of (rows || [])){
+      const tr = document.createElement("tr");
+      for (let i=0;i<cols.length;i++){
+        const td = document.createElement("td");
+        const v = r[i];
+        td.textContent = (v === null || v === undefined) ? "" : String(v);
+        tr.appendChild(td);
+      }
+      frag.appendChild(tr);
+    }
+    tbody.appendChild(frag);
+  }
+
+  function collectFilters(){
+    const rows = Array.from(filtersBoxEl.querySelectorAll(".filter-row"));
+    const out = [];
+    for (const r of rows){
+      const [f, op, v] = r.querySelectorAll("input, select");
+      const field = (f?.value || "").trim();
+      const operator = (op?.value || "eq").trim().toLowerCase();
+      const value = v?.value ?? "";
+      if (!field) continue;
+      out.push({ field, op: operator, value });
+    }
+    return out;
+  }
+
+  function appendFiltersToForm(form, prefix="where"){
+    const filters = collectFilters();
+    filters.forEach((f, i)=>{
+      form.set(`${prefix}[${i}][field]`, f.field);
+      form.set(`${prefix}[${i}][op]`, f.op);
+      if (!["isnull","notnull"].includes(f.op)) form.set(`${prefix}[${i}][value]`, f.value);
+    });
+  }
+
+  async function fetchPage(off, limit){
+    const connId = elConn.value; const sql = elSql.value;
+    if (!connId || !sql.trim()){ return { ok:false, message:"Informe conexão e SQL." }; }
+    const form = new URLSearchParams();
+    form.set("connection_id", connId);
+    form.set("sql_text", sql);
+    form.set("offset", String(off));
+    form.set("limit", String(limit));
+    appendFiltersToForm(form);
+    const resp = await fetch("{% url 'sqlhub:query_page_adhoc' %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": csrftoken, "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString()
+    });
+    return resp.json();
+  }
+
+  async function fetchCount(){
+    const connId = elConn.value; const sql = elSql.value;
+    if (!connId || !sql.trim()){ return null; }
+    const form = new URLSearchParams();
+    form.set("connection_id", connId);
+    form.set("sql_text", sql);
+    appendFiltersToForm(form);
+    try{
+      const resp = await fetch("{% url 'sqlhub:query_count_adhoc' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken, "Content-Type": "application/x-www-form-urlencoded" },
+        body: form.toString()
+      });
+      const data = await resp.json();
+      if (data?.ok && Number.isFinite(data.count)) return data.count;
+      return null;
+    }catch(e){
+      console.warn("Falha ao contar:", e);
+      return null;
+    }
+  }
+
+  async function loadColumns(){
+    const connId = elConn.value; const sql = elSql.value;
+    if (!connId || !sql.trim()) { showErr("Informe conexão e SQL para carregar campos."); return; }
+    const form = new URLSearchParams();
+    form.set("connection_id", connId);
+    form.set("sql_text", sql);
+    form.set("limit", "1");
+    const resp = await fetch("{% url 'sqlhub:query_preview_adhoc' %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": csrftoken, "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString()
+    });
+    const data = await resp.json();
+    if (!data?.ok) { showErr(data?.message || "Falha ao obter colunas."); return; }
+    const cols = data.columns || [];
+    dlColumns.innerHTML = "";
+    cols.forEach(c=>{
+      const opt = document.createElement("option");
+      opt.value = c; dlColumns.appendChild(opt);
+    });
+    showOk(`${cols.length} campo(s) detectado(s).`);
+  }
+
+  async function runPage(newOffset){
+    const limit = pageSize();
+    offset = Math.max(0, newOffset || 0);
+
+    setFoot("Executando…");
+    const [countVal, pageData] = await Promise.all([
+      fetchCount(),          // pode ser null se falhar
+      fetchPage(offset, limit),
+    ]);
+    setFoot("");
+
+    totalCount = (Number.isFinite(countVal) ? countVal : null);
+
+    if (!pageData?.ok || !Array.isArray(pageData.rows)){
+      showErr(pageData?.message || "Erro ao executar preview.");
+      clearTable();
+      updateMeta(0);
+      updatePager(false, false);
+      return;
+    }
+
+    showErr("");
+    showOk("OK");
+
+    columns = pageData.columns || [];
+    renderHeader(columns);
+    renderRows(columns, pageData.rows || []);
+    updateMeta((pageData.rows || []).length);
+
+    // pager
+    const hasPrev = offset > 0;
+    const hasNext = !!pageData.has_more;
+    updatePager(hasPrev, hasNext);
+  }
+
+  function updatePager(hasPrev, hasNext){
+    const btnPrev = document.getElementById("btn-prev");
+    const btnNext = document.getElementById("btn-next");
+    btnPrev.disabled = !hasPrev;
+    btnNext.disabled = !hasNext;
+  }
+
+  // ===== Filtros UI =====
+  function opSelect(){
+    const s = document.createElement("select");
+    ["eq","ne","gt","gte","lt","lte","contains","startswith","endswith","isnull","notnull"].forEach(o=>{
+      const opt = document.createElement("option");
+      opt.value = o; opt.textContent = o;
+      s.appendChild(opt);
+    });
+    return s;
+  }
+  function addFilterRow(initial){
+    const wrap = document.createElement("div"); wrap.className = "filter-row";
+    const inField = document.createElement("input");
+    inField.type = "text"; inField.placeholder = "Campo"; inField.setAttribute("list","dl-columns");
+    inField.value = initial?.field || "";
+
+    const selOp = opSelect(); selOp.value = initial?.op || "eq";
+
+    const inValue = document.createElement("input");
+    inValue.type = "text"; inValue.placeholder = "Valor"; inValue.value = initial?.value ?? "";
+
+    function updateValueVisibility(){
+      const needVal = !["isnull","notnull"].includes(selOp.value);
+      inValue.style.visibility = needVal ? "visible" : "hidden";
+      inValue.style.pointerEvents = needVal ? "auto" : "none";
+    }
+    selOp.addEventListener("change", updateValueVisibility); updateValueVisibility();
+
+    const btnDel = document.createElement("button");
+    btnDel.type = "button"; btnDel.className = "btn warn"; btnDel.textContent = "Remover";
+    btnDel.addEventListener("click", ()=> wrap.remove());
+
+    wrap.appendChild(inField); wrap.appendChild(selOp); wrap.appendChild(inValue); wrap.appendChild(btnDel);
+    filtersBoxEl.appendChild(wrap);
+  }
+  document.getElementById("btn-add-filter").addEventListener("click", ()=> addFilterRow());
+  document.getElementById("btn-clear-filters").addEventListener("click", ()=> filtersBoxEl.innerHTML = "");
+
+  // ===== Eventos =====
+  document.getElementById("btn-run").addEventListener("click", (e)=>{ e.preventDefault(); runPage(0); });
+  document.getElementById("btn-cols").addEventListener("click", (e)=>{ e.preventDefault(); loadColumns(); });
+
+  document.getElementById("btn-prev").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const newOff = Math.max(0, offset - pageSize());
+    runPage(newOff);
+  });
+  document.getElementById("btn-next").addEventListener("click", (e)=>{
+    e.preventDefault();
+    runPage(offset + pageSize());
+  });
+
+  // exportar CSV (streaming no servidor)
+  async function doExport(){
+    showErr("");
+    const connId = elConn.value;
+    const sql = elSql.value;
+    if (!connId || !sql.trim()) { showErr("Informe conexão e SQL."); return; }
+
+    const form = new URLSearchParams();
+    form.set("connection_id", connId);
+    form.set("sql_text", sql);
+    form.set("filename", (document.getElementById("id_name")?.value || "export") + ".csv");
+    appendFiltersToForm(form);
+
+    const resp = await fetch("{% url 'sqlhub:query_export_adhoc' %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": csrftoken, "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString()
+    });
+
+    const ctype = resp.headers.get("Content-Type") || "";
+    if (!resp.ok) {
+      if (ctype.includes("application/json")) {
+        const j = await resp.json();
+        showErr(j.message || "Falha na exportação.");
+      } else {
+        showErr("Falha na exportação.");
+      }
+      return;
+    }
+
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const fname = (document.getElementById("id_name")?.value || "export") + ".csv";
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+  document.getElementById("btn-export").addEventListener("click", (e)=>{ e.preventDefault(); doExport(); });
+
+  // Auto-preview
+  let tmr = null;
+  function schedule() {
+    clearTimeout(tmr);
+    if (!elAuto.checked) return;
+    tmr = setTimeout(()=>runPage(0), 700);
+  }
+  elSql.addEventListener("input", schedule);
+  elConn.addEventListener("change", schedule);
+  elLimit.addEventListener("input", schedule);
+  filtersBoxEl.addEventListener("input", schedule);
+  filtersBoxEl.addEventListener("change", schedule);
+
+  document.addEventListener("keydown", (e)=>{
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter"){
+      e.preventDefault();
+      runPage(0);
+    }
+  });
+
+  // Primeira carga se já houver SQL
+  if ((elSql.value || "").trim()) {
+    setTimeout(()=>{ loadColumns().finally(()=>schedule()); }, 100);
+  }
+})();
+</script>
+{% endblock %}

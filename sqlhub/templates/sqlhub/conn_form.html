@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Conexão · SQL Hub{% endblock %}
+{% block content %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/conn_form.css' %}">
+{% endblock %}
+
+<div class="card">
+  <div class="card-header"><h2>{{ object|default_if_none:"Nova Conexão" }}</h2></div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="form-row">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            {{ field.errors }}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <a class="btn" href="{% url 'sqlhub:conn_list' %}">Voltar</a>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

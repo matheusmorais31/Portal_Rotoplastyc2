@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Conexões · SQL Hub{% endblock %}
+{% block content %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/conn_list.css' %}">
+{% endblock %}
+
+
+<div class="card">
+  <div class="card-header">
+    <h2>Conexões</h2>
+    <a class="btn" href="{% url 'sqlhub:conn_new' %}">Nova conexão</a>
+  </div>
+  <div class="card-body">
+    {% if connections %}
+    <table class="table">
+      <thead><tr><th>Nome</th><th>Engine</th><th>Host</th><th>DB</th><th></th></tr></thead>
+      <tbody>
+      {% for c in connections %}
+        <tr>
+          <td>{{ c.name }}</td>
+          <td>{{ c.get_engine_display }}</td>
+          <td>{{ c.host }}{% if c.port %}:{{ c.port }}{% endif %}</td>
+          <td>{{ c.database }}</td>
+          <td style="text-align:right;">
+            <a class="btn" href="{% url 'sqlhub:conn_edit' c.pk %}">Editar</a>
+            <button class="btn" onclick="testConn({{ c.pk }})">Testar</button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>Nenhuma conexão cadastrada.</p>
+    {% endif %}
+  </div>
+</div>
+<script>
+async function testConn(id){
+  const r = await fetch("{% url 'sqlhub:conn_test' 0 %}".replace("0",""+id));
+  const j = await r.json();
+  alert((j.ok ? "✅ ":"❌ ") + j.message);
+}
+</script>
+{% endblock %}

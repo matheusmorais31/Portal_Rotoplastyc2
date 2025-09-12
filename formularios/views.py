@@ -200,7 +200,6 @@ class CriarFormularioView(LoginRequiredMixin, FormView):
 # --------------------------------------------------------------------------- #
 # EDITAR (BUILDER)                                                            #
 # --------------------------------------------------------------------------- #
-# views.py (trecho) — EditarFormularioView reforçada + logs
 class EditarFormularioView(LoginRequiredMixin, UpdateView):
     model = Formulario
     form_class = FormularioForm
@@ -254,8 +253,23 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
         return ctx
 
     def _salvar_opcoes_escolha(self, form: CampoForm, campo: Campo):
+        """
+        Quando origem das opções for 'sqlhub', NÃO persistimos opções manuais.
+        Para 'manual', persistimos normalmente o JSON vindo de opcoes_json.
+        """
         if campo.tipo not in {"multipla", "checkbox", "lista"}:
             return
+
+        origem = (form.data.get(form.prefix + "-origem_opcoes") or "manual").strip()
+        if origem == "sqlhub":
+            # Limpa opções manuais (se existirem) e sai
+            count = OpcaoCampo.objects.filter(campo=campo).count()
+            if count:
+                OpcaoCampo.objects.filter(campo=campo).delete()
+            logger.debug("Campo %s usando origem SQLHub – opções manuais removidas/ignoradas", campo.pk or "novo")
+            return
+
+        # Origem MANUAL → salva lista postada
         OpcaoCampo.objects.filter(campo=campo).delete()
         raw = form.data.get(form.prefix + "-opcoes_json", "[]")
         try:
@@ -264,7 +278,7 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
                 OpcaoCampo.objects.bulk_create(
                     [OpcaoCampo(campo=campo, texto=str(v)) for v in itens if v]
                 )
-                logger.debug("Opções atualizadas p/ campo=%s (%s itens)", campo.pk, len(itens))
+                logger.debug("Opções (manuais) atualizadas p/ campo=%s (%s itens)", campo.pk, len(itens))
         except json.JSONDecodeError:
             logger.error("JSON opcoes inválido para campo %s – %s", campo.pk, raw)
 
@@ -386,6 +400,47 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
                         "Ignorando valid_json recebido para tipo != arquivo (prefix=%s id=%s raw=%r)",
                         pfx, getattr(form.instance, "pk", None), raw_ghost
                     )
+
+            # =============== Origem das opções (manual | sqlhub) ===============
+            if tipo in {"multipla", "checkbox", "lista"}:
+                origem = (form.data.get(pfx + "-origem_opcoes") or "manual").strip()
+                if origem not in {"manual", "sqlhub"}:
+                    origem = "manual"
+
+                cfg_lj = inst.logica_json or {}
+                cfg_opts = cfg_lj.get("options") or {}
+
+                if origem == "sqlhub":
+                    # >>> lê exatamente os hiddens enviados pelo front
+                    cid_raw = (form.data.get(pfx + "-sqlhub_connection_id") or "").strip()
+                    qid_raw = (form.data.get(pfx + "-sqlhub_query_id") or "").strip()
+                    vfield  = (form.data.get(pfx + "-sqlhub_value_field") or "").strip()
+                    lfield  = (form.data.get(pfx + "-sqlhub_label_field") or "").strip()
+
+                    def _as_int_or_str(x):
+                        try:
+                            return int(x)
+                        except Exception:
+                            return x or None
+
+                    cid = _as_int_or_str(cid_raw)
+                    qid = _as_int_or_str(qid_raw)
+
+                    cfg_opts = {
+                        "source": "sqlhub",
+                        "sqlhub": {
+                            "connection_id": cid,
+                            "query_id": qid,
+                            "value_field": vfield or None,
+                            "label_field": lfield or None,
+                        }
+                    }
+                else:
+                    cfg_opts = {"source": "manual"}
+
+                cfg_lj["options"] = cfg_opts
+                inst.logica_json = cfg_lj
+            # ===================================================================
 
             inst.save()
             self._salvar_opcoes_escolha(form, inst)
@@ -760,8 +815,7 @@ class DetalheRespostaView(DetailView):
         # Todos os valores (para os filtros de template funcionarem)
         valores = list(r.valores.select_related("campo").all())
 
-        # >>> AQUI A MUDANÇA: passar TODOS os campos do formulário (ordem original).
-        # Inclui arquivados para manter histórico; o template já marca "Deletado".
+        # Passar TODOS os campos do formulário (ordem original) — inclui arquivados
         campos_do_form = list(r.formulario.campos.all().order_by("ordem"))
 
         ctx.update({
@@ -1059,7 +1113,7 @@ def excluir_respostas(request: HttpRequest, pk: int):
 
 
 # --------------------------------------------------------------------------- #
-# ==== NOVO: Compartilhamento (liberação direta) ============================ #
+# ==== Compartilhamento (liberação direta) ================================== #
 # --------------------------------------------------------------------------- #
 @login_required
 def colabs_fragment(request: HttpRequest, pk: int):

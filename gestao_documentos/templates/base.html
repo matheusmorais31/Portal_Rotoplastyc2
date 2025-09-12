@@ -119,12 +119,12 @@
     <nav class="side-bar light-theme" id="side-bar">
         <ul>
             <li>
-
                 <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                     <img src="{% static 'images/home-icon.png' %}" alt="Home">
                     <span class="menu-label">Home</span>
                 </a>
             </li>
+
             {% if perms.documentos %}
             <li>
                 <a href="#" onclick="toggleSubmenu(event, this)"
@@ -185,14 +185,12 @@
             </li>
             {% endif %}
 
-
             <li>
                 <a href="#" onclick="toggleSubmenu(event, this)"
                     class="{% if request.resolver_match.namespace == 'bi' %}active{% endif %}">
                     <img src="{% static 'images/indicador.png' %}" alt="BI">
                     <span class="menu-label">BI</span>
                 </a>
-
                 <ul class="submenu">
                     <li><a href="{% url 'bi:my_bi_report_list' %}"
                             class="{% if request.resolver_match.url_name == 'my_bi_report_list' %}active{% endif %}">Lista
@@ -202,14 +200,12 @@
                             class="{% if request.resolver_match.url_name == 'bi_report_list' %}active{% endif %}">Lista
                             geral de BI's</a></li>
                     {% endif %}
-
                     {% if perms.bi.permission_report %}
                     <li><a href="{% url 'bi:bi_relatorios' %}"
                             class="{% if request.resolver_match.url_name == 'bi_relatorios' %}active{% endif %}">Relatórios</a></li>
                     {% endif %}
                 </ul>
             </li>
-
 
             {% if perms.rh %}
             <li>
@@ -218,43 +214,38 @@
                     <img src="{% static 'images/rh.png' %}" alt="RH">
                     <span class="menu-label">RH</span>
                 </a>
-
-
                 <ul class="submenu">
                     {% if perms.rh.delivery_epis %}
                     <li><a href="{% url 'rh:entregas_pendentes' %}"
                             class="{% if request.resolver_match.url_name == 'entregas' %}active{% endif %}">Entregas de
                             EPIs</a></li>
                     {% endif %}
-                
                 </ul>
             </li>
             {% endif %}
-            {# -------- Formulários (CORRIGIDO) -------- #}
+
+            {# -------- Formulários -------- #}
             {% if perms.formularios %}
             <li class="menu-formularios">
                 <a href="#" onclick="toggleSubmenu(event, this)"
-                class="{% if request.resolver_match.namespace == 'formularios' %}active{% endif %}">
+                   class="{% if request.resolver_match.namespace == 'formularios' %}active{% endif %}">
                     <img src="{% static 'images/forms.png' %}" alt="Formulários">
                     <span class="menu-label">Formulários</span>
                 </a>
-
                 <ul class="submenu">
                     {% if perms.formularios.listar_meus %}
                     <li>
                         <a href="{% url 'formularios:listar_meus' %}"
-                        class="{% if request.resolver_match.url_name == 'listar_meus' %}active{% endif %}">
+                           class="{% if request.resolver_match.url_name == 'listar_meus' %}active{% endif %}">
                             Meus formulários
                         </a>
                     </li>
                     {% endif %}
 
-
-
                     {% if perms.formularios.pode_gerenciar %}
                     <li>
                         <a href="{% url 'formularios:todos_formularios' %}"
-                        class="{% if request.resolver_match.url_name == 'todos_formularios' %}active{% endif %}">
+                           class="{% if request.resolver_match.url_name == 'todos_formularios' %}active{% endif %}">
                             Todos (admin)
                         </a>
                     </li>
@@ -262,36 +253,64 @@
                 </ul>
             </li>
             {% endif %}
-            
-            <!--Usuários-->
+
+            {# -------- Administração -------- #}
             {% if perms.usuarios %}
             <li>
                 <a href="#" onclick="toggleSubmenu(event, this)"
-                    class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name != 'perfil_usuario' %}active{% endif %}">
+                   class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name != 'perfil_usuario' %}active{% endif %}">
                     <img src="{% static 'images/administracao.png' %}" alt="Administração">
                     <span class="menu-label">Administração</span>
                 </a>
                 <ul class="submenu">
-                    {% if perms.usuarios.list_user %}<li><a href="{% url 'usuarios:lista_usuarios' %}"
-                            class="{% if request.resolver_match.url_name == 'lista_usuarios' %}active{% endif %}">Usuários</a>
+                    {% if perms.usuarios.list_user %}
+                    <li><a href="{% url 'usuarios:lista_usuarios' %}"
+                           class="{% if request.resolver_match.url_name == 'lista_usuarios' %}active{% endif %}">Usuários</a>
                     </li>{% endif %}
-                    {% if perms.usuarios.can_view_list_group %}<li><a href="{% url 'usuarios:lista_grupos' %}"
-                            class="{% if request.resolver_match.url_name == 'lista_grupos' %}active{% endif %}">Grupos
-                            de Usuários</a></li>{% endif %}
-                    {% if perms.usuarios.change_permission %}<li><a href="{% url 'usuarios:liberar_permissoes' %}"
-                            class="{% if request.resolver_match.url_name == 'liberar_permissoes' %}active{% endif %}">Permissões</a>
+                    {% if perms.usuarios.can_view_list_group %}
+                    <li><a href="{% url 'usuarios:lista_grupos' %}"
+                           class="{% if request.resolver_match.url_name == 'lista_grupos' %}active{% endif %}">Grupos
+                           de Usuários</a></li>{% endif %}
+                    {% if perms.usuarios.change_permission %}
+                    <li><a href="{% url 'usuarios:liberar_permissoes' %}"
+                           class="{% if request.resolver_match.url_name == 'liberar_permissoes' %}active{% endif %}">Permissões</a>
                     </li>{% endif %}
-                    
                     <li><a href="{% url 'usuarios:user_relatorios' %}"
-                            class="{% if request.resolver_match.url_name == 'user_relatorios' %}active{% endif %}">Relatórios</a></li>
-                    
+                           class="{% if request.resolver_match.url_name == 'user_relatorios' %}active{% endif %}">Relatórios</a></li>
                 </ul>
             </li>
             {% endif %}
-        
+
+            {# -------- SQL Hub (menu próprio) -------- #}
+            {% if perms.sqlhub.view_dbconnection or perms.sqlhub.view_savedquery %}
+            <li>
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                   class="{% if request.resolver_match.namespace == 'sqlhub' %}active{% endif %}">
+                    <img src="{% static 'images/database.png' %}" alt="SQL Hub">
+                    <span class="menu-label">SQL Hub</span>
+                </a>
+                <ul class="submenu">
+                    {% if perms.sqlhub.view_dbconnection %}
+                    <li>
+                        <a href="{% url 'sqlhub:conn_list' %}"
+                           class="{% if request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_list' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_new' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_edit' %}active{% endif %}">
+                            Conexões
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if perms.sqlhub.view_savedquery %}
+                    <li>
+                        <a href="{% url 'sqlhub:query_list' %}"
+                           class="{% if request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_list' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_new' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_edit' %}active{% endif %}">
+                            Consultas
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
 
         </ul>
-        
 
         <div class="sidebar-logo-container">
             <img src="{% static 'images/logo-dark.png' %}" alt="Logo Rotoplastyc Dark"
@@ -302,8 +321,7 @@
     </nav>
 
     <main class="main-content">
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
     <script>

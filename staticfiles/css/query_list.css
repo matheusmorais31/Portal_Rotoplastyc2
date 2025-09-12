@@ -1,0 +1,240 @@
+/* ======================================================================
+   LISTA DE CONSULTAS – UI escura (RESPONSIVO REVISADO)
+   Compatível com o HTML atual (card/header/body/table/btn)
+   ====================================================================== */
+:root{
+  --bg-main:#1f1f1f;
+  --bg-layer:#242424;
+  --bg-input:#2a2a2a;
+
+  --bg-container:#515e6c;
+
+  --accent:#2EC2D6;
+  --accent-d:#24a3b4;
+
+  --text-light:#e8e8e8;
+  --text-muted:#b5b5b5;
+  --danger:#ff4d4f;
+}
+
+/* ========= CONTÊINER / TÍTULO ========= */
+.card{
+  background:var(--bg-main);
+  padding:2rem 2.5rem;
+  border-radius:1rem;
+  max-width:1400px;
+  margin:2.5rem auto;
+  box-shadow:0 4px 14px rgba(0,0,0,.45);
+  border:1px solid #2f2f2f;
+}
+.card-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:0 0 1rem 0;
+  border-bottom:1px solid #3a3a3a;
+}
+.card-header h2{
+  color:var(--text-light);
+  font-size:1.6rem;
+  margin:0;
+  font-weight:700;
+}
+.card-body{
+  padding:0;
+  margin-top:1rem;
+  max-height:70vh;          /* altura máxima visível */
+  min-height:260px;
+  overflow:auto;            /* scroll X e Y quando necessário */
+  scrollbar-gutter:stable both-edges;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* ========= BOTÕES ========= */
+.btn{
+  border:none;
+  text-decoration:none;
+  padding:.6rem 1.1rem;
+  border-radius:.55rem;
+  font-weight:600;
+  transition:background .2s, transform .02s, box-shadow .2s, opacity .2s;
+  display:inline-flex; align-items:center; gap:.4rem;
+  min-height:38px;
+  cursor:pointer;
+  color:#fff;
+  background:#555;               /* padrão = secundário */
+}
+.btn:hover{ background:#6b6b6b; }
+.btn:active{ transform:translateY(1px); }
+.btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.2); }
+
+/* botão "Nova consulta" (primário) no header */
+.card-header .btn{
+  background:var(--accent);
+}
+.card-header .btn:hover{ background:var(--accent-d); }
+.card-header .btn:focus-visible{ box-shadow:0 0 0 3px rgba(46,194,214,.35); }
+
+/* ========= TABELA (DESKTOP) ========= */
+.table{
+  width:100%;
+  border-collapse:separate;  /* precisa ser separate p/ bordas internas */
+  border-spacing:0;
+  background:var(--bg-layer);
+  border:1px solid #3a3a3a;
+  border-radius:.75rem;
+  overflow:hidden;           /* mantém cantos arredondados */
+  color:var(--text-light);
+  /* rótulos para mobile (fallback se não usar data-th no HTML) */
+  --th-1:"Nome";
+  --th-2:"Conexão";
+  --th-3:"Ativa";
+  --th-4:"Ações";
+}
+
+/* Cabeçalho */
+.table thead th{
+  text-align:left;
+  color:#fff;
+  font-weight:700;
+  padding:.9rem 1rem;
+  border-bottom:1px solid #3a3a3a;
+  background:var(--accent);
+  position:sticky; top:0; z-index:1; /* sticky no scroll da .card-body */
+}
+.table thead th+th{
+  border-left:1px solid rgba(255,255,255,.9); /* linhas no header */
+}
+
+/* Corpo */
+.table tbody td{
+  color:var(--text-light);
+  padding:.8rem 1rem;
+  border-bottom:1px solid #333;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+.table tbody td+td{
+  border-left:1px solid rgba(255,255,255,.7); /* linhas no corpo */
+}
+.table tbody tr:last-child td{ border-bottom:none; }
+.table tbody tr:hover{ background:#2a2a2a; }
+
+/* larguras apenas para desktop amplo */
+.table th:nth-child(1), .table td:nth-child(1){ width:50%; }
+.table th:nth-child(2), .table td:nth-child(2){ width:220px; }
+.table th:nth-child(3), .table td:nth-child(3){ width:160px; }
+.table th:nth-child(4), .table td:nth-child(4){ width:240px; }
+
+/* coluna Ações – flex + gap */
+.table td:last-child{
+  text-align:left; /* vamos alinhar via flex */
+  display:flex; align-items:center; gap:.6rem;
+  flex-wrap:nowrap;
+  min-width:0;
+}
+.table td:last-child .btn{
+  margin:0; /* gap decide o espaçamento */
+}
+
+/* ========= UTIL ========= */
+.card-body > p{ color:var(--text-muted); padding:1rem; margin:0; }
+
+/* ========= ESTADO VAZIO ========= */
+.card-body > p:only-child{
+  background:#232323;
+  border:1px dashed #3a3a3a;
+  color:var(--text-muted);
+  padding:1rem;
+  border-radius:.6rem;
+  text-align:center;
+}
+
+/* ========= BREAKPOINT 1 – até 1100px (tabela flexível) ========= */
+@media (max-width:1100px){
+  .card{ padding:1.75rem; }
+  .table th:nth-child(n), .table td:nth-child(n){
+    width:auto; white-space:normal; /* solta larguras e permite quebra */
+  }
+  .table td:last-child{ flex-wrap:wrap; }
+  .table td:last-child .btn{
+    flex:0 1 160px;    /* tenta lado a lado; quebra se não couber */
+    justify-content:center;
+  }
+}
+
+/* ========= BREAKPOINT 2 – até 680px (modo CARTÕES) ========= */
+@media (max-width:680px){
+  .card{ padding:1.25rem; }
+
+  .table thead{ display:none; }
+
+  .table, .table tbody, .table tr, .table td{
+    display:block;
+    width:100%;
+  }
+
+  .table{ border:none; background:transparent; }
+
+  .table tbody tr{
+    background:var(--bg-layer);
+    border:1px solid #333;
+    border-radius:.75rem;
+    margin-bottom:.9rem;
+    overflow:hidden;
+  }
+
+  .table tbody td{
+    border:none;
+    border-bottom:1px solid #2e2e2e;
+    padding:.75rem 1rem .75rem 7.2rem; /* espaço p/ rótulo */
+    position:relative;
+  }
+  .table tbody td:last-child{ border-bottom:none; }
+
+  /* rótulo (nome da coluna) — usa data-th se existir; senão usa fallback */
+  .table tbody td::before{
+    content:attr(data-th); /* prioridade para data-th no HTML */
+    position:absolute;
+    left:0; top:0;
+    height:100%; width:7rem;
+    display:flex; align-items:center;
+    padding-left:.9rem;
+    font-weight:700;
+    color:var(--text-muted);
+  }
+  /* fallbacks por coluna */
+  .table tbody td:nth-child(1):not([data-th])::before{ content:var(--th-1); }
+  .table tbody td:nth-child(2):not([data-th])::before{ content:var(--th-2); }
+  .table tbody td:nth-child(3):not([data-th])::before{ content:var(--th-3); }
+  .table tbody td:nth-child(4):not([data-th])::before{ content:var(--th-4); }
+
+  /* seção Ações no cartão */
+  .table tbody td:last-child{
+    padding:.8rem;
+    padding-left:.8rem;     /* sem rótulo */
+    display:flex; gap:.5rem; flex-wrap:wrap;
+  }
+  .table tbody td:last-child::before{ content:none; }
+
+  .table td:last-child .btn{
+    flex:1 1 140px;         /* botões fluidos e alinhados */
+    justify-content:center;
+    text-align:center;
+  }
+}
+
+/* ========= TEMA CLARO ========= */
+body.light-theme .card{ background-color:var(--bg-container); }
+body.light-theme .card-header h2{ color:#ffffff; }
+body.light-theme .card-body > p{ color:#ffffff; }
+body.light-theme .table tbody tr{ background:#677480; }
+body.light-theme a, body.light-theme h2{ color:#ffffff; }
+
+/* Acessibilidade: reduz animação */
+@media (prefers-reduced-motion:reduce){
+  .btn{ transition:none; }
+}
+
+/* ===== Scrollbar (webkit) ===== */
+.card-body::-webkit-scrollbar{height:12px;width:12px}
+.card-body::-webkit-scrollbar-thumb{background:#3b3b3b;border-radius:8px}
+.card-body::-webkit-scrollbar-track{background:var(--bg-main)}

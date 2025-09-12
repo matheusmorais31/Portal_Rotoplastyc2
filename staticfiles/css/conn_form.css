@@ -1,0 +1,215 @@
+/* ======================================================================
+   FORM DE CONEXÃO – Padrão “container” translúcido (dark + responsivo)
+   Compatível com: .card / .card-header / .card-body / .form-grid /
+                   .form-row / .form-actions / .btn / .btn-primary
+   ====================================================================== */
+
+/* Estilizar o contêiner do formulário (usa .card do seu HTML) */
+.card {
+  background-color: #1f1f1f;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.169);
+  width: 600px;
+  max-width: 70%;
+  text-align: center;
+  margin: 50px auto;
+  border: none;
+}
+
+/* Título */
+.card-header h2, .card h2 {
+  color: #ffffff;
+  margin-bottom: 15px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.card-header { border: 0; padding: 0; }
+
+/* Corpo do card */
+.card-body { padding: 0; }
+
+/* ===== Alertas (inclui suporte a errorlist do Django) ===== */
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  width: 90%;
+  margin: 0 auto 20px auto;
+  background-color: rgba(255,0,0,0.2);
+  color: #fff;
+  border: 1px solid #ff0000;
+}
+.alert-warning {
+  background-color: rgba(255,0,0,0.3);
+  border-color: #ff0000;
+  box-shadow: 0 0 10px #d62e2e;
+}
+
+/* Erros do Django como alerta */
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.errorlist li {
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  background-color: rgba(255,0,0,0.2);
+  color: #fff;
+  border: 1px solid #ff0000;
+}
+
+/* ===== Grid e linhas do formulário ===== */
+.form-grid {
+  display: block;           /* mantém o “padrão container” simples */
+}
+.form-row {
+  margin-bottom: 15px;
+}
+
+/* Labels centralizados */
+label {
+  display: block;
+  margin-bottom: 0;
+  font-size: 18px;
+  color: #ffffff;
+  text-align: center;
+}
+
+/* Campos de texto/seleção */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="url"],
+select,
+textarea {
+  width: 90%;
+  height: 38px;
+  padding: 8px;
+  margin: 8px auto;
+  border: none;
+  border-radius: 10px;
+  background-color: #d3d3d3;
+  color: #333;
+  font-size: 14px;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+  display: block;
+}
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Select2 */
+.select2-container { width: 90% !important; }
+.select2-container .select2-selection--single {
+  height: 38px !important;
+  border: none !important;
+  border-radius: 10px !important;
+  background-color: #d3d3d3 !important;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2) !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 8px !important;
+  box-sizing: border-box !important;
+}
+.select2-container .select2-selection--single .select2-selection__rendered {
+  color: #333 !important;
+  font-size: 14px !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+.select2-container .select2-selection--single .select2-selection__arrow {
+  height: 38px !important;
+  right: 8px !important;
+  width: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: absolute !important;
+}
+.select2-dropdown { background-color: #d3d3d3; color: #333; }
+.select2-results__option { color: #333; }
+
+/* Botões (Voltar / Salvar) */
+.btn {
+  display: inline-block;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  padding: 6px 14px;
+  margin: 10px 5px;
+  background-color: #ff0000; /* padrão: cancel/voltar vermelho */
+}
+.btn:hover {
+  background-color: #d62e2e;
+  box-shadow: 0 0 10px #d62e2e;
+}
+.btn-primary {
+  background-color: #2EC2D6;
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #2EC2D6;
+  box-shadow: 0 0 10px #2EC2D6;
+}
+
+/* Área de ações centralizada */
+.form-actions {
+  text-align: center;
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;   /* distância exata entre os botões */
+}
+
+/* Estado claro */
+body.light-theme .card { background-color: #515e6c; }
+
+/* Extras opcionais (caso queira botões de excluir/cancelar em outros fluxos) */
+.btn-exclude {
+  width: 100px;
+  padding: 6px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #2EC2D6;
+  transition: background-color 0.3s;
+  display: inline-block;
+}
+.btn-exclude-cancel {
+  background-color: #ff0000;
+  width: 100px;
+  padding: 6px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: inline-block;
+}
+.btn-exclude-cancel:hover { box-shadow: 0 0 10px #ff0000; }
+
+/* Acessibilidade: reduz animação */
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}

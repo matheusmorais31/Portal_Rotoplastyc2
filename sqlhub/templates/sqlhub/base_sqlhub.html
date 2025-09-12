@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SQL Hub{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1100px; margin: 0 auto;">
+  <header style="display:flex; align-items:center; justify-content:space-between; gap:1rem; margin: 1.5rem 0;">
+    <h1 style="font-size:1.6rem; font-weight:600;">SQL Hub</h1>
+    {% block page_actions %}{% endblock %}
+  </header>
+
+  {% if messages %}
+    <div>
+      {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block sqlhub_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+  {% block sqlhub_scripts %}{% endblock %}
+{% endblock %}

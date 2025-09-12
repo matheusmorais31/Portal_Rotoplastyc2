@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Consultas · SQL Hub{% endblock %}
+{% block content %}
+{% load static %}
+
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/query_list.css' %}">
+{% endblock %}
+
+
+<div class="card">
+  <div class="card-header">
+    <h2>Consultas</h2>
+    <a class="btn" href="{% url 'sqlhub:query_new' %}">Nova consulta</a>
+  </div>
+  <div class="card-body">
+    {% if queries %}
+    <table class="table">
+      <thead><tr><th>Nome</th><th>Conexão</th><th>Ativa</th><th></th></tr></thead>
+      <tbody>
+      {% for q in queries %}
+        <tr>
+          <td>{{ q.name }}</td>
+          <td>{{ q.connection.name }}</td>
+          <td>{{ q.is_active|yesno:"Sim,Não" }}</td>
+          <td style="text-align:right;">
+            <a class="btn" href="{% url 'sqlhub:query_edit' q.pk %}">Editar</a>
+            <button class="btn" onclick="previewQ({{ q.pk }})">Preview</button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>Nenhuma consulta cadastrada.</p>
+    {% endif %}
+  </div>
+</div>
+<script>
+async function previewQ(id){
+  const r = await fetch("{% url 'sqlhub:query_preview' 0 %}".replace("0",""+id));
+  const j = await r.json();
+  if(!j.ok){ alert("❌ " + j.message); return; }
+  alert("✅ " + j.columns.length + " colunas · " + j.rows.length + " linhas");
+}
+</script>
+{% endblock %}

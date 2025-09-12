@@ -4,6 +4,7 @@
  * • Sortable + Autosave via HTMX
  * • Campos multipla / checkbox / lista  →  opcoes_json
  * • Campo Upload (arquivo)              →  valid_json
+ * • Integração LISTA (origem: manual | sqlhub)
  * • ESCOPADO ao #campos-formset
  * • Habilita/Desabilita inputs para não irem ao POST indevidamente
  * • Logs detalhados [CLIENT]
@@ -45,6 +46,9 @@
     return m ? m[1] : "";
   };
 
+  const getTipoCard = (card) => card?.querySelector("select[name$='-tipo']")?.value || "";
+  const getOrigemCard = (card) => (card?.querySelector("input[name$='-origem_opcoes']")?.value || "manual");
+
   /* ===============================================================
      1. Helpers JSON  (Opções + Arquivo)
      =============================================================== */
@@ -53,9 +57,17 @@
     const hidden = block.querySelector("input[name$='-opcoes_json']");
     if (!list || !hidden) return;
 
-    const values = [...list.querySelectorAll("input[type='text']")]
-      .map((i) => i.value.trim())
-      .filter(Boolean);
+    // dedupe preservando ordem
+    const seen = new Set();
+    const values = [];
+    list.querySelectorAll("input[type='text']").forEach((i) => {
+      const v = (i.value || "").trim();
+      if (v && !seen.has(v)) {
+        seen.add(v);
+        values.push(v);
+      }
+    });
+
     hidden.value = JSON.stringify(values);
     log("opcoes_json atualizado:", values);
   }
@@ -64,14 +76,11 @@
     const hidden = card.querySelector("input[name$='-valid_json']");
     if (!hidden) return;
 
-    const sel = card.querySelector("select[name$='-tipo']");
-    const tipo = sel?.value;
+    const tipo = getTipoCard(card);
 
     // Se NÃO for 'arquivo' → garante desabilitado e limpo
     if (tipo !== "arquivo") {
-      if (hidden.value) {
-        hidden.value = "";
-      }
+      if (hidden.value) hidden.value = "";
       setDisabled(hidden, true, "tipo!=arquivo");
       return;
     }
@@ -95,23 +104,41 @@
   }
 
   function updateAllHiddenJson() {
-    // opções
+    // opções + sqlhub
     qsaFS(".pergunta-card").forEach((card) => {
-      const sel = card.querySelector("select[name$='-tipo']");
-      const tipo = sel?.value;
+      const tipo = getTipoCard(card);
+      const origem = getOrigemCard(card);
       const optsBlock = card.querySelector(".options-block");
       const hiddenOpts = card.querySelector("input[name$='-opcoes_json']");
 
-      const showOpts = ["multipla", "checkbox", "lista"].includes(tipo);
-      if (optsBlock && hiddenOpts) {
-        if (showOpts) {
+      const hiddenQ  = card.querySelector("input[name$='-sqlhub_query']");
+      const hiddenV  = card.querySelector("input[name$='-sqlhub_value_field']");
+      const hiddenL  = card.querySelector("input[name$='-sqlhub_label_field']");
+
+      const isChoice = ["multipla", "checkbox", "lista"].includes(tipo);
+      const useManual = isChoice && !(tipo === "lista" && origem === "sqlhub");
+
+      if (hiddenOpts) {
+        if (useManual) {
           setDisabled(hiddenOpts, false);
-          updateSingleOptionsJsonField(optsBlock);
+          if (optsBlock) updateSingleOptionsJsonField(optsBlock);
         } else {
           hiddenOpts.value = "";
-          setDisabled(hiddenOpts, true, "tipo_sem_opcoes");
+          setDisabled(hiddenOpts, true, "origem!=manual");
         }
       }
+
+      // Habilita os hidden de SQLHub apenas quando tipo=lista & origem=sqlhub
+      const isSQL = tipo === "lista" && origem === "sqlhub";
+      [hiddenQ, hiddenV, hiddenL].forEach((h) => {
+        if (!h) return;
+        if (isSQL) {
+          setDisabled(h, false);
+        } else {
+          h.value = "";
+          setDisabled(h, true, "origem!=sqlhub");
+        }
+      });
     });
 
     // arquivo
@@ -136,7 +163,7 @@
   };
   const debouncedTriggerAutosave = debounce(triggerAutosave);
 
-  // Deixe acessível globalmente (para onclick inline e outros scripts)
+  // Exponha globalmente para onclick inline do botão 🗑️
   window.triggerAutosave = triggerAutosave;
   window.debouncedTriggerAutosave = debouncedTriggerAutosave;
 
@@ -158,7 +185,6 @@
   }
   document.addEventListener("htmx:afterSwap", syncTotalAndOrder);
   document.addEventListener("rowDeleted", syncTotalAndOrder);
-  // Se deletou uma linha, também autosave (corrige caso do botão 🗑️)
   document.addEventListener("rowDeleted", () => debouncedTriggerAutosave());
 
   /* ===============================================================
@@ -190,7 +216,7 @@
     const inFS = e.target.closest("#campos-formset");
     if (!inFS) return;
 
-    // Editou uma opção de texto
+    // Editou opção (em blur)
     if (e.target.closest(".options-list")) {
       updateSingleOptionsJsonField(e.target.closest(".options-block"));
     }
@@ -202,6 +228,15 @@
     }
 
     debouncedTriggerAutosave();
+  });
+
+  // Também atualizar enquanto digita (mais responsivo)
+  document.body.addEventListener("input", (e) => {
+    if (!e.target.closest("#campos-formset")) return;
+    if (e.target.closest(".options-list")) {
+      updateSingleOptionsJsonField(e.target.closest(".options-block"));
+      debouncedTriggerAutosave();
+    }
   });
 
   /* ===============================================================
@@ -221,15 +256,21 @@
     const addBtn = e.target.closest("#campos-formset .btn-add-option");
     if (addBtn) {
       e.preventDefault();
+      if (typeof e.stopPropagation === "function") e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+
       const block = addBtn.closest(".options-block");
       const row = createOptionRow();
-      block.querySelector(".options-list").appendChild(row);
+      const list = block.querySelector(".options-list");
+      list.appendChild(row);
       row.querySelector("input").focus();
 
-      // Garante hidden habilitado (pois só aparece quando showOpts=true)
+      // Garante hidden habilitado
       const hiddenOpts = block.querySelector("input[name$='-opcoes_json']");
       setDisabled(hiddenOpts, false);
 
+      updateSingleOptionsJsonField(block);
+      debouncedTriggerAutosave();
       return;
     }
 
@@ -237,8 +278,11 @@
     const delBtn = e.target.closest("#campos-formset .opt-del");
     if (delBtn) {
       e.preventDefault();
+      if (typeof e.stopPropagation === "function") e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+
       const blk = delBtn.closest(".options-block");
-      delBtn.closest(".opt-row").remove();
+      delBtn.closest(".opt-row")?.remove();
       updateSingleOptionsJsonField(blk);
       debouncedTriggerAutosave();
     }
@@ -250,27 +294,33 @@
   function applyVisibilityAndDisabling(card) {
     if (!card || !card.closest("#campos-formset")) return;
 
-    const sel = card.querySelector("select[name$='-tipo']");
+    const tipo = getTipoCard(card);
+    const origem = getOrigemCard(card);
+
     const opts = card.querySelector(".options-block");
     const cfg = card.querySelector(".file-config");
     const hiddenOpts = card.querySelector("input[name$='-opcoes_json']");
     const hiddenValid = card.querySelector("input[name$='-valid_json']");
-    const tipo = sel?.value;
 
-    const showOpts = ["multipla", "checkbox", "lista"].includes(tipo);
+    const hiddenQ  = card.querySelector("input[name$='-sqlhub_query']");
+    const hiddenV  = card.querySelector("input[name$='-sqlhub_value_field']");
+    const hiddenL  = card.querySelector("input[name$='-sqlhub_label_field']");
+
+    const isChoice = ["multipla", "checkbox", "lista"].includes(tipo);
+    const useManual = isChoice && !(tipo === "lista" && origem === "sqlhub");
     const showCfg = tipo === "arquivo";
 
-    // Mostrar/Esconder blocos
-    opts?.classList.toggle("hide", !showOpts);
+    // Mostrar/Esconder blocos (options manual só quando useManual=true)
+    opts?.classList.toggle("hide", !useManual);
     cfg?.classList.toggle("hide", !showCfg);
 
     // HABILITAR/DESABILITAR os hiddens para controlar o POST
     if (hiddenOpts) {
-      if (showOpts) {
+      if (useManual) {
         setDisabled(hiddenOpts, false);
       } else {
         hiddenOpts.value = "";
-        setDisabled(hiddenOpts, true, "tipo_sem_opcoes");
+        setDisabled(hiddenOpts, true, "origem!=manual");
       }
     }
     if (hiddenValid) {
@@ -282,11 +332,24 @@
       }
     }
 
+    // SQLHub hiddens
+    const isSQL = tipo === "lista" && origem === "sqlhub";
+    [hiddenQ, hiddenV, hiddenL].forEach((h) => {
+      if (!h) return;
+      if (isSQL) {
+        setDisabled(h, false);
+      } else {
+        h.value = "";
+        setDisabled(h, true, "origem!=sqlhub");
+      }
+    });
+
     log(
-      "toggleBlocks prefix=%s tipo=%s → showOpts=%s showCfg=%s",
+      "toggleBlocks prefix=%s tipo=%s origem=%s → manual=%s cfg=%s",
       getPrefix(card),
       tipo,
-      showOpts,
+      origem,
+      useManual,
       showCfg
     );
   }

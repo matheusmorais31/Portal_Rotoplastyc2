@@ -1,36 +1,32 @@
 # settings.py
 import os
-import logging
 import ssl
+import base64
+import hashlib
+import logging
 from pathlib import Path
-from decouple import config # Mantenha apenas um import do config no topo
+from decouple import config
 from django.urls import reverse_lazy
-from dotenv import load_dotenv # IMPORTANTE: Adicionar esta linha
+from dotenv import load_dotenv
+from decimal import Decimal
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Base
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# IMPORTANTE: Carrega variáveis do arquivo .env ANTES de qualquer chamada a config()
-# Isso garante que o decouple encontre as variáveis definidas no seu .env
-env_path = BASE_DIR / '.env' # Assume que o .env está na raiz do projeto (junto com manage.py)
+# Carrega .env cedo
+env_path = BASE_DIR / '.env'
 if os.path.exists(env_path):
     load_dotenv(dotenv_path=env_path)
 else:
-    # Opcional: logar um aviso se o .env não for encontrado.
-    # O decouple então buscará apenas variáveis de ambiente reais do sistema.
     print(f"AVISO: Arquivo .env não encontrado em {env_path}. "
-          f"Certifique-se de que as variáveis de ambiente estão definidas diretamente ou que o arquivo .env existe.")
+          f"Defina as variáveis de ambiente ou crie o .env.")
 
-
-# Quick-start development settings - unsuitable for production
+# Django core
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=True, cast=bool) # É uma boa prática pegar do .env e converter para bool
-ALLOWED_HOSTS = [
-    '172.16.44.12', 'localhost'    
-]
+DEBUG = config('DEBUG', default=True, cast=bool)
+ALLOWED_HOSTS = ['172.16.44.12', 'localhost']
 
-
-# Application definition
+# Apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,16 +34,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'documentos.apps.DocumentosConfig',
-    'usuarios.apps.UsuariosConfig',
+
     'django.contrib.humanize',
-    'notificacoes',
+
+    # Terceiros
     'dirtyfields',
     'django_celery_beat',
+    # 'django_htmx',  # opcional (necessário apenas se você usar template tags do pacote)
+
+    # Apps do projeto
+    'documentos.apps.DocumentosConfig',
+    'usuarios.apps.UsuariosConfig',
+    'notificacoes',
     'bi',
     'ia',
     'rh',
     'formularios',
+    'sqlhub',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -63,8 +66,6 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'usuarios.session_timeout_middleware.SessionIdleTimeoutMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
-    'usuarios.session_timeout_middleware.SessionIdleTimeoutMiddleware',
-
 ]
 
 ROOT_URLCONF = 'gestao_documentos.urls'
@@ -89,7 +90,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gestao_documentos.wsgi.application'
 
-# Database configuration
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -100,9 +101,8 @@ DATABASES = {
         'PORT': config('DB_PORT', default='3306'),
         'OPTIONS': {
             'ssl': {
-                # ATENÇÃO: ssl.CERT_NONE desabilita a verificação do certificado SSL.
-                # Isso é INSEGURO para produção se você não confia na rede.
-                # Considere usar um certificado CA apropriado.
+                # AVISO: ssl.CERT_NONE desabilita verificação do certificado.
+                # Evite em produção se não confiar na rede.
                 'cert_reqs': ssl.CERT_NONE,
             }
         }
@@ -117,227 +117,155 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
+# I18N/L10N
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
-# USE_L10N = True # Deprecado a partir do Django 4.0, USE_I18N cobre a formatação localizada.
-USE_TZ = False # Se False, datas/horas são ingênuas (naive). Se True, são cientes de fuso (aware) e TIME_ZONE é usado.
+USE_TZ = False
 
+LOCALE_PATHS = [BASE_DIR / 'locale']
 
-LOCALE_PATHS = [
-    BASE_DIR / 'locale',
-]
-
-# Static files (CSS, JavaScript, Images)
+# Static & Media
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# LibreOffice configuration
+# LibreOffice
 _soffice_path_default = "/usr/bin/soffice"
-if os.name == 'nt':  # Windows
+if os.name == 'nt':
     _soffice_path_default = r"C:\Program Files\LibreOffice\program\soffice.exe"
 SOFFICE_PATH = config('SOFFICE_PATH', default=_soffice_path_default)
+LIBREOFFICE_PATH = SOFFICE_PATH
 
-
-# Logging configuration with log rotation
+# Logging
 LOGGING_DIR = BASE_DIR / 'logs'
-LOGGING_DIR.mkdir(parents=True, exist_ok=True) # Garante que o diretório de logs exista
+LOGGING_DIR.mkdir(parents=True, exist_ok=True)
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {asctime} [{name}] {message}', # Adicionado [{name}] para ver a origem do logger
-            'style': '{',
-        },
+        'verbose': {'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}', 'style': '{'},
+        'simple':  {'format': '{levelname} {asctime} [{name}] {message}', 'style': '{'},
     },
     'handlers': {
         'file_django': {
-            'level': 'INFO', # Pode ser INFO para logs gerais do Django
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': LOGGING_DIR / 'django.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'maxBytes': 10 * 1024 * 1024,
             'backupCount': 5,
             'formatter': 'verbose',
         },
-        'file_documentos': { # Se você ainda usa este logger
+        'file_documentos': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': LOGGING_DIR / 'documentos.log',
-            'maxBytes': 1024 * 1024 * 5,
+            'maxBytes': 5 * 1024 * 1024,
             'backupCount': 5,
             'formatter': 'verbose',
         },
-        'file_email': { # Para o 'custom_email_logger'
+        'file_email': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': LOGGING_DIR / 'email.log',
-            'maxBytes': 1024 * 1024 * 5,
+            'maxBytes': 5 * 1024 * 1024,
             'backupCount': 5,
             'formatter': 'verbose',
         },
-        'file_bi': { # Se você ainda usa este logger
+        'file_bi': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': LOGGING_DIR / 'bi.log',
-            'maxBytes': 1024 * 1024 * 5,
+            'maxBytes': 5 * 1024 * 1024,
             'backupCount': 5,
             'formatter': 'verbose',
         },
-        # --- NOVO HANDLER PARA A APLICAÇÃO 'ia' ---
         'file_ia': {
-            'level': 'DEBUG',  # Captura logs de nível DEBUG e acima para 'ia'
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGGING_DIR / 'ia.log', # Nome do arquivo de log
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB por arquivo
-            'backupCount': 5,             # Mantém 5 arquivos de backup
-            'formatter': 'verbose',       # Usa o formatador detalhado
-        },
-        # --- FIM DO NOVO HANDLER ---
-        'console': {
-            'level': 'DEBUG', # Mostra logs DEBUG e acima no console durante o desenvolvimento
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple', # Formato simples para o console
+            'filename': LOGGING_DIR / 'ia.log',
+            'maxBytes': 5 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'verbose',
         },
         'file_formularios': {
-            'level': 'DEBUG',                        # queremos capturar DEBUG
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': LOGGING_DIR / 'formularios.log',
-            'maxBytes': 5 * 1024 * 1024,             # 5 MB
+            'maxBytes': 5 * 1024 * 1024,
             'backupCount': 5,
             'formatter': 'verbose',
         },
+
+        # Handler adicionado para sqlhub
+        'file_sqlhub': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'sqlhub.log',
+            'maxBytes': 5 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+
+        'console': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'simple'},
     },
     'loggers': {
-        'django': {
-            'handlers': ['file_django', 'console'],
-            'level': 'INFO', # Nível para os logs do próprio Django
-            'propagate': True,
-        },
-        'documentos': { # Se ainda relevante
-            'handlers': ['file_documentos', 'console'],
-            'level': 'DEBUG',
-            'propagate': False, # False para não enviar para o logger 'django' ou root
-        },
-        'bi': { # Se ainda relevante
-            'handlers': ['file_bi', 'console'],
-            'level': 'DEBUG',
-            'propagate': False, # Ajuste propagate conforme necessidade
-        },
-        'custom_email_logger': { # Para logs de e-mail
-            'handlers': ['file_email', 'console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # --- NOVO LOGGER PARA A APLICAÇÃO 'ia' ---
-        'ia': {  # Este nome ('ia') corresponderá a loggers como 'ia.views', 'ia.models', etc.
-            'handlers': ['file_ia', 'console'], # Envia para 'ia.log' e para o console
-            'level': 'DEBUG',          # Define o nível mínimo de log a ser capturado para esta app
-            'propagate': False,        # Impede que as mensagens sejam passadas para loggers pai (root ou django)
-                                       # Isso mantém o ia.log mais limpo e focado.
-        },
-        'formularios': {
-            'handlers': ['file_formularios', 'console'],
-            'level': 'DEBUG',          # habilita DEBUG
-            'propagate': False,        # não envia para o logger “django”
-        },
-        
-        # --- FIM DO NOVO LOGGER ---
+        'django':      {'handlers': ['file_django', 'console'], 'level': 'INFO', 'propagate': True},
+        'documentos':  {'handlers': ['file_documentos', 'console'], 'level': 'DEBUG', 'propagate': False},
+        'bi':          {'handlers': ['file_bi', 'console'], 'level': 'DEBUG', 'propagate': False},
+        'custom_email_logger': {'handlers': ['file_email', 'console'], 'level': 'INFO', 'propagate': False},
+        'ia':          {'handlers': ['file_ia', 'console'], 'level': 'DEBUG', 'propagate': False},
+        'formularios': {'handlers': ['file_formularios', 'console'], 'level': 'DEBUG', 'propagate': False},
+
+        # Logger adicionado para sqlhub
+        'sqlhub': {'handlers': ['file_sqlhub', 'console'], 'level': 'DEBUG', 'propagate': False},
     },
-    # Opcional: Configuração do logger raiz para capturar logs não tratados por loggers específicos
-    # 'root': {
-    # 'handlers': ['console', 'file_django'], # Onde enviar logs "órfãos"
-    # 'level': 'WARNING', # Nível para logs não especificados
-    # }
 }
 
-
-
-# Authentication backends
+# Auth backends
 AUTHENTICATION_BACKENDS = [
     'usuarios.auth_backends.ActiveDirectoryBackend',
-    'django.contrib.auth.backends.ModelBackend', # Necessário para o admin e usuários locais
-    # 'usuarios.authentication.CustomBackend', # Se este for diferente do ModelBackend, certifique-se que está correto
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
-
-LIBREOFFICE_PATH = SOFFICE_PATH # Usa a variável já definida anteriormente
-
-
-# Security settings
+# Segurança/Headers
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-# Redirect URLs
+# Redirects
 LOGOUT_REDIRECT_URL = reverse_lazy('usuarios:login_usuario')
 LOGIN_URL = reverse_lazy('usuarios:login_usuario')
 
+# Upload limits
+DATA_UPLOAD_MAX_MEMORY_SIZE = 500 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 500 * 1024 * 1024
 
-# Tamanho máximo de upload em bytes (Exemplo: 500MB)
-DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 * 1024 * 1024
-FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 * 1024 * 1024
-
-
-# Configurações de e-mail (já definidas no topo via config, esta seção parece redundante se os nomes forem os mesmos)
-# Se estas forem as configurações de e-mail, elas devem usar `config()` também.
-# Por exemplo, se `EMAIL_HOST` já foi carregado via `config('EMAIL_HOST')` no topo, esta redefinição não é necessária.
-# Vou assumir que as definições com `config()` são as principais.
+# Email (via .env)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com') # Ou o valor do seu .env
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER') # Já carregado do .env se definido lá
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD') # Já carregado do .env se definido lá
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER) # Usa EMAIL_HOST_USER como padrão
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 
 SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
 
-# Celery Configuration Options
+# Celery
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = TIME_ZONE # Usa o TIME_ZONE já definido para o Django
+CELERY_TIMEZONE = TIME_ZONE
 DJANGO_CELERY_BEAT_TZ_AWARE = False
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-
-# ==============================================================================
-# Power BI Configuration - AJUSTADO PARA MÉTODO ROPC
-# ATENÇÃO: Esta abordagem ROPC é ALTAMENTE DESACONSELHADA para produção.
-# Certifique-se de que estas variáveis estão definidas CORRETAMENTE no seu arquivo .env
-# ==============================================================================
-POWERBI_TENANT_ID = config('POWERBI_TENANT_ID', default=None)
-POWERBI_USERNAME = config('POWERBI_USERNAME', default=None)
-POWERBI_PASSWORD = config('POWERBI_PASSWORD', default=None)
-
-# CRÍTICO: POWERBI_CLIENT_ID_FOR_ROPC deve ser um GUID (Client ID) de um App Registration
-# no Azure AD configurado como "Cliente Público" com permissões delegadas para Power BI.
-# O valor "gopNO9198saF8R0t0@!yTo?10!3856@6498" que você tinha no .env está INCORRETO.
-POWERBI_CLIENT_ID_FOR_ROPC = config('POWERBI_CLIENT_ID_FOR_ROPC', default=None)
-
-# ID do Workspace/Grupo padrão do Power BI. Útil independentemente do método de autenticação.
-POWERBI_GROUP_ID_DEFAULT = config('POWERBI_GROUP_ID_DEFAULT', default=None)
-
-POWERBI_CLIENT_ID = config("POWERBI_CLIENT_ID", default=None)
-POWERBI_CLIENT_SECRET = config("POWERBI_CLIENT_SECRET", default="")
-POWERBI_SCOPE = config(
-    "POWERBI_SCOPE",
-    default="https://analysis.windows.net/powerbi/api/.default"
-)
-
+# Caches
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -345,33 +273,42 @@ CACHES = {
     }
 }
 
-# LDAP Configuration
+# LDAP
 LDAP_SERVER = config('LDAP_SERVER', default=None)
-LDAP_USER = config('LDAP_USER', default=None) # DN de bind
+LDAP_USER = config('LDAP_USER', default=None)
 LDAP_PASSWORD = config('LDAP_PASSWORD', default=None)
 LDAP_SEARCH_BASE = config('LDAP_SEARCH_BASE', default=None)
 
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-
-# Tempo de sessão
-SESSION_COOKIE_AGE = config('SESSION_COOKIE_AGE', default=3600, cast=int) # 1 hora
-SESSION_IDLE_TIMEOUT = config('SESSION_IDLE_TIMEOUT', default=3600, cast=int) # 1 hora, para o middleware customizado
+# Sessão
+SESSION_COOKIE_AGE = config('SESSION_COOKIE_AGE', default=3600, cast=int)
+SESSION_IDLE_TIMEOUT = config('SESSION_IDLE_TIMEOUT', default=3600, cast=int)
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = config('SESSION_EXPIRE_AT_BROWSER_CLOSE', default=True, cast=bool)
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-IA_MAX_FILE_EXTRACTION_CHARS = config('IA_MAX_FILE_EXTRACTION_CHARS', default=1000000, cast=int)  # 1 milhão de caracteres
-
-# CHAVE IA
+# IA / APIs
+IA_MAX_FILE_EXTRACTION_CHARS = config('IA_MAX_FILE_EXTRACTION_CHARS', default=1000000, cast=int)
 GEMINI_API_KEY = config('GEMINI_API_KEY', default=None)
-
-# CHAVE API OpenAI
 OPENAI_API_KEY = config('OPENAI_API_KEY', default=None)
-
 ASSISTANT_ID = "asst_n3bjyIruC73ZJVgygOKRtaqU"
 
+# Power BI (ROPC - use com cautela)
+POWERBI_TENANT_ID = config('POWERBI_TENANT_ID', default=None)
+POWERBI_USERNAME = config('POWERBI_USERNAME', default=None)
+POWERBI_PASSWORD = config('POWERBI_PASSWORD', default=None)
+POWERBI_CLIENT_ID_FOR_ROPC = config('POWERBI_CLIENT_ID_FOR_ROPC', default=None)
+POWERBI_GROUP_ID_DEFAULT = config('POWERBI_GROUP_ID_DEFAULT', default=None)
+POWERBI_CLIENT_ID = config("POWERBI_CLIENT_ID", default=None)
+POWERBI_CLIENT_SECRET = config("POWERBI_CLIENT_SECRET", default="")
+POWERBI_SCOPE = config("POWERBI_SCOPE", default="https://analysis.windows.net/powerbi/api/.default")
 
+# Taxa de câmbio (exemplo)
+USD_TO_BRL_RATE = config('USD_TO_BRL_RATE', default=Decimal("5.00"), cast=Decimal)
 
-# Taxa de Câmbio (Exemplo)
-from decimal import Decimal
-USD_TO_BRL_RATE = config('USD_TO_BRL_RATE', default=Decimal("5.00"), cast=Decimal) # Adicionado cast e default
+# ====== CHAVES FERNET (para criptografia do sqlhub/fields.py) ======
+FERNET_KEYS = [os.getenv("FERNET_KEY")]
+
+# Fallback seguro: se não houver FERNET_KEY, deriva a partir da SECRET_KEY
+if not FERNET_KEYS or not FERNET_KEYS[0]:
+    digest = hashlib.sha256(SECRET_KEY.encode()).digest()
+    FERNET_KEYS = [base64.urlsafe_b64encode(digest).decode()]

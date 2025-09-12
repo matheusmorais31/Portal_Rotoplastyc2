@@ -211,34 +211,29 @@ def home(request):
         if not force_popup and not _eligivel_por_alvo(request, f, agora):
             continue
 
-        # ===== NOVO: respeita "Repetir a cada" em relação à ÚLTIMA RESPOSTA do usuário =====
-        intervalo = getattr(f, "repetir_cada", timedelta(0)) or timedelta(0)
-
-        # pega a última resposta do usuário (se logado)
+        # ===== respeita "Repetir a cada" em relação à ÚLTIMA RESPOSTA do usuário =====
+        intervalo = getattr(f, "repetir_cada", None)  # << mantém None (difere de 0)
         last_answer_dt = None
-        if request.user.is_authenticated:
-            last = (
-                f.respostas.filter(enviado_por=request.user)
-                .only("enviado_em").order_by("-enviado_em").first()
-            )
-            if last:
-                last_answer_dt = last.enviado_em
-        else:
-            # anônimo: usa horário salvo na sessão (se você gravar isso ao enviar)
-            last_iso = request.session.get(f"form_last_answer_{f.pk}")
-            if last_iso:
-                try:
-                    last_answer_dt = datetime.fromisoformat(last_iso)
-                except Exception:
-                    last_answer_dt = None
 
-        # se respondeu recentemente, só reabrir depois do intervalo
-        if not force_popup and last_answer_dt and intervalo.total_seconds() > 0:
+        # (home é login_required, então basta olhar respostas do usuário logado)
+        last = (
+            f.respostas.filter(enviado_por=request.user)
+            .only("enviado_em").order_by("-enviado_em").first()
+        )
+        if last:
+            last_answer_dt = last.enviado_em
+
+        if not force_popup and last_answer_dt:
+            # • respondeu e repetir_cada é None OU 0  => NUNCA repetir
+            if not intervalo or intervalo.total_seconds() == 0:
+                continue
+            # • respondeu e repetir_cada > 0 => só reabre após o intervalo
             if (agora - last_answer_dt) < intervalo:
                 continue
 
-        # ===== também respeita intervalo entre exibições (para não abrir repetidamente) =====
-        if not force_popup and intervalo.total_seconds() > 0:
+        # ===== também respeita intervalo entre exibições (não abrir repetidamente) =====
+        # só faz sentido quando há um intervalo > 0
+        if not force_popup and intervalo and intervalo.total_seconds() > 0:
             last_show_iso = request.session.get(f"form_last_show_{f.pk}")
             if last_show_iso:
                 try:

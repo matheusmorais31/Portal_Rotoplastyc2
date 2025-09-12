@@ -1,8 +1,7 @@
-# forms.py
 from __future__ import annotations
 
-import json
 from datetime import timedelta
+import json
 
 from django import forms
 from django.forms import inlineformset_factory
@@ -14,37 +13,16 @@ from .models import Formulario, Campo
 User = get_user_model()
 
 
-# ------------------------------------------------------------------
-# 1) Form principal (cabeçalho)
-# ------------------------------------------------------------------
 class FormularioForm(forms.ModelForm):
-    """
-    - 'abre_em' e 'fecha_em' usam <input type="datetime-local"> com
-      formato HTML5 (YYYY-MM-DDTHH:MM) para não sumirem após reload.
-    - 'repetir_cada_str' exibe/recebe DD:HH:MM e é convertido para
-      DurationField (repetir_cada) no clean().
-    - Quando aparece_home=True e alvo_resposta='MAN', não bloqueamos
-      o save se ainda não houver 'alvo_usuarios' — a própria lógica
-      de exibição na home impedirá que apareça para alguém até que
-      a lista seja preenchida.
-    """
-
-    # Campos de data/hora com widget já no formato correto
     abre_em = forms.DateTimeField(
         required=False,
-        widget=forms.DateTimeInput(
-            attrs={"type": "datetime-local"},
-            format="%Y-%m-%dT%H:%M",
-        ),
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
         input_formats=["%Y-%m-%dT%H:%M"],
         label="Abre em",
     )
     fecha_em = forms.DateTimeField(
         required=False,
-        widget=forms.DateTimeInput(
-            attrs={"type": "datetime-local"},
-            format="%Y-%m-%dT%H:%M",
-        ),
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
         input_formats=["%Y-%m-%dT%H:%M"],
         label="Fecha em",
     )
@@ -71,21 +49,17 @@ class FormularioForm(forms.ModelForm):
             "abre_em",
             "fecha_em",
             "aceita_respostas",
-            # ==== Config (Home) ====
             "aparece_home",
             "coletar_nome",
             "alvo_resposta",
             "alvo_usuarios",
-            # repetir_cada é populado via repetir_cada_str
         ]
         widgets = {
             "alvo_usuarios": forms.SelectMultiple(attrs={"size": 8}),
         }
 
-    # --------- helpers internos ---------
     @staticmethod
     def _format_duration(td: timedelta | None) -> str:
-        """Formata timedelta como DD:HH:MM (zero-padded)."""
         if td is None:
             return "00:00:00"
         total_min = int(td.total_seconds() // 60)
@@ -95,11 +69,6 @@ class FormularioForm(forms.ModelForm):
 
     @staticmethod
     def _parse_duration(s: str) -> timedelta | None:
-        """
-        Converte 'DD:HH:MM' -> timedelta.
-        '00:00:00' => timedelta(0)  (não repete).
-        Vazio => None (tratado como não repetir na lógica de exibição).
-        """
         s = (s or "").strip()
         if not s:
             return None
@@ -111,17 +80,12 @@ class FormularioForm(forms.ModelForm):
         except Exception:
             raise forms.ValidationError("Formato inválido. Use DD:HH:MM (ex.: 00:04:00).")
 
-    # --------- lifecycle ---------
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Preenche repetir_cada_str (GET / primeira carga)
         if not self.is_bound:
             self.initial["repetir_cada_str"] = self._format_duration(
                 getattr(self.instance, "repetir_cada", None)
             )
-
-            # Garante que os datetime apareçam no controle e no timezone local
             for f in ("abre_em", "fecha_em"):
                 val = getattr(self.instance, f, None)
                 if val:
@@ -130,22 +94,16 @@ class FormularioForm(forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-
-        # Converte repetir_cada_str -> repetir_cada
         try:
             data["repetir_cada"] = self._parse_duration(data.get("repetir_cada_str"))
         except forms.ValidationError as e:
             self.add_error("repetir_cada_str", e)
 
-        # Validação: fecha_em não pode ser menor que abre_em
-        abre  = data.get("abre_em")
+        abre = data.get("abre_em")
         fecha = data.get("fecha_em")
         if abre and fecha and fecha < abre:
             self.add_error("fecha_em", "A data de fechamento deve ser igual ou posterior à data de abertura.")
 
-        # NÃO bloquear o save quando alvo = MAN sem usuários.
-        # A exibição na home já impede aparecer para alguém até que a lista seja preenchida.
-        # (Se preferir fallback automático para 100%, troque o 'pass' por: data["alvo_resposta"] = Formulario.AlvoChoices.ALL)
         if data.get("aparece_home") and data.get("alvo_resposta") == "MAN":
             usuarios = data.get("alvo_usuarios")
             if not usuarios or len(usuarios) == 0:
@@ -155,7 +113,6 @@ class FormularioForm(forms.ModelForm):
 
     def save(self, commit: bool = True):
         obj = super().save(commit=False)
-        # seta o DurationField a partir do cleaned_data
         obj.repetir_cada = self.cleaned_data.get("repetir_cada")
         if commit:
             obj.save()
@@ -163,43 +120,99 @@ class FormularioForm(forms.ModelForm):
         return obj
 
 
-# ------------------------------------------------------------------
-# 2) Form de cada Campo / Pergunta
-# ------------------------------------------------------------------
 class CampoForm(forms.ModelForm):
-    """
-    • 'ordem' é oculto e preenchido pelo JS.
-    • 'opcoes_json' → multipla / checkbox / lista (Hidden)
-    • 'valid_json'  → regras extras (arquivo)         (Hidden)
-    • NÃO expõe 'ativo' (arquivamento controlado pela view).
-    """
     opcoes_json = forms.CharField(widget=forms.HiddenInput(), required=False)
-    valid_json = forms.CharField(widget=forms.HiddenInput(), required=False)
-    ordem = forms.IntegerField(widget=forms.HiddenInput())
-    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    valid_json  = forms.CharField(widget=forms.HiddenInput(), required=False)
+    ordem       = forms.IntegerField(widget=forms.HiddenInput())
+    id          = forms.IntegerField(widget=forms.HiddenInput(), required=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Se já existe 'validacao_json' no modelo, preenche o hidden 'valid_json' com o JSON string
-        if self.instance and self.instance.pk and getattr(self.instance, "validacao_json", None):
-            self.initial["valid_json"] = json.dumps(self.instance.validacao_json)
+    origem_opcoes        = forms.CharField(widget=forms.HiddenInput(), required=False)
+    sqlhub_connection_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    sqlhub_query_id      = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    sqlhub_value_field   = forms.CharField(widget=forms.HiddenInput(), required=False)
+    sqlhub_label_field   = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = Campo
-        exclude = ["formulario", "ativo"]  # <<< NÃO editar o flag 'ativo' no form
+        exclude = ["formulario", "ativo"]
         widgets = {
             "tipo": forms.Select(),
             "ajuda": forms.TextInput(attrs={"placeholder": "Texto de ajuda opcional"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        cfg = getattr(self.instance, "logica_json", {}) or {}
+        opt = (cfg.get("options") or {})
+        if opt:
+            self.initial["origem_opcoes"] = opt.get("source") or "manual"
+            sh = opt.get("sqlhub") or {}
+            self.initial["sqlhub_connection_id"] = sh.get("connection_id") or ""
+            self.initial["sqlhub_query_id"]      = sh.get("query_id") or ""
+            self.initial["sqlhub_value_field"]   = sh.get("value_field") or ""
+            self.initial["sqlhub_label_field"]   = sh.get("label_field") or ""
 
-# ------------------------------------------------------------------
-# 3) Formsets
-# ------------------------------------------------------------------
+    def clean(self):
+        data = super().clean()
+
+        tipo   = data.get("tipo")
+        source = (self.data.get(f"{self.prefix}-origem_choice") or data.get("origem_opcoes") or "manual").strip()
+
+        lj = dict(data.get("logica_json") or {})
+
+        if tipo == "lista":
+            if source == "sqlhub":
+                cid = data.get("sqlhub_connection_id") or self.data.get(f"{self.prefix}-sqlhub_connection_id")
+                qid = data.get("sqlhub_query_id")      or self.data.get(f"{self.prefix}-sqlhub_query_id")
+                vf  = (data.get("sqlhub_value_field")  or self.data.get(f"{self.prefix}-sqlhub_value_field") or "").strip()
+                lf  = (data.get("sqlhub_label_field")  or self.data.get(f"{self.prefix}-sqlhub_label_field") or "").strip()
+
+                if cid in ("", None) or qid in ("", None) or not vf or not lf:
+                    lj["options"] = {"source": "manual"}
+                else:
+                    try:  cid_cast = int(cid)
+                    except Exception: cid_cast = cid
+                    try:  qid_cast = int(qid)
+                    except Exception: qid_cast = qid
+
+                    lj["options"] = {
+                        "source": "sqlhub",
+                        "sqlhub": {
+                            "connection_id": cid_cast,
+                            "query_id": qid_cast,
+                            "value_field": vf,
+                            "label_field": lf,
+                        },
+                    }
+            else:
+                lj["options"] = {"source": "manual"}
+        else:
+            if "options" in lj:
+                lj["options"] = {"source": "manual"}
+
+        data["logica_json"] = lj
+        # Validação de upload (se veio)
+        vraw = self.data.get(f"{self.prefix}-valid_json") or self.cleaned_data.get("valid_json")
+        if vraw:
+            try:
+                vcfg = json.loads(vraw)
+                self.instance.validacao_json = vcfg
+            except Exception:
+                pass
+        return data
+
+    def save(self, commit: bool = True):
+        instance: Campo = super().save(commit=False)
+        instance.logica_json = self.cleaned_data.get("logica_json") or {}
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
+
 CampoFormSetCreate = inlineformset_factory(
     Formulario, Campo, form=CampoForm, extra=1, can_delete=True
 )
-
 CampoFormSetBuilder = inlineformset_factory(
     Formulario, Campo, form=CampoForm, extra=0, can_delete=True
 )

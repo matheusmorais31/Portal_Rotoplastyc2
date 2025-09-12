@@ -2,9 +2,19 @@
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/responder.css' %}">
 
-<div class="form-card" id="aba-respostas" data-has-charts="1">
+{% with current_tab=request.GET.tab|default:'resumo' %}
+<div class="form-card" id="aba-respostas" data-has-charts="1" data-current-tab="{{ current_tab }}">
   <!-- CSRF helper -->
   <form id="csrf-helper" style="display:none">{% csrf_token %}</form>
+
+  <!-- Estado aplicado dos filtros (SEM page) para paginação/links -->
+  <form id="applied-state" style="display:none">
+    {% for k,v in request.GET.items %}
+      {% if k != 'page' %}
+        <input type="hidden" name="{{ k }}" value="{{ v }}">
+      {% endif %}
+    {% endfor %}
+  </form>
 
   <!-- Cabeçalho / ações -->
   <div class="cabecalho-card responses-top">
@@ -26,7 +36,13 @@
           type="button"
           id="btn-toggle-filtros"
           class="chip chip-ghost"
-          hx-on="click: document.getElementById('filtros-resps').classList.toggle('hidden')">
+          hx-on="click:
+            var p = document.getElementById('filtros-resps');
+            if(!p) return;
+            p.classList.toggle('hidden');
+            var h = document.getElementById('filters_open');
+            if(h) h.value = p.classList.contains('hidden') ? '0' : '1';
+          ">
           Filtros
         </button>
       </div>
@@ -34,35 +50,38 @@
 
     <!-- Abas -->
     <div class="tabs">
-      <button class="tab active" type="button" data-target="tab-resumo">Resumo</button>
-      <button class="tab" type="button" data-target="tab-pergunta">Pergunta</button>
-      <button class="tab" type="button" data-target="tab-individual">Individual</button>
+      <button class="tab {% if current_tab == 'resumo' %}active{% endif %}" type="button" data-target="tab-resumo">Resumo</button>
+      <button class="tab {% if current_tab == 'pergunta' %}active{% endif %}" type="button" data-target="tab-pergunta">Pergunta</button>
+      <button class="tab {% if current_tab == 'individual' %}active{% endif %}" type="button" data-target="tab-individual">Individual</button>
     </div>
 
-    <!-- Filtros compactos -->
+    {% with fo=request.GET.filters_open|default_if_none:'' %}
+    <!-- Filtros (aplicação manual) -->
     <form id="filtros-resps"
-          class="filters-panel hidden"
+          class="filters-panel{% if fo %}{% if fo != '1' %} hidden{% endif %}{% else %}{% if not request.GET.q and not request.GET.de and not request.GET.ate and not request.GET.tem_anexo and not request.GET.campo and not request.GET.valor %} hidden{% endif %}{% endif %}"
           hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
           hx-target="#resp-section"
-          hx-swap="innerHTML"
-          hx-trigger="change, keyup changed delay:450 from:.auto">
+          hx-swap="innerHTML">
+      <!-- Estados persistentes -->
+      <input type="hidden" name="filters_open" id="filters_open" value="{{ request.GET.filters_open|default:'0' }}">
+      <input type="hidden" name="tab" id="tab_state" value="{{ current_tab }}">
 
       <div class="filters-grid">
         <div class="f-item grow">
           <label>Busca</label>
-          <input class="auto input-texto" type="text" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="texto, usuário, IP ou #ID">
+          <input class="input-texto" type="text" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="texto, usuário, IP ou #ID">
         </div>
         <div class="f-item">
           <label>De</label>
-          <input class="auto input-texto" type="date" name="de" value="{{ request.GET.de|default_if_none:'' }}">
+          <input class="input-texto" type="date" name="de" value="{{ request.GET.de|default_if_none:'' }}">
         </div>
         <div class="f-item">
           <label>Até</label>
-          <input class="auto input-texto" type="date" name="ate" value="{{ request.GET.ate|default_if_none:'' }}">
+          <input class="input-texto" type="date" name="ate" value="{{ request.GET.ate|default_if_none:'' }}">
         </div>
         <div class="f-item">
           <label>Anexos</label>
-          <select class="auto input-select" name="tem_anexo">
+          <select class="input-select" name="tem_anexo">
             <option value="" {% if not request.GET.tem_anexo %}selected{% endif %}>Todos</option>
             <option value="s" {% if request.GET.tem_anexo == 's' %}selected{% endif %}>Com anexos</option>
             <option value="n" {% if request.GET.tem_anexo == 'n' %}selected{% endif %}>Sem anexos</option>
@@ -71,7 +90,7 @@
 
         <div class="f-item">
           <label>Ordenar</label>
-          <select class="auto input-select" name="ord">
+          <select class="input-select" name="ord">
             <option value="-enviado_em" {% if request.GET.ord|default:'-enviado_em' == '-enviado_em' %}selected{% endif %}>Mais recentes</option>
             <option value="enviado_em"  {% if request.GET.ord == 'enviado_em' %}selected{% endif %}>Mais antigas</option>
             <option value="-id"         {% if request.GET.ord == '-id' %}selected{% endif %}>ID desc</option>
@@ -80,7 +99,7 @@
         </div>
         <div class="f-item">
           <label>Por página</label>
-          <select class="auto input-select" name="pp">
+          <select class="input-select" name="pp">
             {% for n in page_size_options %}
               <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
             {% endfor %}
@@ -89,7 +108,7 @@
 
         <div class="f-item">
           <label>Campo</label>
-          <select class="auto input-select" name="campo">
+          <select class="input-select" name="campo">
             <option value="">(opcional)</option>
             {% for c in formulario.campos.all %}
               <option value="{{ c.id }}" {% if request.GET.campo|default_if_none:'' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.ordem }}. {{ c.rotulo }}</option>
@@ -98,15 +117,29 @@
         </div>
         <div class="f-item">
           <label>Valor contém</label>
-          <input class="auto input-texto" type="text" name="valor" value="{{ request.GET.valor|default_if_none:'' }}" placeholder="conteúdo do campo escolhido">
+          <input class="input-texto" type="text" name="valor" value="{{ request.GET.valor|default_if_none:'' }}" placeholder="conteúdo do campo escolhido">
         </div>
 
         <div class="f-item actions">
-          <a class="btn-primario {% if not total_filtrado %}btn-disabled{% endif %}"
-             {% if total_filtrado %}href="{% url 'formularios:exportar_respostas_csv' formulario.pk %}?{{ request.GET.urlencode }}"{% endif %}>Exportar CSV</a>
+          <!-- Aplicação manual dos filtros -->
+          <button type="button"
+                  class="btn-primario"
+                  hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
+                  hx-target="#resp-section"
+                  hx-swap="innerHTML"
+                  hx-include="#filtros-resps,#tab_state"
+                  hx-vals='{"page":"1"}'>
+            Aplicar filtros
+          </button>
+
           <a class="btn-secundario {% if not total_filtrado %}btn-disabled{% endif %}"
-             {% if total_filtrado %}href="{% url 'formularios:exportar_anexos_zip' formulario.pk %}?{{ request.GET.urlencode }}"{% endif %}>Baixar anexos</a>
-          {# botão Excluir selecionadas removido #}
+             {% if total_filtrado %}href="{% url 'formularios:exportar_respostas_csv' formulario.pk %}?{{ request.GET.urlencode }}"{% endif %}>
+            Exportar CSV
+          </a>
+          <a class="btn-secundario {% if not total_filtrado %}btn-disabled{% endif %}"
+             {% if total_filtrado %}href="{% url 'formularios:exportar_anexos_zip' formulario.pk %}?{{ request.GET.urlencode }}"{% endif %}>
+            Baixar anexos
+          </a>
         </div>
       </div>
 
@@ -117,17 +150,20 @@
         <button type="button" class="chip chip-ghost" data-range="30d">Últimos 30 dias</button>
         <a class="chip chip-clear"
            hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
+           hx-include="#filtros-resps,#tab_state"
            hx-target="#resp-section"
-           hx-swap="innerHTML">Limpar</a>
+           hx-swap="innerHTML"
+           hx-vals='{"q":"","de":"","ate":"","tem_anexo":"","campo":"","valor":"","page":"1"}'>Limpar</a>
       </div>
     </form>
+    {% endwith %}
   </div>
 
   <!-- CONTEÚDO DAS ABAS -->
   <div class="tabs-content">
 
     <!-- ========== RESUMO ========== -->
-    <section id="tab-resumo" class="tab-pane active">
+    <section id="tab-resumo" class="tab-pane {% if current_tab == 'resumo' %}active{% endif %}">
       {% for c in campos_resumo %}
         {% if c.tipo in "multipla checkbox lista escala" %}
           <div class="pergunta-card {% if not c.ativo %}is-archived{% endif %}" data-campo-id="{{ c.id }}">
@@ -186,7 +222,7 @@
     </section>
 
     <!-- ========== PERGUNTA ========== -->
-    <section id="tab-pergunta" class="tab-pane">
+    <section id="tab-pergunta" class="tab-pane {% if current_tab == 'pergunta' %}active{% endif %}">
       <div class="pergunta-card">
         <div class="card-title-row">
           <h3 id="titulo-pergunta">Por pergunta</h3>
@@ -210,7 +246,7 @@
     </section>
 
     <!-- ========== INDIVIDUAL ========== -->
-    <section id="tab-individual" class="tab-pane">
+    <section id="tab-individual" class="tab-pane {% if current_tab == 'individual' %}active{% endif %}">
       {% if qs_page.object_list %}
         {% for r in qs_page.object_list %}
           <div class="pergunta-card resp-card" data-id="{{ r.id }}">
@@ -221,11 +257,7 @@
             <ul class="preview-ul">
               {% for v in r.valores.all %}
                 <li><em>{% if v.campo %}{{ v.campo.rotulo }}{% else %}(Pergunta removida){% endif %}:</em>
-                  {% if v.valor_arquivo %}
-                    <span class="file-pill">arquivo</span>
-                  {% else %}
-                    {{ v.valor_texto|default:"—" }}
-                  {% endif %}
+                  {% if v.valor_arquivo %}<span class="file-pill">arquivo</span>{% else %}{{ v.valor_texto|default:"—" }}{% endif %}
                 </li>
               {% endfor %}
             </ul>
@@ -240,13 +272,19 @@
           <div class="pager-btns">
             {% if qs_page.has_previous %}
               <a class="pager"
-                 hx-get="{% url 'formularios:aba_respostas' formulario.pk %}?page={{ qs_page.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}"
-                 hx-target="#resp-section" hx-swap="innerHTML">« Anterior</a>
+                 hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
+                 hx-target="#resp-section"
+                 hx-swap="innerHTML"
+                 hx-include="#applied-state,#tab_state"
+                 hx-vals='{"page":"{{ qs_page.previous_page_number }}"}'>« Anterior</a>
             {% endif %}
             {% if qs_page.has_next %}
               <a class="pager"
-                 hx-get="{% url 'formularios:aba_respostas' formulario.pk %}?page={{ qs_page.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}"
-                 hx-target="#resp-section" hx-swap="innerHTML">Próxima »</a>
+                 hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
+                 hx-target="#resp-section"
+                 hx-swap="innerHTML"
+                 hx-include="#applied-state,#tab_state"
+                 hx-vals='{"page":"{{ qs_page.next_page_number }}"}'>Próxima »</a>
             {% endif %}
           </div>
         </div>
@@ -296,13 +334,49 @@
   </script>
 </div>
 
-<!-- Inicialização: usa o init do builder se existir; senão, fallback mínimo + cópia com fallback -->
+<!-- Persistência da aba ativa + injeção do ?tab em requests HTMX -->
+<script>
+  (function(){
+    const root = document.getElementById('aba-respostas');
+    if (!root) return;
+
+    const tabHidden = document.getElementById('tab_state');
+    const initial = root.dataset.currentTab
+      || (root.querySelector('.tabs .tab.active')?.dataset.target || 'tab-resumo').replace('tab-','');
+    window.__abaTab = initial;
+    if (tabHidden) tabHidden.value = window.__abaTab;
+
+    root.querySelectorAll('.tabs .tab').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const val = (btn.dataset.target || 'tab-resumo').replace('tab-','');
+        window.__abaTab = val;
+        if (tabHidden) tabHidden.value = val;
+      });
+    });
+
+    if (!window.__abaCfgBound) {
+      window.__abaCfgBound = true;
+      document.addEventListener('htmx:configRequest', function(e){
+        const elt = e.detail && e.detail.elt;
+        if (!elt) return;
+        const scope = document.getElementById('aba-respostas');
+        if (!scope || !scope.contains(elt)) return;
+        e.detail.parameters = e.detail.parameters || {};
+        if (!('tab' in e.detail.parameters)) {
+          e.detail.parameters.tab = (document.getElementById('tab_state')?.value) || window.__abaTab || 'resumo';
+        }
+      });
+    }
+  })();
+</script>
+
+<!-- Inicialização e fallback -->
 <script>
 (function(){
   const root = document.getElementById('aba-respostas');
   if (!root) return;
 
-  // ------- util exposta: builder pode chamar também -------
+  // util: copiar/baixar canvas
   window.setupCopyButtonsClipboardFallback = function(scope){
     scope = scope || document;
     function canvasToBlob(canvas) {
@@ -345,22 +419,25 @@
   };
 
   if (window.initAbaRespostas) {
-    // o builder fará init completo; garantimos apenas o fallback de cópia
     window.setupCopyButtonsClipboardFallback(root);
     window.initAbaRespostas(root);
     return;
   }
 
-  // --- Fallback simples (para acesso direto a esta página sem o builder) ---
+  // Fallback simples (sem builder)
   function setupTabs(){
     const tabs = root.querySelectorAll('.tab');
     const panes = root.querySelectorAll('.tab-pane');
+    const tabHidden = document.getElementById('tab_state');
     tabs.forEach(btn=>{
       btn.addEventListener('click', ()=>{
         tabs.forEach(b=>b.classList.remove('active'));
         panes.forEach(p=>p.classList.remove('active'));
         btn.classList.add('active');
         root.querySelector('#'+btn.dataset.target).classList.add('active');
+        const val = (btn.dataset.target || 'tab-resumo').replace('tab-','');
+        window.__abaTab = val;
+        if (tabHidden) tabHidden.value = val;
       });
     });
   }
@@ -375,13 +452,13 @@
         if(r==='today'){ de.value=fmt(n); ate.value=fmt(n); }
         else if(r==='7d'){ const d=new Date(n); d.setDate(n.getDate()-6); de.value=fmt(d); ate.value=fmt(n); }
         else if(r==='30d'){ const d=new Date(n); d.setDate(n.getDate()-29); de.value=fmt(d); ate.value=fmt(n); }
-        panel.dispatchEvent(new Event('change',{bubbles:true}));
+        // sem auto-submit; usuário clica em "Aplicar filtros"
       });
     });
   }
   function parseJSON(id){ try{ return JSON.parse(document.getElementById(id)?.textContent||''); }catch{ return null; } }
 
-  const CH = 260; // altura compacta
+  const CH = 260;
   const PALETTE = ["#4aa3ff","#ff6b8a","#ffa143","#f4c04d","#7bd8a4","#b98bff","#6ed0fb","#ff8f5e","#9fe17d","#e0b3ff"];
 
   function doughnutOptions(){ return {
@@ -417,11 +494,9 @@
     const scaleDist   = parseJSON('data-escala-dist') || {};
     const scaleAvg    = parseJSON('data-escalas-media') || {};
 
-    // carrega Chart.js se preciso
     const ensure = () => window.Chart ? Promise.resolve() : new Promise((ok,err)=>{ const s=document.createElement('script'); s.src="https://cdn.jsdelivr.net/npm/chart.js@4"; s.onload=ok; s.onerror=err; document.head.appendChild(s); });
 
     ensure().then(()=>{
-      // textos brancos no tema escuro
       Chart.defaults.color = '#fff';
       Chart.defaults.plugins.legend.labels.color = '#fff';
       Chart.defaults.plugins.tooltip.titleColor = '#fff';
@@ -519,17 +594,17 @@
       sel.dispatchEvent(new Event('change'));
     });
 
-  } // fim fallback
+  }
 
   function init(){
     setupTabs();
     setupFilters();
-    window.setupCopyButtonsClipboardFallback(root); // copiar/baixar gráficos
+    window.setupCopyButtonsClipboardFallback(root);
     draw();
   }
   init();
 
-  // rebind após swaps HTMX (paginador/filtros)
+  // Rebind mínimo após swaps HTMX (o HTML novo já traz este script)
   document.addEventListener('htmx:afterSwap', (e)=>{
     if (e.target && e.target.id === 'resp-section'){
       window.setupCopyButtonsClipboardFallback(e.target);
@@ -537,3 +612,4 @@
   });
 })();
 </script>
+{% endwith %}

@@ -53,6 +53,7 @@ urlpatterns = [
     # Formulários
     path('formularios/', include('formularios.urls', namespace='formularios')),
 
+    path('sqlhub/', include('sqlhub.urls', namespace="sqlhub")),
 
 
 ]
