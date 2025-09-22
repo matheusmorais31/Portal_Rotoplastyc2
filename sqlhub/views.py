@@ -1,3 +1,4 @@
+# views.py
 from __future__ import annotations
 
 import csv
@@ -7,17 +8,16 @@ import unicodedata
 import logging
 import time
 from collections import OrderedDict
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple, Set, Optional
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import (
     Http404,
     HttpRequest,
-    HttpResponse,
     JsonResponse,
     StreamingHttpResponse,
 )
@@ -29,6 +29,7 @@ from django.views.generic import CreateView, ListView, UpdateView
 from .models import DBConnection, SavedQuery, DBEngine
 
 logger = logging.getLogger(__name__)
+
 
 # =========================
 # Forms
@@ -57,8 +58,6 @@ class DBConnectionForm(forms.ModelForm):
         cleaned = super().clean()
         engine = cleaned.get("engine")
         database = (cleaned.get("database") or "").strip()
-
-        # Para Firebird/Postgres/MySQL exigimos 'database'
         if engine in (DBEngine.FIREBIRD, DBEngine.POSTGRES, DBEngine.MYSQL) and not database:
             raise ValidationError({"database": "Este campo é obrigatório para este banco."})
         return cleaned
@@ -150,7 +149,11 @@ def _open_dbapi(conn: DBConnection):
             from firebird.driver import connect as fb_connect
             dsn = f"{host}/{port or 3050}:{db}" if host else db
             py_conn = fb_connect(
-                dsn=dsn, user=user, password=pwd, timeout=int(opts.get("connect_timeout", 5))
+                dsn=dsn,
+                user=user,
+                password=pwd,
+                timeout=int(opts.get("connect_timeout", 5)),
+                charset=opts.get("charset", "UTF8"),
             )
             return py_conn, py_conn.cursor()
         except Exception:
@@ -187,7 +190,7 @@ def _clamp_limit(raw: Any, soft_max: int = 1000) -> int:
         v = int(raw)
     except Exception:
         v = soft_max
-    v = max(1, min(v, max(soft_max, 5000)))  # nunca > 5000 no preview
+    v = max(1, min(v, max(soft_max, 5000)))
     return v
 
 
@@ -274,31 +277,113 @@ def _build_sql_with_filters(base_sql: str, engine: str, filters: List[Dict[str, 
     return wrapped, params
 
 
-# ====== Busca server-side (no SGBD) para options ======
+# ====== Normalização util ======
 
-_NUM_NAME_RE = re.compile(
-    r"(^|_)(id|cod|codigo|código|cd|nr|num|numero|número|seq|serial|matricula|matr)(_|$)",
-    re.I,
-)
+def _norm(s: Any) -> str:
+    try:
+        t = str(s or "")
+        t = unicodedata.normalize("NFKD", t)
+        t = "".join(ch for ch in t if not unicodedata.combining(ch))
+        return t.lower()
+    except Exception:
+        return str(s or "").lower()
 
-def _looks_numeric_name(col: str) -> bool:
-    """Heurística: nomes que sugerem valor numérico/código."""
-    return bool(_NUM_NAME_RE.search(col or ""))
+
+def _canon_name(s: Any) -> str:
+    try:
+        t = str(s or "")
+        t = unicodedata.normalize("NFKD", t)
+        t = "".join(ch for ch in t if not unicodedata.combining(ch))
+        return t.lower()
+    except Exception:
+        return str(s or "").lower()
 
 
-def _like_expr_by_engine(engine: str, col: str, q_mode: str = "contains") -> str:
-    """Expressão por engine; suporta modo 'prefix' (usa índice) no Firebird."""
+def _find_col_index(cols: List[str], name: str | None, default: int = 0) -> int:
+    if not cols or not name:
+        return default
+    try:
+        return cols.index(name)
+    except ValueError:
+        pass
+    canon = {_canon_name(c): i for i, c in enumerate(cols)}
+    return canon.get(_canon_name(name), default)
+
+
+# ====== Cache LRU/TTL curto ======
+
+class _TTLCache:
+    def __init__(self, maxsize=512, ttl=45.0):
+        self.data = OrderedDict()
+        self.maxsize = maxsize
+        self.ttl = ttl
+    def _purge(self):
+        now = time.monotonic()
+        for k in list(self.data.keys()):
+            t, _ = self.data[k]
+            if now - t > self.ttl:
+                self.data.pop(k, None)
+        while len(self.data) > self.maxsize:
+            self.data.popitem(last=False)
+    def get(self, key):
+        self._purge()
+        item = self.data.pop(key, None)
+        if not item:
+            return None
+        t, v = item
+        if time.monotonic() - t > self.ttl:
+            return None
+        self.data[key] = (time.monotonic(), v)
+        return v
+    def set(self, key, value):
+        self._purge()
+        self.data[key] = (time.monotonic(), value)
+
+_OPTIONS_CACHE = _TTLCache(maxsize=512, ttl=45.0)
+_BADCOLS_CACHE  = _TTLCache(maxsize=256, ttl=300.0)
+
+def _badkey(qpk: int, col: str) -> tuple:
+    return ("badcol", int(qpk), (col or "").upper())
+
+def _mark_bad_col(qpk: int, col: str) -> None:
+    try:
+        _BADCOLS_CACHE.set(_badkey(qpk, col), True)
+    except Exception:
+        pass
+
+def _is_bad_col(qpk: int, col: str) -> bool:
+    try:
+        return bool(_BADCOLS_CACHE.get(_badkey(qpk, col)))
+    except Exception:
+        return False
+
+
+# ====== SQL genérico para busca por engine, sem amarrar a nomes ======
+
+def _like_expr_by_engine(
+    engine: str,
+    col: str,
+    q_mode: str = "contains",
+    is_text: Optional[bool] = None,
+) -> str:
+    """
+    Constrói expressão de filtro para a coluna `src.col` conforme engine.
+    - Não usa nomes específicos; só depende do tipo inferido (texto ou não).
+    - Em Firebird, evita casts de charset para não provocar "Malformed string".
+    """
     c = f"src.{col}"
+    # quando não temos certeza se é texto, converta para texto de forma genérica
+    as_text = c if is_text else f"CAST({c} AS VARCHAR(512))"
+
     if engine == DBEngine.FIREBIRD:
         if q_mode == "prefix":
-            if _looks_numeric_name(col):
-                return f"CAST({c} AS VARCHAR(64)) STARTING WITH $$PARAM$$"
-            return f"{c} STARTING WITH $$PARAM$$"
-        if _looks_numeric_name(col):
-            return f"CAST({c} AS VARCHAR(64)) CONTAINING $$PARAM$$"
-        return f"{c} CONTAINING $$PARAM$$"
+            # STARTING WITH é rápido com índice; UPPER para case-insensitive
+            return f"UPPER({as_text}) STARTING WITH UPPER($$PARAM$$)"
+        # contains é case-insensitive por natureza no FB
+        return f"{as_text} CONTAINING $$PARAM$$"
 
     if engine == DBEngine.POSTGRES:
+        # ILIKE é case-insensitive
         return f"CAST({c} AS TEXT) ILIKE $$PARAM$$"
 
     if engine == DBEngine.MYSQL:
@@ -307,17 +392,8 @@ def _like_expr_by_engine(engine: str, col: str, q_mode: str = "contains") -> str
     if engine == DBEngine.SQLSERVER:
         return f"UPPER(CAST({c} AS NVARCHAR(4000))) LIKE UPPER($$PARAM$$)"
 
+    # fallback genérico
     return f"CAST({c} AS TEXT) LIKE $$PARAM$$"
-
-
-def _should_prefix(engine: str, col: str, qtext: str | None) -> bool:
-    """Heurística: no Firebird, prefira prefixo para campos de código/id ou termo 'limpo'."""
-    if engine != DBEngine.FIREBIRD or not qtext:
-        return False
-    if _looks_numeric_name(col):
-        return True
-    qt = str(qtext).strip()
-    return bool(qt) and bool(re.fullmatch(r"[A-Za-z0-9._-]+", qt))
 
 
 def _build_options_db_filter_sql(
@@ -326,13 +402,13 @@ def _build_options_db_filter_sql(
     search_cols: List[str],
     qtext: str | None = None,
     limit: int | None = None,
-    q_mode: str | None = None,   # "contains" | "prefix" | None (auto)
+    q_mode: str | None = None,  # "prefix" | "contains" | None
+    text_cols: Optional[Set[str]] = None,
 ) -> Tuple[str, List[Any]]:
     """
-    Monta filtro server-side para options, com:
-      - seleção por colunas (LIKE/ILIKE/CONTAINING/STARTING WITH)
-      - heurística de prefixo no Firebird
-      - LIMIT/TOP/ROWS no SQL externo
+    Constrói SELECT sobre (base_sql) aplicando WHERE de busca nas colunas indicadas.
+    Não depende de nomes específicos; usa `text_cols` (inferido por amostra) para decidir
+    se precisa CAST genérico (sem charset) ou pode usar a coluna diretamente.
     """
     base_sql = (base_sql or "").strip().rstrip(";")
     ph = _engine_placeholder(engine)
@@ -341,45 +417,151 @@ def _build_options_db_filter_sql(
     if not safe_cols:
         return base_sql, []
 
-    exprs, params = [], []
+    mode = q_mode or "contains"
+    exprs: List[str] = []
+    params: List[Any] = []
+
     for c in safe_cols:
-        mode = "contains"
-        if q_mode == "prefix":
-            mode = "prefix"
-        elif _should_prefix(engine, c, qtext):
-            mode = "prefix"
-        expr = _like_expr_by_engine(engine, c, mode).replace("$$PARAM$$", ph)
+        is_text = (text_cols is not None and c in text_cols)
+        expr = _like_expr_by_engine(engine, c, mode, is_text=is_text).replace("$$PARAM$$", ph)
         exprs.append(f"({expr})")
+
         if qtext is None:
-            params.append(None)  # compat
+            params.append(None)
         else:
             if engine == DBEngine.FIREBIRD:
-                params.append(qtext)  # termo puro
+                # no Firebird o termo vai “puro”
+                params.append(qtext if mode != "prefix" else qtext)
             else:
-                params.append((f"{qtext}%" if mode == "prefix" else f"%{qtext}%"))
+                params.append(f"{qtext}%" if mode == "prefix" else f"%{qtext}%")
 
     where_sql = " OR ".join(exprs)
     final_sql = f"SELECT * FROM (\n{base_sql}\n) src WHERE {where_sql}"
 
-    # LIMIT/TOP/ROWS no SQL externo
+    # LIMIT/TOP/ROWS
     if limit and isinstance(limit, int) and limit > 0:
         n = int(limit)
         if engine in (DBEngine.POSTGRES, DBEngine.MYSQL):
             final_sql += " ORDER BY 1 LIMIT %s"
             params.append(n)
         elif engine == DBEngine.SQLSERVER:
-            # respeita SELECT DISTINCT
-            if re.match(r"(?is)^\s*SELECT\s+DISTINCT\s+", final_sql):
-                final_sql = re.sub(r"(?is)^\s*SELECT\s+DISTINCT\s+",
-                                   f"SELECT DISTINCT TOP {n} ", final_sql, count=1)
-            else:
-                final_sql = re.sub(r"(?is)^\s*SELECT\s+",
-                                   f"SELECT TOP {n} ", final_sql, count=1)
+            final_sql = re.sub(r"(?is)^\s*SELECT\s+", f"SELECT TOP {n} ", final_sql, count=1)
             final_sql += " ORDER BY 1"
         elif engine == DBEngine.FIREBIRD:
-            final_sql += f" ORDER BY 1 ROWS {n}"
+            # deixar sem ORDER BY para FB poder usar índice
+            final_sql += f" ROWS {n}"
 
     return final_sql, params
+
+
+def _dbfilter_firebird_greedy(
+    qpk: int,
+    conn: DBConnection,
+    base_sql: str,
+    search_cols: List[str],
+    qtext: str,
+    limit: int,
+    vf_idx: int,
+    text_cols: Optional[Set[str]],
+) -> Tuple[List[List[Any]], List[str], List[str]]:
+    """
+    Firebird: Tenta prefixo por coluna; se necessário, tenta contains.
+    Não depende de nomes de colunas. Usa `text_cols` para evitar CAST desnecessário.
+    Retorna (rows, good_cols, bad_cols).
+    """
+    rows: List[List[Any]] = []
+    seen: Set[Any] = set()
+    good_cols: List[str] = []
+    bad_cols: List[str] = []
+
+    # 1ª passada: prefix
+    for col in search_cols:
+        try:
+            rem = max(1, limit - len(rows))
+            sql_col, params = _build_options_db_filter_sql(
+                base_sql, DBEngine.FIREBIRD, [col], qtext=qtext, limit=rem, q_mode="prefix", text_cols=text_cols
+            )
+            logger.debug("fb-greedy col=%s sql=%s", col, sql_col)
+            py_conn, cur = _open_dbapi(conn)
+            try:
+                cur.execute(sql_col, params)
+                got_any = False
+                while len(rows) < limit:
+                    batch = cur.fetchmany(min(limit - len(rows), 2000))
+                    if not batch:
+                        break
+                    for r in batch:
+                        rr = list(r)
+                        key = rr[vf_idx] if vf_idx < len(rr) else tuple(rr)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        rows.append(rr)
+                        got_any = True
+                        if len(rows) >= limit:
+                            break
+                if got_any:
+                    good_cols.append(col)
+            finally:
+                try: cur.close()
+                except Exception: pass
+                try: py_conn.close()
+                except Exception: pass
+        except Exception as e:
+            bad_cols.append(col)
+            if "Malformed string" in str(e) or "SQLCODE: -104" in str(e):
+                _mark_bad_col(qpk, col)
+            logger.debug("fb-greedy(prefix): pulando coluna %s por erro %r", col, e)
+
+        if len(rows) >= limit:
+            break
+
+    # 2ª passada: contains
+    if len(rows) < limit:
+        for col in search_cols:
+            if col in good_cols or col in bad_cols or _is_bad_col(qpk, col):
+                continue
+            try:
+                rem = max(1, limit - len(rows))
+                sql_col, params = _build_options_db_filter_sql(
+                    base_sql, DBEngine.FIREBIRD, [col], qtext=qtext, limit=rem, q_mode="contains", text_cols=text_cols
+                )
+                logger.debug("fb-greedy (contains) col=%s sql=%s", col, sql_col)
+                py_conn, cur = _open_dbapi(conn)
+                try:
+                    cur.execute(sql_col, params)
+                    got_any = False
+                    while len(rows) < limit:
+                        batch = cur.fetchmany(min(limit - len(rows), 2000))
+                        if not batch:
+                            break
+                        for r in batch:
+                            rr = list(r)
+                            key = rr[vf_idx] if vf_idx < len(rr) else tuple(rr)
+                            if key in seen:
+                                continue
+                            seen.add(key)
+                            rows.append(rr)
+                            got_any = True
+                            if len(rows) >= limit:
+                                break
+                    if got_any:
+                        good_cols.append(col)
+                finally:
+                    try: cur.close()
+                    except Exception: pass
+                    try: py_conn.close()
+                    except Exception: pass
+            except Exception as e:
+                bad_cols.append(col)
+                if "Malformed string" in str(e) or "SQLCODE: -104" in str(e):
+                    _mark_bad_col(qpk, col)
+                logger.debug("fb-greedy(contains): pulando coluna %s por erro %r", col, e)
+
+            if len(rows) >= limit:
+                break
+
+    return rows, good_cols, bad_cols
 
 
 # =========================
@@ -444,7 +626,6 @@ def _fetch_page(
 
         columns = [d[0] for d in (cur.description or [])]
 
-        # pular offset
         to_skip = offset
         while to_skip > 0:
             n = min(skip_batch, to_skip)
@@ -470,19 +651,17 @@ def _fetch_page(
 # Conexões (CBVs)
 # =========================
 
-class ConnectionList(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class ConnectionList(LoginRequiredMixin, ListView):
     model = DBConnection
     template_name = "sqlhub/conn_list.html"
     context_object_name = "connections"
-    permission_required = "sqlhub.view_dbconnection"
 
 
-class ConnectionCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class ConnectionCreate(LoginRequiredMixin, CreateView):
     model = DBConnection
     form_class = DBConnectionForm
     template_name = "sqlhub/conn_form.html"
     success_url = reverse_lazy("sqlhub:conn_list")
-    permission_required = "sqlhub.add_dbconnection"
 
     def form_valid(self, form):
         obj: DBConnection = form.save(commit=False)
@@ -495,12 +674,11 @@ class ConnectionCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ConnectionUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ConnectionUpdate(LoginRequiredMixin, UpdateView):
     model = DBConnection
     form_class = DBConnectionForm
     template_name = "sqlhub/conn_form.html"
     success_url = reverse_lazy("sqlhub:conn_list")
-    permission_required = "sqlhub.change_dbconnection"
 
     def form_valid(self, form):
         messages.success(self.request, "Conexão atualizada com sucesso.")
@@ -508,7 +686,6 @@ class ConnectionUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 
 @login_required
-@permission_required("sqlhub.view_dbconnection", raise_exception=True)
 def test_connection_view(request: HttpRequest, pk: int) -> JsonResponse:
     conn = get_object_or_404(DBConnection, pk=pk)
     try:
@@ -533,11 +710,10 @@ def test_connection_view(request: HttpRequest, pk: int) -> JsonResponse:
 # Consultas (CBVs + APIs)
 # =========================
 
-class QueryList(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class QueryList(ListView):
     model = SavedQuery
     template_name = "sqlhub/query_list.html"
     context_object_name = "queries"
-    permission_required = "sqlhub.view_savedquery"
 
     def get_queryset(self):
         qs = super().get_queryset().select_related("connection").order_by(
@@ -552,12 +728,11 @@ class QueryList(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return qs
 
 
-class QueryCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class QueryCreate(LoginRequiredMixin, CreateView):
     model = SavedQuery
     form_class = SavedQueryForm
     template_name = "sqlhub/query_form.html"
     success_url = reverse_lazy("sqlhub:query_list")
-    permission_required = "sqlhub.add_savedquery"
 
     def form_valid(self, form):
         obj: SavedQuery = form.save(commit=False)
@@ -567,20 +742,18 @@ class QueryCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class QueryUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class QueryUpdate(LoginRequiredMixin, UpdateView):
     model = SavedQuery
     form_class = SavedQueryForm
     template_name = "sqlhub/query_form.html"
     success_url = reverse_lazy("sqlhub:query_list")
-    permission_required = "sqlhub.change_savedquery"
 
     def form_valid(self, form):
         messages.success(self.request, "Consulta atualizada com sucesso.")
         return super().form_valid(form)
 
 
-@login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
+
 def query_preview(request: HttpRequest, pk: int) -> JsonResponse:
     q = get_object_or_404(SavedQuery, pk=pk, is_active=True)
     limit = _clamp_limit(request.GET.get("limit") or q.default_limit or 100)
@@ -598,7 +771,6 @@ def query_preview(request: HttpRequest, pk: int) -> JsonResponse:
 
 
 @login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
 def query_columns(request: HttpRequest, pk: int) -> JsonResponse:
     q = get_object_or_404(SavedQuery, pk=pk, is_active=True)
     try:
@@ -612,91 +784,6 @@ def query_columns(request: HttpRequest, pk: int) -> JsonResponse:
         return JsonResponse({"ok": False, "message": f"Erro ao obter colunas: {e}"}, status=400)
 
 
-# ====== Utilidades de normalização/nomes ======
-
-def _norm(s: Any) -> str:
-    try:
-        t = str(s or "")
-        t = unicodedata.normalize("NFKD", t)
-        t = "".join(ch for ch in t if not unicodedata.combining(ch))
-        return t.lower()
-    except Exception:
-        return str(s or "").lower()
-
-
-def _canon_name(s: Any) -> str:
-    try:
-        t = str(s or "")
-        t = unicodedata.normalize("NFKD", t)
-        t = "".join(ch for ch in t if not unicodedata.combining(ch))
-        return t.lower()
-    except Exception:
-        return str(s or "").lower()
-
-
-def _find_col_index(cols: List[str], name: str | None, default: int = 0) -> int:
-    if not cols or not name:
-        return default
-    try:
-        return cols.index(name)
-    except ValueError:
-        pass
-    canon = {_canon_name(c): i for i, c in enumerate(cols)}
-    return canon.get(_canon_name(name), default)
-
-
-def _pick_extra_search_cols(cols: List[str], base_idxs: List[int]) -> List[int]:
-    prefs = [
-        "descricao", "descrição", "description", "desc",
-        "nome", "name", "titulo", "título", "title",
-        "referencia", "referência", "ref",
-        "produto", "item", "materia", "material"
-    ]
-    chosen: List[int] = []
-    cnames = [_canon_name(c) for c in cols]
-    for p in prefs:
-        for i, c in enumerate(cnames):
-            if i in base_idxs or i in chosen:
-                continue
-            if c == p or p in c:
-                chosen.append(i)
-    return chosen
-
-
-# ====== Cache LRU/TTL curto para options ======
-
-class _TTLCache:
-    def __init__(self, maxsize=512, ttl=15.0):
-        self.data = OrderedDict()
-        self.maxsize = maxsize
-        self.ttl = ttl
-    def _purge(self):
-        now = time.monotonic()
-        for k in list(self.data.keys()):
-            t, _ = self.data[k]
-            if now - t > self.ttl:
-                self.data.pop(k, None)
-        while len(self.data) > self.maxsize:
-            self.data.popitem(last=False)
-    def get(self, key):
-        self._purge()
-        item = self.data.pop(key, None)
-        if not item:
-            return None
-        t, v = item
-        if time.monotonic() - t > self.ttl:
-            return None
-        self.data[key] = (time.monotonic(), v)
-        return v
-    def set(self, key, value):
-        self._purge()
-        self.data[key] = (time.monotonic(), value)
-
-_OPTIONS_CACHE = _TTLCache(maxsize=512, ttl=15.0)
-
-
-@login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
 def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
     """
     GET /sqlhub/api/query/<id>/options/
@@ -706,7 +793,8 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
       &scan=<int>              # teto da varredura no fallback (default 2000; com q → 50000)
       + where[...] opcionais
       &q_mode=prefix|contains  # força modo (opcional)
-      &cache=0                 # desliga cache (opcional)
+      &cache=0                 # desliga cache curto (opcional)
+      &skip_cols=COL1,COL2     # força pular colunas específicas
     """
     qobj = get_object_or_404(SavedQuery, pk=pk, is_active=True)
     value_field = (request.GET.get("value_field") or request.GET.get("value") or "").strip()
@@ -715,71 +803,169 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
     filters = _parse_where_filters(request)
     qtext = (request.GET.get("q") or "").strip()
 
-    # Descobre colunas reais
+    # Descobre colunas e 1ª linha para inferir tipos textuais
     try:
-        cols, _ = _fetch_preview(qobj.connection, qobj.sql_text, limit=1, filters=filters)
+        cols, sample_rows = _fetch_preview(qobj.connection, qobj.sql_text, limit=1, filters=filters)
     except Exception as e:
         return JsonResponse({"ok": False, "message": f"Falha ao inspecionar colunas: {e}"}, status=400)
 
-    # Índices value/label (fallbacks: REFERENCIA / DESCRICAO)
-    vf_idx = cols.index(value_field) if value_field in cols else (cols.index("REFERENCIA") if "REFERENCIA" in cols else 0)
-    lf_idx = cols.index(label_field) if label_field in cols else (cols.index("DESCRICAO") if "DESCRICAO" in cols else 0)
+    sample = sample_rows[0] if sample_rows else []
+    text_cols: Set[str] = set()
+    for i, c in enumerate(cols):
+        try:
+            v = sample[i] if i < len(sample) else None
+            if isinstance(v, (str, bytes)) or v is None:
+                text_cols.add(c)
+        except Exception:
+            # se der erro para inspecionar, não marca como texto
+            pass
+
+    # Índices value/label (fallback: primeira/segunda coluna, se existirem)
+    vf_idx = cols.index(value_field) if value_field in cols else (0 if cols else 0)
+    lf_idx = cols.index(label_field) if label_field in cols else (1 if len(cols) > 1 else 0)
 
     engine = qobj.connection.engine
 
-    # Colunas de busca (preferência + override q_fields)
-    pref = ["REFERENCIA", "DESCRICAO", "DESCRIÇÃO", "COD_PRODUTO", "REFERÊNCIA"]
-    search_cols_ordered: List[str] = []
-    seen = set()
-    for c in pref + cols:
-        if c in cols and c not in seen:
-            search_cols_ordered.append(c); seen.add(c)
-
+    # Colunas de busca:
+    # - se q_fields informado, usa as pedidas (presentes e válidas)
+    # - senão, usa TODAS as colunas em ordem do SQL,
+    #     mas dá preferência às textuais (as primeiras N serão textuais)
     q_fields_param = (request.GET.get("q_fields") or request.GET.get("q_cols") or "").strip()
     if q_fields_param:
         asked = [c.strip() for c in q_fields_param.split(",") if c.strip()]
-        asked = [c for c in asked if c in cols]
-        if asked:
-            search_cols_ordered = asked
+        search_cols_ordered = [c for c in asked if c in cols]
+    else:
+        text_first = [c for c in cols if c in text_cols]
+        non_text   = [c for c in cols if c not in text_cols]
+        search_cols_ordered = text_first + non_text
 
-    # cache curto (apenas quando tem q=)
+    # aplicar skip_cols e blacklist TTL
+    skip_cols_param = (request.GET.get("skip_cols") or "").strip()
+    skip_cols = {c.strip() for c in skip_cols_param.split(",") if c.strip()}
+    search_cols_ordered = [
+        c for c in search_cols_ordered
+        if c not in skip_cols and not _is_bad_col(qobj.id, c)
+    ]
+
+    # mantenha no máximo 4 colunas no caminho DB (tuneável via GET se quiser)
+    max_cols = int(request.GET.get("max_cols") or 4)
+    if max_cols > 0:
+        search_cols_ordered = search_cols_ordered[:max_cols]
+
+    # cache curto (funciona com e sem q)
     cache_enabled = (request.GET.get("cache", "1") != "0")
     cache_key = None
-    if qtext and cache_enabled:
+    if cache_enabled:
         filt_key = tuple(
             (f.get("field",""), f.get("op",""), str(f.get("value","")))
             for f in (filters or [])
         )
-        cache_key = ("opt", pk, tuple(search_cols_ordered[:4]), vf_idx, lf_idx, qtext.lower(), limit, filt_key)
+        cache_key = ("opt", pk, tuple(search_cols_ordered), vf_idx, lf_idx, (qtext or "").lower(), limit, filt_key)
         hit = _OPTIONS_CACHE.get(cache_key)
         if hit:
             return JsonResponse(hit)
 
-    # ---------- 1) DB-FILTER quando tem q ----------
+    # ---------- 1) Caminho server-side quando tem q ----------
     if qtext and (request.GET.get("db_search", "1") != "0"):
-        try:
-            sql_db, params = _build_options_db_filter_sql(
-                qobj.sql_text, engine, search_cols_ordered[:4],
-                qtext=qtext, limit=limit, q_mode=(request.GET.get("q_mode") or None)
-            )
-            logger.debug(
-                "options_api DB-FILTER sql=%s | search_cols=%s | params_count=%s",
-                sql_db, search_cols_ordered[:4], len(params)
-            )
-            py_conn, cur = _open_dbapi(qobj.connection)
+        logger.debug("options_api pk=%s engine=%s q=%r search_cols=%s", pk, engine, qtext, search_cols_ordered)
+        if engine == DBEngine.FIREBIRD:
             try:
-                cur.execute(sql_db, params)
-                rows: List[List[Any]] = []
-                while len(rows) < limit:
-                    batch = cur.fetchmany(min(limit - len(rows), 500))
-                    if not batch:
-                        break
-                    rows.extend([list(r) for r in batch])
-
-                logger.debug(
-                    "options_api pk=%s DB-FILTER OK engine=%s q=%r -> %s row(s)",
-                    pk, engine, qtext, len(rows)
+                base_sql, _ = _build_sql_with_filters(qobj.sql_text, engine, filters or [])
+                rows, good_cols, bad_cols = _dbfilter_firebird_greedy(
+                    qobj.id, qobj.connection, base_sql, search_cols_ordered, qtext, limit, vf_idx, text_cols
                 )
+                if rows:
+                    options = []
+                    for r in rows[:limit]:
+                        try:
+                            options.append({"value": r[vf_idx], "label": r[lf_idx]})
+                        except Exception:
+                            continue
+                    payload = {"ok": True, "columns": cols, "options": options}
+                    if cache_key:
+                        _OPTIONS_CACHE.set(cache_key, payload)
+                    return JsonResponse(payload)
+
+                # sem linhas no greedy → combinado prefix e depois contains
+                try_cols = good_cols or [c for c in search_cols_ordered if c not in bad_cols and not _is_bad_col(qobj.id, c)]
+
+                rows2: List[List[Any]] = []
+                if try_cols:
+                    sql_db, params = _build_options_db_filter_sql(
+                        qobj.sql_text, engine, try_cols, qtext=qtext, limit=limit, q_mode="prefix", text_cols=text_cols
+                    )
+                    logger.debug("options_api FB combined(prefix) cols=%s sql=%s", try_cols, sql_db)
+                    py_conn, cur = _open_dbapi(qobj.connection)
+                    try:
+                        cur.execute(sql_db, params)
+                        while len(rows2) < limit:
+                            batch = cur.fetchmany(min(limit - len(rows2), 2000))
+                            if not batch:
+                                break
+                            rows2.extend([list(r) for r in batch])
+                    finally:
+                        try: cur.close()
+                        except Exception: pass
+                        try: py_conn.close()
+                        except Exception: pass
+
+                if not rows2 and try_cols:
+                    sql_db, params = _build_options_db_filter_sql(
+                        qobj.sql_text, engine, try_cols, qtext=qtext, limit=limit, q_mode="contains", text_cols=text_cols
+                    )
+                    logger.debug("options_api FB combined(contains) cols=%s sql=%s", try_cols, sql_db)
+                    py_conn, cur = _open_dbapi(qobj.connection)
+                    try:
+                        cur.execute(sql_db, params)
+                        while len(rows2) < limit:
+                            batch = cur.fetchmany(min(limit - len(rows2), 2000))
+                            if not batch:
+                                break
+                            rows2.extend([list(r) for r in batch])
+                    finally:
+                        try: cur.close()
+                        except Exception: pass
+                        try: py_conn.close()
+                        except Exception: pass
+
+                if rows2:
+                    options = []
+                    for r in rows2[:limit]:
+                        try:
+                            options.append({"value": r[vf_idx], "label": r[lf_idx]})
+                        except Exception:
+                            continue
+                    payload = {"ok": True, "columns": cols, "options": options}
+                    if cache_key:
+                        _OPTIONS_CACHE.set(cache_key, payload)
+                    return JsonResponse(payload)
+
+            except Exception as e:
+                logger.warning("options_api pk=%s FB caminho server-side falhou (%r) → fallback client-side", pk, e)
+        else:
+            # Demais engines: uma consulta combinada
+            try:
+                sql_db, params = _build_options_db_filter_sql(
+                    qobj.sql_text, engine, search_cols_ordered, qtext=qtext, limit=limit, q_mode=(request.GET.get("q_mode") or None), text_cols=text_cols
+                )
+                logger.debug(
+                    "options_api DB-FILTER sql=%s | search_cols=%s | params_count=%s",
+                    sql_db, search_cols_ordered, len(params)
+                )
+                py_conn, cur = _open_dbapi(qobj.connection)
+                try:
+                    cur.execute(sql_db, params)
+                    rows: List[List[Any]] = []
+                    while len(rows) < limit:
+                        batch = cur.fetchmany(min(limit - len(rows), 2000))
+                        if not batch:
+                            break
+                        rows.extend([list(r) for r in batch])
+                finally:
+                    try: cur.close()
+                    except Exception: pass
+                    try: py_conn.close()
+                    except Exception: pass
 
                 options = []
                 for r in rows:
@@ -792,14 +978,8 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
                 if cache_key:
                     _OPTIONS_CACHE.set(cache_key, payload)
                 return JsonResponse(payload)
-            finally:
-                try: cur.close()
-                except Exception: pass
-                try: py_conn.close()
-                except Exception: pass
-
-        except Exception as e:
-            logger.warning("options_api pk=%s DB-FILTER falhou (%r) → fallback client-side", pk, e)
+            except Exception as e:
+                logger.warning("options_api pk=%s DB-FILTER falhou (%r) → fallback client-side", pk, e)
 
     # ---------- 2) Fallback (varredura client-side) ----------
     scan_soft_max = 50000 if qtext else 5000
@@ -811,9 +991,9 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
 
     base_sql, base_params = _build_sql_with_filters(qobj.sql_text, engine, filters or [])
 
-    # Índices de busca no fallback
-    search_idx = [cols.index(c) for c in search_cols_ordered if c in cols][:4]
-    logger.debug("options_api pk=%s Fallback search cols idx=%s names=%s", pk, search_idx, [cols[i] for i in search_idx])
+    # Índices de busca no fallback: use as colunas escolhidas
+    search_idx = [cols.index(c) for c in search_cols_ordered if c in cols]
+    logger.debug("options_api pk=%s Fallback search idx=%s names=%s", pk, search_idx, [cols[i] for i in search_idx])
 
     matches: List[List[Any]] = []
     looked = 0
@@ -827,10 +1007,10 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
                 cur.execute(base_sql)
 
             if qtext:
-                chunk = 1000
+                chunk = 2000
                 nq = _norm(qtext)
                 while len(matches) < limit and looked < scan_limit:
-                    batch = cur.fetchmany(chunk)
+                    batch = cur.fetchmany(min(chunk, scan_limit - looked))
                     if not batch:
                         break
                     looked += len(batch)
@@ -849,10 +1029,9 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
                             if len(matches) >= limit:
                                 break
             else:
-                # q vazio: só o necessário
                 remaining = limit - len(matches)
                 while remaining > 0:
-                    batch = cur.fetchmany(min(remaining, 1000))
+                    batch = cur.fetchmany(min(2000, remaining))
                     if not batch:
                         break
                     looked += len(batch)
@@ -881,10 +1060,6 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
         except Exception:
             continue
 
-    logger.debug(
-        "options_api pk=%s returning %s options (limit=%s) vf_idx=%s lf_idx=%s",
-        pk, len(options), limit, vf_idx, lf_idx
-    )
     payload = {"ok": True, "columns": cols, "options": options}
     if cache_key:
         _OPTIONS_CACHE.set(cache_key, payload)
@@ -894,7 +1069,6 @@ def query_options_api(request: HttpRequest, pk: int) -> JsonResponse:
 # ----- Ad-hoc (editor de consulta) -----
 
 @login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
 @require_POST
 def query_preview_adhoc(request: HttpRequest) -> JsonResponse:
     try:
@@ -922,7 +1096,6 @@ def query_preview_adhoc(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
 @require_POST
 def query_page_adhoc(request: HttpRequest) -> JsonResponse:
     try:
@@ -952,7 +1125,6 @@ def query_page_adhoc(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
 @require_POST
 def query_export_adhoc(request: HttpRequest) -> StreamingHttpResponse:
     try:
@@ -1013,7 +1185,6 @@ def query_export_adhoc(request: HttpRequest) -> StreamingHttpResponse:
 
 
 @login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
 @require_POST
 def query_count_adhoc(request: HttpRequest) -> JsonResponse:
     try:
@@ -1056,7 +1227,6 @@ def query_count_adhoc(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
-@permission_required("sqlhub.view_dbconnection", raise_exception=True)
 def connections_list_api(request: HttpRequest) -> JsonResponse:
     data = [
         {"id": c.id, "name": c.name, "engine": c.engine}
@@ -1066,7 +1236,6 @@ def connections_list_api(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
-@permission_required("sqlhub.view_savedquery", raise_exception=True)
 def queries_list_api(request: HttpRequest) -> JsonResponse:
     qs = SavedQuery.objects.select_related("connection").filter(is_active=True)
     conn_id = request.GET.get("connection")

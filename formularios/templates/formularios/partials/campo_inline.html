@@ -37,6 +37,7 @@
       {{ subform.ajuda.label_tag }} {{ subform.ajuda }}
     </div>
 
+    {# ── ORIGEM DAS OPÇÕES (apenas para Lista) ── #}
     <div class="options-origin hide">
       <label style="margin-bottom:.35rem;">Origem das opções</label>
       <div class="campo-duplo" style="align-items:center;">
@@ -62,6 +63,7 @@
       {{ subform.sqlhub_label_field }}
     </div>
 
+    {# ── Opções MANUAIS ── #}
     <div class="options-block hide">
       <label>Opções</label>
       <div class="options-list">
@@ -78,6 +80,7 @@
       {{ subform.opcoes_json }}
     </div>
 
+    {# ── Config SQLHub ── #}
     <div class="sqlhub-config hide">
       <div class="campo-duplo">
         <div class="campo-full">
@@ -112,6 +115,37 @@
       <small class="muted">As opções serão carregadas de <code>/sqlhub/api/query/&lt;id&gt;/options/</code> usando os campos escolhidos.</small>
     </div>
 
+    {# ── Config de UPLOAD (tipo = arquivo) ── #}
+    <div class="file-config hide">
+      <h4 style="margin:.5rem 0 .25rem">Configurações do upload</h4>
+
+      <label class="toggle-label" style="margin:0;gap:.4rem;cursor:pointer;">
+        <input type="checkbox" class="cfg-tipos-toggle">
+        <span class="toggle-custom"></span>
+        <span class="lbl-text">Permitir apenas tipos específicos</span>
+      </label>
+
+      <div class="cfg-tipos-list hide">
+        {% for label in FILE_CAT_LABELS %}
+          <label class="cfg-type-item">
+            <input type="checkbox" value="{{ label|lower }}">
+            <span>{{ label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+
+      <div class="campo-duplo">
+        <div class="campo-full">
+          <label>Máximo de arquivos</label>
+          <input type="number" min="1" step="1" value="1" class="input-texto cfg-max-arqs" style="max-width:140px">
+        </div>
+        <div class="campo-full">
+          <label>Tamanho máximo (MB)</label>
+          <input type="number" min="1" step="1" value="10" class="input-texto cfg-max-mb" style="max-width:140px">
+        </div>
+      </div>
+    </div>
+
     {{ subform.valid_json }}
   </div>
 
@@ -125,18 +159,22 @@
 (function(){
   const card    = document.getElementById('pergunta-{{ subform.prefix }}');
   if(!card) return;
-
   const prefix  = card.dataset.prefix;
+  const L = (...a)=>console.debug('[CLIENT/campo]', prefix, ...a);
+
+  /* ── refs ───────────────────────────────────────────────────── */
   const selTipo = card.querySelector('#id_' + prefix + '-tipo');
+  const inpRotulo = card.querySelector('#id_' + prefix + '-rotulo');
+  const inpAjuda  = card.querySelector('#id_' + prefix + '-ajuda');
 
   const optionsOrigin = card.querySelector('.options-origin');
   const optionsBlock  = card.querySelector('.options-block');
   const sqlBlock      = card.querySelector('.sqlhub-config');
   const fileBlock     = card.querySelector('.file-config');
 
-  const inpRotulo     = card.querySelector('#id_' + prefix + '-rotulo');
-  const inpAjuda      = card.querySelector('#id_' + prefix + '-ajuda');
+  const radsOrig      = card.querySelectorAll(`input[name="${prefix}-origem_choice"]`);
 
+  const listEl        = card.querySelector('.options-list');
   const hidOpcoes     = card.querySelector('#id_' + prefix + '-opcoes_json');
   const hidValid      = card.querySelector('#id_' + prefix + '-valid_json');
 
@@ -146,31 +184,33 @@
   const hidV          = card.querySelector('#id_' + prefix + '-sqlhub_value_field');
   const hidL          = card.querySelector('#id_' + prefix + '-sqlhub_label_field');
 
-  const radsOrig      = card.querySelectorAll(`input[name="${prefix}-origem_choice"]`);
-
-  const listEl        = card.querySelector('.options-list');
-
-  const ckTipos       = card.querySelector('.cfg-tipos-toggle');
-  const boxTipos      = card.querySelector('.cfg-tipos-list');
-  const maxArqsEl     = card.querySelector('.cfg-max-arqs');
-  const maxMbEl       = card.querySelector('.cfg-max-mb');
-
   const selConn       = card.querySelector('.sel-conn');
   const selQuery      = card.querySelector('.sel-query');
   const selVal        = card.querySelector('.sel-val');
   const selLbl        = card.querySelector('.sel-lbl');
 
-  const URL_CONNS     = "{{ url_sqlhub_conns }}";
-  const URL_QUERIES   = "{{ url_sqlhub_queries }}";
-  const URL_COLUMNS   = (qid) => `/sqlhub/queries/${qid}/columns/`;
+  // upload
+  const ckTipos   = card.querySelector('.cfg-tipos-toggle');
+  const boxTipos  = card.querySelector('.cfg-tipos-list');
+  const maxArqsEl = card.querySelector('.cfg-max-arqs');
+  const maxMbEl   = card.querySelector('.cfg-max-mb');
+
+  const URL_CONNS   = "{{ url_sqlhub_conns }}";
+  const URL_QUERIES = "{{ url_sqlhub_queries }}";
 
   const autosave = () => document.body.dispatchEvent(new Event('autosave'));
 
-  let queriesById = {};
-
+  /* ── helpers ─────────────────────────────────────────────────── */
   function show(el, yes){ if(!el) return; el.classList.toggle('hide', !yes); }
   function getTipo(){ return (selTipo?.value || '').trim(); }
-
+  function currentOrigem(){
+    const h = (hidOrigem?.value || '').trim();
+    return (h === 'sqlhub') ? 'sqlhub' : 'manual';
+  }
+  function setRadiosFromHidden(){
+    const val = currentOrigem();
+    radsOrig.forEach(r => r.checked = (r.value === val));
+  }
   function fillSelect(sel, items, vKey, tKey, firstLabel, decorate){
     if(!sel) return;
     sel.innerHTML = '';
@@ -186,50 +226,36 @@
     });
   }
 
-  function currentOrigem(){
-    const h = (hidOrigem?.value || '').trim();
-    return (h === 'sqlhub') ? 'sqlhub' : 'manual';
-  }
-
-  function setRadiosFromHidden(){
-    const val = currentOrigem();
-    radsOrig.forEach(r => r.checked = (r.value === val));
-  }
-
-  function updateHiddenOrigem(from){
-    const v = (from || currentOrigem());
-    if(hidOrigem) hidOrigem.value = v;
-  }
-
+  /* ── Opções manuais → hidden ─────────────────────────────────── */
   function optsToHidden(){
     if(!hidOpcoes || !listEl) return;
     const vals = Array.from(listEl.querySelectorAll('input[type="text"]'))
       .map(i => (i.value || '').trim())
       .filter(Boolean);
     hidOpcoes.value = JSON.stringify(vals);
+    L('MANUAL options → hidden', vals);
     autosave();
   }
   listEl?.addEventListener('input', (e)=>{
     if(e.target.matches('.opt-row input')) optsToHidden();
   });
 
+  /* ── Upload: carrega -> UI / salva -> hidden ─────────────────── */
   function loadValidToUI(){
     try{
       const cfg = JSON.parse(hidValid?.value || '{}') || {};
       const livres = (cfg.tipos_livres !== false);
       if(ckTipos){ ckTipos.checked = !livres; }
       show(boxTipos, !livres);
-
       const cats = new Set((cfg.categorias || []).map(String));
       boxTipos?.querySelectorAll('input[type="checkbox"]').forEach(ch=>{
         ch.checked = cats.has((ch.value||'').trim());
       });
-
       if(maxArqsEl){ maxArqsEl.value = cfg.max_arquivos ?? 1; }
       if(maxMbEl){ maxMbEl.value = cfg.max_mb ?? 10; }
-    }catch{}
+      L('UPLOAD loadValidToUI', cfg);
+    }catch(e){ L('UPLOAD loadValidToUI parse error', e); }
   }
-
   function saveUIToValid(){
     const livres = ckTipos ? !ckTipos.checked : true;
     const cats = [];
@@ -243,14 +269,16 @@
       max_mb: Math.max(1, parseInt(maxMbEl?.value || '10',10) || 10),
     };
     if(hidValid) hidValid.value = JSON.stringify(cfg);
+    L('UPLOAD saveUIToValid → valid_json', cfg, 'hidden_disabled:', hidValid?.disabled, 'hidden_value:', hidValid?.value);
     autosave();
   }
-
   ckTipos?.addEventListener('change', ()=>{ show(boxTipos, ckTipos.checked); saveUIToValid(); });
   boxTipos?.addEventListener('change', saveUIToValid);
   maxArqsEl?.addEventListener('input', saveUIToValid);
   maxMbEl?.addEventListener('change', saveUIToValid);
 
+  /* ── SQLHub loaders ──────────────────────────────────────────── */
+  let queriesById = {};
   async function loadConnections(){
     if(!selConn) return;
     try{
@@ -259,11 +287,12 @@
       const items = (j && j.connections) || [];
       fillSelect(selConn, items, 'id', 'name', 'Conexão…');
       if(hidConn?.value){ selConn.value = String(hidConn.value); }
-    }catch{
+      L('SQLHub connections loaded:', items.length, 'selected:', selConn?.value);
+    }catch(e){
       fillSelect(selConn, [], 'id', 'name', 'Falha ao carregar');
+      L('SQLHub connections error', e);
     }
   }
-
   async function loadQueries(connId){
     if(!selQuery) return;
     queriesById = {};
@@ -282,15 +311,17 @@
         (opt, it) => { opt.dataset.conn = it.connection_id ?? it.connection ?? it.connectionId ?? ''; }
       );
       if(hidQ?.value){ selQuery.value = String(hidQ.value); }
-    }catch{
+      L('SQLHub queries loaded:', items.length, 'selected:', selQuery?.value, 'connId:', connId || '(any)');
+    }catch(e){
       fillSelect(selQuery, [], 'id', 'name', 'Falha ao carregar');
+      L('SQLHub queries error', e);
     }
   }
-
   async function loadColumns(qid){
     if(!qid){
       fillSelect(selVal, [], 'name', 'name', 'Valor');
       fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
+      L('SQLHub columns cleared (no qid)');
       return;
     }
     try{
@@ -300,22 +331,20 @@
       const items = cols.map(c => ({name:c}));
       fillSelect(selVal, items, 'name', 'name', 'Valor');
       fillSelect(selLbl, items, 'name', 'name', 'Rótulo');
-
       if(hidV?.value) selVal.value = hidV.value;
       if(hidL?.value) selLbl.value = hidL.value;
-    }catch{
+      L('SQLHub columns loaded:', items.length, 'qid:', qid, 'val:', selVal?.value, 'lbl:', selLbl?.value);
+    }catch(e){
       fillSelect(selVal, [], 'name', 'name', 'Falha ao carregar');
       fillSelect(selLbl, [], 'name', 'name', 'Falha ao carregar');
+      L('SQLHub columns error', e);
     }
   }
-
   async function restoreFromHidden(){
     const qid = (hidQ?.value || '').trim();
     const connId = (hidConn?.value || '').trim();
-
     if(connId){ selConn.value = String(connId); }
     await loadQueries(connId || '');
-
     if(qid){
       selQuery.value = qid;
       const item = queriesById[qid];
@@ -325,81 +354,87 @@
       if(hidV?.value) selVal.value = hidV.value;
       if(hidL?.value) selLbl.value = hidL.value;
     }
+    L('SQLHub restoreFromHidden done', {conn:hidConn?.value, qid:hidQ?.value, val:hidV?.value, lbl:hidL?.value});
   }
 
+  /* ── Listeners SQLHub ────────────────────────────────────────── */
   selConn?.addEventListener('change', async (e)=>{
     const cid = (e.target.value || '').trim();
     if(hidConn){ hidConn.value = cid; }
+    L('SQLHub conn change →', cid);
     await loadQueries(cid);
     if(hidQ) hidQ.value = '';
     fillSelect(selVal, [], 'name', 'name', 'Valor');
     fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
     autosave();
   });
-
   selQuery?.addEventListener('change', async (e)=>{
     const qid = (e.target.value || '').trim();
     if(hidQ) hidQ.value = qid;
-
     const opt = e.target.selectedOptions?.[0];
     const connFromOpt = opt?.dataset?.conn;
     if(connFromOpt){
       if(selConn) selConn.value = String(connFromOpt);
       if(hidConn) hidConn.value = String(connFromOpt);
+      L('SQLHub query change set conn from option:', connFromOpt);
     }
-
     await loadColumns(qid);
     autosave();
   });
+  selVal?.addEventListener('change', (e)=>{ if(hidV){ hidV.value = e.target.value; autosave(); L('SQLHub val field →', e.target.value); }});
+  selLbl?.addEventListener('change', (e)=>{ if(hidL){ hidL.value = e.target.value; autosave(); L('SQLHub lbl field →', e.target.value); }});
 
-  selVal?.addEventListener('change', (e)=>{ if(hidV){ hidV.value = e.target.value; autosave(); }});
-  selLbl?.addEventListener('change', (e)=>{ if(hidL){ hidL.value = e.target.value; autosave(); }});
-
+  /* ── Visibilidade por tipo/origem ────────────────────────────── */
   async function syncVisibility(){
-    const t = (selTipo?.value || '').trim();
-
-    show(fileBlock, t === 'arquivo');
-    if(t === 'arquivo'){ /* loadValidToUI(); se tiver file-config no markup */ }
-
+    const t = getTipo();
     const isChoice = (t === 'multipla' || t === 'checkbox' || t === 'lista');
     const isLista  = (t === 'lista');
-    show(optionsOrigin, isLista);
 
-    const origem = (hidOrigem?.value || 'manual');
+    // Upload
+    show(fileBlock, t === 'arquivo');
+    if(t === 'arquivo'){ loadValidToUI(); }
+
+    // Origem para lista
+    show(optionsOrigin, isLista);
+    const origem = currentOrigem();
     if(isLista){
       const useSql = (origem === 'sqlhub');
       show(optionsBlock, !useSql);
       show(sqlBlock, useSql);
-
+      L('VIS', {tipo:t, origem, useSql});
       if(useSql){
         await loadConnections();
         await loadQueries(hidConn?.value || '');
         await restoreFromHidden();
       }
-    }else{
+    } else {
       show(optionsBlock, isChoice);
       show(sqlBlock, false);
       if(hidOrigem) hidOrigem.value = 'manual';
       setRadiosFromHidden();
+      L('VIS (non-list)', {tipo:t});
     }
   }
 
   radsOrig.forEach(r=>{
     r.addEventListener('change', ()=>{
       if(hidOrigem) hidOrigem.value = r.value;
+      L('ORIGEM radio change →', r.value);
       syncVisibility();
       autosave();
     });
   });
 
   selTipo?.addEventListener('change', ()=>{
+    L('TIPO change →', getTipo());
     syncVisibility();
     autosave();
   });
 
-  inpRotulo?.addEventListener('blur', autosave);
-  inpAjuda?.addEventListener('blur', autosave);
+  inpRotulo?.addEventListener('blur', ()=>{ L('rotulo blur'); autosave(); });
+  inpAjuda?.addEventListener('blur', ()=>{ L('ajuda blur'); autosave(); });
 
+  // estado inicial
   if(hidOrigem && !hidOrigem.value){ hidOrigem.value = 'manual'; }
   setRadiosFromHidden();
 
@@ -409,6 +444,7 @@
     if(texts.length){ hidOpcoes.value = JSON.stringify(texts); }
   }
 
+  L('INIT', {tipo:getTipo(), origem:currentOrigem(), hasFileBlock:!!fileBlock});
   syncVisibility();
 })();
 </script>

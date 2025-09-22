@@ -211,11 +211,21 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
         u = self.request.user
         if not u.is_authenticated:
             return Formulario.objects.none()
+
+        # ✔ Admins/gerentes podem editar qualquer formulário
+        if u.has_perm("formularios.pode_gerenciar"):
+            return Formulario.objects.all()
+
+        # Dono ou colaborador com edição
         return (
             Formulario.objects
-            .filter(Q(dono=u) | Q(colaboradores__usuario=u, colaboradores__pode_editar=True))
+            .filter(
+                Q(dono=u) |
+                Q(colaboradores__usuario=u, colaboradores__pode_editar=True)
+            )
             .distinct()
         )
+
 
     def get_formset_class(self):
         return CampoFormSetBuilder
@@ -788,15 +798,16 @@ class DetalheRespostaView(DetailView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        is_owner = (obj.formulario.dono_id == getattr(self.request.user, "id", None))
-        is_sender = (obj.enviado_por_id == getattr(self.request.user, "id", None))
+        u = self.request.user
+
+        # ✔ gerente pode ver
+        if u.has_perm("formularios.pode_gerenciar"):
+            return obj
+
+        is_owner = (obj.formulario.dono_id == getattr(u, "id", None))
+        is_sender = (obj.enviado_por_id == getattr(u, "id", None))
         sess_key = f"can_view_resp_{obj.pk}"
         has_ticket = self.request.session.get(sess_key)
-
-        logger.debug(
-            "DetalheResposta id=%s | owner=%s sender=%s ticket=%s",
-            obj.pk, is_owner, is_sender, bool(has_ticket)
-        )
 
         if is_owner or is_sender or has_ticket:
             if has_ticket:
@@ -807,6 +818,7 @@ class DetalheRespostaView(DetailView):
                     pass
             return obj
         raise Http404
+
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -834,12 +846,23 @@ class DetalheRespostaView(DetailView):
 # --------------------------------------------------------------------------- #
 def _get_form_or_404(pk: int, user, for_edit: bool = False) -> Formulario:
     form = get_object_or_404(Formulario, pk=pk)
+
+    # precisa estar logado para qualquer acesso
+    if not getattr(user, "is_authenticated", False):
+        raise Http404
+
+    # ✔ gerentes têm acesso total
+    if user.has_perm("formularios.pode_gerenciar"):
+        return form
+
     allowed = form.can_user_edit(user) if for_edit else form.can_user_view(user)
     if not allowed:
         logger.warning("Acesso negado ao formulário %s por user=%s",
                        pk, getattr(user, "username", None))
         raise Http404
     return form
+
+
 
 
 def _filtrar_respostas(request: HttpRequest, form: Formulario):
@@ -919,9 +942,16 @@ class AbaRespostasView(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        if not obj.can_user_view(self.request.user):
+        u = self.request.user
+
+        # ✔ gerente pode ver sempre
+        if u.has_perm("formularios.pode_gerenciar"):
+            return obj
+
+        if not obj.can_user_view(u):
             raise Http404
         return obj
+
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -1021,40 +1051,58 @@ class AbaRespostasView(LoginRequiredMixin, DetailView):
         return ctx
 
 
-# --------------------------------------------------------------------------- #
-# EXPORTAR CSV                                                                #
-# --------------------------------------------------------------------------- #
+# ------------- #
+# EXPORTAR CSV  #
+# ------------- #
 @login_required
 def exportar_respostas_csv(request: HttpRequest, pk: int):
     form = _get_form_or_404(pk, request.user, for_edit=False)
     qs = _filtrar_respostas(request, form)
 
+    # separador e dica para Excel (opcional): ?excel=1  e  ?sep=;|,
+    sep = (request.GET.get("sep") or ";")
+    excel_hint = (request.GET.get("excel") == "1")
+
     resp = HttpResponse(content_type="text/csv; charset=utf-8")
-    fname = f'{slugify(form.titulo)}.csv'
+    fname = f"{slugify(form.titulo)}.csv"
     resp["Content-Disposition"] = f'attachment; filename="{fname}"'
 
-    writ = csv.writer(resp)
+    # BOM para Excel + linha "sep=..." (se pedida)
+    resp.write("\ufeff")
+    if excel_hint:
+        resp.write(f"sep={sep}\r\n")
+
+    writer = csv.writer(
+        resp,
+        delimiter=sep,
+        quoting=csv.QUOTE_MINIMAL,
+        lineterminator="\r\n",
+    )
+
     campos = list(form.campos.order_by("ordem"))
-    writ.writerow(["ID", "Enviado em", "Usuário", "Nome (informado)", "IP", *[c.rotulo for c in campos]])
+
+    # Cabeçalho sem "Usuário" e sem "IP"
+    writer.writerow(["ID", "Enviado em", "Nome (informado)", *[c.rotulo for c in campos]])
 
     for r in qs:
         linha = [
             r.pk,
             _fmt_local(r.enviado_em),
-            getattr(r.enviado_por, "username", "") or "",
             getattr(r, "nome_coletado", "") or "",
-            r.ip or "",
         ]
         for c in campos:
             v = r.valores.filter(campo=c).first()
-            linha.append(
-                v.valor_texto if v and not v.valor_arquivo else
-                (v.valor_arquivo.url if v and v.valor_arquivo else "")
-            )
-        writ.writerow(linha)
+            if v and not v.valor_arquivo:
+                linha.append(v.valor_texto or "")
+            elif v and v.valor_arquivo:
+                linha.append(v.valor_arquivo.url or "")
+            else:
+                linha.append("")
+        writer.writerow(linha)
 
-    logger.debug("CSV exportado: %s linhas", qs.count())
+    logger.debug("CSV exportado (sem usuário/IP): %s linhas", qs.count())
     return resp
+
 
 
 # --------------------------------------------------------------------------- #

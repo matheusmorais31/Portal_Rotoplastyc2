@@ -5,25 +5,41 @@ from .fields import EncryptedTextField
 
 
 class DBEngine(models.TextChoices):
-    FIREBIRD = "firebird", "Firebird"
-    POSTGRES = "postgresql", "PostgreSQL"
-    MYSQL = "mysql", "MySQL/MariaDB"
-    SQLSERVER = "mssql", "SQL Server"
+    FIREBIRD = ("firebird", "Firebird")
+    POSTGRES = ("postgresql", "PostgreSQL")
+    MYSQL = ("mysql", "MySQL/MariaDB")
+    SQLSERVER = ("mssql", "SQL Server")
+
+
+# ============================================================
+# Codenames centralizados para usar em decorators/mixins
+# Ex.: permission_required(SQLHubPerms.VIEW_CONN)
+# ============================================================
+class SQLHubPerms:
+    APP = "sqlhub"
+
+    # DBConnection (explícitas; não são as "default" do Django)
+    VIEW_CONN   = f"{APP}.view_dbconnection"
+    ADD_CONN    = f"{APP}.add_dbconnection"
+    CHANGE_CONN = f"{APP}.change_dbconnection"
+    DELETE_CONN = f"{APP}.delete_dbconnection"
+    TEST_CONN   = f"{APP}.test_connection"
+
+    # SavedQuery (explícitas)
+    VIEW_QUERY    = f"{APP}.view_savedquery"
+    ADD_QUERY     = f"{APP}.add_savedquery"
+    CHANGE_QUERY  = f"{APP}.change_savedquery"
+    DELETE_QUERY  = f"{APP}.delete_savedquery"
+    EXECUTE_QUERY = f"{APP}.execute_savedquery"
+    EXPORT_QUERY  = f"{APP}.export_savedquery"
+    ADHOC_QUERY   = f"{APP}.adhoc_savedquery"
 
 
 class DBConnection(models.Model):
-    name = models.CharField(
-        "Nome", max_length=80, unique=True, db_column="nome"
-    )
-    engine = models.CharField(
-        "Engine", max_length=20, choices=DBEngine.choices, db_column="tipo_banco"
-    )
-    host = models.CharField(
-        "Host", max_length=200, blank=True, default="", db_column="host"
-    )
-    port = models.PositiveIntegerField(
-        "Porta", null=True, blank=True, db_column="porta"
-    )
+    name = models.CharField("Nome", max_length=80, unique=True, db_column="nome")
+    engine = models.CharField("Engine", max_length=20, choices=DBEngine.choices, db_column="tipo_banco")
+    host = models.CharField("Host", max_length=200, blank=True, default="", db_column="host")
+    port = models.PositiveIntegerField("Porta", null=True, blank=True, db_column="porta")
 
     # Importante: opcional para SQL Server (usa o DB padrão do login se vazio)
     database = models.CharField(
@@ -35,12 +51,9 @@ class DBConnection(models.Model):
         db_column="banco_servico",
     )
 
-    username = models.CharField(
-        "Usuário", max_length=200, db_column="usuario"
-    )
-    password = EncryptedTextField(
-        "Senha", db_column="senha"  # criptografado em repouso
-    )
+    username = models.CharField("Usuário", max_length=200, db_column="usuario")
+    password = EncryptedTextField("Senha", db_column="senha")  # criptografado em repouso
+
     options = models.JSONField(
         "Opções",
         default=dict,
@@ -48,9 +61,8 @@ class DBConnection(models.Model):
         help_text='Ex.: {"odbc_driver": "ODBC Driver 18 for SQL Server", "charset": "UTF8"}',
         db_column="opcoes",
     )
-    read_only = models.BooleanField(
-        "Somente leitura", default=True, db_column="somente_leitura"
-    )
+    read_only = models.BooleanField("Somente leitura", default=True, db_column="somente_leitura")
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -58,24 +70,26 @@ class DBConnection(models.Model):
         verbose_name="Criado por",
         db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(
-        "Criado em", auto_now_add=True, db_column="criado_em"
-    )
+    created_at = models.DateTimeField("Criado em", auto_now_add=True, db_column="criado_em")
 
     class Meta:
-        db_table = "sqlhub_conexao"
+        ordering = ["-created_at"]
+        # Desliga as permissões padrão do Django para este model
+        default_permissions = ()
+        # Declara apenas as permissões desejadas
+        permissions = [
+            ("sqglgub", "Pode acessar o SQLHub"),
+            
+        ]
         verbose_name = "Conexão de banco"
         verbose_name_plural = "Conexões de banco"
-        ordering = ("name",)
 
     def __str__(self) -> str:  # pragma: no cover
         return f"{self.name} ({self.get_engine_display()})"
 
 
 class SavedQuery(models.Model):
-    name = models.CharField(
-        "Nome", max_length=120, db_column="nome"
-    )
+    name = models.CharField("Nome", max_length=120, db_column="nome")
     connection = models.ForeignKey(
         DBConnection,
         on_delete=models.CASCADE,
@@ -88,15 +102,10 @@ class SavedQuery(models.Model):
         help_text="Apenas SELECT. WHERE/ORDER BY permitidos. Evite ';'.",
         db_column="sql_texto",
     )
-    default_limit = models.PositiveIntegerField(
-        "Limite padrão", default=1000, db_column="limite_padrao"
-    )
-    is_active = models.BooleanField(
-        "Ativa?", default=True, db_column="ativa"
-    )
-    meta = models.JSONField(
-        "Metadados", default=dict, blank=True, db_column="metadados"
-    )
+    default_limit = models.PositiveIntegerField("Limite padrão", default=1000, db_column="limite_padrao")
+    is_active = models.BooleanField("Ativa?", default=True, db_column="ativa")
+    meta = models.JSONField("Metadados", default=dict, blank=True, db_column="metadados")
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -104,9 +113,7 @@ class SavedQuery(models.Model):
         verbose_name="Criada por",
         db_column="criada_por_id",
     )
-    updated_at = models.DateTimeField(
-        "Atualizada em", auto_now=True, db_column="atualizada_em"
-    )
+    updated_at = models.DateTimeField("Atualizada em", auto_now=True, db_column="atualizada_em")
 
     class Meta:
         db_table = "sqlhub_consulta"
@@ -114,6 +121,12 @@ class SavedQuery(models.Model):
         verbose_name_plural = "Consultas"
         unique_together = ("connection", "name")
         ordering = ("connection__name", "name")
+        # Desliga as permissões padrão do Django para este model
+        default_permissions = ()
+        # Permissões explicitamente controladas
+        permissions = [
+          
+        ]
 
     def __str__(self) -> str:  # pragma: no cover
         return f"{self.connection.name} :: {self.name}"
@@ -127,25 +140,20 @@ class QueryCache(models.Model):
         verbose_name="Consulta",
         db_column="consulta_id",
     )
-    params_hash = models.CharField(
-        "Hash dos parâmetros", max_length=64, db_index=True, db_column="hash_parametros"
-    )
-    rows = models.JSONField(
-        "Linhas", default=list, blank=True, db_column="linhas"
-    )  # [[v1,v2,...],...]
-    columns = models.JSONField(
-        "Colunas", default=list, blank=True, db_column="colunas"
-    )  # ["col","col2",...]
-    expires_at = models.DateTimeField(
-        "Expira em", db_index=True, db_column="expira_em"
-    )
+    params_hash = models.CharField("Hash dos parâmetros", max_length=64, db_index=True, db_column="hash_parametros")
+    rows = models.JSONField("Linhas", default=list, blank=True, db_column="linhas")  # [[v1,v2,...],...]
+    columns = models.JSONField("Colunas", default=list, blank=True, db_column="colunas")  # ["col","col2",...]
+    expires_at = models.DateTimeField("Expira em", db_index=True, db_column="expira_em")
 
     class Meta:
         db_table = "sqlhub_cache_consulta"
         verbose_name = "Cache de consulta"
         verbose_name_plural = "Caches de consulta"
+        # Desliga TOTALMENTE as permissões padrão e não cria nenhuma custom
+        default_permissions = ()
+        permissions = []
         indexes = [
-            models.Index(fields=["query", "params_hash", "expires_at"])
+            models.Index(fields=["query", "params_hash", "expires_at"]),
         ]
 
     def __str__(self) -> str:  # pragma: no cover

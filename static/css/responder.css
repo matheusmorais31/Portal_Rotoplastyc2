@@ -33,7 +33,7 @@ html { scroll-behavior: smooth; }
   --danger: #ff5252;
   --success: #4caf50;
   --radius: 8px;
-  --shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  --shadow: 0 2px 6px rgba(0,0,0,.55);
   --transition: .2s ease;
 }
 
@@ -75,7 +75,7 @@ body {
 .pergunta-card:hover,
 .pergunta-card:focus-within {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 4px 12px rgba(0,0,0,.7);
 }
 
 .cabecalho-card {
@@ -95,32 +95,19 @@ body {
 }
 
 /* ===============================================================
-   ESTRUTURA DA PERGUNTA (HEADER, BODY, AJUDA)
+   ESTRUTURA DA PERGUNTA
    =============================================================== */
 .pergunta-header label {
   font-size: 1rem;
   font-weight: 500;
   display: inline-block;
 }
-
-.asterisk {
-  color: var(--danger);
-  font-weight: bold;
-  margin-left: 2px;
-}
-
-.texto-ajuda {
-  display: block;
-  color: var(--text-muted);
-  font-size: .8rem;
-  font-weight: 400;
-  margin-top: 6px;
-}
-
+.asterisk { color: var(--danger); font-weight: bold; margin-left: 2px; }
+.texto-ajuda { display:block; color: var(--text-muted); font-size:.8rem; font-weight:400; margin-top:6px; }
 .pergunta-body { margin-top: 12px; }
 
 /* ===============================================================
-   CAMPOS DE TEXTO / SELECT / FILE
+   CAMPOS
    =============================================================== */
 .input-texto,
 .input-select,
@@ -141,12 +128,11 @@ body {
   outline: none;
   border-color: var(--accent-light);
   background-color: var(--bg-input-focus);
-  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+  box-shadow: 0 0 0 2px rgba(66,153,225,.5);
 }
 
-/* <input type="file"> */
+/* file */
 .input-file { padding: 0; border: none; background: transparent; }
-
 .input-file::file-selector-button {
   background: var(--accent);
   color: #fff;
@@ -167,66 +153,28 @@ body {
 textarea.input-texto { resize: vertical; min-height: 100px; }
 
 /* ===============================================================
-   RADIO & CHECKBOX CUSTOMIZADOS
+   RADIOS & CHECKS
    =============================================================== */
 .options-block { display: flex; flex-direction: column; gap: 1rem; }
-
-.option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  user-select: none;
-}
-
+.option { display:flex; align-items:center; gap:12px; cursor:pointer; user-select:none; }
 .option input {
-  appearance: none;
-  -webkit-appearance: none;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border-color);
-  background: var(--bg-input);
-  margin: 0;
-  position: relative;
-  cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  flex-shrink: 0; width: 20px; height: 20px;
+  border: 2px solid var(--border-color); background: var(--bg-input);
+  margin: 0; position: relative; cursor: pointer;
   transition: background var(--transition), border-color var(--transition);
 }
-
-/* Radio redondo / Checkbox quadrado */
 .options-block.radios .option input { border-radius: 50%; }
 .options-block.checks .option input { border-radius: 4px; }
-
-/* Estado :checked */
 .option input:checked { background: var(--accent); border-color: var(--accent); }
-
-/* Marcador interno (ponto para radio, V para checkbox) */
-.option input:checked::after {
-  content: "";
-  position: absolute;
-  display: block;
-}
-
-/* Ponto para Radio */
+.option input:checked::after { content:""; position:absolute; display:block; }
 .options-block.radios .option input:checked::after {
-  width: 8px;
-  height: 8px;
-  background: #fff;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 8px; height: 8px; background:#fff; border-radius:50%;
+  top:50%; left:50%; transform: translate(-50%, -50%);
 }
-
-/* V para Checkbox */
 .options-block.checks .option input:checked::after {
-  width: 5px;
-  height: 10px;
-  border: solid #fff;
-  border-width: 0 2px 2px 0;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg);
+  width:5px; height:10px; border:solid #fff; border-width:0 2px 2px 0;
+  top:45%; left:50%; transform: translate(-50%, -50%) rotate(45deg);
 }
 
 /* ===============================================================
@@ -236,7 +184,6 @@ textarea.input-texto { resize: vertical; min-height: 100px; }
   --scale-size: 26px;
   --scale-gap-y: .5rem;
 }
-
 .options-block.escala{
   display: grid;
   grid-template-columns: repeat(10, minmax(0,1fr));
@@ -247,105 +194,54 @@ textarea.input-texto { resize: vertical; min-height: 100px; }
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
-
 .options-block.escala .option{
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  justify-content: center;
-  gap: var(--scale-gap-y);
-  text-align: center;
-  cursor: pointer;
+  display: flex; flex-direction: column-reverse;
+  align-items:center; justify-content:center;
+  gap: var(--scale-gap-y); text-align:center; cursor: pointer;
 }
-
 .options-block.escala .scale-num{
-  font-size: .9rem;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
+  font-size:.9rem; color:var(--text-muted); font-variant-numeric:tabular-nums; line-height:1;
 }
-
 .options-block.escala .option input{
-  appearance: none;
-  -webkit-appearance: none;
-  width: var(--scale-size);
-  height: var(--scale-size);
+  appearance:none; -webkit-appearance:none;
+  width: var(--scale-size); height: var(--scale-size);
   border-radius: 50%;
-  border: 2px solid var(--border-color);
-  background: var(--bg-input);
-  margin: 0;
-  position: relative;
+  border:2px solid var(--border-color); background:var(--bg-input);
+  margin:0; position:relative;
   transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
 }
-.options-block.escala .option input:hover{
-  box-shadow: 0 0 0 4px rgba(96,164,207,.25);
-  border-color: var(--accent-light);
-}
-.options-block.escala .option input:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(96,164,207,.35);
-}
-.options-block.escala .option input:checked{
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: scale(.98);
-}
+.options-block.escala .option input:hover{ box-shadow:0 0 0 4px rgba(96,164,207,.25); border-color:var(--accent-light); }
+.options-block.escala .option input:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(96,164,207,.35); }
+.options-block.escala .option input:checked{ background:var(--accent); border-color:var(--accent); transform: scale(.98); }
 .options-block.escala .option input:checked::after{
-  content: "";
-  position: absolute;
-  width: 10px; height: 10px;
-  background: #fff;
-  border-radius: 50%;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
+  content:""; position:absolute; width:10px; height:10px; background:#fff; border-radius:50%;
+  top:50%; left:50%; transform: translate(-50%, -50%);
 }
-.options-block.escala .option input:checked + .scale-num{
-  color: #fff;
-  font-weight: 600;
-}
-@media (max-width: 640px){
-  .options-block.escala{ grid-template-columns: repeat(5, minmax(0,1fr)); }
-}
+.options-block.escala .option input:checked + .scale-num{ color:#fff; font-weight:600; }
+@media (max-width: 640px){ .options-block.escala{ grid-template-columns: repeat(5, minmax(0,1fr)); } }
 
 /* ===============================================================
    BOTÕES
    =============================================================== */
-.btn-group { display: flex; justify-content: flex-start; margin-top: 2rem; }
-
+.btn-group { display:flex; justify-content:flex-start; margin-top: 2rem; }
 .btn-primario {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 12px 28px;
-  font-weight: 600;
-  font-size: .95rem;
-  border-radius: 4px;
-  cursor: pointer;
+  background: var(--accent); color:#fff; border:none; padding:12px 28px;
+  font-weight:600; font-size:.95rem; border-radius:4px; cursor:pointer;
   transition: background var(--transition), transform var(--transition);
 }
 .btn-primario:hover { background: var(--accent-light); }
 .btn-primario:active { background: var(--accent-dark); transform: scale(.97); }
-.btn-primario:disabled { background: #666; cursor: not-allowed; }
+.btn-primario:disabled { background:#666; cursor:not-allowed; }
 
 /* ===============================================================
    LEGENDA (aba de respostas)
    =============================================================== */
-#aba-respostas .legend-col { color: #fff; }
-#aba-respostas .legend-list {
-  list-style: none;
-  margin: 0;
-  padding: .25rem 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: .35rem;
-}
-#aba-respostas .legend-list li { display: flex; align-items: center; gap: .5rem; }
-#aba-respostas .legend-swatch {
-  width: 12px; height: 12px; border-radius: 3px; display: inline-block;
-  border: 1px solid rgba(255, 255, 255, .25);
-}
-#aba-respostas .legend-text { color: #fff; }
-#aba-respostas .legend-text strong { color: #fff; }
+#aba-respostas .legend-col { color:#fff; }
+#aba-respostas .legend-list{ list-style:none; margin:0; padding:.25rem 0 0; display:flex; flex-direction:column; gap:.35rem; }
+#aba-respostas .legend-list li{ display:flex; align-items:center; gap:.5rem; }
+#aba-respostas .legend-swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; border:1px solid rgba(255,255,255,.25); }
+#aba-respostas .legend-text{ color:#fff; }
+#aba-respostas .legend-text strong{ color:#fff; }
 
 /* ===============================================================
    RESPONSIVO
@@ -358,42 +254,36 @@ textarea.input-texto { resize: vertical; min-height: 100px; }
 /* ===============================================================
    ESTADOS DE ERRO
    =============================================================== */
-.has-error { border-color: #ff4d4f !important; box-shadow: 0 0 0 1px rgba(255, 77, 79, .25), var(--shadow); }
+.has-error { border-color:#ff4d4f !important; box-shadow:0 0 0 1px rgba(255,77,79,.25), var(--shadow); }
 .has-error .pergunta-header label,
-.has-error .texto-ajuda { color: #ffb8b8; }
+.has-error .texto-ajuda { color:#ffb8b8; }
 .has-error .input-texto,
 .has-error .input-select,
 .has-error .input-file {
-  border-color: #ff4d4f !important;
-  background-color: #2b2323;
-  box-shadow: 0 0 0 2px rgba(255, 77, 79, .18);
+  border-color:#ff4d4f !important;
+  background-color:#2b2323;
+  box-shadow:0 0 0 2px rgba(255,77,79,.18);
 }
-.field-errors {
-  list-style: disc;
-  margin: .5rem 0 0 1.25rem;
-  color: #ff9191;
-  line-height: 1.35;
-  font-size: .9rem;
-}
-.options-block[aria-invalid="true"] .option input { border-color: #ff4d4f; }
+.field-errors { list-style:disc; margin:.5rem 0 0 1.25rem; color:#ff9191; line-height:1.35; font-size:.9rem; }
+.options-block[aria-invalid="true"] .option input { border-color:#ff4d4f; }
 
 /* ====================
    TEMA CLARO
    ==================== */
 body.light-theme .options-block.escala .option input{ background: var(--bg-container); }
-body.light-theme .options-block.escala { border-top: 1px solid #a3a1a1; border-bottom: 1px solid #a3a1a1; }
+body.light-theme .options-block.escala { border-top:1px solid #a3a1a1; border-bottom:1px solid #a3a1a1; }
 body.light-theme .cabecalho-card { background-color: var(--bg-container-child); }
-body.light-theme .cabecalho-card h1{ color: #fff; }
+body.light-theme .cabecalho-card h1{ color:#fff; }
 body.light-theme .pergunta-card { background-color: var(--bg-container-child); }
 body.light-theme .pergunta-card input{ background-color: var(--bg-container); }
 body.light-theme .pergunta-card textarea{ background-color: var(--bg-container); }
 body.light-theme .pergunta-card select{ background-color: var(--bg-container); }
-body.light-theme .pergunta-card label{ color: #fff; }
-body.light-theme .texto-ajuda { color: #fff; }
-body.light-theme .top-row { background-color: #4caf50; }
+body.light-theme .pergunta-card label{ color:#fff; }
+body.light-theme .texto-ajuda { color:#fff; }
+body.light-theme .top-row { background-color:#4caf50; }
 
 /* ===============================================================
-   SELECT PESQUISÁVEL (search + sugestões)
+   SELECT PESQUISÁVEL (box, input, dropdown)
    =============================================================== */
 .ss { position: relative; }
 .ss-hidden { display: none !important; }
@@ -417,13 +307,12 @@ body.light-theme .top-row { background-color: #4caf50; }
   padding: .4rem .25rem;
   outline: none;
 }
-/* Esconde o “x” nativo do input[type=search] no Chrome/Edge/Safari */
+/* esconder X nativo */
 .ss-input::-webkit-search-cancel-button,
 .ss-input::-webkit-search-decoration,
 .ss-input::-webkit-search-results-button,
-.ss-input::-webkit-search-results-decoration { display: none; -webkit-appearance: none; appearance: none; }
-/* Edge (legado) */
-.ss-input::-ms-clear, .ss-input::-ms-reveal { width: 0; height: 0; display: none; }
+.ss-input::-webkit-search-results-decoration { display:none; -webkit-appearance:none; appearance:none; }
+.ss-input::-ms-clear, .ss-input::-ms-reveal { width:0; height:0; display:none; }
 
 .ss-clear {
   flex: 0 0 auto;
@@ -436,13 +325,12 @@ body.light-theme .top-row { background-color: #4caf50; }
   cursor: pointer;
   border-radius: .35rem;
 }
-.ss-clear:hover { background: rgba(255,255,255,.06); color: #fff; }
+.ss-clear:hover { background: rgba(255,255,255,.06); color:#fff; }
 
 .ss-dropdown {
   position: absolute;
   z-index: 30;
-  left: 0;
-  right: 0;
+  left: 0; right: 0;
   margin-top: .25rem;
   background: var(--bg-layer);
   border: 1px solid var(--border-color);
@@ -450,26 +338,63 @@ body.light-theme .top-row { background-color: #4caf50; }
   box-shadow: var(--shadow);
   max-height: 280px;
   overflow: auto;
+
+  /* largura padrão da coluna "valor" (pode ser sobrescrita via JS: --ss-value-w) */
+  --ss-value-w: 12ch;
 }
 
-.ss-list { list-style: none; margin: 0; padding: .25rem; }
-.ss-item {
-  display: flex;
-  justify-content: space-between;
-  gap: .75rem;
+.ss-list { list-style:none; margin:0; padding:.25rem; }
+
+/* ---------- Cabeçalho e Itens em GRID de 2 colunas ---------- */
+.ss-columns,
+.ss-item{
+  display: grid;
+  grid-template-columns: 1fr var(--ss-value-w);
+  align-items: center;
+  column-gap: .75rem;
+}
+
+.ss-columns{
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-layer);
+  padding: .45rem .6rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: .85rem;
+}
+.ss-columns code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  background: rgba(255,255,255,.07);
+  padding: .05rem .35rem;
+  border-radius: .35rem;
+  color: #fff;
+}
+
+/* Células dos itens */
+.ss-item{
   padding: .45rem .6rem;
   border-radius: .35rem;
   cursor: pointer;
 }
-.ss-item:hover, .ss-item:focus { outline: none; background: rgba(255,255,255,.06); }
-.ss-item .ss-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ss-item .ss-value { color: var(--text-muted); font-size: .8rem; }
+.ss-item:hover, .ss-item:focus{ outline:none; background: rgba(255,255,255,.06); }
+.ss-item .ss-label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ss-item .ss-value{
+  justify-self: end;
+  text-align: right;
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
 
-.ss-empty { padding: .6rem .8rem; color: var(--text-muted); }
+.ss-empty { padding:.6rem .8rem; color:var(--text-muted); }
 
 .ss mark { background: transparent; color: #fff; font-weight: 700; text-decoration: underline; }
 
 /* tema claro */
 body.light-theme .ss-box { background: var(--bg-container); border-color: #6c6c6c; }
+body.light-theme .ss-label { color: #fff; }
 body.light-theme .ss-dropdown { background: var(--bg-container-child); }
 body.light-theme .ss-item:hover { background: rgba(0,0,0,.08); }
+body.light-theme .ss-columns{ background: var(--bg-container-child); }

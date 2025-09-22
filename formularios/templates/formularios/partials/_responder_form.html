@@ -2,133 +2,136 @@
 <link rel="stylesheet" href="{% static 'responder.css' %}">
 
 <div class="form-wrapper">
-    <div class="cabecalho-card">
-        <h1>{{ formulario.titulo }}</h1>
-        {% if formulario.descricao %}
-        <p class="form-descricao">{{ formulario.descricao|linebreaksbr }}</p>
-        {% endif %}
-    </div>
+  <div class="cabecalho-card">
+    <h1>{{ formulario.titulo }}</h1>
+    {% if formulario.descricao %}
+      <p class="form-descricao">{{ formulario.descricao|linebreaksbr }}</p>
+    {% endif %}
+  </div>
 
-    <form method="post"
-          action="{% url 'formularios:enviar_resposta_formulario' formulario.pk %}{% if embed or request.GET.embed == '1' %}?embed=1{% endif %}"
-          enctype="multipart/form-data"
-          novalidate>
-        {% csrf_token %}
-        {% if embed or request.GET.embed == '1' %}
-        <input type="hidden" name="__embed" value="1">
-        {% endif %}
+  <form method="post"
+        action="{% url 'formularios:enviar_resposta_formulario' formulario.pk %}{% if embed or request.GET.embed == '1' %}?embed=1{% endif %}"
+        enctype="multipart/form-data"
+        novalidate>
+    {% csrf_token %}
+    {% if embed or request.GET.embed == '1' %}
+      <input type="hidden" name="__embed" value="1">
+    {% endif %}
 
-        {% if erros or nome_erros %}
-        <div class="pergunta-card" style="border-color:#ff4d4f">
-            <strong style="color:#ff9191;display:block;margin-bottom:.5rem">Corrija os itens abaixo:</strong>
-            <ul style="margin-left:1rem;line-height:1.35">
-                {% for e in erros %}<li>{{ e }}</li>{% empty %}{% endfor %}
-                {% for e in nome_erros %}<li>{{ e }}</li>{% empty %}{% endfor %}
+    {% if erros or nome_erros %}
+      <div class="pergunta-card" style="border-color:#ff4d4f">
+        <strong style="color:#ff9191;display:block;margin-bottom:.5rem">Corrija os itens abaixo:</strong>
+        <ul style="margin-left:1rem;line-height:1.35">
+          {% for e in erros %}<li>{{ e }}</li>{% empty %}{% endfor %}
+          {% for e in nome_erros %}<li>{{ e }}</li>{% empty %}{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if formulario.coletar_nome and not request.user.is_authenticated %}
+      <div class="pergunta-card required {% if nome_erros %}has-error{% endif %}">
+        <div class="pergunta-header">
+          <label for="campo-nome">Seu nome</label>
+          <small class="texto-ajuda">Informe seu nome para registrar a resposta.</small>
+        </div>
+        <div class="pergunta-body">
+          <input type="text"
+                 name="__nome__"
+                 id="campo-nome"
+                 class="input-texto"
+                 placeholder="Seu nome completo"
+                 value="{{ nome_informado|default_if_none:'' }}"
+                 aria-invalid="{% if nome_erros %}true{% else %}false{% endif %}"
+                 required>
+          {% if nome_erros %}
+            <ul class="field-errors">
+              {% for e in nome_erros %}<li>{{ e }}</li>{% empty %}{% endfor %}
             </ul>
+          {% endif %}
         </div>
-        {% endif %}
+      </div>
+    {% endif %}
 
-        {% if formulario.coletar_nome and not request.user.is_authenticated %}
-        <div class="pergunta-card required {% if nome_erros %}has-error{% endif %}">
-            <div class="pergunta-header">
-                <label for="campo-nome">Seu nome</label>
-                <small class="texto-ajuda">Informe seu nome para registrar a resposta.</small>
-            </div>
-            <div class="pergunta-body">
-                <input type="text"
-                       name="__nome__"
-                       id="campo-nome"
-                       class="input-texto"
-                       placeholder="Seu nome completo"
-                       value="{{ nome_informado|default_if_none:'' }}"
-                       aria-invalid="{% if nome_erros %}true{% else %}false{% endif %}"
-                       required>
-                {% if nome_erros %}
-                <ul class="field-errors">
-                    {% for e in nome_erros %}<li>{{ e }}</li>{% empty %}{% endfor %}
-                </ul>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
-
-        {# ===================== CAMPOS ATIVOS ===================== #}
-        {% for campo in formulario.campos.all %}
-        {% if campo.ativo %}
+    {# ===================== CAMPOS ATIVOS ===================== #}
+    {% for campo in formulario.campos.all %}
+      {% if campo.ativo %}
         <div class="pergunta-card {% if campo.obrigatorio %}required{% endif %} {% if campo.errors %}has-error{% endif %}">
-            <div class="pergunta-header">
-                <label for="campo-{{ campo.id }}">
-                    {{ campo.rotulo }}{% if campo.obrigatorio %}<span class="asterisk">*</span>{% endif %}
-                </label>
-                {% if campo.ajuda %}
-                <small class="texto-ajuda">{{ campo.ajuda }}</small>
-                {% endif %}
-            </div>
+          <div class="pergunta-header">
+            <label for="campo-{{ campo.id }}">
+              {{ campo.rotulo }}{% if campo.obrigatorio %}<span class="asterisk">*</span>{% endif %}
+            </label>
+            {% if campo.ajuda %}
+              <small class="texto-ajuda">{{ campo.ajuda }}</small>
+            {% endif %}
+          </div>
 
-            <div class="pergunta-body">
-                {% if campo.tipo == "texto_curto" %}
-                <input type="text"
-                       name="{{ campo.id }}"
-                       id="campo-{{ campo.id }}"
-                       class="input-texto"
-                       placeholder="Sua resposta"
-                       value="{{ campo.posted|default_if_none:'' }}"
-                       aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
-                       {% if campo.obrigatorio %}required{% endif %}>
-                {% elif campo.tipo == "paragrafo" %}
-                <textarea name="{{ campo.id }}"
-                          id="campo-{{ campo.id }}"
-                          rows="4"
-                          class="input-texto"
-                          placeholder="Sua resposta"
-                          aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
-                          {% if campo.obrigatorio %}required{% endif %}>{{ campo.posted|default_if_none:'' }}</textarea>
-                {% elif campo.tipo == "multipla" %}
-                <div class="options-block radios" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
-                    {% for opcao in campo.opcoes.all %}
-                    {% with val_op=opcao.valor|default:opcao.texto %}
+          <div class="pergunta-body">
+            {% if campo.tipo == "texto_curto" %}
+              <input type="text"
+                     name="{{ campo.id }}"
+                     id="campo-{{ campo.id }}"
+                     class="input-texto"
+                     placeholder="Sua resposta"
+                     value="{{ campo.posted|default_if_none:'' }}"
+                     aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                     {% if campo.obrigatorio %}required{% endif %}>
+
+            {% elif campo.tipo == "paragrafo" %}
+              <textarea name="{{ campo.id }}"
+                        id="campo-{{ campo.id }}"
+                        rows="4"
+                        class="input-texto"
+                        placeholder="Sua resposta"
+                        aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                        {% if campo.obrigatorio %}required{% endif %}>{{ campo.posted|default_if_none:'' }}</textarea>
+
+            {% elif campo.tipo == "multipla" %}
+              <div class="options-block radios" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+                {% for opcao in campo.opcoes.all %}
+                  {% with val_op=opcao.valor|default:opcao.texto %}
                     <label class="option">
-                        <input type="radio"
-                               name="{{ campo.id }}"
-                               value="{{ val_op }}"
-                               {% if campo.posted == val_op %}checked{% endif %}
-                               {% if campo.obrigatorio %}required{% endif %}>
-                        {{ opcao.texto }}
+                      <input type="radio"
+                             name="{{ campo.id }}"
+                             value="{{ val_op }}"
+                             {% if campo.posted == val_op %}checked{% endif %}
+                             {% if campo.obrigatorio %}required{% endif %}>
+                      {{ opcao.texto }}
                     </label>
-                    {% endwith %}
-                    {% empty %}
-                    <div class="texto-ajuda">Sem opções.</div>
-                    {% endfor %}
-                </div>
-                {% elif campo.tipo == "checkbox" %}
-                <div class="options-block checks" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
-                    {% for opcao in campo.opcoes.all %}
-                    {% with val_op=opcao.valor|default:opcao.texto %}
+                  {% endwith %}
+                {% empty %}
+                  <div class="texto-ajuda">Sem opções.</div>
+                {% endfor %}
+              </div>
+
+            {% elif campo.tipo == "checkbox" %}
+              <div class="options-block checks" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+                {% for opcao in campo.opcoes.all %}
+                  {% with val_op=opcao.valor|default:opcao.texto %}
                     <label class="option">
-                        <input type="checkbox"
-                               name="{{ campo.id }}"
-                               value="{{ val_op }}"
-                               {% if campo.posted_multi and val_op in campo.posted_multi %}checked{% endif %}>
-                        {{ opcao.texto }}
+                      <input type="checkbox"
+                             name="{{ campo.id }}"
+                             value="{{ val_op }}"
+                             {% if campo.posted_multi and val_op in campo.posted_multi %}checked{% endif %}>
+                      {{ opcao.texto }}
                     </label>
-                    {% endwith %}
-                    {% empty %}
-                    <div class="texto-ajuda">Sem opções.</div>
-                    {% endfor %}
-                </div>
+                  {% endwith %}
+                {% empty %}
+                  <div class="texto-ajuda">Sem opções.</div>
+                {% endfor %}
+              </div>
 
-                {# ========= LISTA (SELECT) ========= #}
-                {% elif campo.tipo == "lista" %}
-                {% with lj=campo.logica_json %}
-                {% with opts=lj.options|default:lj %}
-                {% with sql=opts.sqlhub %}
-                {% firstof opts.source lj.source campo.origem_opcoes "manual" as origem_raw %}
-                {% with origem=origem_raw|lower %}
-                {% firstof sql.query_id sql.query campo.sqlhub_query_id "" as qid %}
-                {% firstof sql.value_field sql.value campo.sqlhub_value_field "" as vf %}
-                {% firstof sql.label_field sql.label campo.sqlhub_label_field "" as lf %}
+            {# ========= LISTA (SELECT) ========= #}
+            {% elif campo.tipo == "lista" %}
+              {% with lj=campo.logica_json %}
+              {% with opts=lj.options|default:lj %}
+              {% with sql=opts.sqlhub %}
+              {% firstof opts.source lj.source campo.origem_opcoes "manual" as origem_raw %}
+              {% with origem=origem_raw|lower %}
+              {% firstof sql.query_id sql.query campo.sqlhub_query_id "" as qid %}
+              {% firstof sql.value_field sql.value campo.sqlhub_value_field "" as vf %}
+              {% firstof sql.label_field sql.label campo.sqlhub_label_field "" as lf %}
 
-                {% if origem == "sqlhub" or qid %}
+              {% if origem == "sqlhub" or qid %}
                 <select name="{{ campo.id }}"
                         id="campo-{{ campo.id }}"
                         class="input-select sqlhub-select"
@@ -139,636 +142,723 @@
                         data-selected="{{ campo.posted|default_if_none:'' }}"
                         aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
                         {% if campo.obrigatorio %}required{% endif %}>
-                    <option value="">Carregando…</option>
+                  <option value="">Carregando…</option>
                 </select>
                 <script>
-                    console.log('[RESP] lista via SQLHub → campo {{ campo.id }}', {
-                        id: '{{ campo.id }}',
-                        origem: '{{ origem }}',
-                        qid: '{{ qid }}',
-                        vf: '{{ vf|escapejs }}',
-                        lf: '{{ lf|escapejs }}',
-                        selected: '{{ campo.posted|default_if_none:""|escapejs }}'
-                    });
+                  console.log('[RESP] lista via SQLHub → campo {{ campo.id }}', {
+                    id: '{{ campo.id }}',
+                    origem: '{{ origem }}',
+                    qid: '{{ qid }}',
+                    vf: '{{ vf|escapejs }}',
+                    lf: '{{ lf|escapejs }}',
+                    selected: '{{ campo.posted|default_if_none:""|escapejs }}'
+                  });
                 </script>
-                {% else %}
+              {% else %}
                 <select name="{{ campo.id }}"
                         id="campo-{{ campo.id }}"
                         class="input-select"
                         aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
                         {% if campo.obrigatorio %}required{% endif %}>
-                    <option value="" disabled {% if not campo.posted %}selected{% endif %}>Escolha…</option>
-                    {% for opcao in campo.opcoes.all %}
+                  <option value="" disabled {% if not campo.posted %}selected{% endif %}>Escolha…</option>
+                  {% for opcao in campo.opcoes.all %}
                     {% with val_op=opcao.valor|default:opcao.texto %}
-                    <option value="{{ val_op }}" {% if campo.posted == val_op %}selected{% endif %}>
+                      <option value="{{ val_op }}" {% if campo.posted == val_op %}selected{% endif %}>
                         {{ opcao.texto }}
-                    </option>
+                      </option>
                     {% endwith %}
-                    {% empty %}
+                  {% empty %}
                     <option value="" disabled>Sem opções.</option>
-                    {% endfor %}
+                  {% endfor %}
                 </select>
                 <script>
-                    console.log('[RESP] lista manual → campo {{ campo.id }}', {
-                        id: '{{ campo.id }}',
-                        origem: '{{ origem }}',
-                        qid: '{{ qid }}',
-                        opts: {{ campo.opcoes.count|default:0 }}
-                    });
+                  console.log('[RESP] lista manual → campo {{ campo.id }}', {
+                    id: '{{ campo.id }}',
+                    origem: '{{ origem }}',
+                    qid: '{{ qid }}',
+                    opts: {{ campo.opcoes.count|default:0 }}
+                  });
                 </script>
-                {% endif %}
+              {% endif %}
 
-                {% endwith %}
-                {% endwith %}
-                {% endwith %}
-                {% endwith %}
+              {% endwith %}
+              {% endwith %}
+              {% endwith %}
+              {% endwith %}
 
-                {% elif campo.tipo == "escala" %}
-                <div class="options-block radios escala" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
-                    {% for i in "12345678910"|make_list %}
-                    {% if forloop.counter <= 10 %}
+            {% elif campo.tipo == "escala" %}
+              <div class="options-block radios escala" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+                {% for i in "12345678910"|make_list %}
+                  {% if forloop.counter <= 10 %}
                     <label class="option">
-                        <input type="radio"
-                               name="{{ campo.id }}"
-                               value="{{ forloop.counter }}"
-                               {% if campo.posted == forloop.counter|stringformat:"s" %}checked{% endif %}
-                               {% if campo.obrigatorio %} required{% endif %}>
-                        <span class="scale-num">{{ forloop.counter }}</span>
+                      <input type="radio"
+                             name="{{ campo.id }}"
+                             value="{{ forloop.counter }}"
+                             {% if campo.posted == forloop.counter|stringformat:"s" %}checked{% endif %}
+                             {% if campo.obrigatorio %} required{% endif %}>
+                      <span class="scale-num">{{ forloop.counter }}</span>
                     </label>
-                    {% endif %}
-                    {% empty %}{% endfor %}
+                  {% endif %}
+                {% empty %}{% endfor %}
+              </div>
+
+            {% elif campo.tipo == "data" %}
+              <input type="date"
+                     name="{{ campo.id }}"
+                     id="campo-{{ campo.id }}"
+                     class="input-texto"
+                     value="{{ campo.posted|default_if_none:'' }}"
+                     aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                     {% if campo.obrigatorio %}required{% endif %}>
+
+            {% elif campo.tipo == "hora" %}
+              <input type="time"
+                     name="{{ campo.id }}"
+                     id="campo-{{ campo.id }}"
+                     class="input-texto"
+                     value="{{ campo.posted|default_if_none:'' }}"
+                     aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                     {% if campo.obrigatorio %}required{% endif %}>
+
+            {% elif campo.tipo == "arquivo" %}
+              {% with cfg=campo.validacao_json %}
+              <div class="multi-uploader {% if campo.errors %}has-error{% endif %}"
+                   data-name="{{ campo.id }}"
+                   data-accept="{{ campo.accept_string|default_if_none:'' }}"
+                   data-max="{{ cfg.max_arquivos|default:1 }}"
+                   data-maxmb="{{ cfg.max_mb|default:10 }}"
+                   data-required="{% if campo.obrigatorio %}1{% else %}0{% endif %}">
+                <div class="fu-input-holder" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
+                  <noscript>
+                    <input type="file"
+                           name="{{ campo.id }}"
+                           class="input-file"
+                           accept="{{ campo.accept_string|default_if_none:'' }}"
+                           {% if cfg.max_arquivos and cfg.max_arquivos > 1 %}multiple{% endif %}
+                           {% if campo.obrigatorio %}required{% endif %}>
+                  </noscript>
                 </div>
+                <small class="texto-ajuda">
+                  {% if cfg.max_arquivos %}Máx {{ cfg.max_arquivos }} arquivo(s). {% endif %}
+                  {% if cfg.max_mb %}{{ cfg.max_mb }} MB cada. {% endif %}
+                  {% if cfg and not cfg.tipos_livres and cfg.categorias %} Tipos permitidos: {{ cfg.categorias|join:", " }}. {% endif %}
+                  <span class="fu-hint-max">Selecionados: <span class="fu-count">0</span></span>
+                  {% if campo.errors %}<br>Atenção: por segurança do navegador, os arquivos precisam ser selecionados novamente.{% endif %}
+                </small>
+                <ul class="fu-list"></ul>
+                <div class="fu-bucket" aria-hidden="true" style="display:none"></div>
+              </div>
+              {% endwith %}
 
-                {% elif campo.tipo == "data" %}
-                <input type="date"
-                       name="{{ campo.id }}"
-                       id="campo-{{ campo.id }}"
-                       class="input-texto"
-                       value="{{ campo.posted|default_if_none:'' }}"
-                       aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
-                       {% if campo.obrigatorio %}required{% endif %}>
-                {% elif campo.tipo == "hora" %}
-                <input type="time"
-                       name="{{ campo.id }}"
-                       id="campo-{{ campo.id }}"
-                       class="input-texto"
-                       value="{{ campo.posted|default_if_none:'' }}"
-                       aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
-                       {% if campo.obrigatorio %}required{% endif %}>
-                {% elif campo.tipo == "arquivo" %}
-                {% with cfg=campo.validacao_json %}
-                <div class="multi-uploader {% if campo.errors %}has-error{% endif %}"
-                     data-name="{{ campo.id }}"
-                     data-accept="{{ campo.accept_string|default_if_none:'' }}"
-                     data-max="{{ cfg.max_arquivos|default:1 }}"
-                     data-required="{% if campo.obrigatorio %}1{% else %}0{% endif %}">
-                    <div class="fu-input-holder" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
-                        <noscript>
-                            <input type="file"
-                                   name="{{ campo.id }}"
-                                   class="input-file"
-                                   accept="{{ campo.accept_string|default_if_none:'' }}"
-                                   {% if cfg.max_arquivos and cfg.max_arquivos > 1 %}multiple{% endif %}
-                                   {% if campo.obrigatorio %}required{% endif %}>
-                        </noscript>
-                    </div>
+            {% else %}
+              <p class="campo-nao-suportado">Tipo de campo ‘{{ campo.get_tipo_display }}’ não suportado.</p>
+            {% endif %}
 
-                    <small class="texto-ajuda">
-                        {% if cfg.max_arquivos %}Máx {{ cfg.max_arquivos }} arquivo(s). {% endif %}
-                        {% if cfg.max_mb %}{{ cfg.max_mb }} MB cada. {% endif %}
-                        {% if cfg and not cfg.tipos_livres and cfg.categorias %} Tipos permitidos: {{ cfg.categorias|join:", " }}. {% endif %}
-                        <span class="fu-hint-max">Selecionados: <span class="fu-count">0</span></span>
-                        {% if campo.errors %}<br>Atenção: por segurança do navegador, os arquivos precisam ser selecionados novamente.{% endif %}
-                    </small>
-
-                    <ul class="fu-list"></ul>
-                    <div class="fu-bucket" aria-hidden="true" style="display:none"></div>
-                </div>
-                {% endwith %}
-
-                {% else %}
-                <p class="campo-nao-suportado">Tipo de campo ‘{{ campo.get_tipo_display }}’ não suportado.</p>
-                {% endif %}
-
-                {% if campo.errors %}
-                <ul class="field-errors">
-                    {% for e in campo.errors %}<li>{{ e }}</li>{% empty %}{% endfor %}
-                </ul>
-                {% endif %}
-            </div>
+            {% if campo.errors %}
+              <ul class="field-errors">
+                {% for e in campo.errors %}<li>{{ e }}</li>{% empty %}{% endfor %}
+              </ul>
+            {% endif %}
+          </div>
         </div>
-        {% endif %}
-        {% empty %}{% endfor %}
+      {% endif %}
+    {% empty %}{% endfor %}
 
-        <div class="btn-group">
-            <button type="submit" class="btn-primario">Enviar</button>
-        </div>
-    </form>
+    <div class="btn-group">
+      <button type="submit" class="btn-primario">Enviar</button>
+    </div>
+  </form>
 </div>
 
+{# ======= SQLHUB + SELECT PESQUISÁVEL (compat ES5 – sem optional chaining) ======= #}
 <script>
 (function () {
-    const LOG = true;
+  var LOG = true;
 
-    const L = {
-        group(label, collapsed = true) {
-            if (!LOG) return { end() {} };
-            (collapsed ? console.groupCollapsed : console.group).call(console, label);
-            return { end: () => console.groupEnd() };
-        },
-        log(...a) { LOG && console.log('[SS]', ...a); },
-        warn(...a) { LOG && console.warn('[SS]', ...a); },
-        error(...a) { LOG && console.error('[SS]', ...a); },
-    };
+  var L = {
+    group: function(label, collapsed){
+      if (typeof collapsed === 'undefined') collapsed = true;
+      if (!LOG) return { end: function(){} };
+      (collapsed ? console.groupCollapsed : console.group).call(console, label);
+      return { end: function(){ try{ console.groupEnd(); }catch(e){} } };
+    },
+    log: function(){ if (LOG) console.log.apply(console, ['[SS]'].concat([].slice.call(arguments))); },
+    warn: function(){ if (LOG) console.warn.apply(console, ['[SS]'].concat([].slice.call(arguments))); },
+    error: function(){ if (LOG) console.error.apply(console, ['[SS]'].concat([].slice.call(arguments))); }
+  };
 
-    const CANDS = (qid) => [
-        `/sqlhub/api/query/${qid}/options/`,
-        `/sqlhub/api/queries/${qid}/options/`,
-        `/sqlhub/queries/${qid}/options/`
+  function CANDS(qid){
+    return [
+      '/sqlhub/api/query/'   + qid + '/options/',
+      '/sqlhub/api/queries/' + qid + '/options/',
+      '/sqlhub/queries/'     + qid + '/options/'
     ];
+  }
 
-    function buildUrls(qid, vf, lf, { limit = '200' } = {}) {
-        const out = [];
-        const add = (u, strict = true) => {
-            if (strict) {
-                u.searchParams.set('value_field', vf);
-                u.searchParams.set('label_field', lf);
-            } else {
-                u.searchParams.set('value', vf);
-                u.searchParams.set('label', lf);
-            }
-            ['limit', 'page_size', 'per_page', 'size', 'max', 'top'].forEach(k => u.searchParams.set(k, limit));
-        };
-        for (const base of CANDS(qid)) {
-            const s = new URL(base, location.origin);
-            add(s, true);
-            out.push({ url: s, strict: true });
-            const l = new URL(base, location.origin);
-            add(l, false);
-            out.push({ url: l, strict: false });
+  function buildUrls(qid, vf, lf, opts){
+    opts = opts || {}; var limit = opts.limit || '200';
+    var out = [];
+    function add(u, strict){
+      if (strict){
+        u.searchParams.set('value_field', vf);
+        u.searchParams.set('label_field', lf);
+      } else {
+        u.searchParams.set('value', vf);
+        u.searchParams.set('label', lf);
+      }
+      ['limit','page_size','per_page','size','max','top'].forEach(function(k){ u.searchParams.set(k, limit); });
+    }
+    CANDS(qid).forEach(function(base){
+      var s = new URL(base, location.origin); add(s, true);  out.push({ url:s, strict:true });
+      var l = new URL(base, location.origin); add(l, false); out.push({ url:l, strict:false });
+    });
+    return out;
+  }
+
+  function fetchJson(u, controller){
+    var g = L.group('[GET] ' + u.pathname + u.search, true);
+    return fetch(u, {
+      headers: { 'X-Requested-With':'fetch', 'Accept':'application/json' },
+      signal: controller && controller.signal
+    }).then(function(r){
+      L.log('→', u.href, 'status', r.status, r.statusText);
+      if (!r.ok) { g.end(); return [false, null]; }
+      return r.json().catch(function(){ return null; }).then(function(j){ g.end(); return [true, j]; });
+    }).catch(function(e){
+      L.warn('fetch error', e);
+      g.end();
+      return [false, null];
+    });
+  }
+
+  function normalize(json, vf, lf){
+    var rows = Array.isArray(json && json.rows) ? json.rows
+             : Array.isArray(json && json.data) ? json.data
+             : Array.isArray(json && json.results) ? json.results
+             : (Array.isArray(json) ? json : null);
+    var arr = rows || (json && json.options) || [];
+    if (!Array.isArray(arr)) return [];
+    return arr.map(function(r){
+      var ref = r && (r.REFERENCIA != null ? r.REFERENCIA : r.referencia);
+      var desc = r && (r.DESCRICAO  != null ? r.DESCRICAO  : r.descricao);
+      var labelPref = ref ? (desc ? (ref + ' — ' + desc) : String(ref))
+                          : ( (r && (r[lf] != null ? r[lf] : (r.label || r.name || r[vf]))) );
+      var value = r && (r[vf] != null ? r[vf] : (r.value != null ? r.value : r.id));
+      return { value: String(value || ''), label: String(labelPref || '') , raw:r };
+    }).filter(function(x){ return x.value !== ''; });
+  }
+
+  function enhanceSearchable(select){
+    if (!select || select.dataset.enhanced === '1') return;
+    select.dataset.enhanced = '1';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'ss';
+    select.parentNode.insertBefore(wrap, select);
+    wrap.appendChild(select);
+
+    var box = document.createElement('div');
+    box.className = 'ss-box';
+
+    var input = document.createElement('input');
+    input.type = 'search';
+    input.className = 'ss-input';
+    input.placeholder = 'Pesquisar...';
+
+    var clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'ss-clear';
+    clearBtn.title = 'Limpar';
+    clearBtn.innerHTML = '×';
+
+    box.appendChild(input);
+    box.appendChild(clearBtn);
+
+    var drop = document.createElement('div');
+    drop.className = 'ss-dropdown';
+    drop.hidden = true;
+
+    var list = document.createElement('ul');
+    list.className = 'ss-list';
+    drop.appendChild(list);
+
+    var status = document.createElement('div');
+    status.className = 'ss-status';
+    drop.appendChild(status);
+
+    wrap.insertBefore(box, select);
+    wrap.insertBefore(drop, select);
+    select.classList.add('ss-hidden');
+
+    function norm(s){ return String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(); }
+    function alnum(s){ return norm(s).replace(/[^a-z0-9]/g, ''); }
+    var MAX_SUG = 100;
+
+    function li(text, cls){
+      if (!cls) cls = 'ss-empty';
+      var el = document.createElement('li');
+      el.className = cls;
+      el.textContent = text;
+      return el;
+    }
+
+    function setStatus(txt){
+      status.textContent = txt || '';
+      status.style.display = txt ? 'block' : 'none';
+    }
+
+    function buildLocal(){
+      var arr = [];
+      for (var i=0;i<select.options.length;i++){
+        var opt = select.options[i];
+        if (!opt.value) continue;
+        arr.push({ value: opt.value, label: opt.text });
+      }
+      return arr;
+    }
+
+    var LOCAL = buildLocal();
+    var vf = select.dataset.vf || '';
+    var lf = select.dataset.lf || '';
+    var remoteBase = select.dataset.sqlhubBase || '';
+
+    if (!remoteBase && select.dataset.qid){
+      remoteBase = CANDS(select.dataset.qid)[0];
+      select.dataset.sqlhubBase = remoteBase;
+    }
+
+    L.log('enhanceSearchable/base', remoteBase, { vf:vf, lf:lf });
+
+    var currentSearch = { ctl:null, seq:0 };
+
+    function renderLocal(q){
+      if (typeof q === 'undefined') q = '';
+      list.innerHTML = '';
+      var nq = norm(q), aq = alnum(q);
+      var data = q ? LOCAL.filter(function(o){
+        return norm(o.label).includes(nq) ||
+               norm(o.value).includes(nq) ||
+               alnum(o.label).includes(aq) ||
+               alnum(o.value).includes(aq);
+      }) : LOCAL.slice(0, MAX_SUG);
+
+      if (!data.length){
+        list.appendChild(li('Nenhum resultado'));
+        drop.hidden = false;
+        setStatus('');
+        return;
+      }
+
+      data.slice(0, MAX_SUG).forEach(function(o){
+        var item = document.createElement('li');
+        item.className = 'ss-item';
+        item.setAttribute('role', 'option');
+        item.dataset.value = o.value;
+        item.dataset.label = o.label;
+        item.innerHTML = '<span class="ss-label">'+o.label+'</span><span class="ss-value">'+o.value+'</span>';
+        item.addEventListener('mousedown', function(ev){
+          ev.preventDefault();
+          choose(o.value, o.label);
+        });
+        list.appendChild(item);
+      });
+
+      drop.hidden = false;
+      setStatus('');
+    }
+
+    function ensureOption(value, label){
+      var found = null;
+      for (var i=0;i<select.options.length;i++){
+        if (select.options[i].value === String(value)){ found = select.options[i]; break; }
+      }
+      if (!found){
+        var opt = document.createElement('option');
+        opt.value = String(value);
+        opt.textContent = String(label != null ? label : value);
+        select.appendChild(opt);
+        LOCAL = buildLocal();
+        return opt;
+      }
+      return found;
+    }
+
+    function choose(value, label, ensure){
+      if (ensure) ensureOption(value, label);
+      select.value = String(value);
+      input.value = String(label || value);
+      drop.hidden = true;
+    }
+
+    function filterByQuery(listData, q){
+      var nq = norm(q), aq = alnum(q);
+      return listData.filter(function(o){
+        var Ltxt = String(o.label || '');
+        var Vtxt = String(o.value || '');
+        var raw = o.raw || {};
+        var ref = String((raw.REFERENCIA != null ? raw.REFERENCIA : raw.referencia) || '');
+        var desc = String((raw.DESCRICAO  != null ? raw.DESCRICAO  : raw.descricao) || '');
+        return (
+          norm(Ltxt).includes(nq) ||
+          norm(Vtxt).includes(nq) ||
+          alnum(Ltxt).includes(aq) ||
+          alnum(Vtxt).includes(aq) ||
+          norm(ref).includes(nq) ||
+          norm(desc).includes(nq) ||
+          alnum(ref).includes(aq)
+        );
+      });
+    }
+
+    function getNextUrl(payload, baseUrl){
+      var nx = (payload && (payload.next || (payload.links && payload.links.next) || (payload.pagination && payload.pagination.next) ||
+               (payload.meta && payload.meta.next) || payload.next_page_url || payload.nextPageUrl)) || null;
+      if (!nx) return null;
+      try { return new URL(nx, location.origin); }
+      catch(e){
+        try { return new URL(String(nx), new URL(baseUrl, location.origin)); }
+        catch(e2){ return null; }
+      }
+    }
+
+    // ============ BUSCA REMOTA ============
+    function remoteSearch(q, limit){
+      if (!limit) limit = '120';
+      if (!remoteBase || !q) return Promise.resolve([]);
+      if (currentSearch.ctl && typeof currentSearch.ctl.abort === 'function') currentSearch.ctl.abort();
+      var ctl = new AbortController();
+      var mySeq = ++currentSearch.seq;
+      currentSearch.ctl = ctl;
+      var attempts = [];
+      function push(tag, u){ attempts.push({ tag:tag, u:u }); }
+
+      var u = new URL(remoteBase, location.origin);
+      u.searchParams.set('value_field', vf);
+      u.searchParams.set('label_field', lf);
+      u.searchParams.set('q', q);
+      ['limit','page_size','per_page','size','max','top'].forEach(function(k){ u.searchParams.set(k, limit); });
+      push('strict q', u);
+
+      u = new URL(remoteBase, location.origin);
+      u.searchParams.set('value', vf);
+      u.searchParams.set('label', lf);
+      u.searchParams.set('q', q);
+      ['limit','page_size','per_page','size','max','top'].forEach(function(k){ u.searchParams.set(k, limit); });
+      push('legacy q', u);
+
+      ['REFERENCIA','referencia','DESCRICAO','descricao'].forEach(function(field){
+        var uu = new URL(remoteBase, location.origin);
+        uu.searchParams.set('value_field', vf);
+        uu.searchParams.set('label_field', lf);
+        uu.searchParams.set(field + '_like', '%' + q + '%');
+        ['limit','page_size','per_page','size','max','top'].forEach(function(k){ uu.searchParams.set(k, limit); });
+        push('strict '+field+'_like', uu);
+      });
+
+      function tryAttempts(idx){
+        if (idx >= attempts.length) return scanPages();
+        setStatus('Procurando…');
+        return fetchJson(attempts[idx].u, ctl).then(function(res){
+          if (mySeq !== currentSearch.seq) return [];
+          var ok = res[0], payload = res[1];
+          if (!ok) return tryAttempts(idx+1);
+          var list = normalize(payload, vf, lf);
+          var filtered = filterByQuery(list, q);
+          L.log('remote attempt:', attempts[idx].tag, 'orig=', list.length, 'filtered=', filtered.length);
+          if (filtered.length) return filtered;
+          return tryAttempts(idx+1);
+        });
+      }
+
+      function scanPages(){
+        var PAGE_SIZE = 200, MAX_PAGES = 300;
+        var seen = {};
+        var page = 1;
+        var pageUrl = new URL(remoteBase, location.origin);
+        pageUrl.searchParams.set('value_field', vf);
+        pageUrl.searchParams.set('label_field', lf);
+        ['limit','page_size','per_page','size','max','top'].forEach(function(k){ pageUrl.searchParams.set(k, PAGE_SIZE); });
+
+        function loop(){
+          if (page > MAX_PAGES) { setStatus(''); return []; }
+          setStatus('Procurando… (página ' + page + ')');
+          var key = pageUrl.pathname + pageUrl.search;
+          if (seen[key]) { L.warn('scan next repetido, encerrando'); setStatus(''); return []; }
+          seen[key] = true;
+
+          return fetchJson(pageUrl, ctl).then(function(res){
+            if (mySeq !== currentSearch.seq) return [];
+            var ok = res[0], payload = res[1];
+            if (!ok || !payload) { setStatus(''); return []; }
+            var list = normalize(payload, vf, lf);
+            L.log('scan next page', page, 'count=', list.length);
+            var filtered = filterByQuery(list, q);
+            if (filtered.length) { setStatus(''); return filtered; }
+            var nxt = getNextUrl(payload, pageUrl.href);
+            if (!nxt) { L.log('scan next EOF'); setStatus(''); return []; }
+            pageUrl = nxt; page++;
+            return loop();
+          });
         }
-        return out;
+        return loop();
+      }
+
+      return tryAttempts(0).then(function(list){ return list || []; });
     }
 
-    async function fetchJson(u, controller) {
-        const g = L.group(`[GET] ${u.pathname}${u.search}`, true);
-        try {
-            const r = await fetch(u, {
-                headers: { 'X-Requested-With': 'fetch', 'Accept': 'application/json' },
-                signal: controller?.signal
-            });
-            L.log('→', u.href, 'status', r.status, r.statusText);
-            if (!r.ok) { g.end(); return [false, null]; }
-            const j = await r.json().catch(() => null);
-            if (j && typeof j === 'object') L.log('json keys', Object.keys(j));
-            g.end();
-            return [true, j];
-        } catch (e) {
-            if (e.name === 'AbortError') L.warn('abort', u.href);
-            else L.warn('fetch error', e);
-            g.end();
-            return [false, null];
+    function renderRemote(q){
+      list.innerHTML = '';
+      list.appendChild(li('Procurando…'));
+      drop.hidden = false;
+      remoteSearch(q, '120').then(function(data){
+        if (currentSearch.ctl && currentSearch.ctl.signal && currentSearch.ctl.signal.aborted) return;
+        list.innerHTML = '';
+        setStatus('');
+        if (!data.length){ list.appendChild(li('Nenhum resultado')); return; }
+        data.forEach(function(o){
+          var it = document.createElement('li');
+          it.className = 'ss-item';
+          it.setAttribute('role', 'option');
+          it.dataset.value = o.value;
+          it.dataset.label = o.label || o.value;
+          it.innerHTML = '<span class="ss-label">'+(o.label || o.value)+'</span><span class="ss-value">'+o.value+'</span>';
+          it.addEventListener('mousedown', function(ev){
+            ev.preventDefault();
+            choose(o.value, o.label || o.value, true);
+          });
+          list.appendChild(it);
+        });
+      });
+    }
+
+    if (select.value){
+      var opt0 = select.options[select.selectedIndex];
+      if (opt0) input.value = opt0.text;
+    }
+
+    var debounce = null;
+    function trigger(){
+      var q = input.value.trim();
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(function(){
+        if (q.length >= 2 && remoteBase) renderRemote(q);
+        else { if (currentSearch.ctl && typeof currentSearch.ctl.abort === 'function') currentSearch.ctl.abort(); renderLocal(q); }
+      }, 220);
+    }
+
+    input.addEventListener('focus', trigger);
+    input.addEventListener('input', trigger);
+
+    input.addEventListener('keydown', function(e){
+      var items = Array.prototype.slice.call(list.querySelectorAll('.ss-item'));
+      var focused = document.activeElement;
+      var idx = items.indexOf(focused);
+      if (e.key === 'ArrowDown'){
+        e.preventDefault(); (items[idx + 1] || items[0] || input).focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault(); (items[idx - 1] || items[items.length - 1] || input).focus();
+      } else if (e.key === 'Enter') {
+        if (focused && focused.classList.contains('ss-item')){
+          e.preventDefault(); choose(focused.dataset.value, focused.dataset.label, true);
+        } else {
+          var match = Array.prototype.slice.call(select.options).find(function(o){ return o.text === input.value; });
+          if (match) choose(match.value, match.text);
+          drop.hidden = true;
         }
-    }
-
-    function normalize(json, vf, lf) {
-        const rows = Array.isArray(json?.rows) ? json.rows
-            : Array.isArray(json?.data) ? json.data
-            : Array.isArray(json?.results) ? json.results
-            : (Array.isArray(json) ? json : null);
-        const arr = rows || json?.options || [];
-        if (!Array.isArray(arr)) return [];
-        return arr.map(r => {
-            const ref = r?.REFERENCIA ?? r?.referencia;
-            const desc = r?.DESCRICAO ?? r?.descricao;
-            const labelPref = ref
-                ? (desc ? `${ref} — ${desc}` : String(ref))
-                : (r?.[lf] ?? r?.label ?? r?.name ?? r?.[vf]);
-            return {
-                value: String(r?.[vf] ?? r?.value ?? r?.id ?? ''),
-                label: String(labelPref ?? ''),
-                raw: r
-            };
-        }).filter(x => x.value !== '');
-    }
-
-    /* ============ UI PESQUISÁVEL ============ */
-    function enhanceSearchable(select) {
-        if (!select || select.dataset.enhanced === "1") return;
-        select.dataset.enhanced = "1";
-
-        const wrap = document.createElement('div');
-        wrap.className = 'ss';
-        select.parentNode.insertBefore(wrap, select);
-        wrap.appendChild(select);
-
-        const box = document.createElement('div');
-        box.className = 'ss-box';
-
-        const input = document.createElement('input');
-        input.type = 'search';
-        input.className = 'ss-input';
-        input.placeholder = 'Pesquisar...';
-
-        const clearBtn = document.createElement('button');
-        clearBtn.type = 'button';
-        clearBtn.className = 'ss-clear';
-        clearBtn.title = 'Limpar';
-        clearBtn.innerHTML = '×';
-
-        box.appendChild(input);
-        box.appendChild(clearBtn);
-
-        const drop = document.createElement('div');
-        drop.className = 'ss-dropdown';
+      } else if (e.key === 'Escape') {
+        if (currentSearch.ctl && typeof currentSearch.ctl.abort === 'function') currentSearch.ctl.abort();
         drop.hidden = true;
-
-        const list = document.createElement('ul');
-        list.className = 'ss-list';
-        drop.appendChild(list);
-
-        const status = document.createElement('div');
-        status.className = 'ss-status';
-        drop.appendChild(status);
-
-        wrap.insertBefore(box, select);
-        wrap.insertBefore(drop, select);
-        select.classList.add('ss-hidden');
-
-        const norm = s => String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-        const alnum = s => norm(s).replace(/[^a-z0-9]/g, '');
-        const MAX_SUG = 100;
-
-        function li(text, cls = 'ss-empty') {
-            const el = document.createElement('li');
-            el.className = cls;
-            el.textContent = text;
-            return el;
-        }
-
-        function setStatus(txt) {
-            status.textContent = txt || '';
-            status.style.display = txt ? 'block' : 'none';
-        }
-
-        function buildLocal() {
-            const arr = [];
-            for (const opt of select.options) {
-                if (!opt.value) continue;
-                arr.push({ value: opt.value, label: opt.text });
-            }
-            return arr;
-        }
-
-        let LOCAL = buildLocal();
-        const vf = select.dataset.vf || '';
-        const lf = select.dataset.lf || '';
-        let remoteBase = select.dataset.sqlhubBase || '';
-
-        if (!remoteBase && select.dataset.qid) {
-            remoteBase = CANDS(select.dataset.qid)[0];
-            select.dataset.sqlhubBase = remoteBase;
-        }
-
-        L.log('enhanceSearchable/base', remoteBase, { vf, lf });
-
-        let currentSearch = { ctl: null, seq: 0 };
-
-        function renderLocal(q = '') {
-            list.innerHTML = '';
-            const nq = norm(q), aq = alnum(q);
-            const data = q ? LOCAL.filter(o =>
-                norm(o.label).includes(nq) ||
-                norm(o.value).includes(nq) ||
-                alnum(o.label).includes(aq) ||
-                alnum(o.value).includes(aq)
-            ) : LOCAL.slice(0, MAX_SUG);
-
-            if (!data.length) {
-                list.appendChild(li('Nenhum resultado'));
-                drop.hidden = false;
-                setStatus('');
-                return;
-            }
-
-            data.slice(0, MAX_SUG).forEach(o => {
-                const item = document.createElement('li');
-                item.className = 'ss-item';
-                item.setAttribute('role', 'option');
-                item.dataset.value = o.value;
-                item.dataset.label = o.label;
-                item.innerHTML = `<span class="ss-label">${o.label}</span><span class="ss-value">${o.value}</span>`;
-                item.addEventListener('mousedown', (ev) => {
-                    ev.preventDefault();
-                    choose(o.value, o.label);
-                });
-                list.appendChild(item);
-            });
-
-            drop.hidden = false;
-            setStatus('');
-        }
-
-        function ensureOption(value, label) {
-            let opt = Array.from(select.options).find(o => o.value === String(value));
-            if (!opt) {
-                opt = document.createElement('option');
-                opt.value = String(value);
-                opt.textContent = String(label ?? value);
-                select.appendChild(opt);
-                LOCAL = buildLocal();
-            }
-            return opt;
-        }
-
-        function choose(value, label, ensure = false) {
-            if (ensure) ensureOption(value, label);
-            select.value = String(value);
-            input.value = String(label || value);
-            drop.hidden = true;
-        }
-
-        function filterByQuery(list, q) {
-            const nq = norm(q), aq = alnum(q);
-            return list.filter(o => {
-                const Ltxt = String(o.label || '');
-                const Vtxt = String(o.value || '');
-                const raw = o.raw || {};
-                const ref = String(raw.REFERENCIA ?? raw.referencia ?? '');
-                const desc = String(raw.DESCRICAO ?? raw.descricao ?? '');
-                return (
-                    norm(Ltxt).includes(nq) ||
-                    norm(Vtxt).includes(nq) ||
-                    alnum(Ltxt).includes(aq) ||
-                    alnum(Vtxt).includes(aq) ||
-                    norm(ref).includes(nq) ||
-                    norm(desc).includes(nq) ||
-                    alnum(ref).includes(aq)
-                );
-            });
-        }
-
-        function getNextUrl(payload, baseUrl) {
-            let nx = payload?.next || payload?.links?.next || payload?.pagination?.next
-                || payload?.meta?.next || payload?.next_page_url || payload?.nextPageUrl;
-            if (!nx) return null;
-            try { return new URL(nx, location.origin); }
-            catch {
-                try { return new URL(String(nx), new URL(baseUrl, location.origin)); }
-                catch { return null; }
-            }
-        }
-
-        // ============ BUSCA REMOTA ============ 
-        async function remoteSearch(q, limit = '120') {
-            if (!remoteBase || !q) return [];
-            currentSearch.ctl?.abort();
-            const ctl = new AbortController();
-            const mySeq = ++currentSearch.seq;
-            currentSearch.ctl = ctl;
-            const attempts = [];
-            const push = (tag, u) => attempts.push({ tag, u });
-
-            // tentativas rápidas
-            let u = new URL(remoteBase, location.origin);
-            u.searchParams.set('value_field', vf);
-            u.searchParams.set('label_field', lf);
-            u.searchParams.set('q', q);
-            ['limit', 'page_size', 'per_page', 'size', 'max', 'top'].forEach(k => u.searchParams.set(k, limit));
-            push('strict q', u);
-
-            u = new URL(remoteBase, location.origin);
-            u.searchParams.set('value', vf);
-            u.searchParams.set('label', lf);
-            u.searchParams.set('q', q);
-            ['limit', 'page_size', 'per_page', 'size', 'max', 'top'].forEach(k => u.searchParams.set(k, limit));
-            push('legacy q', u);
-
-            for (const field of ['REFERENCIA', 'referencia', 'DESCRICAO', 'descricao']) {
-                u = new URL(remoteBase, location.origin);
-                u.searchParams.set('value_field', vf);
-                u.searchParams.set('label_field', lf);
-                u.searchParams.set(`${field}_like`, `%${q}%`);
-                ['limit', 'page_size', 'per_page', 'size', 'max', 'top'].forEach(k => u.searchParams.set(k, limit));
-                push(`strict ${field}_like`, u);
-            }
-
-            for (const { tag, u: uu } of attempts) {
-                setStatus('Procurando…');
-                const [ok, payload] = await fetchJson(uu, ctl);
-                if (mySeq !== currentSearch.seq) return [];
-                if (!ok) continue;
-                const list = normalize(payload, vf, lf);
-                const filtered = filterByQuery(list, q);
-                L.log('remote attempt:', tag, 'orig=', list.length, 'filtered=', filtered.length);
-                if (filtered.length) return filtered;
-            }
-
-            // fallback paginado (DRF-like)
-            const PAGE_SIZE = 200;
-            const MAX_PAGES = 300;
-            const seen = new Set();
-            let page = 1;
-            let pageUrl = new URL(remoteBase, location.origin);
-            pageUrl.searchParams.set('value_field', vf);
-            pageUrl.searchParams.set('label_field', lf);
-            ['limit', 'page_size', 'per_page', 'size', 'max', 'top'].forEach(k => pageUrl.searchParams.set(k, PAGE_SIZE));
-
-            while (page <= MAX_PAGES) {
-                setStatus(`Procurando… (página ${page})`);
-                const key = pageUrl.pathname + pageUrl.search;
-                if (seen.has(key)) {
-                    L.warn('scan next repetido, encerrando');
-                    break;
-                }
-                seen.add(key);
-                const [ok, payload] = await fetchJson(pageUrl, ctl);
-                if (mySeq !== currentSearch.seq) return [];
-                if (!ok || !payload) break;
-                const list = normalize(payload, vf, lf);
-                L.log('scan next page', page, 'count=', list.length);
-                const filtered = filterByQuery(list, q);
-                if (filtered.length) {
-                    L.log('scan next HIT page', page, 'filtered=', filtered.length);
-                    return filtered;
-                }
-                const nxt = getNextUrl(payload, pageUrl.href);
-                if (!nxt) { L.log('scan next EOF'); break; }
-                pageUrl = nxt;
-                page++;
-            }
-
-            setStatus('');
-            L.warn('remoteSearch: nenhuma tentativa / página retornou resultado');
-            return [];
-        }
-
-        async function renderRemote(q) {
-            list.innerHTML = '';
-            list.appendChild(li('Procurando…'));
-            drop.hidden = false;
-            const data = await remoteSearch(q, '120');
-            if (currentSearch.ctl?.signal?.aborted) return;
-            list.innerHTML = '';
-            setStatus('');
-            if (!data.length) {
-                list.appendChild(li('Nenhum resultado'));
-                return;
-            }
-            data.forEach(o => {
-                const it = document.createElement('li');
-                it.className = 'ss-item';
-                it.setAttribute('role', 'option');
-                it.dataset.value = o.value;
-                it.dataset.label = o.label || o.value;
-                it.innerHTML = `<span class="ss-label">${o.label || o.value}</span><span class="ss-value">${o.value}</span>`;
-                it.addEventListener('mousedown', (ev) => {
-                    ev.preventDefault();
-                    choose(o.value, o.label || o.value, true);
-                });
-                list.appendChild(it);
-            });
-        }
-
-        if (select.value) {
-            const opt = select.options[select.selectedIndex];
-            if (opt) input.value = opt.text;
-        }
-
-        let debounce;
-        function trigger() {
-            const q = input.value.trim();
-            clearTimeout(debounce);
-            debounce = setTimeout(() => {
-                if (q.length >= 2 && remoteBase) {
-                    renderRemote(q);
-                } else {
-                    currentSearch.ctl?.abort();
-                    renderLocal(q);
-                }
-            }, 220);
-        }
-
-        input.addEventListener('focus', trigger);
-        input.addEventListener('input', trigger);
-
-        input.addEventListener('keydown', (e) => {
-            const items = Array.from(list.querySelectorAll('.ss-item'));
-            const focused = document.activeElement;
-            const idx = items.indexOf(focused);
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                (items[idx + 1] || items[0] || input).focus();
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                (items[idx - 1] || items[items.length - 1] || input).focus();
-            } else if (e.key === 'Enter') {
-                if (focused && focused.classList.contains('ss-item')) {
-                    e.preventDefault();
-                    choose(focused.dataset.value, focused.dataset.label, true);
-                } else {
-                    const match = Array.from(select.options).find(o => o.text === input.value);
-                    if (match) choose(match.value, match.text);
-                    drop.hidden = true;
-                }
-            } else if (e.key === 'Escape') {
-                currentSearch.ctl?.abort();
-                drop.hidden = true;
-                input.blur();
-            }
-        });
-
-        clearBtn.addEventListener('click', () => {
-            currentSearch.ctl?.abort();
-            input.value = '';
-            select.value = '';
-            renderLocal('');
-            input.focus();
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!wrap.contains(e.target)) {
-                currentSearch.ctl?.abort();
-                drop.hidden = true;
-            }
-        });
-
-        const mo = new MutationObserver(() => { LOCAL = buildLocal(); });
-        mo.observe(select, { childList: true, subtree: true, characterData: true });
-    }
-
-    /* ============ Hidratação inicial (200 mais usados) ============ */
-    async function hydrateSelect(sel) {
-        const qid = (sel.dataset.qid || '').trim();
-        const vf = (sel.dataset.vf || '').trim();
-        const lf = (sel.dataset.lf || '').trim();
-        const selected = String(sel.dataset.selected ?? '');
-        if (!qid || !vf || !lf) {
-            sel.innerHTML = '<option value="" disabled selected>Configuração inválida (qid/vf/lf)</option>';
-            return;
-        }
-        sel.disabled = true;
-        sel.innerHTML = '<option value="">Carregando…</option>';
-        try {
-            let usedHref = null, data = [];
-            for (const cand of buildUrls(qid, vf, lf, { limit: '200' })) {
-                const [ok, payload] = await fetchJson(cand.url);
-                if (!ok) continue;
-                const list = normalize(payload, vf, lf);
-                if (!list.length) continue;
-                usedHref = cand.url.href;
-                data = list;
-                break;
-            }
-            if (!data.length) {
-                sel.innerHTML = '<option value="" disabled selected>Nenhuma opção disponível</option>';
-            } else {
-                // placeholder selecionado quando não há valor prévio
-                sel.innerHTML = '';
-                const ph = document.createElement('option');
-                ph.value = '';
-                ph.textContent = 'Escolha…';
-                ph.disabled = true;
-                if (!selected) ph.selected = true;
-                sel.appendChild(ph);
-
-                data.forEach(o => {
-                    const op = document.createElement('option');
-                    op.value = String(o.value ?? '');
-                    op.textContent = String(o.label ?? o.value ?? '');
-                    if (selected && selected === op.value) op.selected = true;
-                    sel.appendChild(op);
-                });
-
-                if (!selected) {
-                    sel.value = '';
-                    sel.selectedIndex = 0;
-                }
-            }
-
-            if (usedHref) {
-                const u = new URL(usedHref, location.origin);
-                sel.dataset.sqlhubBase = u.pathname;
-            } else {
-                sel.dataset.sqlhubBase = CANDS(qid)[0];
-            }
-        } catch (e) {
-            sel.innerHTML = '<option value="" disabled selected>Falha ao carregar opções</option>';
-        } finally {
-            sel.disabled = false;
-            enhanceSearchable(sel);
-        }
-    }
-
-    function initSqlhub(container) {
-        (container || document).querySelectorAll('select.sqlhub-select[data-sqlhub="1"]').forEach(hydrateSelect);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        initSqlhub(document);
-        document.querySelectorAll('select.input-select:not(.sqlhub-select)').forEach(enhanceSearchable);
+        input.blur();
+      }
     });
 
-    document.addEventListener('htmx:afterSwap', e => initSqlhub(e.target));
+    clearBtn.addEventListener('click', function(){
+      if (currentSearch.ctl && typeof currentSearch.ctl.abort === 'function') currentSearch.ctl.abort();
+      input.value = '';
+      select.value = '';
+      renderLocal('');
+      input.focus();
+    });
+
+    document.addEventListener('click', function(e){
+      if (!wrap.contains(e.target)){
+        if (currentSearch.ctl && typeof currentSearch.ctl.abort === 'function') currentSearch.ctl.abort();
+        drop.hidden = true;
+      }
+    });
+
+    var mo = new MutationObserver(function(){ LOCAL = buildLocal(); });
+    mo.observe(select, { childList:true, subtree:true, characterData:true });
+  }
+
+  function hydrateSelect(sel){
+    var qid = (sel.getAttribute('data-qid') || '').trim();
+    var vf  = (sel.getAttribute('data-vf')  || '').trim();
+    var lf  = (sel.getAttribute('data-lf')  || '').trim();
+    var selected = String(sel.getAttribute('data-selected') || '');
+    if (!qid || !vf || !lf){
+      sel.innerHTML = '<option value="" disabled selected>Configuração inválida (qid/vf/lf)</option>';
+      return;
+    }
+    sel.disabled = true;
+    sel.innerHTML = '<option value="">Carregando…</option>';
+
+    var usedHref = null, data = [];
+    (function tryList(list, idx){
+      if (idx >= list.length){
+        if (!data.length){
+          sel.innerHTML = '<option value="" disabled selected>Nenhuma opção disponível</option>';
+          sel.disabled = false;
+          return;
+        }
+        // fill options:
+        sel.innerHTML = '';
+        var ph = document.createElement('option');
+        ph.value = '';
+        ph.textContent = 'Escolha…';
+        ph.disabled = true;
+        if (!selected) ph.selected = true;
+        sel.appendChild(ph);
+
+        data.forEach(function(o){
+          var op = document.createElement('option');
+          op.value = String(o.value || '');
+          op.textContent = String(o.label || o.value || '');
+          if (selected && selected === op.value) op.selected = true;
+          sel.appendChild(op);
+        });
+        if (!selected){ sel.value = ''; sel.selectedIndex = 0; }
+
+        if (usedHref){
+          try { sel.dataset.sqlhubBase = new URL(usedHref, location.origin).pathname; } catch(e){ sel.dataset.sqlhubBase = CANDS(qid)[0]; }
+        } else {
+          sel.dataset.sqlhubBase = CANDS(qid)[0];
+        }
+        sel.disabled = false;
+        enhanceSearchable(sel);
+        return;
+      }
+      var url = buildUrls(qid, vf, lf, { limit:'200' })[idx].url;
+      fetchJson(url).then(function(res){
+        var ok = res[0], payload = res[1];
+        if (!ok) { tryList(buildUrls(qid, vf, lf, { limit:'200' }), idx+1); return; }
+        var listData = normalize(payload, vf, lf);
+        if (listData.length){ usedHref = url.href; data = listData; }
+        // se vazio, tenta o próximo
+        tryList(buildUrls(qid, vf, lf, { limit:'200' }), idx+1);
+      });
+    })(buildUrls(qid, vf, lf, { limit:'200' }), 0);
+  }
+
+  function initSqlhub(container){
+    (container || document).querySelectorAll('select.sqlhub-select[data-sqlhub="1"]').forEach(hydrateSelect);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      initSqlhub(document);
+      Array.prototype.forEach.call(document.querySelectorAll('select.input-select:not(.sqlhub-select)'), enhanceSearchable);
+    });
+  } else {
+    initSqlhub(document);
+    Array.prototype.forEach.call(document.querySelectorAll('select.input-select:not(.sqlhub-select)'), enhanceSearchable);
+  }
+  document.addEventListener('htmx:afterSwap', function(e){ initSqlhub(e.target); });
+})();
+</script>
+
+{# ======= UPLOADER: injeta <input type="file"> (sem depender do <noscript>) ======= #}
+<script>
+(function(){
+  var LOG = true;
+  function log(){ if (LOG) console.log.apply(console, ['[RESP/UPLOAD]'].concat([].slice.call(arguments))); }
+
+  function bytesHuman(b){
+    var u=['B','KB','MB','GB'], i=0, n=b||0;
+    while(n>=1024 && i<u.length-1){ n/=1024; i++; }
+    return ((n<10&&i)? n.toFixed(1):Math.round(n))+' '+u[i];
+  }
+
+  function capFiles(input, maxCount, maxMb){
+    var files = Array.prototype.slice.call(input.files||[]);
+    var kept = [];
+    var maxBytes = (parseInt(maxMb,10)||0)*1024*1024;
+    for(var idx=0; idx<files.length; idx++){
+      var f = files[idx];
+      if(maxBytes && f.size > maxBytes){ continue; }
+      kept.push(f);
+      if(maxCount && kept.length >= maxCount) break;
+    }
+    if (kept.length === files.length) return false;
+    var dt = new DataTransfer();
+    kept.forEach(function(f){ dt.items.add(f); });
+    input.files = dt.files;
+    return true;
+  }
+
+  function renderList(ul, input){
+    ul.innerHTML = '';
+    var arr = Array.prototype.slice.call(input.files||[]);
+    if(!arr.length){
+      var li = document.createElement('li');
+      li.className = 'muted';
+      li.textContent = 'Nenhum arquivo selecionado';
+      ul.appendChild(li);
+      return;
+    }
+    arr.forEach(function(f){
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="file-pill">'+f.name+'</span> <small class="muted">('+bytesHuman(f.size)+')</small>';
+      ul.appendChild(li);
+    });
+  }
+
+  function initOne(box){
+    if(!box || box.getAttribute('data-ready') === '1') return;
+    box.setAttribute('data-ready','1');
+
+    var name = box.getAttribute('data-name') || '';
+    var max = parseInt(box.getAttribute('data-max') || '1', 10) || 1;
+    var maxMb = parseInt(box.getAttribute('data-maxmb') || '10', 10) || 10;
+    var accept = (box.getAttribute('data-accept') || '').trim();
+    var required = box.getAttribute('data-required') === '1';
+
+    var holder = box.querySelector('.fu-input-holder');
+    var list = box.querySelector('.fu-list');
+    var countEl = box.querySelector('.fu-count');
+
+    var inp = document.createElement('input');
+    inp.type = 'file';
+    inp.name = name;
+    inp.id = 'fu-'+name;
+    inp.className = 'input-file';
+    if (accept) inp.accept = accept;
+    if (max > 1) inp.multiple = true;
+    if (required) inp.required = true;
+
+    holder.appendChild(inp);
+    log('init', {name:name,max:max,maxMb:maxMb,accept:accept,required:required});
+
+    function update(){
+      var changed = capFiles(inp, max, maxMb);
+      renderList(list, inp);
+      if(countEl) countEl.textContent = String((inp.files||[]).length);
+      if(changed){ holder.classList.add('pulse'); setTimeout(function(){ holder.classList.remove('pulse'); }, 300); }
+    }
+
+    inp.addEventListener('change', update);
+    update();
+  }
+
+  function boot(){
+    Array.prototype.forEach.call(document.querySelectorAll('.multi-uploader'), initOne);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', boot);
+  }else{
+    boot();
+  }
+  document.addEventListener('htmx:afterSwap', boot);
 })();
 </script>

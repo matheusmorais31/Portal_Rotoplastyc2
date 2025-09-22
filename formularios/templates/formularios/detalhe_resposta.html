@@ -25,18 +25,14 @@
       <p><strong>ID:</strong> {{ resposta.id }}</p>
       <p><strong>Enviada em:</strong> {{ resposta.enviado_em }}</p>
 
-      {# Mostra APENAS quando coletar_nome=True (sem fallback do usuário) #}
       {% if resposta.formulario.coletar_nome %}
         <p><strong>Nome:</strong> {{ resposta.nome_coletado|default:"Não informado" }}</p>
       {% endif %}
-
-      
     </div>
   </div>
 
-  {# ============= Campos: sempre renderiza, mesmo sem resposta ============= #}
+  {# Renderiza todos os campos do form (inclusive arquivados), mesmo sem resposta #}
   {% for campo in campos_da_resposta %}
-    {% with txt=valores_resposta|primeiro_texto:campo.id sel=valores_resposta|selecoes_checkbox:campo.id arquivos=valores_resposta|arquivos_do_campo:campo.id %}
     <div class="pergunta-card {% if campo.obrigatorio %}required{% endif %} {% if not campo.ativo %}is-archived{% endif %}">
       <div class="pergunta-header">
         <label for="campo-{{ campo.id }}">
@@ -48,103 +44,118 @@
 
       <div class="pergunta-body">
 
+        {# TEXTO CURTO #}
         {% if campo.tipo == "texto_curto" %}
-          <input type="text" id="campo-{{ campo.id }}" class="input-texto" value="{{ txt }}" placeholder="—" disabled readonly>
-          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with val=valores_resposta|primeiro_texto:campo.id %}
+            <input type="text" id="campo-{{ campo.id }}" class="input-texto"
+                   value="{{ val }}" placeholder="—" disabled readonly>
+            {% if not val %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# PARÁGRAFO #}
         {% elif campo.tipo == "paragrafo" %}
-          <textarea id="campo-{{ campo.id }}" rows="4" class="input-texto" disabled readonly placeholder="—">{{ txt }}</textarea>
-          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with val=valores_resposta|primeiro_texto:campo.id %}
+            <textarea id="campo-{{ campo.id }}" rows="4" class="input-texto" disabled readonly placeholder="—">{{ val }}</textarea>
+            {% if not val %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# MÚLTIPLA (sempre manual) #}
         {% elif campo.tipo == "multipla" %}
-          <div class="options-block radios">
-            {% for opcao in campo.opcoes.all %}{% with val_op=opcao.valor|default:opcao.texto %}
-              <label class="option">
-                <input type="radio" name="campo-{{ campo.id }}" value="{{ val_op }}" disabled {% if txt == val_op %}checked{% endif %}>
-                {{ opcao.texto }}
-              </label>
-            {% endwith %}{% empty %}
-              <div class="texto-ajuda">Sem opções configuradas.</div>
-            {% endfor %}
-          </div>
-          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with val=valores_resposta|primeiro_texto:campo.id %}
+            <div class="options-block radios">
+              {% for opcao in campo.opcoes.all %}
+                {% with val_op=opcao.valor|default:opcao.texto %}
+                <label class="option">
+                  <input type="radio"
+                         name="campo-{{ campo.id }}"
+                         value="{{ val_op }}"
+                         disabled
+                         {% if val == val_op %}checked{% endif %}>
+                  {{ opcao.texto }}
+                </label>
+                {% endwith %}
+              {% empty %}
+                <div class="texto-ajuda">Sem opções configuradas.</div>
+              {% endfor %}
+            </div>
+            {% if not val %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# CHECKBOX (sempre manual) #}
         {% elif campo.tipo == "checkbox" %}
-          <div class="options-block checks">
-            {% for opcao in campo.opcoes.all %}{% with val_op=opcao.valor|default:opcao.texto %}
-              <label class="option">
-                <input type="checkbox" name="campo-{{ campo.id }}" value="{{ val_op }}" disabled {% if val_op in sel %}checked{% endif %}>
-                {{ opcao.texto }}
-              </label>
-            {% endwith %}{% empty %}
-              <div class="texto-ajuda">Sem opções configuradas.</div>
-            {% endfor %}
-          </div>
-          {% if not sel %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with sel=valores_resposta|selecoes_checkbox:campo.id %}
+            <div class="options-block checks">
+              {% for opcao in campo.opcoes.all %}
+                {% with val_op=opcao.valor|default:opcao.texto %}
+                <label class="option">
+                  <input type="checkbox"
+                         name="campo-{{ campo.id }}"
+                         value="{{ val_op }}"
+                         disabled
+                         {% if val_op in sel %}checked{% endif %}>
+                  {{ opcao.texto }}
+                </label>
+                {% endwith %}
+              {% empty %}
+                <div class="texto-ajuda">Sem opções configuradas.</div>
+              {% endfor %}
+            </div>
+            {% if not sel %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# LISTA (único tipo que pode ser SQL). Se não houver opções manuais, mostra o valor cru. #}
         {% elif campo.tipo == "lista" %}
-          <select id="campo-{{ campo.id }}" class="input-select" disabled>
-            <option value="">Escolha…</option>
-            {% for opcao in campo.opcoes.all %}{% with val_op=opcao.valor|default:opcao.texto %}
-              <option value="{{ val_op }}" {% if txt == val_op %}selected{% endif %}>{{ opcao.texto }}</option>
-            {% endwith %}{% endfor %}
-          </select>
-          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with val=valores_resposta|primeiro_texto:campo.id %}
+            {% if campo.opcoes.all|length > 0 %}
+              <select id="campo-{{ campo.id }}" class="input-select" disabled>
+                <option value="">Escolha…</option>
+                {% for opcao in campo.opcoes.all %}
+                  {% with val_op=opcao.valor|default:opcao.texto %}
+                  <option value="{{ val_op }}" {% if val == val_op %}selected{% endif %}>
+                    {{ opcao.texto }}
+                  </option>
+                  {% endwith %}
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="input-texto" value="{{ val|default:'—' }}" disabled readonly>
+            {% endif %}
+            {% if not val %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# ESCALA 1–10 #}
         {% elif campo.tipo == "escala" %}
-          <div class="options-block radios escala">
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="1" disabled {% if txt == "1" %}checked{% endif %}>
-              <span class="scale-num">1</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="2" disabled {% if txt == "2" %}checked{% endif %}>
-              <span class="scale-num">2</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="3" disabled {% if txt == "3" %}checked{% endif %}>
-              <span class="scale-num">3</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="4" disabled {% if txt == "4" %}checked{% endif %}>
-              <span class="scale-num">4</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="5" disabled {% if txt == "5" %}checked{% endif %}>
-              <span class="scale-num">5</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="6" disabled {% if txt == "6" %}checked{% endif %}>
-              <span class="scale-num">6</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="7" disabled {% if txt == "7" %}checked{% endif %}>
-              <span class="scale-num">7</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="8" disabled {% if txt == "8" %}checked{% endif %}>
-              <span class="scale-num">8</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="9" disabled {% if txt == "9" %}checked{% endif %}>
-              <span class="scale-num">9</span>
-            </label>
-            <label class="option">
-              <input type="radio" name="campo-{{ campo.id }}" value="10" disabled {% if txt == "10" %}checked{% endif %}>
-              <span class="scale-num">10</span>
-            </label>
-          </div>
-          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with val=valores_resposta|primeiro_texto:campo.id %}
+            <div class="options-block radios escala">
+              {% for i in "12345678910"|make_list %}
+                {% if forloop.counter <= 10 %}
+                <label class="option">
+                  <input type="radio" name="campo-{{ campo.id }}" value="{{ forloop.counter }}" disabled {% if val == forloop.counter|stringformat:"s" %}checked{% endif %}>
+                  <span class="scale-num">{{ forloop.counter }}</span>
+                </label>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if not val %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# DATA #}
         {% elif campo.tipo == "data" %}
-          <input type="date" id="campo-{{ campo.id }}" class="input-texto" disabled readonly value="{{ txt }}">
-          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with val=valores_resposta|primeiro_texto:campo.id %}
+            <input type="date" id="campo-{{ campo.id }}" class="input-texto" disabled readonly value="{{ val }}">
+            {% if not val %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# HORA #}
         {% elif campo.tipo == "hora" %}
-          <input type="time" id="campo-{{ campo.id }}" class="input-texto" disabled readonly value="{{ txt }}">
-          {% if not txt %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% with val=valores_resposta|primeiro_texto:campo.id %}
+            <input type="time" id="campo-{{ campo.id }}" class="input-texto" disabled readonly value="{{ val }}">
+            {% if not val %}<p class="nao-respondido">Não respondido.</p>{% endif %}
+          {% endwith %}
 
+        {# ARQUIVO #}
         {% elif campo.tipo == "arquivo" %}
+          {% with arquivos=valores_resposta|arquivos_do_campo:campo.id %}
           <div class="media-carousel-wrapper">
             <div class="media-carousel" data-campo-id="{{ campo.id }}">
               <div class="carousel-track">
@@ -158,10 +169,14 @@
                       {% elif fname|slice:"-4:" == ".mp4" or fname|slice:"-5:" == ".webm" or fname|slice:"-4:" == ".ogg" %}
                         <video src="{{ v.valor_arquivo.url }}" controls playsinline preload="metadata" class="carousel-media"></video>
                       {% else %}
-                        <a class="btn-primario" href="{{ v.valor_arquivo.url }}" target="_blank" rel="noopener">Baixar: {{ v.valor_arquivo.name|truncatechars:30 }}</a>
+                        <a class="btn-primario" href="{{ v.valor_arquivo.url }}" target="_blank" rel="noopener">
+                          Baixar: {{ v.valor_arquivo.name|truncatechars:30 }}
+                        </a>
                       {% endif %}
                     {% endwith %}
                   </div>
+                {% empty %}
+                  <p class="texto-ajuda" style="padding: 1rem;">Nenhum arquivo enviado.</p>
                 {% endfor %}
               </div>
             </div>
@@ -169,32 +184,31 @@
             <button class="carousel-button next" aria-label="Próxima mídia"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
           </div>
           {% if not arquivos %}<p class="nao-respondido" style="margin-top:.5rem">Nenhum arquivo enviado.</p>{% endif %}
+          {% endwith %}
 
         {% else %}
           <p class="texto-ajuda">Tipo de campo ‘{{ campo.get_tipo_display }}’ não suportado.</p>
         {% endif %}
+
       </div>
     </div>
-    {% endwith %}
   {% endfor %}
 
   {# Valores órfãos (se algum campo foi removido) #}
-  {% with orfaos=resposta.valores.all|dictsort:"id" %}
-    {% for v in orfaos %}
-      {% if not v.campo %}
-        <div class="pergunta-card is-archived">
-          <div class="pergunta-header"><label>(Pergunta removida)</label></div>
-          <div class="pergunta-body">
-            {% if v.valor_arquivo %}
-              <a class="btn-primario" href="{{ v.valor_arquivo.url }}" target="_blank" rel="noopener">Baixar arquivo</a>
-            {% else %}
-              <p class="input-texto" style="white-space:pre-wrap">{{ v.valor_texto|default:"—" }}</p>
-            {% endif %}
-          </div>
+  {% for v in resposta.valores.all|dictsort:"id" %}
+    {% if not v.campo %}
+      <div class="pergunta-card is-archived">
+        <div class="pergunta-header"><label>(Pergunta removida)</label></div>
+        <div class="pergunta-body">
+          {% if v.valor_arquivo %}
+            <a class="btn-primario" href="{{ v.valor_arquivo.url }}" target="_blank" rel="noopener">Baixar arquivo</a>
+          {% else %}
+            <p class="input-texto" style="white-space:pre-wrap">{{ v.valor_texto|default:"—" }}</p>
+          {% endif %}
         </div>
-      {% endif %}
-    {% endfor %}
-  {% endwith %}
+      </div>
+    {% endif %}
+  {% endfor %}
 </div>
 {% endblock %}
 

@@ -142,6 +142,8 @@ class CampoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Preenche origem/SQLHub a partir do logica_json
         cfg = getattr(self.instance, "logica_json", {}) or {}
         opt = (cfg.get("options") or {})
         if opt:
@@ -151,6 +153,15 @@ class CampoForm(forms.ModelForm):
             self.initial["sqlhub_query_id"]      = sh.get("query_id") or ""
             self.initial["sqlhub_value_field"]   = sh.get("value_field") or ""
             self.initial["sqlhub_label_field"]   = sh.get("label_field") or ""
+
+        # NOVO: se já for um campo de upload, popular o hidden valid_json
+        if getattr(self.instance, "tipo", None) == "arquivo":
+            v = getattr(self.instance, "validacao_json", None)
+            if v:
+                try:
+                    self.initial["valid_json"] = json.dumps(v)
+                except Exception:
+                    pass
 
     def clean(self):
         data = super().clean()
@@ -191,6 +202,7 @@ class CampoForm(forms.ModelForm):
                 lj["options"] = {"source": "manual"}
 
         data["logica_json"] = lj
+
         # Validação de upload (se veio)
         vraw = self.data.get(f"{self.prefix}-valid_json") or self.cleaned_data.get("valid_json")
         if vraw:

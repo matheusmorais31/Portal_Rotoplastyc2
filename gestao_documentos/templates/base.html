@@ -253,6 +253,35 @@
                 </ul>
             </li>
             {% endif %}
+            
+            {# -------- SQL Hub (menu próprio) -------- #}
+            {% if perms.sqlhub %}
+            <li>
+                <a href="#" onclick="toggleSubmenu(event, this)"
+                   class="{% if request.resolver_match.namespace == 'sqlhub' %}active{% endif %}">
+                    <img src="{% static 'images/database.png' %}" alt="SQL Hub">
+                    <span class="menu-label">SQL Hub</span>
+                </a>
+                <ul class="submenu">
+                    {% if perms.sqlhub %}
+                    <li>
+                        <a href="{% url 'sqlhub:conn_list' %}"
+                           class="{% if request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_list' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_new' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_edit' %}active{% endif %}">
+                            Conexões
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if perms.sqlhub %}
+                    <li>
+                        <a href="{% url 'sqlhub:query_list' %}"
+                           class="{% if request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_list' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_new' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_edit' %}active{% endif %}">
+                            Consultas
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
 
             {# -------- Administração -------- #}
             {% if perms.usuarios %}
@@ -281,34 +310,7 @@
             </li>
             {% endif %}
 
-            {# -------- SQL Hub (menu próprio) -------- #}
-            {% if perms.sqlhub.view_dbconnection or perms.sqlhub.view_savedquery %}
-            <li>
-                <a href="#" onclick="toggleSubmenu(event, this)"
-                   class="{% if request.resolver_match.namespace == 'sqlhub' %}active{% endif %}">
-                    <img src="{% static 'images/database.png' %}" alt="SQL Hub">
-                    <span class="menu-label">SQL Hub</span>
-                </a>
-                <ul class="submenu">
-                    {% if perms.sqlhub.view_dbconnection %}
-                    <li>
-                        <a href="{% url 'sqlhub:conn_list' %}"
-                           class="{% if request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_list' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_new' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'conn_edit' %}active{% endif %}">
-                            Conexões
-                        </a>
-                    </li>
-                    {% endif %}
-                    {% if perms.sqlhub.view_savedquery %}
-                    <li>
-                        <a href="{% url 'sqlhub:query_list' %}"
-                           class="{% if request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_list' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_new' or request.resolver_match.namespace == 'sqlhub' and request.resolver_match.url_name == 'query_edit' %}active{% endif %}">
-                            Consultas
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </li>
-            {% endif %}
+
 
         </ul>
 

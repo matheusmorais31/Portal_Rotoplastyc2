@@ -67,7 +67,7 @@ class Formulario(models.Model):
         verbose_name = 'formulário'
         verbose_name_plural = 'formulários'
         permissions = [
-            ('pode_responder', 'Pode responder formulário'),
+            
             ('pode_gerenciar', 'Pode gerenciar formulário'),
             ('listar_meus', 'Listar meus formulários'),
             ('criar_formulario', 'Criar formulário')
