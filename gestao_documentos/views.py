@@ -336,4 +336,6 @@ def odonto(request):
 def regulamentos(request):
     return render(request, 'regulamentos.html')
 
+def ideias_protagonistas(request):
+    return render(request, 'ideias_protagonistas.html')
 

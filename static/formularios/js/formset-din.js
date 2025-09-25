@@ -4,10 +4,10 @@
  * • Sortable + Autosave via HTMX
  * • Campos multipla / checkbox / lista  →  opcoes_json
  * • Campo Upload (arquivo)              →  valid_json
+ * • Suporte completo a origem "SQLHub" p/ Lista (sem inline <script>)
  * • ESCOPADO ao #campos-formset
  * • Habilita/Desabilita inputs p/ não irem ao POST indevido
- * • Validação visual (cliente) p/ “Rótulo” e “Tipo”
- * • Logs extra e recálculo imediato do file-config
+ * • Validação visual (cliente) p/ “Rótulo”, “Tipo” e configs (SQLHub/Upload)
  *****************************************************************/
 
 (function () {
@@ -30,6 +30,21 @@
     const m = any?.name?.match?.(/^(campo_set-\d+)-/);
     return m ? m[1] : "";
   };
+  const getTipoValue = (card) => card?.querySelector("select[name$='-tipo']")?.value || "";
+  const fillSelect = (sel, items, vKey, tKey, firstLabel, decorate) => {
+    if (!sel) return;
+    sel.innerHTML = '';
+    const o0 = document.createElement('option');
+    o0.value = ''; o0.textContent = firstLabel || 'Selecione…';
+    sel.appendChild(o0);
+    (items||[]).forEach(it=>{
+      const o = document.createElement('option');
+      o.value = String(it[vKey] ?? '');
+      o.textContent = String(it[tKey] ?? it[vKey] ?? '');
+      if (typeof decorate === 'function') decorate(o, it);
+      sel.appendChild(o);
+    });
+  };
 
   // ===== Helpers JSON (opções/lista + upload) =====
   function updateSingleOptionsJsonField(block) {
@@ -46,21 +61,15 @@
   function buildFileValidationJson(card) {
     if (!card) return;
     const hidden = card.querySelector("input[name$='-valid_json']");
-    const prefix = getPrefix(card);
-    const sel = card.querySelector("select[name$='-tipo']");
-    const tipo = sel?.value;
-
-    if (!hidden) {
-      log("valid_json: hidden NÃO encontrado", { prefix, tipo });
-      return;
-    }
+    const tipo = getTipoValue(card);
+    if (!hidden) return;
 
     // se não for 'arquivo' → limpa/desabilita
     if (tipo !== "arquivo") {
       const before = hidden.value;
       if (hidden.value) hidden.value = "";
       setDisabled(hidden, true, "tipo!=arquivo");
-      log("valid_json LIMPO (tipo!=arquivo)", { prefix, tipo, before, disabled: hidden.disabled });
+      log("valid_json LIMPO (tipo!=arquivo)", { prefix: getPrefix(card), tipo, before, disabled: hidden.disabled });
       return;
     }
 
@@ -69,7 +78,6 @@
 
     const toggle = card.querySelector(".cfg-tipos-toggle");
     const categorias = [...card.querySelectorAll(".cfg-type-item input:checked")].map((i) => i.value);
-
     const maxArqsEl = card.querySelector(".cfg-max-arqs");
     const maxMbEl   = card.querySelector(".cfg-max-mb");
 
@@ -87,7 +95,7 @@
     hidden.value = JSON.stringify(payload);
 
     log("valid_json atualizado:", {
-      prefix,
+      prefix: getPrefix(card),
       disabled: hidden.disabled,
       toggle_checked: !!toggle?.checked,
       tipos_livres: tiposLivres,
@@ -101,11 +109,10 @@
   function updateAllHiddenJson() {
     // opções (considerando origem quando tipo=lista)
     qsaFS(".pergunta-card").forEach((card) => {
-      const tipo = card.querySelector("select[name$='-tipo']")?.value;
+      const tipo = getTipoValue(card);
       const origem = (card.querySelector("input[name$='-origem_opcoes']")?.value || "manual").trim();
       const hiddenOpts = card.querySelector("input[name$='-opcoes_json']");
       const optsBlock  = card.querySelector(".options-block");
-
       const showOpts = ["multipla","checkbox"].includes(tipo) || (tipo === "lista" && origem !== "sqlhub");
       if (optsBlock && hiddenOpts) {
         if (showOpts) {
@@ -120,7 +127,7 @@
 
     // arquivo (sempre recalcula o JSON – mas só para tipo=arquivo)
     qsaFS(".pergunta-card").forEach((c) => {
-      const tipo = c.querySelector("select[name$='-tipo']")?.value;
+      const tipo = getTipoValue(c);
       if (tipo === "arquivo") buildFileValidationJson(c);
     });
 
@@ -179,9 +186,7 @@
   function applyVisibilityAndDisabling(card) {
     if (!card || !card.closest("#campos-formset")) return;
 
-    const sel     = card.querySelector("select[name$='-tipo']");
-    const tipo    = sel?.value || "";
-
+    const tipo    = getTipoValue(card);
     const origemHidden = (card.querySelector("input[name$='-origem_opcoes']")?.value || "manual").trim();
     const originBlk = card.querySelector(".options-origin");
     const sqlBlk    = card.querySelector(".sqlhub-config");
@@ -213,6 +218,8 @@
 
     log("toggleBlocks prefix=%s tipo=%s origem=%s → origin=%s sql=%s opts=%s cfg=%s",
       getPrefix(card), tipo, origemHidden, showOrigin, showSql, showOpts, showCfg);
+
+    if (showSql) initSqlhub(card, /*restore*/true);
   }
 
   // ===== Validação visual por card =====
@@ -222,12 +229,236 @@
     if(holder){ holder.innerHTML = msg ? `<li>${msg}</li>` : ""; }
     if(wrap){ wrap.classList.toggle("erro", !!msg); }
   }
+  function setGlobalWarn(card, on) {
+    const flag = card.querySelector(".card-flag.warn");
+    if (flag) flag.classList.toggle("hide", !on);
+  }
   function validateCard(card){
     if(!card) return;
+
+    // limpa avisos anteriores
+    ["rotulo","tipo","sqlhub","opcoes","upload"].forEach(k => setFieldError(card, k, ""));
+    let problems = 0;
+
     const tipo   = (card.querySelector("select[name$='-tipo']")?.value || "").trim();
     const rotulo = (card.querySelector("input[name$='-rotulo']")?.value || "").trim();
-    setFieldError(card, "tipo",   tipo   ? "" : "Selecione o tipo.");
-    setFieldError(card, "rotulo", rotulo ? "" : "Informe o rótulo.");
+
+    // básicos
+    if(!tipo){ setFieldError(card, "tipo", "Selecione o tipo."); problems++; }
+    if(!rotulo){ setFieldError(card, "rotulo", "Informe o rótulo."); problems++; }
+
+    // Lista: origem manual x sqlhub
+    if (tipo === "lista") {
+      const origem = (card.querySelector("input[name$='-origem_opcoes']")?.value || "manual").trim();
+
+      if (origem === "sqlhub") {
+        const hidConn = (card.querySelector("input[name$='-sqlhub_connection_id']")?.value || "").trim();
+        const hidQ    = (card.querySelector("input[name$='-sqlhub_query_id']")?.value || "").trim();
+        const hidV    = (card.querySelector("input[name$='-sqlhub_value_field']")?.value || "").trim();
+        const hidL    = (card.querySelector("input[name$='-sqlhub_label_field']")?.value || "").trim();
+
+        const faltas = [];
+        if(!hidConn) faltas.push("Conexão");
+        if(!hidQ)    faltas.push("Consulta");
+        if(!hidV)    faltas.push("Campo (valor)");
+        if(!hidL)    faltas.push("Campo (rótulo)");
+
+        if (faltas.length){
+          setFieldError(card, "sqlhub", "Defina: " + faltas.join(", ") + ".");
+          problems++;
+        }
+      } else {
+        // manual
+        const qtd = [...(card.querySelectorAll(".options-block .options-list input[type='text']") || [])]
+          .map(i => (i.value||"").trim())
+          .filter(Boolean).length;
+        if (qtd === 0){
+          setFieldError(card, "opcoes", "Adicione pelo menos 1 opção.");
+          problems++;
+        }
+      }
+    }
+
+    // Upload: quando restringe tipos, precisa marcar pelo menos uma categoria
+    if (tipo === "arquivo") {
+      const toggle = card.querySelector(".cfg-tipos-toggle");
+      const box    = card.querySelector(".cfg-tipos-list");
+      const maxArq = parseInt(card.querySelector(".cfg-max-arqs")?.value || "1", 10) || 1;
+      const maxMb  = parseInt(card.querySelector(".cfg-max-mb")?.value  || "10",10) || 10;
+
+      if (toggle?.checked) {
+        const qtdCats = box ? box.querySelectorAll("input[type='checkbox']:checked").length : 0;
+        if (qtdCats === 0){
+          setFieldError(card, "upload", "Selecione pelo menos 1 categoria ou desmarque a restrição.");
+          problems++;
+        }
+      }
+      if (maxArq < 1 || maxMb < 1){
+        setFieldError(card, "upload", "Valores mínimos: 1 arquivo e 1 MB.");
+        problems++;
+      }
+    }
+
+    setGlobalWarn(card, problems > 0);
+  }
+
+  // ===== SQLHub (carregadores centralizados) =====
+  async function sqlhubLoadConnections(card){
+    const selConn = card.querySelector('.sel-conn');
+    const sqlBlk  = card.querySelector('.sqlhub-config');
+    if (!selConn || !sqlBlk) return;
+    try{
+      const url = sqlBlk.dataset.connsUrl || "/sqlhub/api/connections/";
+      const r = await fetch(url, {headers:{'X-Requested-With':'fetch'}});
+      const j = await r.json();
+      const items = (j && j.connections) || [];
+      fillSelect(selConn, items, 'id', 'name', 'Conexão…');
+      const hidConn = card.querySelector("input[name$='-sqlhub_connection_id']");
+      if (hidConn?.value) selConn.value = String(hidConn.value);
+      log("[SQLHub] connections loaded:", items.length, "selected:", selConn?.value);
+    }catch(e){
+      fillSelect(card.querySelector('.sel-conn'), [], 'id', 'name', 'Falha ao carregar');
+      log("[SQLHub] connections error", e);
+    }
+  }
+  async function sqlhubLoadQueries(card, connId){
+    const selQuery = card.querySelector('.sel-query');
+    const sqlBlk   = card.querySelector('.sqlhub-config');
+    if (!selQuery || !sqlBlk) return;
+    try{
+      const base = sqlBlk.dataset.queriesUrl || "/sqlhub/api/queries/";
+      const url = connId ? `${base}?connection=${encodeURIComponent(connId)}` : base;
+      const r = await fetch(url, {headers:{'X-Requested-With':'fetch'}});
+      const j = await r.json();
+      const items = (j && j.queries) || [];
+      fillSelect(
+        selQuery, items, 'id', 'name', 'Consulta…',
+        (opt, it) => { opt.dataset.conn = it.connection_id ?? it.connection ?? it.connectionId ?? ''; }
+      );
+      const hidQ = card.querySelector("input[name$='-sqlhub_query_id']");
+      if (hidQ?.value) selQuery.value = String(hidQ.value);
+      log("[SQLHub] queries loaded:", items.length, "selected:", selQuery?.value, "connId:", connId || "(any)");
+    }catch(e){
+      fillSelect(selQuery, [], 'id', 'name', 'Falha ao carregar');
+      log("[SQLHub] queries error", e);
+    }
+  }
+  async function sqlhubLoadColumns(card, qid){
+    const selVal = card.querySelector('.sel-val');
+    const selLbl = card.querySelector('.sel-lbl');
+    if(!selVal || !selLbl){
+      return;
+    }
+    if(!qid){
+      fillSelect(selVal, [], 'name', 'name', 'Valor');
+      fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
+      log("[SQLHub] columns cleared (no qid)");
+      return;
+    }
+    try{
+      const r = await fetch(`/sqlhub/queries/${qid}/columns/`, {headers:{'X-Requested-With':'fetch'}});
+      const j = await r.json();
+      const cols = (j && j.ok && j.columns) ? j.columns : [];
+      const items = cols.map(c => ({name:c}));
+      fillSelect(selVal, items, 'name', 'name', 'Valor');
+      fillSelect(selLbl, items, 'name', 'name', 'Rótulo');
+      const hidV = card.querySelector("input[name$='-sqlhub_value_field']");
+      const hidL = card.querySelector("input[name$='-sqlhub_label_field']");
+      if (hidV?.value) selVal.value = hidV.value;
+      if (hidL?.value) selLbl.value = hidL.value;
+      log("[SQLHub] columns loaded:", items.length, "qid:", qid, "val:", selVal?.value, "lbl:", selLbl?.value);
+    }catch(e){
+      fillSelect(selVal, [], 'name', 'name', 'Falha ao carregar');
+      fillSelect(selLbl, [], 'name', 'name', 'Falha ao carregar');
+      log("[SQLHub] columns error", e);
+    }
+  }
+
+  async function sqlhubRestore(card){
+    const hidConn = card.querySelector("input[name$='-sqlhub_connection_id']");
+    const hidQ    = card.querySelector("input[name$='-sqlhub_query_id']");
+    const selConn = card.querySelector(".sel-conn");
+    if (hidConn?.value) selConn.value = String(hidConn.value);
+    await sqlhubLoadQueries(card, hidConn?.value || '');
+    if (hidQ?.value){
+      card.querySelector(".sel-query").value = String(hidQ.value);
+      await sqlhubLoadColumns(card, hidQ.value);
+    }
+    const hidV = card.querySelector("input[name$='-sqlhub_value_field']");
+    const hidL = card.querySelector("input[name$='-sqlhub_label_field']");
+    if (hidV?.value && card.querySelector('.sel-val')) card.querySelector('.sel-val').value = hidV.value;
+    if (hidL?.value && card.querySelector('.sel-lbl')) card.querySelector('.sel-lbl').value = hidL.value;
+    log("[SQLHub] restore done", {conn:hidConn?.value, qid:hidQ?.value, val:hidV?.value, lbl:hidL?.value});
+  }
+
+  function wireSqlhubEvents(card){
+    const selConn = card.querySelector('.sel-conn');
+    const selQuery= card.querySelector('.sel-query');
+    const selVal  = card.querySelector('.sel-val');
+    const selLbl  = card.querySelector('.sel-lbl');
+    const hidConn = card.querySelector("input[name$='-sqlhub_connection_id']");
+    const hidQ    = card.querySelector("input[name$='-sqlhub_query_id']");
+    const hidV    = card.querySelector("input[name$='-sqlhub_value_field']");
+    const hidL    = card.querySelector("input[name$='-sqlhub_label_field']");
+
+    if (selConn && !selConn._wired){
+      selConn._wired = true;
+      selConn.addEventListener('change', async (e)=>{
+        const cid = (e.target.value || '').trim();
+        if(hidConn) hidConn.value = cid;
+        await sqlhubLoadQueries(card, cid);
+        if(hidQ) hidQ.value = '';
+        fillSelect(selVal, [], 'name', 'name', 'Valor');
+        fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
+        debouncedTriggerAutosave();
+        validateCard(card);
+      });
+    }
+    if (selQuery && !selQuery._wired){
+      selQuery._wired = true;
+      selQuery.addEventListener('change', async (e)=>{
+        const qid = (e.target.value || '').trim();
+        if(hidQ) hidQ.value = qid;
+        const opt = e.target.selectedOptions?.[0];
+        const connFromOpt = opt?.dataset?.conn;
+        if(connFromOpt){
+          if (selConn) selConn.value = String(connFromOpt);
+          if (hidConn) hidConn.value = String(connFromOpt);
+          log('[SQLHub] query change set conn from option:', connFromOpt);
+        }
+        await sqlhubLoadColumns(card, qid);
+        debouncedTriggerAutosave();
+        validateCard(card);
+      });
+    }
+    if (selVal && !selVal._wired){
+      selVal._wired = true;
+      selVal.addEventListener('change', (e)=>{
+        if(hidV){ hidV.value = e.target.value; debouncedTriggerAutosave(); }
+        validateCard(card);
+      });
+    }
+    if (selLbl && !selLbl._wired){
+      selLbl._wired = true;
+      selLbl.addEventListener('change', (e)=>{
+        if(hidL){ hidL.value = e.target.value; debouncedTriggerAutosave(); }
+        validateCard(card);
+      });
+    }
+  }
+
+  async function initSqlhub(card, restore=false){
+    if (!card || card._sqlhubReady) return;
+    const sqlBlk = card.querySelector('.sqlhub-config');
+    if (!sqlBlk) return;
+
+    card._sqlhubReady = true;
+
+    await sqlhubLoadConnections(card);
+    await sqlhubLoadQueries(card, card.querySelector("input[name$='-sqlhub_connection_id']")?.value || '');
+    if (restore) await sqlhubRestore(card);
+
+    wireSqlhubEvents(card);
   }
 
   // ===== ligar eventos do .file-config (UPLOAD) =====
@@ -241,8 +472,9 @@
     toggle?.addEventListener("change", (ev)=>{
       list?.classList.toggle("hide", !ev.target.checked);
       log("file-config: toggle change", { prefix: getPrefix(card), checked: !!ev.target.checked });
-      buildFileValidationJson(card);        // recálculo imediato
-      triggerAutosave();                    // autosave imediato (sem debounce)
+      buildFileValidationJson(card);
+      triggerAutosave();
+      validateCard(card);
     });
 
     // qualquer alteração em checkboxes de tipos
@@ -254,8 +486,9 @@
           checked: e.target.checked,
           totalMarcados: list.querySelectorAll(".cfg-type-item input:checked").length
         });
-        buildFileValidationJson(card);      // recálculo imediato
-        triggerAutosave();                  // autosave imediato
+        buildFileValidationJson(card);
+        triggerAutosave();
+        validateCard(card);
       }
     });
 
@@ -268,6 +501,7 @@
       });
       buildFileValidationJson(card);
       debouncedTriggerAutosave();
+      validateCard(card);
     };
     maxArq?.addEventListener("input", () => numHandler(maxArq));
     maxMb?.addEventListener("input",  () => numHandler(maxMb));
@@ -279,15 +513,30 @@
     if (!card || card.dataset.ready) return;
     card.dataset.ready = "1";
 
-    // default da origem + sincroniza select (se existir)
+    // default de origem (hidden)
     const hidOrig = card.querySelector("input[name$='-origem_opcoes']");
     if (hidOrig && !hidOrig.value) hidOrig.value = "manual";
-    const selOrig = card.querySelector(".sel-origem");
-    if (selOrig && hidOrig) selOrig.value = hidOrig.value;
+
+    // sincroniza radios de origem a partir do hidden
+    const radiosOrig = card.querySelectorAll(`input[name$='-origem_choice']`);
+    if (radiosOrig.length){
+      const val = (hidOrig?.value || 'manual').trim();
+      radiosOrig.forEach(r => r.checked = (r.value === val));
+      radiosOrig.forEach(r => r.addEventListener('change', () => {
+        if (hidOrig) hidOrig.value = (Array.from(radiosOrig).find(x=>x.checked)?.value || 'manual');
+        applyVisibilityAndDisabling(card);
+        if (getTipoValue(card) === 'lista' && (hidOrig?.value === 'sqlhub')) {
+          initSqlhub(card, true);
+        }
+        debouncedTriggerAutosave();
+        validateCard(card);
+      }));
+    }
 
     applyVisibilityAndDisabling(card);
     validateCard(card);
 
+    // tipo → muda layout e pode ligar SQLHub
     const sel = card.querySelector("select[name$='-tipo']");
     sel?.addEventListener("change", () => {
       applyVisibilityAndDisabling(card);
@@ -329,6 +578,11 @@
         }
       }
     }
+
+    // se já abrir como Lista+SQLHub, inicializa imediatamente
+    if (getTipoValue(card) === 'lista' && (hidOrig?.value === 'sqlhub')) {
+      initSqlhub(card, true);
+    }
   }
 
   function initCards() { qsaFS(".pergunta-card").forEach(initCard); }
@@ -340,29 +594,34 @@
     const inFS = e.target.closest("#campos-formset");
     if (!inFS) return;
 
-    // editou opções de texto
+    // editou opções de texto (manuais)
     if (e.target.closest(".options-list")) {
       updateSingleOptionsJsonField(e.target.closest(".options-block"));
+      const card = e.target.closest(".pergunta-card");
+      validateCard(card); // valida na hora
     }
 
-    // tipo mudou
+    // tipo mudou (fallback)
     if (e.target.matches("select[name$='-tipo']")) {
       const card = e.target.closest(".pergunta-card");
       applyVisibilityAndDisabling(card);
       validateCard(card);
     }
 
-    // origem mudou
-    if (e.target.matches(".sel-origem")) {
+    // origem mudou (via radios) – fallback
+    if (e.target.matches("input[name$='-origem_choice']")) {
       const card = e.target.closest(".pergunta-card");
       const hid  = card?.querySelector("input[name$='-origem_opcoes']");
-      if (hid) hid.value = e.target.value || "manual";
+      if (hid) hid.value = (e.target.value || "manual");
       applyVisibilityAndDisabling(card);
+      validateCard(card);
     }
 
     // qualquer mudança dentro do file-config (fallback)
     if (e.target.closest(".file-config")) {
       debouncedTriggerAutosave();
+      const card = e.target.closest(".pergunta-card");
+      validateCard(card);
     }
 
     debouncedTriggerAutosave();
@@ -387,6 +646,9 @@
 
       const hiddenOpts = block.querySelector("input[name$='-opcoes_json']");
       setDisabled(hiddenOpts, false);
+
+      const card = addBtn.closest(".pergunta-card");
+      validateCard(card);
       return;
     }
 
@@ -394,9 +656,11 @@
     if (delBtn) {
       e.preventDefault();
       const blk = delBtn.closest(".options-block");
+      const card = delBtn.closest(".pergunta-card");
       delBtn.closest(".opt-row").remove();
       updateSingleOptionsJsonField(blk);
       debouncedTriggerAutosave();
+      validateCard(card);
     }
   });
 
@@ -443,7 +707,7 @@
       const idx = parseInt(total.value, 10);
       wrap.insertAdjacentHTML("beforeend", tpl.replace(/__prefix__/g, idx));
       total.value = idx + 1;
-      initCards();
+      initCards();          // inicializa tudo (inclui SQLHub/validações)
       initSortable();
       syncTotalAndOrder();
       wrap.dispatchEvent(new Event("newCardAdded", { bubbles: true }));
@@ -491,20 +755,6 @@
           }
         }
         log("[CLIENT/htmx:configRequest] keys(-tipo/-valid_json)=", arr);
-        // Snapshot por card de upload
-        qsaFS(".pergunta-card").forEach((c)=>{
-          const prefix = getPrefix(c);
-          const tipo = c.querySelector("select[name$='-tipo']")?.value;
-          if (tipo === "arquivo") {
-            const hidden = c.querySelector("input[name$='-valid_json']");
-            const toggle = c.querySelector(".cfg-tipos-toggle");
-            const marcados = c.querySelectorAll(".cfg-type-item input:checked").length;
-            log("UPLOAD SNAPSHOT →", {
-              prefix, tipo, hidden_disabled: hidden?.disabled, hidden_value: hidden?.value,
-              toggle_checked: !!toggle?.checked, categorias_marcadas: marcados
-            });
-          }
-        });
       } catch {}
     }
   });
@@ -513,7 +763,7 @@
   window.__dumpUploadCards = function(){
     qsaFS(".pergunta-card").forEach((c)=>{
       const prefix = getPrefix(c);
-      const tipo = c.querySelector("select[name$='-tipo']")?.value;
+      const tipo = getTipoValue(c);
       if (tipo === "arquivo") {
         const hidden = c.querySelector("input[name$='-valid_json']");
         const toggle = c.querySelector(".cfg-tipos-toggle");

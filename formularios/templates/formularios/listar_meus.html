@@ -24,6 +24,16 @@
             <td class="actions" data-th="Ações">
               <a href="{% url 'formularios:construtor_formulario' f.pk %}" class="btn-secundario">Editar</a>
               <a href="{% url 'formularios:exibir_formulario' f.pk %}" class="btn-primario">Responder</a>
+
+              <!-- Excluir formulário (meus -> sempre dono) -->
+               {% if perms.formularios.pode_excluir_formulario %}
+              <form action="{% url 'formularios:deletar_formulario' f.pk %}"
+                    method="post" style="display:inline"
+                    onsubmit="return confirm('Excluir o formulário &quot;{{ f.titulo }}&quot; e TODAS as respostas? Esta ação não pode ser desfeita.');">
+                {% csrf_token %}
+                <button class="btn-secundario btn-danger">Excluir</button>
+              </form>
+                {% endif %}
             </td>
           </tr>
         {% endfor %}
@@ -58,6 +68,7 @@
                 <a href="{% url 'formularios:construtor_formulario' f.pk %}" class="btn-secundario">Editar</a>
               {% endif %}
               <a href="{% url 'formularios:exibir_formulario' f.pk %}" class="btn-primario">Responder</a>
+              {# não exibimos "Excluir" aqui para evitar confusão #}
             </td>
           </tr>
         {% endfor %}
@@ -67,7 +78,7 @@
     <p>Nenhum formulário compartilhado com você.</p>
   {% endif %}
 
-  {% if perms.formularios.criar_formulario %}
+  {% if perms.formularios.pode_criar %}
   <p class="mt-2">
     <a href="{% url 'formularios:criar_formulario' %}" class="btn-primario">+ Novo formulário</a>
   </p>

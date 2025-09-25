@@ -32,6 +32,8 @@
             <span class="badge badge-stop">Não</span>
           {% endif %}
         </span>
+
+        <!-- Botão: abre/fecha painel de filtros -->
         <button
           type="button"
           id="btn-toggle-filtros"
@@ -61,7 +63,9 @@
           class="filters-panel{% if fo %}{% if fo != '1' %} hidden{% endif %}{% else %}{% if not request.GET.q and not request.GET.de and not request.GET.ate and not request.GET.tem_anexo and not request.GET.campo and not request.GET.valor %} hidden{% endif %}{% endif %}"
           hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
           hx-target="#resp-section"
-          hx-swap="innerHTML">
+          hx-select="#aba-respostas"
+          hx-swap="innerHTML"
+          hx-push-url="false">
       <!-- Estados persistentes -->
       <input type="hidden" name="filters_open" id="filters_open" value="{{ request.GET.filters_open|default:'0' }}">
       <input type="hidden" name="tab" id="tab_state" value="{{ current_tab }}">
@@ -126,7 +130,9 @@
                   class="btn-primario"
                   hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
                   hx-target="#resp-section"
+                  hx-select="#aba-respostas"
                   hx-swap="innerHTML"
+                  hx-push-url="false"
                   hx-include="#filtros-resps,#tab_state"
                   hx-vals='{"page":"1"}'>
             Aplicar filtros
@@ -152,7 +158,9 @@
            hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
            hx-include="#filtros-resps,#tab_state"
            hx-target="#resp-section"
+           hx-select="#aba-respostas"
            hx-swap="innerHTML"
+           hx-push-url="false"
            hx-vals='{"q":"","de":"","ate":"","tem_anexo":"","campo":"","valor":"","page":"1"}'>Limpar</a>
       </div>
     </form>
@@ -252,7 +260,26 @@
           <div class="pergunta-card resp-card" data-id="{{ r.id }}">
             <div class="card-title-row">
               <h3>#{{ r.id }} — {{ r.enviado_em|date:"d/m/Y H:i" }}</h3>
-              <a class="btn-secundario" href="{% url 'formularios:detalhe_resposta' r.pk %}" target="_blank" rel="noopener">Abrir</a>
+              
+              <div class="right" style="display:flex;gap:.5rem;align-items:center">
+                <a class="btn-secundario" href="{% url 'formularios:detalhe_resposta' r.pk %}" target="_blank" rel="noopener">Abrir</a>
+                
+                {# EXCLUIR — disponível SOMENTE no Individual #}
+                {% if perms.formularios.pode_excluir_respostas %}
+                <button type="button"
+                        class="btn-danger-ind"
+                        hx-post="{% url 'formularios:deletar_resposta' r.pk %}"
+                        hx-include="#csrf-helper,#applied-state,#tab_state"
+                        hx-vals='{"tab":"individual"}'
+                        hx-target="#resp-section"
+                        
+                        hx-swap="innerHTML"
+                        hx-confirm="Excluir a resposta #{{ r.id }}? Isso não pode ser desfeito.">
+                  Excluir
+                </button>
+                {% endif %}
+              </div>
+              
             </div>
             <ul class="preview-ul">
               {% for v in r.valores.all %}
@@ -274,7 +301,9 @@
               <a class="pager"
                  hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
                  hx-target="#resp-section"
+                 hx-select="#aba-respostas"
                  hx-swap="innerHTML"
+                 hx-push-url="false"
                  hx-include="#applied-state,#tab_state"
                  hx-vals='{"page":"{{ qs_page.previous_page_number }}"}'>« Anterior</a>
             {% endif %}
@@ -282,7 +311,9 @@
               <a class="pager"
                  hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
                  hx-target="#resp-section"
+                 hx-select="#aba-respostas"
                  hx-swap="innerHTML"
+                 hx-push-url="false"
                  hx-include="#applied-state,#tab_state"
                  hx-vals='{"page":"{{ qs_page.next_page_number }}"}'>Próxima »</a>
             {% endif %}
@@ -370,11 +401,25 @@
   })();
 </script>
 
-<!-- Inicialização e fallback -->
+<!-- Inicialização e fallback (fora do builder) -->
 <script>
 (function(){
   const root = document.getElementById('aba-respostas');
   if (!root) return;
+
+  /* Fallback pro botão "Filtros" quando HTMX não está carregado (uso fora do builder) */
+  (function(){
+    if (window.htmx) return; // htmx já cuida via hx-on
+    const btn = document.getElementById('btn-toggle-filtros');
+    const panel = document.getElementById('filtros-resps');
+    const hidden = document.getElementById('filters_open');
+    if (btn && panel) {
+      btn.addEventListener('click', function(){
+        panel.classList.toggle('hidden');
+        if (hidden) hidden.value = panel.classList.contains('hidden') ? '0' : '1';
+      });
+    }
+  })();
 
   // util: copiar/baixar canvas
   window.setupCopyButtonsClipboardFallback = function(scope){
@@ -419,12 +464,12 @@
   };
 
   if (window.initAbaRespostas) {
+    // No builder, o init completo acontece no builder.js; só ativamos o copiar PNG.
     window.setupCopyButtonsClipboardFallback(root);
-    window.initAbaRespostas(root);
     return;
   }
 
-  // Fallback simples (sem builder)
+  // --------- Fallback simples (sem builder) ---------
   function setupTabs(){
     const tabs = root.querySelectorAll('.tab');
     const panes = root.querySelectorAll('.tab-pane');

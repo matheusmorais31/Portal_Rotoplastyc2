@@ -76,7 +76,9 @@ html, body {
     color: #fff;
 }
 
-
+strong {
+  color: #2EC2D6;
+}
 
 .btn-primario, .btn-ghost {
     border: none;
@@ -94,6 +96,7 @@ html, body {
 .btn-ghost {
     background: #555;
     color: #fff;
+    border: 1px solid #656766;
 
 }
 
@@ -114,4 +117,21 @@ html, body {
 @media (max-width: 520px) {
   .thanks-actions { flex-direction: column; }
   .btn { width: 100%; }
+}
+
+
+body.light-theme .thanks-card {
+  background-color: #515e6c;
+}
+
+body.light-theme .thanks-title,
+body.light-theme .thanks-subtitle,
+body.light-theme .thanks-actions,
+body.light-theme .btn-ghost,
+body.light-theme .btn-primary {
+  color: #ffffff;
+}
+
+body.light-theme strong {
+  color: #0aff2b
 }

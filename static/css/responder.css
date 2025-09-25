@@ -56,6 +56,8 @@ body {
   max-width: 760px;
   margin: 2.5rem auto;
   padding: 0 1rem;
+  position: relative;
+  z-index: 0;
 }
 
 /* ===============================================================
@@ -70,12 +72,24 @@ body {
   margin-bottom: 14px;
   padding: 24px;
   transition: transform var(--transition), box-shadow var(--transition);
+  overflow: visible;            /* impede recorte do dropdown */
+}
+
+.pergunta-card {
+  position: relative;           /* base do stacking local */
+  z-index: 0;                   /* baseline de todos os cards */
 }
 
 .pergunta-card:hover,
 .pergunta-card:focus-within {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,.7);
+  z-index: 2;                   /* sobe um pouco no hover */
+}
+
+/* Quando existir dropdown aberto dentro do card, joga no topo (browsers com :has) */
+.pergunta-card:has(.ss-dropdown:not([hidden])) {
+  z-index: 9999;
 }
 
 .cabecalho-card {
@@ -128,7 +142,7 @@ body {
   outline: none;
   border-color: var(--accent-light);
   background-color: var(--bg-input-focus);
-  box-shadow: 0 0 0 2px rgba(66,153,225,.5);
+  box-shadow: 0 0 0 2px rgba(96,164,207,.35);
 }
 
 /* file */
@@ -189,7 +203,8 @@ textarea.input-texto { resize: vertical; min-height: 100px; }
   grid-template-columns: repeat(10, minmax(0,1fr));
   gap: .35rem 8px;
   align-items: center;
-  position: relative;
+  position: relative;   /* para não competir em z-index */
+  z-index: 0;
   padding: 1rem .25rem .75rem;
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
@@ -233,6 +248,20 @@ textarea.input-texto { resize: vertical; min-height: 100px; }
 .btn-primario:active { background: var(--accent-dark); transform: scale(.97); }
 .btn-primario:disabled { background:#666; cursor:not-allowed; }
 
+/* ===== Botões secundários/pequenos (para uploader) ===== */
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter var(--transition), transform var(--transition);
+}
+.btn-danger:hover { filter: brightness(0.95); }
+.btn-danger:active { transform: scale(.98); }
+.btn-sm { padding: 4px 8px; font-size: .85rem; }
+
 /* ===============================================================
    LEGENDA (aba de respostas)
    =============================================================== */
@@ -242,14 +271,6 @@ textarea.input-texto { resize: vertical; min-height: 100px; }
 #aba-respostas .legend-swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; border:1px solid rgba(255,255,255,.25); }
 #aba-respostas .legend-text{ color:#fff; }
 #aba-respostas .legend-text strong{ color:#fff; }
-
-/* ===============================================================
-   RESPONSIVO
-   =============================================================== */
-@media (max-width: 600px) {
-  body { font-size: 15px; }
-  .cabecalho-card h1 { font-size: 1.6rem; }
-}
 
 /* ===============================================================
    ESTADOS DE ERRO
@@ -267,25 +288,10 @@ textarea.input-texto { resize: vertical; min-height: 100px; }
 .field-errors { list-style:disc; margin:.5rem 0 0 1.25rem; color:#ff9191; line-height:1.35; font-size:.9rem; }
 .options-block[aria-invalid="true"] .option input { border-color:#ff4d4f; }
 
-/* ====================
-   TEMA CLARO
-   ==================== */
-body.light-theme .options-block.escala .option input{ background: var(--bg-container); }
-body.light-theme .options-block.escala { border-top:1px solid #a3a1a1; border-bottom:1px solid #a3a1a1; }
-body.light-theme .cabecalho-card { background-color: var(--bg-container-child); }
-body.light-theme .cabecalho-card h1{ color:#fff; }
-body.light-theme .pergunta-card { background-color: var(--bg-container-child); }
-body.light-theme .pergunta-card input{ background-color: var(--bg-container); }
-body.light-theme .pergunta-card textarea{ background-color: var(--bg-container); }
-body.light-theme .pergunta-card select{ background-color: var(--bg-container); }
-body.light-theme .pergunta-card label{ color:#fff; }
-body.light-theme .texto-ajuda { color:#fff; }
-body.light-theme .top-row { background-color:#4caf50; }
-
 /* ===============================================================
-   SELECT PESQUISÁVEL (box, input, dropdown)
+   SELECT PESQUISÁVEL
    =============================================================== */
-.ss { position: relative; }
+.ss { position: relative; z-index: 10; }   /* garante que o wrapper está acima do conteúdo local */
 .ss-hidden { display: none !important; }
 
 .ss-box {
@@ -307,7 +313,6 @@ body.light-theme .top-row { background-color:#4caf50; }
   padding: .4rem .25rem;
   outline: none;
 }
-/* esconder X nativo */
 .ss-input::-webkit-search-cancel-button,
 .ss-input::-webkit-search-decoration,
 .ss-input::-webkit-search-results-button,
@@ -329,7 +334,7 @@ body.light-theme .top-row { background-color:#4caf50; }
 
 .ss-dropdown {
   position: absolute;
-  z-index: 30;
+  z-index: 100000;   /* bem acima do card e da escala */
   left: 0; right: 0;
   margin-top: .25rem;
   background: var(--bg-layer);
@@ -338,14 +343,11 @@ body.light-theme .top-row { background-color:#4caf50; }
   box-shadow: var(--shadow);
   max-height: 280px;
   overflow: auto;
-
-  /* largura padrão da coluna "valor" (pode ser sobrescrita via JS: --ss-value-w) */
   --ss-value-w: 12ch;
 }
 
-.ss-list { list-style:none; margin:0; padding:.25rem; }
+.ss-list { list-style:none; margin:0; padding:.25rem; z-index: 100000; }
 
-/* ---------- Cabeçalho e Itens em GRID de 2 colunas ---------- */
 .ss-columns,
 .ss-item{
   display: grid;
@@ -372,7 +374,6 @@ body.light-theme .top-row { background-color:#4caf50; }
   color: #fff;
 }
 
-/* Células dos itens */
 .ss-item{
   padding: .45rem .6rem;
   border-radius: .35rem;
@@ -388,13 +389,67 @@ body.light-theme .top-row { background-color:#4caf50; }
   color: var(--text-muted);
 }
 
-.ss-empty { padding:.6rem .8rem; color:var(--text-muted); }
+.ss-empty { padding:.6rem .8rem; color: var(--text-muted); }
 
 .ss mark { background: transparent; color: #fff; font-weight: 700; text-decoration: underline; }
 
-/* tema claro */
+/* ===============================================================
+   UPLOADER – lista e feedback
+   =============================================================== */
+.fu-list { list-style: none; margin: .65rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .45rem; }
+.fu-item { display:flex; align-items:center; flex-wrap: wrap; gap: .35rem .5rem; }
+.file-pill {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: .25rem .5rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  font-size: .9rem;
+}
+.muted { color: #cfcfcf; }
+
+.fu-input-holder.pulse {
+  animation: fuPulse .28s ease;
+}
+@keyframes fuPulse {
+  0% { box-shadow: 0 0 0 0 rgba(96,164,207,.0); }
+  50% { box-shadow: 0 0 0 3px rgba(96,164,207,.35); }
+  100% { box-shadow: 0 0 0 0 rgba(96,164,207,.0); }
+}
+
+/* ===============================================================
+   RESPONSIVO
+   =============================================================== */
+@media (max-width: 600px) {
+  body { font-size: 15px; }
+  .cabecalho-card h1 { font-size: 1.6rem; }
+}
+
+/* ====================
+   TEMA CLARO
+   ==================== */
+body.light-theme .options-block.escala .option input{ background: var(--bg-container); }
+body.light-theme .options-block.escala { border-top:1px solid #a3a1a1; border-bottom:1px solid #a3a1a1; }
+body.light-theme .cabecalho-card { background-color: var(--bg-container-child); }
+body.light-theme .cabecalho-card h1{ color:#fff; }
+body.light-theme .pergunta-card { background-color: var(--bg-container-child); }
+body.light-theme .pergunta-card input{ background-color: var(--bg-container); }
+body.light-theme .pergunta-card textarea{ background-color: var(--bg-container); }
+body.light-theme .pergunta-card select{ background-color: var(--bg-container); }
+body.light-theme .pergunta-card label{ color:#fff; }
+body.light-theme .texto-ajuda { color:#fff; }
+body.light-theme .top-row { background-color:#4caf50; }
 body.light-theme .ss-box { background: var(--bg-container); border-color: #6c6c6c; }
 body.light-theme .ss-label { color: #fff; }
 body.light-theme .ss-dropdown { background: var(--bg-container-child); }
 body.light-theme .ss-item:hover { background: rgba(0,0,0,.08); }
 body.light-theme .ss-columns{ background: var(--bg-container-child); }
+
+/* ====================
+   Fallback JS (:has) – classe aplicada no card ativo
+   ==================== */
+.pergunta-card.z-top { z-index: 9999; }

@@ -8,6 +8,9 @@
   <div class="pergunta-head">
     <span class="drag-handle" title="Arrastar">☰</span>
 
+    {# NOVO: badge de alerta #}
+    <span class="card-flag warn hide" title="Configuração incompleta">⚠ Config incompleta</span>
+
     <label class="toggle-label obrig-toggle" title="Tornar esta pergunta obrigatória">
       {{ subform.obrigatorio }}<span class="toggle-custom"></span>
       <span class="lbl-text">Obrigatório</span>
@@ -25,11 +28,15 @@
 
   <div class="pergunta-body">
     <div class="campo-duplo">
-      <div class="campo-full">
+      <div class="campo-full" data-field="rotulo">
         {{ subform.rotulo.label_tag }} {{ subform.rotulo }}
+        {# holder de erro #}
+        <ul class="mini-errors" data-error-holder="rotulo"></ul>
       </div>
-      <div class="tipo-col">
+      <div class="tipo-col" data-field="tipo">
         {{ subform.tipo.label_tag }} {{ subform.tipo }}
+        {# holder de erro #}
+        <ul class="mini-errors" data-error-holder="tipo"></ul>
       </div>
     </div>
 
@@ -78,10 +85,14 @@
       </div>
       <button type="button" class="btn-add-option">+ Adicionar opção</button>
       {{ subform.opcoes_json }}
+      {# holder de erro específico #}
+      <ul class="mini-errors" data-error-holder="opcoes"></ul>
     </div>
 
     {# ── Config SQLHub ── #}
-    <div class="sqlhub-config hide">
+    <div class="sqlhub-config hide"
+         data-conns-url="{{ url_sqlhub_conns }}"
+         data-queries-url="{{ url_sqlhub_queries }}">
       <div class="campo-duplo">
         <div class="campo-full">
           <label>Conexão</label>
@@ -112,7 +123,9 @@
         </div>
       </div>
 
-      <small class="muted">As opções serão carregadas de <code>/sqlhub/api/query/&lt;id&gt;/options/</code> usando os campos escolhidos.</small>
+      
+      {# holder de erro específico #}
+      <ul class="mini-errors" data-error-holder="sqlhub"></ul>
     </div>
 
     {# ── Config de UPLOAD (tipo = arquivo) ── #}
@@ -144,6 +157,9 @@
           <input type="number" min="1" step="1" value="10" class="input-texto cfg-max-mb" style="max-width:140px">
         </div>
       </div>
+
+      {# holder de erro específico #}
+      <ul class="mini-errors" data-error-holder="upload"></ul>
     </div>
 
     {{ subform.valid_json }}
@@ -154,297 +170,3 @@
     {{ subform.rotulo.errors }} {{ subform.tipo.errors }}
   </div>
 </div>
-
-<script>
-(function(){
-  const card    = document.getElementById('pergunta-{{ subform.prefix }}');
-  if(!card) return;
-  const prefix  = card.dataset.prefix;
-  const L = (...a)=>console.debug('[CLIENT/campo]', prefix, ...a);
-
-  /* ── refs ───────────────────────────────────────────────────── */
-  const selTipo = card.querySelector('#id_' + prefix + '-tipo');
-  const inpRotulo = card.querySelector('#id_' + prefix + '-rotulo');
-  const inpAjuda  = card.querySelector('#id_' + prefix + '-ajuda');
-
-  const optionsOrigin = card.querySelector('.options-origin');
-  const optionsBlock  = card.querySelector('.options-block');
-  const sqlBlock      = card.querySelector('.sqlhub-config');
-  const fileBlock     = card.querySelector('.file-config');
-
-  const radsOrig      = card.querySelectorAll(`input[name="${prefix}-origem_choice"]`);
-
-  const listEl        = card.querySelector('.options-list');
-  const hidOpcoes     = card.querySelector('#id_' + prefix + '-opcoes_json');
-  const hidValid      = card.querySelector('#id_' + prefix + '-valid_json');
-
-  const hidOrigem     = card.querySelector('#id_' + prefix + '-origem_opcoes');
-  const hidConn       = card.querySelector('#id_' + prefix + '-sqlhub_connection_id');
-  const hidQ          = card.querySelector('#id_' + prefix + '-sqlhub_query_id');
-  const hidV          = card.querySelector('#id_' + prefix + '-sqlhub_value_field');
-  const hidL          = card.querySelector('#id_' + prefix + '-sqlhub_label_field');
-
-  const selConn       = card.querySelector('.sel-conn');
-  const selQuery      = card.querySelector('.sel-query');
-  const selVal        = card.querySelector('.sel-val');
-  const selLbl        = card.querySelector('.sel-lbl');
-
-  // upload
-  const ckTipos   = card.querySelector('.cfg-tipos-toggle');
-  const boxTipos  = card.querySelector('.cfg-tipos-list');
-  const maxArqsEl = card.querySelector('.cfg-max-arqs');
-  const maxMbEl   = card.querySelector('.cfg-max-mb');
-
-  const URL_CONNS   = "{{ url_sqlhub_conns }}";
-  const URL_QUERIES = "{{ url_sqlhub_queries }}";
-
-  const autosave = () => document.body.dispatchEvent(new Event('autosave'));
-
-  /* ── helpers ─────────────────────────────────────────────────── */
-  function show(el, yes){ if(!el) return; el.classList.toggle('hide', !yes); }
-  function getTipo(){ return (selTipo?.value || '').trim(); }
-  function currentOrigem(){
-    const h = (hidOrigem?.value || '').trim();
-    return (h === 'sqlhub') ? 'sqlhub' : 'manual';
-  }
-  function setRadiosFromHidden(){
-    const val = currentOrigem();
-    radsOrig.forEach(r => r.checked = (r.value === val));
-  }
-  function fillSelect(sel, items, vKey, tKey, firstLabel, decorate){
-    if(!sel) return;
-    sel.innerHTML = '';
-    const o0 = document.createElement('option');
-    o0.value = ''; o0.textContent = firstLabel || 'Selecione…';
-    sel.appendChild(o0);
-    (items||[]).forEach(it=>{
-      const o = document.createElement('option');
-      o.value = String(it[vKey] ?? '');
-      o.textContent = String(it[tKey] ?? it[vKey] ?? '');
-      if(typeof decorate === 'function') decorate(o, it);
-      sel.appendChild(o);
-    });
-  }
-
-  /* ── Opções manuais → hidden ─────────────────────────────────── */
-  function optsToHidden(){
-    if(!hidOpcoes || !listEl) return;
-    const vals = Array.from(listEl.querySelectorAll('input[type="text"]'))
-      .map(i => (i.value || '').trim())
-      .filter(Boolean);
-    hidOpcoes.value = JSON.stringify(vals);
-    L('MANUAL options → hidden', vals);
-    autosave();
-  }
-  listEl?.addEventListener('input', (e)=>{
-    if(e.target.matches('.opt-row input')) optsToHidden();
-  });
-
-  /* ── Upload: carrega -> UI / salva -> hidden ─────────────────── */
-  function loadValidToUI(){
-    try{
-      const cfg = JSON.parse(hidValid?.value || '{}') || {};
-      const livres = (cfg.tipos_livres !== false);
-      if(ckTipos){ ckTipos.checked = !livres; }
-      show(boxTipos, !livres);
-      const cats = new Set((cfg.categorias || []).map(String));
-      boxTipos?.querySelectorAll('input[type="checkbox"]').forEach(ch=>{
-        ch.checked = cats.has((ch.value||'').trim());
-      });
-      if(maxArqsEl){ maxArqsEl.value = cfg.max_arquivos ?? 1; }
-      if(maxMbEl){ maxMbEl.value = cfg.max_mb ?? 10; }
-      L('UPLOAD loadValidToUI', cfg);
-    }catch(e){ L('UPLOAD loadValidToUI parse error', e); }
-  }
-  function saveUIToValid(){
-    const livres = ckTipos ? !ckTipos.checked : true;
-    const cats = [];
-    if(boxTipos && !livres){
-      boxTipos.querySelectorAll('input[type="checkbox"]:checked').forEach(ch=> cats.push((ch.value||'').trim()));
-    }
-    const cfg = {
-      tipos_livres: livres,
-      categorias: cats,
-      max_arquivos: Math.max(1, parseInt(maxArqsEl?.value || '1',10) || 1),
-      max_mb: Math.max(1, parseInt(maxMbEl?.value || '10',10) || 10),
-    };
-    if(hidValid) hidValid.value = JSON.stringify(cfg);
-    L('UPLOAD saveUIToValid → valid_json', cfg, 'hidden_disabled:', hidValid?.disabled, 'hidden_value:', hidValid?.value);
-    autosave();
-  }
-  ckTipos?.addEventListener('change', ()=>{ show(boxTipos, ckTipos.checked); saveUIToValid(); });
-  boxTipos?.addEventListener('change', saveUIToValid);
-  maxArqsEl?.addEventListener('input', saveUIToValid);
-  maxMbEl?.addEventListener('change', saveUIToValid);
-
-  /* ── SQLHub loaders ──────────────────────────────────────────── */
-  let queriesById = {};
-  async function loadConnections(){
-    if(!selConn) return;
-    try{
-      const r = await fetch(URL_CONNS, {headers:{'X-Requested-With':'fetch'}});
-      const j = await r.json();
-      const items = (j && j.connections) || [];
-      fillSelect(selConn, items, 'id', 'name', 'Conexão…');
-      if(hidConn?.value){ selConn.value = String(hidConn.value); }
-      L('SQLHub connections loaded:', items.length, 'selected:', selConn?.value);
-    }catch(e){
-      fillSelect(selConn, [], 'id', 'name', 'Falha ao carregar');
-      L('SQLHub connections error', e);
-    }
-  }
-  async function loadQueries(connId){
-    if(!selQuery) return;
-    queriesById = {};
-    try{
-      const url = connId ? `${URL_QUERIES}?connection=${encodeURIComponent(connId)}` : URL_QUERIES;
-      const r = await fetch(url, {headers:{'X-Requested-With':'fetch'}});
-      const j = await r.json();
-      const items = (j && j.queries) || [];
-      items.forEach(it => { if(it && it.id != null) queriesById[String(it.id)] = it; });
-      fillSelect(
-        selQuery,
-        items,
-        'id',
-        'name',
-        'Consulta…',
-        (opt, it) => { opt.dataset.conn = it.connection_id ?? it.connection ?? it.connectionId ?? ''; }
-      );
-      if(hidQ?.value){ selQuery.value = String(hidQ.value); }
-      L('SQLHub queries loaded:', items.length, 'selected:', selQuery?.value, 'connId:', connId || '(any)');
-    }catch(e){
-      fillSelect(selQuery, [], 'id', 'name', 'Falha ao carregar');
-      L('SQLHub queries error', e);
-    }
-  }
-  async function loadColumns(qid){
-    if(!qid){
-      fillSelect(selVal, [], 'name', 'name', 'Valor');
-      fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
-      L('SQLHub columns cleared (no qid)');
-      return;
-    }
-    try{
-      const r = await fetch(`/sqlhub/queries/${qid}/columns/`, {headers:{'X-Requested-With':'fetch'}});
-      const j = await r.json();
-      const cols = (j && j.ok && j.columns) ? j.columns : [];
-      const items = cols.map(c => ({name:c}));
-      fillSelect(selVal, items, 'name', 'name', 'Valor');
-      fillSelect(selLbl, items, 'name', 'name', 'Rótulo');
-      if(hidV?.value) selVal.value = hidV.value;
-      if(hidL?.value) selLbl.value = hidL.value;
-      L('SQLHub columns loaded:', items.length, 'qid:', qid, 'val:', selVal?.value, 'lbl:', selLbl?.value);
-    }catch(e){
-      fillSelect(selVal, [], 'name', 'name', 'Falha ao carregar');
-      fillSelect(selLbl, [], 'name', 'name', 'Falha ao carregar');
-      L('SQLHub columns error', e);
-    }
-  }
-  async function restoreFromHidden(){
-    const qid = (hidQ?.value || '').trim();
-    const connId = (hidConn?.value || '').trim();
-    if(connId){ selConn.value = String(connId); }
-    await loadQueries(connId || '');
-    if(qid){
-      selQuery.value = qid;
-      const item = queriesById[qid];
-      const connFromItem = (item && (item.connection_id ?? item.connection ?? item.connectionId)) || '';
-      if(!connId && connFromItem && selConn){ selConn.value = String(connFromItem); if(hidConn) hidConn.value = String(connFromItem); }
-      await loadColumns(qid);
-      if(hidV?.value) selVal.value = hidV.value;
-      if(hidL?.value) selLbl.value = hidL.value;
-    }
-    L('SQLHub restoreFromHidden done', {conn:hidConn?.value, qid:hidQ?.value, val:hidV?.value, lbl:hidL?.value});
-  }
-
-  /* ── Listeners SQLHub ────────────────────────────────────────── */
-  selConn?.addEventListener('change', async (e)=>{
-    const cid = (e.target.value || '').trim();
-    if(hidConn){ hidConn.value = cid; }
-    L('SQLHub conn change →', cid);
-    await loadQueries(cid);
-    if(hidQ) hidQ.value = '';
-    fillSelect(selVal, [], 'name', 'name', 'Valor');
-    fillSelect(selLbl, [], 'name', 'name', 'Rótulo');
-    autosave();
-  });
-  selQuery?.addEventListener('change', async (e)=>{
-    const qid = (e.target.value || '').trim();
-    if(hidQ) hidQ.value = qid;
-    const opt = e.target.selectedOptions?.[0];
-    const connFromOpt = opt?.dataset?.conn;
-    if(connFromOpt){
-      if(selConn) selConn.value = String(connFromOpt);
-      if(hidConn) hidConn.value = String(connFromOpt);
-      L('SQLHub query change set conn from option:', connFromOpt);
-    }
-    await loadColumns(qid);
-    autosave();
-  });
-  selVal?.addEventListener('change', (e)=>{ if(hidV){ hidV.value = e.target.value; autosave(); L('SQLHub val field →', e.target.value); }});
-  selLbl?.addEventListener('change', (e)=>{ if(hidL){ hidL.value = e.target.value; autosave(); L('SQLHub lbl field →', e.target.value); }});
-
-  /* ── Visibilidade por tipo/origem ────────────────────────────── */
-  async function syncVisibility(){
-    const t = getTipo();
-    const isChoice = (t === 'multipla' || t === 'checkbox' || t === 'lista');
-    const isLista  = (t === 'lista');
-
-    // Upload
-    show(fileBlock, t === 'arquivo');
-    if(t === 'arquivo'){ loadValidToUI(); }
-
-    // Origem para lista
-    show(optionsOrigin, isLista);
-    const origem = currentOrigem();
-    if(isLista){
-      const useSql = (origem === 'sqlhub');
-      show(optionsBlock, !useSql);
-      show(sqlBlock, useSql);
-      L('VIS', {tipo:t, origem, useSql});
-      if(useSql){
-        await loadConnections();
-        await loadQueries(hidConn?.value || '');
-        await restoreFromHidden();
-      }
-    } else {
-      show(optionsBlock, isChoice);
-      show(sqlBlock, false);
-      if(hidOrigem) hidOrigem.value = 'manual';
-      setRadiosFromHidden();
-      L('VIS (non-list)', {tipo:t});
-    }
-  }
-
-  radsOrig.forEach(r=>{
-    r.addEventListener('change', ()=>{
-      if(hidOrigem) hidOrigem.value = r.value;
-      L('ORIGEM radio change →', r.value);
-      syncVisibility();
-      autosave();
-    });
-  });
-
-  selTipo?.addEventListener('change', ()=>{
-    L('TIPO change →', getTipo());
-    syncVisibility();
-    autosave();
-  });
-
-  inpRotulo?.addEventListener('blur', ()=>{ L('rotulo blur'); autosave(); });
-  inpAjuda?.addEventListener('blur', ()=>{ L('ajuda blur'); autosave(); });
-
-  // estado inicial
-  if(hidOrigem && !hidOrigem.value){ hidOrigem.value = 'manual'; }
-  setRadiosFromHidden();
-
-  if(listEl && hidOpcoes && !hidOpcoes.value){
-    const texts = Array.from(listEl.querySelectorAll('input[type="text"]'))
-                  .map(i => (i.value||'').trim()).filter(Boolean);
-    if(texts.length){ hidOpcoes.value = JSON.stringify(texts); }
-  }
-
-  L('INIT', {tipo:getTipo(), origem:currentOrigem(), hasFileBlock:!!fileBlock});
-  syncVisibility();
-})();
-</script>

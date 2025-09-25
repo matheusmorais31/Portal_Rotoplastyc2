@@ -43,6 +43,18 @@
     canvas.style.maxHeight = CHART_HEIGHT_PX + 'px';
     if(canvas.parentElement){ canvas.parentElement.style.height = CHART_HEIGHT_PX + 'px'; }
   }
+
+  // >>>>>> registro p/ destruir/reusar canvas sem erro <<<<<<
+  const __chartMap = new WeakMap();
+  function destroyChartIfAny(canvas){
+    if(!canvas) return;
+    try{
+      const existing = __chartMap.get(canvas) || (window.Chart && Chart.getChart ? Chart.getChart(canvas) : null);
+      if(existing && typeof existing.destroy === 'function'){ existing.destroy(); }
+    }catch(_){}
+    __chartMap.delete(canvas);
+  }
+
   function renderLegend(holder, labels, values, colors){
     if(!holder) return;
     const tot = (values||[]).reduce((a,b)=>a+(+b||0),0) || 0;
@@ -66,6 +78,10 @@
   window.initAbaRespostas = function(root){
     if(!root) return;
 
+    // evita rodar 2x no mesmo root (HTMX + script do fragmento)
+    if (root.__chartsInitDone) return;
+    root.__chartsInitDone = true;
+
     // Tabs internas (Resumo / Pergunta / Individual)
     (function(){
       const tabs  = root.querySelectorAll('.tab');
@@ -86,7 +102,17 @@
     (function(){
       const panel = root.querySelector('#filtros-resps');
       const btn   = root.querySelector('#btn-toggle-filtros');
-      btn?.addEventListener('click', (e)=>{ e.preventDefault(); panel.classList.toggle('hidden'); });
+
+      // ⚠️ Importante: se o botão já tem hx-on, não registramos outro listener aqui,
+      // senão o toggle acontece duas vezes (abre e fecha no mesmo clique).
+      if (btn && !btn.hasAttribute('hx-on')) {
+        btn.addEventListener('click', (e)=>{
+          e.preventDefault();
+          panel?.classList.toggle('hidden');
+          const h = root.querySelector('#filters_open');
+          if (h) h.value = panel?.classList.contains('hidden') ? '0' : '1';
+        });
+      }
 
       const de  = panel?.querySelector('input[name="de"]');
       const ate = panel?.querySelector('input[name="ate"]');
@@ -125,6 +151,7 @@
     function buildChoiceChart(canvas, rows, tipo, legendHolder){
       if(!canvas) return null;
       setSmallChartHeight(canvas);
+      destroyChartIfAny(canvas);
       const labels = rows.map(r => (r.label ?? '(vazio)'));
       const values = rows.map(r => Number(r.count) || 0);
       const isCheckbox = (tipo === 'checkbox');
@@ -142,12 +169,14 @@
           scales: isCheckbox ? { y: { beginAtZero:true, ticks:{ color:'#fff', precision:0 } }, x: { ticks:{ color:'#fff' } } } : {}
         }
       });
+      __chartMap.set(canvas, chart);
       renderLegend(legendHolder, labels, values, colors);
       return chart;
     }
     function buildScaleChart(canvas, dist15, legendHolder){
       if(!canvas) return null;
       setSmallChartHeight(canvas);
+      destroyChartIfAny(canvas);
       const labels = dist15.map(r=>r.valor);
       const values = dist15.map(r=>r.qtd || 0);
       const colors = labels.map((_,i)=> DEFAULT_COLORS[i % DEFAULT_COLORS.length]);
@@ -156,6 +185,7 @@
         data:{ labels, datasets:[{ data:values, label:'Respostas', backgroundColor: colors, borderColor: '#222', borderWidth:1 }] },
         options:{ responsive:true, maintainAspectRatio:false, layout:{ padding:6 }, plugins:{ legend:{ display:false }, tooltip:{ titleColor:'#fff', bodyColor:'#fff' } }, scales:{ y:{ beginAtZero:true, ticks:{ color:'#fff', precision:0 } }, x:{ ticks:{ color:'#fff' } } } }
       });
+      __chartMap.set(canvas, chart);
       renderLegend(legendHolder, labels, values, colors);
       return chart;
     }
@@ -207,8 +237,13 @@
 
       let singleChart = null;
       sel.addEventListener('change', ()=>{
-        singleChart?.destroy?.(); legendQ.innerHTML = '';
+        if (singleChart && typeof singleChart.destroy === 'function') singleChart.destroy();
+        destroyChartIfAny(chartTarget);
+        legendQ.innerHTML = '';
+
         const [kind, fid] = sel.value.split(':');
+        setSmallChartHeight(chartTarget);
+
         if(kind === 'choice'){
           const rows = (choicesData?.[fid]?.rows)||[];
           singleChart = buildChoiceChart(chartTarget, rows, 'multipla', legendQ);
@@ -273,7 +308,7 @@
       if(e.target && e.target.id === 'resp-section'){
         builderShowTab('resp');
         const root = document.getElementById('aba-respostas');
-        if(root) window.initAbaRespostas(root);
+        if(root) window.initAbaRespostas(root); // segunda chamada será ignorada pelo flag
       }
       if(e.target && e.target.id === 'colabs-box'){
         initColabsBox(e.target);
@@ -456,13 +491,18 @@
   <div class="gform-toolbar">
     <div class="tb-group">
       <a href="#" class="tb-link active" data-tab="edit">Editar</a>
+
+      <!-- sem "once" e com hx-select -->
       <a class="tb-link"
          data-tab="resp"
          hx-get="{% url 'formularios:aba_respostas' formulario.pk %}"
          hx-target="#resp-section"
+         hx-select="#aba-respostas"
          hx-swap="innerHTML"
-         hx-trigger="click once">Ver respostas</a>
+         hx-trigger="click">Ver respostas</a>
+      
       <a href="#" class="tb-link" data-tab="conf">Configurações</a>
+      
     </div>
 
     <div class="tb-group">

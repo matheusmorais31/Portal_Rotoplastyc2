@@ -29,4 +29,9 @@ urlpatterns = [
     path("<int:pk>/colabs/add/",               views.add_colab,           name="add_colab"),
     path("<int:pk>/colabs/<int:colab_id>/role/",   views.set_colab_role,  name="set_colab_role"),
     path("<int:pk>/colabs/<int:colab_id>/remove/", views.remove_colab,    name="remove_colab"),
+
+
+    # ---------- NOVOS: exclusões individuais ----------
+    path("resposta/<int:pk>/excluir/", views.deletar_resposta,  name="deletar_resposta"),
+    path("<int:pk>/excluir/",          views.deletar_formulario, name="deletar_formulario"),
 ]

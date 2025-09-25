@@ -1,6 +1,9 @@
 /* home2.css ───────────────────────────────────────────────────────────────
-   Home + Widget de Previsão do Tempo (ajustes p/ zoom 125%, 150%, 175%, 200%)
-   Última revisão: 28-ago-2025
+   Home + Widget de Previsão do Tempo
+   - some em resoluções < 1366×768
+   - em >=1366×768 vira overlay FIXO no canto e reserva um gutter à direita
+   - zoom muito alto (≈200%) e altura muito baixa escondem o card
+   Última revisão: 24-set-2025
 */
 
 /* ---------------------------------------------------- Reset & Variáveis */
@@ -103,69 +106,55 @@ a { text-decoration: none; }
 .prev-day:hover,.next-day:hover{ color:#2EC2D6; }
 .separator-line    { width:100%; height:1px; background:#8d8989; margin:1rem 0; }
 
-/* ------------------------------------------------------- BREAKPOINTS W/H */
-/* laptops/monitores grandes */
+/* ------------------------------------------------------- AJUSTES GERAIS */
 @media (max-width: 120rem){ .weather-icon{ width:2.7rem; } }
 @media (max-width: 90rem){  .weather-card{ max-width:20rem; } }
 
-/* muito grandes: pode voltar a fixed no canto */
-@media (min-width: 100rem){ /* ≥1600px */
-  .weather-card{
-    position: fixed;
-    top: auto; bottom: 1.25rem; right: 1.25rem;
-    grid-column: auto;
+/* ====== ESCONDER EM RESOLUÇÃO BAIXA (<1366×768) ========================= */
+@media (max-width: 1365.98px), (max-height: 767.98px){
+  .weather-card{ display: none !important; }
+  body{
+    grid-template-columns: 1fr;   /* ícones ocupam 100% */
+    padding-right: 0;
   }
 }
 
-/* ===== Desktop com zoom/Hi-DPI (ex.: 1920×1200 @ 125% e 150%) =====
-   Largura efetiva ≥1280px e densidade ≥1.2dppx → fixa no canto */
-@media (min-width: 80rem) and (min-resolution: 1.2dppx){
+/* ====== OVERLAY COM GUTTER (>=1366×768) =================================
+   - card fixo no canto
+   - reserva ~24rem de espaço à direita para nada passar por baixo */
+@media (min-width: 1366px) and (min-height: 768px){
+  body{
+    grid-template-columns: 1fr;   /* uma coluna pros ícones */
+    padding-right: 24rem;         /* ~384px de “gutter” */
+  }
   .weather-card{
     position: fixed !important;
-    bottom: 1.25rem; right: 1.25rem; top: auto;
-    grid-column: auto;
-    max-width: 19rem;
+    right: 1.25rem;
+    bottom: 1.25rem;              /* troque por top:1.25rem se preferir no topo */
+    left: auto; top: auto;
     z-index: 10;
   }
 }
 
-/* ===== Zoom 175% (≈1.75 dppx): mantém visível, FIXO e mais estreito ===== */
-@media (min-resolution: 1.7dppx){
-  .weather-card{
-    position: fixed !important;
-    bottom: 1.25rem; right: 1.25rem; top: auto;
-    grid-column: auto;
-    max-width: 18rem;                /* um pouco menor que no 150% */
-    z-index: 10;
-  }
+/* telas muito largas: mantém o gutter */
+@media (min-width: 1600px){
+  body{ padding-right: 24rem; }
 }
 
-/* ===== 200% (≈2.0 dppx): OCULTA o card e libera toda a largura ===== */
+/* ====== ZOOM/Hi-DPI e ALTURA MUITO BAIXA ================================= */
+/* 200%+ de zoom: some o card para liberar espaço */
 @media (min-resolution: 1.95dppx){
   .weather-card{ display: none !important; }
-  body{ grid-template-columns: 1fr; }    /* ícones em largura total */
+  body{ padding-right: 0; grid-template-columns: 1fr; }
 }
 
-/* ===== Tablets/≤1024px: uma coluna; card vai para baixo, sem ocultar ===== */
-@media (max-width: 64rem){ /* ≤1024px */
-  body { grid-template-columns: 1fr; }
-  .icon-grid-container { grid-column: 1; }
-  .weather-card{
-    grid-column: 1;
-    position: static;             /* aparece abaixo dos ícones */
-    margin: .5rem auto 0;
-    max-width: 17.5rem;
-  }
-  .modal-container { width: 7.5rem; height: 7.5rem; }
-  .modal-img       { width: 2.8125rem; height: 2.8125rem; }
+/* altura bem baixa: esconde também */
+@media (max-height: 640px){
+  .weather-card{ display: none !important; }
+  body{ padding-right: 0; grid-template-columns: 1fr; }
 }
 
-/* Empurra sutilmente os ícones para não “encostar” no card em telas médias */
-@media (min-width: 62rem) and (max-width: 100rem){ /* ~992–1600px */
-  .icon-grid-container{ padding-right: 1rem; }
-}
-
-/* =================================================================== Hi-DPI extras (tipografia/escala leve) */
+/* ====== (Opcional) zoom 125–175% → ajuste de tipografia/escala leve ===== */
 @media (min-resolution: 1.25dppx) and (max-resolution: 1.49dppx){
   html{ font-size: 15px; }
   .modal-container{ transform: scale(.96); transform-origin: center; }

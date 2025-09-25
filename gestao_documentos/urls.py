@@ -27,6 +27,7 @@ urlpatterns = [
     path('beneficios/', views.beneficios, name='beneficios'),
     path('odonto/', views.odonto, name='odonto'),
     path('regulamentos/', views.regulamentos, name='regulamentos'),
+    path('ideias_protagonistas/', views.ideias_protagonistas, name='ideias_protagonistas'),
     
     # Administração
     path('admin/', admin.site.urls),

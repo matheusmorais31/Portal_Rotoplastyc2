@@ -70,7 +70,12 @@ class Formulario(models.Model):
             
             ('pode_gerenciar', 'Pode gerenciar formulário'),
             ('listar_meus', 'Listar meus formulários'),
-            ('criar_formulario', 'Criar formulário')
+            ('pode_criar', 'Criar formulário'),
+            
+            ('pode_excluir_formulario', 'Pode excluir formulário'),
+            ('pode_excluir_respostas', 'Pode excluir respostas'),
+            
+            
         ]
 
     def __str__(self) -> str:

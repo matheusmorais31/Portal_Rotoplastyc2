@@ -12,41 +12,52 @@
   <h1>Todos os formulários</h1>
 
   {% if formularios %}
-    <table class="tabela-formularios">
-      <thead>
-        <tr>
-          <th>Título</th>
-          <th>Dono</th>
-          <th>Criado em</th>
-          <th>Respostas</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for f in formularios %}
+    <div class="tabela-wrap">
+      <table class="tabela-formularios">
+        <thead>
           <tr>
-            <td data-th="Título">{{ f.titulo }}</td>
-            <td data-th="Dono">
-              {% if f.dono.get_full_name %}{{ f.dono.get_full_name }}{% else %}{{ f.dono.username }}{% endif %}
-            </td>
-            <td data-th="Criado em">{{ f.criado_em|date:"d/m/Y H:i" }}</td>
-            <td data-th="Respostas">{{ f.respostas.count }}</td>
-            <td data-th="Status">
-              {% if f.aceita_respostas %}
-                <span class="badge" style="background:#0f513233;color:#00ff88;border:1px solid #0f513255">Aceitando</span>
-              {% else %}
-                <span class="badge" style="background:#84202933;color:#ff0000;border:1px solid #84202955">Pausado</span>
-              {% endif %}
-            </td>
-            <td class="actions" data-th="Ações">
-              <a href="{% url 'formularios:construtor_formulario' f.pk %}" class="btn-secundario">Editar</a>
-              <a href="{% url 'formularios:exibir_formulario' f.pk %}" class="btn-primario">Responder</a>
-            </td>
+            <th>Título</th>
+            <th>Dono</th>
+            <th>Criado em</th>
+            <th>Respostas</th>
+            <th>Status</th>
+            <th>Ações</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for f in formularios %}
+            <tr>
+              <td data-th="Título">{{ f.titulo }}</td>
+              <td data-th="Dono">
+                {% if f.dono.get_full_name %}{{ f.dono.get_full_name }}{% else %}{{ f.dono.username }}{% endif %}
+              </td>
+              <td data-th="Criado em">{{ f.criado_em|date:"d/m/Y H:i" }}</td>
+              <td data-th="Respostas">{{ f.respostas.count }}</td>
+              <td data-th="Status">
+                {% if f.aceita_respostas %}
+                  <span class="badge" style="background:#0f513233;color:#00ff88;border:1px solid #0f513255">Aceitando</span>
+                {% else %}
+                  <span class="badge" style="background:#84202933;color:#ff0000;border:1px solid #84202955">Pausado</span>
+                {% endif %}
+              </td>
+              <td class="actions" data-th="Ações">
+                <a href="{% url 'formularios:construtor_formulario' f.pk %}" class="btn-secundario">Editar</a>
+                <a href="{% url 'formularios:exibir_formulario' f.pk %}" class="btn-primario">Responder</a>
+
+                {% if user == f.dono or perms.formularios.pode_gerenciar %}
+                <form action="{% url 'formularios:deletar_formulario' f.pk %}"
+                      method="post" style="display:inline"
+                      onsubmit="return confirm('Excluir o formulário &quot;{{ f.titulo }}&quot; e TODAS as respostas?');">
+                  {% csrf_token %}
+                  <button class="btn-secundario btn-danger">Excluir</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
     <p>Nenhum formulário encontrado.</p>
   {% endif %}

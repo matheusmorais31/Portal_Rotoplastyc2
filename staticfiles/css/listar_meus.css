@@ -16,6 +16,10 @@
   --danger:#ff4d4f;
 }
 
+/* reset leve */
+*, *::before, *::after { box-sizing:border-box; }
+button { font:inherit; background:transparent; border:0; padding:0; }
+
 /* ========= CONTÊINER / TÍTULO ========= */
 .form-card{
   background:var(--bg-main);
@@ -32,43 +36,59 @@
   font-weight:700;
 }
 
+/* ========= WRAPPER DA TABELA ========= */
+.tabela-wrap{
+  border:1px solid #3a3a3a;
+  border-radius:.75rem;
+  overflow:hidden;                  /* raio aplicado aqui */
+  background:var(--bg-layer);       /* fundo externo uniforme */
+}
+
 /* ========= TABELA (DESKTOP) ========= */
 .tabela-formularios{
   width:100%;
-  border-collapse:separate;            /* precisa ser separate p/ bordas internas */
+  border-collapse:collapse;         /* sem gaps/bordas duplas */
   border-spacing:0;
-  background:var(--bg-layer);
-  border:1px solid #3a3a3a;
-  border-radius:.75rem;
-  overflow:hidden;                     /* mantém cantos arredondados */
+  background:transparent;           /* fundo controlado pelo wrapper e pelas linhas */
 }
 
+/* cabeçalho */
 .tabela-formularios thead th{
   text-align:left;
-  color:var(--text-light);
+  color:#ffffff;
   font-weight:700;
   padding:.9rem 1rem;
-  border-bottom:1px solid #3a3a3a;
   background:var(--accent);
+  border-bottom:1px solid #3a3a3a;
 }
-.tabela-formularios thead th+th{
-  border-left:1px solid rgba(255,255,255,.9); /* linhas no header */
+.tabela-formularios thead th + th{
+  border-left:1px solid rgba(255,255,255,.9);
 }
 
+/* ===== o pulo do gato: fundo na LINHA, não na célula ===== */
+.tabela-formularios tbody tr{
+  background:#2a2a2a;                           /* base escura da linha */
+  box-shadow:inset 0 -1px #333;                 /* separador entre linhas */
+}
+.tabela-formularios tbody tr:last-child{
+  box-shadow:none;
+}
+
+/* anula qualquer fundo de <td> global (tema claro) só nesta tabela */
 .tabela-formularios tbody td{
+  background:transparent !important;            /* vence body.light-theme td */
   color:var(--text-light);
-  padding:.8rem 1rem;
-  border-bottom:1px solid #333;
+  padding:.85rem 1rem;
   vertical-align:middle;
-
+  border:0;                                     /* sem bordas em célula */
 }
-.tabela-formularios tbody td+td{
-  border-left:1px solid rgba(255,255,255,.7); /* linhas no corpo */
+.tabela-formularios tbody td + td{
+  border-left:1px solid rgba(255,255,255,.08);  /* divisória vertical suave */
 }
-.tabela-formularios tbody tr:last-child td{ border-bottom:none; }
-.tabela-formularios tbody tr:hover{ background:#2a2a2a; }
 
-/* larguras apenas para desktop amplo */
+
+
+/* larguras desktop */
 .tabela-formularios th:nth-child(1),
 .tabela-formularios td:nth-child(1){ width:50%; }
 .tabela-formularios th:nth-child(2),
@@ -76,52 +96,52 @@
 .tabela-formularios th:nth-child(3),
 .tabela-formularios td:nth-child(3){ width:100%; white-space:nowrap; }
 
-/* coluna Ações – espaçamento consistente via flex + gap (desktop também) */
+/* coluna Ações */
 .tabela-formularios td.actions{
   display:flex;
   align-items:center;
-  justify-content:flex-start;
-  gap:.6rem;           /* << aqui dá o espaço entre os botões */
+  gap:.6rem;
   flex-wrap:nowrap;
   min-width:0;
 }
-.tabela-formularios td.actions a{
-  margin:0;            /* garantimos que o gap que manda */
-  white-space:nowrap;
+.tabela-formularios td.actions a,
+.tabela-formularios td.actions button{
+  margin:0; white-space:nowrap;
 }
 
 /* ========= BOTÕES ========= */
 .btn-primario,
 .btn-secundario{
-  border:none;
-  text-decoration:none;
-  padding:.6rem 1.1rem;
-  border-radius:.55rem;
-  font-weight:600;
-  transition:background .2s, transform .02s, box-shadow .2s;
   display:inline-flex;
   align-items:center;
-  gap:.4rem;
-  min-height:38px;
+  justify-content:center;
+  height:40px;
+  padding:0 16px;
+  line-height:1;
+  border-radius:.55rem;
+  font-weight:600;
+  border:none;
+  text-decoration:none;
+  transition:background .2s, transform .02s, box-shadow .2s;
+  color:#fff;
+  cursor:pointer;
 }
-.btn-primario{ background:var(--accent); color:#fff; }
+.btn-primario{ background:var(--accent); }
 .btn-primario:hover{ background:var(--accent-d); }
-.btn-primario:active{ transform:translateY(1px); }
-.btn-primario:focus-visible{
-  outline:none; box-shadow:0 0 0 3px rgba(46,194,214,.35);
-}
-.btn-secundario{ background:#555; color:#fff; }
+.btn-secundario{ background:#555; }
 .btn-secundario:hover{ background:#6b6b6b; }
-.btn-secundario:active{ transform:translateY(1px); }
-.btn-secundario:focus-visible{
+.btn-primario:active,.btn-secundario:active{ transform:translateY(1px); }
+.btn-primario:focus-visible,.btn-secundario:focus-visible{
   outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.2);
 }
+.btn-danger{ background:#ff0000; }
+.btn-danger:hover{ background:#750202; }
 
-/* ========= UTIL ========= */
+/* util */
 .mt-2{ margin-top:1rem; }
 .form-card>p{ color:var(--text-muted); }
 
-/* ========= ESTADO VAZIO ========= */
+/* vazio */
 .form-card>p:only-child{
   background:#232323;
   border:1px dashed #3a3a3a;
@@ -131,23 +151,19 @@
   text-align:center;
 }
 
-/* ========= BREAKPOINT 1 – até 1100px (tabela flexível) ========= */
+/* ========= BREAKPOINT 1 – até 1100px ========= */
 @media (max-width:1100px){
   .form-card{ padding:1.75rem; }
-
-  /* solta larguras e permite quebra de texto */
   .tabela-formularios th:nth-child(n),
   .tabela-formularios td:nth-child(n){
     width:auto; white-space:normal;
   }
-
-  /* ações podem quebrar em duas linhas */
   .tabela-formularios td.actions{
     flex-wrap:wrap;
   }
   .tabela-formularios td.actions .btn-primario,
   .tabela-formularios td.actions .btn-secundario{
-    flex:0 1 160px;    /* tenta colocar lado a lado; quebra se não couber */
+    flex:0 1 160px;
   }
 }
 
@@ -155,39 +171,39 @@
 @media (max-width:680px){
   .form-card{ padding:1.25rem; }
 
+  .tabela-wrap{
+    border:0; border-radius:0; overflow:visible; background:transparent;
+  }
+
   .tabela-formularios thead{ display:none; }
 
   .tabela-formularios,
   .tabela-formularios tbody,
   .tabela-formularios tr,
   .tabela-formularios td{
-    display:block;
-    width:100%;
+    display:block; width:100%;
   }
 
-  .tabela-formularios{ border:none; background:transparent; }
-
   .tabela-formularios tbody tr{
-    background:var(--bg-layer);
+    background: #242424;
     border:1px solid #333;
     border-radius:.75rem;
     margin-bottom:.9rem;
+    box-shadow:none; /* separador vira border do cartão */
     overflow:hidden;
   }
 
   .tabela-formularios tbody td{
     border:none;
     border-bottom:1px solid #2e2e2e;
-    padding:.75rem 1rem .75rem 7.2rem; /* espaço para o rótulo */
+    padding:.75rem 1rem .75rem 7.2rem;
     position:relative;
   }
   .tabela-formularios tbody td:last-child{ border-bottom:none; }
 
-  /* rótulo da célula (nome da coluna) via data attribute */
   .tabela-formularios tbody td::before{
     content:attr(data-th);
-    position:absolute;
-    left:0; top:0;
+    position:absolute; left:0; top:0;
     height:100%; width:7rem;
     display:flex; align-items:center;
     padding-left:.9rem;
@@ -195,30 +211,35 @@
     color:var(--text-muted);
   }
 
-  /* seção Ações no cartão */
   .tabela-formularios tbody td.actions{
-    padding:.8rem;
-    padding-left:.8rem;     /* sem rótulo */
+    padding:.8rem; padding-left:.8rem;
     display:flex; gap:.5rem; flex-wrap:wrap;
   }
   .tabela-formularios tbody td.actions::before{ content:none; }
 
   .tabela-formularios td.actions .btn-primario,
   .tabela-formularios td.actions .btn-secundario{
-    flex:1 1 140px;         /* botões fluidos e alinhados */
-    justify-content:center;
-    text-align:center;
+    flex:1 1 140px; justify-content:center; text-align:center;
   }
 }
 
-/* ========= TEMA CLARO ========= */
+/* ========= TEMA CLARO (fundo na LINHA) ========= */
 body.light-theme .form-card{ background-color:var(--bg-container); }
-body.light-theme td{ background-color:#677480; }
-body.light-theme h1{ color:#ffffff; }
-body.light-theme a{ color:#ffffff; }
-body.light-theme h2{ color:#ffffff; }
 
-/* Acessibilidade: reduz animação */
+/* linha no claro */
+body.light-theme .tabela-formularios tbody tr{
+  background:#677480;
+}
+body.light-theme .tabela-formularios tbody tr:hover{
+  background:#5f6c79;
+}
+
+/* textos/links no claro */
+body.light-theme h1,
+body.light-theme h2,
+body.light-theme a{ color:#ffffff; }
+
+/* acessibilidade */
 @media (prefers-reduced-motion:reduce){
   .btn-primario, .btn-secundario{ transition:none; }
 }

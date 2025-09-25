@@ -233,62 +233,63 @@ textarea {
 }
 
 /* ------------------------------------------------------------------
-   BOTÕES
+   BOTÕES (unificado e consistente)
    ------------------------------------------------------------------ */
 .btn-primario,
-.btn-secundario {
-  border: none;
+.btn-secundario,
+.btn-danger-ind,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
   text-decoration: none;
+  border: none;
   padding: .7rem 1.4rem;
   border-radius: .6rem;
   font-weight: 600;
-  transition: background .2s, opacity .2s;
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
+  font-size: .95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .2s, opacity .2s, filter .2s;
 }
 
+/* Variantes */
 .btn-primario {
   background: var(--accent);
-  color: #fff
+  color: #fff;
 }
-
-.btn-primario:hover {
-  background: var(--accent-d)
-}
+.btn-primario:hover { background: var(--accent-d); }
 
 .btn-secundario {
-  background: #555;
-  color: #fff
+  background: #2EC2D6;
+  color: #fff;
 }
+.btn-secundario:hover { background: var(--accent-d); }
 
-.btn-secundario:hover {
-  background: #6b6b6b
-}
-
-.btn-primario:disabled {
-  opacity: .55;
-  cursor: not-allowed
-}
-
+.btn-danger-ind,
 .btn-danger {
   background: var(--danger);
   color: #fff;
-  border: none;
-  border-radius: .6rem;
-  padding: .55rem .9rem;
-  cursor: pointer
 }
+.btn-danger:hover { filter: brightness(.9); }
 
+/* Estado desabilitado (todas as variantes) */
+.btn-primario:disabled,
+.btn-secundario:disabled,
+.btn-danger-ind:disabled,
 .btn-danger[disabled] {
-  opacity: .5;
-  cursor: not-allowed
+  opacity: .55;
+  cursor: not-allowed;
 }
 
-.btn-disabled {
-  opacity: .5;
-  pointer-events: none
+/* Versão compacta APENAS na lista/tabela de ações */
+.td-actions .btn-secundario {
+  padding: .25rem .6rem; /* mantém “chip” compacto na tabela */
 }
+
+/* Botões utilitários menores */
+.btn-disabled { opacity: .5; pointer-events: none; }
 
 /* ------------------------------------------------------------------
    PERGUNTA CARD (Builder e cartões gerais)
@@ -313,7 +314,7 @@ textarea {
 
 .pergunta-head {
   position: absolute;
-  top: .6rem;
+  top: .1rem;
   right: .95rem;
   display: flex;
   align-items: center;
@@ -322,9 +323,7 @@ textarea {
   opacity: .85;
 }
 
-.drag-handle {
-  cursor: grab
-}
+.drag-handle { cursor: grab }
 
 .btn-trash {
   background: #303030;
@@ -354,13 +353,9 @@ textarea {
   flex-direction: column
 }
 
-.pergunta-body .campo-duplo {
-  gap: 1.25rem
-}
+.pergunta-body .campo-duplo { gap: 1.25rem }
 
-.options-block {
-  margin-top: .3rem
-}
+.options-block { margin-top: .3rem }
 
 .options-list .opt-row {
   display: flex;
@@ -396,9 +391,7 @@ textarea {
   cursor: pointer
 }
 
-.btn-add-option:hover {
-  background: #666
-}
+.btn-add-option:hover { background: #666 }
 
 /* ------------------------------------------------------------------
    CONFIGURAÇÕES DE UPLOAD (.file-config) – COM CHECKBOXES
@@ -414,9 +407,7 @@ textarea {
   gap: 1.1rem;
 }
 
-.file-config .lbl-text {
-  font-size: .93rem
-}
+.file-config .lbl-text { font-size: .93rem }
 
 .cfg-tipos-list {
   margin-left: .1rem;
@@ -447,10 +438,7 @@ textarea {
   color: var(--text-light)
 }
 
-.cfg-max-arqs {
-  min-width: 80px;
-  text-align: center
-}
+.cfg-max-arqs { min-width: 80px; text-align: center }
 
 .cfg-max-mb {
   background: var(--bg-input);
@@ -463,13 +451,9 @@ textarea {
 /* ------------------------------------------------------------------
    INDICADOR / UTIL
    ------------------------------------------------------------------ */
-.hide {
-  display: none !important
-}
+.hide { display: none !important }
 
-input[name$='-DELETE'] {
-  display: none
-}
+input[name$='-DELETE'] { display: none }
 
 #save-indicator {
   position: fixed;
@@ -486,9 +470,7 @@ input[name$='-DELETE'] {
   pointer-events: none;
 }
 
-#save-indicator.htmx-request {
-  opacity: 1
-}
+#save-indicator.htmx-request { opacity: 1 }
 
 #form-main.htmx-request .btn-add-question,
 #form-main.htmx-request .btn-trash {
@@ -499,9 +481,7 @@ input[name$='-DELETE'] {
 /* ------------------------------------------------------------------
    TABELA (quando utilizada)
    ------------------------------------------------------------------ */
-.tabela-wrap {
-  overflow: auto
-}
+.tabela-wrap { overflow: auto }
 
 .tabela-formularios {
   width: 100%;
@@ -527,9 +507,7 @@ input[name$='-DELETE'] {
   border-top: 1px solid var(--border-color)
 }
 
-.tabela-formularios tbody tr:first-child td {
-  border-top: none
-}
+.tabela-formularios tbody tr:first-child td { border-top: none }
 
 .tabela-formularios tbody tr td:first-child {
   border-top-left-radius: .6rem;
@@ -539,10 +517,6 @@ input[name$='-DELETE'] {
 .tabela-formularios tbody tr td:last-child {
   border-top-right-radius: .6rem;
   border-bottom-right-radius: .6rem
-}
-
-.td-actions .btn-secundario {
-  padding: .25rem .6rem
 }
 
 /* ------------------------------------------------------------------
@@ -555,10 +529,7 @@ input[name$='-DELETE'] {
   margin-bottom: 1rem
 }
 
-.quick-stats span {
-  margin-right: 1rem;
-  color: var(--text-muted)
-}
+.quick-stats span { margin-right: 1rem; color: var(--text-muted) }
 
 .responses-top .top-row {
   display: flex;
@@ -568,15 +539,9 @@ input[name$='-DELETE'] {
   margin-bottom: .75rem;
 }
 
-.top-actions {
-  display: flex;
-  gap: .5rem;
-  align-items: center
-}
+.top-actions { display: flex; gap: .5rem; align-items: center }
 
-.toggle-status {
-  color: var(--text-muted)
-}
+.toggle-status { color: var(--text-muted) }
 
 .badge {
   padding: .15rem .5rem;
@@ -621,14 +586,8 @@ input[name$='-DELETE'] {
   opacity: 1
 }
 
-.tabs-content .tab-pane {
-  display: none;
-  margin-top: 1rem
-}
-
-.tabs-content .tab-pane.active {
-  display: block
-}
+.tabs-content .tab-pane { display: none; margin-top: 1rem }
+.tabs-content .tab-pane.active { display: block }
 
 /* Filtros compactos */
 .filters-card {
@@ -647,9 +606,7 @@ input[name$='-DELETE'] {
   margin-top: .75rem
 }
 
-.filters-panel.hidden {
-  display: none
-}
+.filters-panel.hidden { display: none }
 
 .filters-grid {
   display: grid;
@@ -657,13 +614,8 @@ input[name$='-DELETE'] {
   gap: .6rem
 }
 
-.filters-grid .f-item {
-  grid-column: span 3
-}
-
-.filters-grid .f-item.grow {
-  grid-column: span 6
-}
+.filters-grid .f-item { grid-column: span 3 }
+.filters-grid .f-item.grow { grid-column: span 6 }
 
 .filters-grid .f-item.actions {
   grid-column: span 12;
@@ -672,9 +624,7 @@ input[name$='-DELETE'] {
   justify-content: flex-end
 }
 
-.input-with-icon {
-  position: relative
-}
+.input-with-icon { position: relative }
 
 .input-with-icon svg {
   position: absolute;
@@ -685,9 +635,7 @@ input[name$='-DELETE'] {
   color: #cfcfcf
 }
 
-.input-with-icon input {
-  padding-left: 2rem
-}
+.input-with-icon input { padding-left: 2rem }
 
 .chip {
   display: inline-flex;
@@ -743,16 +691,9 @@ input[name$='-DELETE'] {
   cursor: pointer
 }
 
-.link-btn:hover {
-  opacity: .85
-}
+.link-btn:hover { opacity: .85 }
 
-.preview-ul {
-  list-style: none;
-  padding: 0;
-  margin: 0
-}
-
+.preview-ul { list-style: none; padding: 0; margin: 0 }
 .preview-ul li {
   white-space: nowrap;
   overflow: hidden;
@@ -760,9 +701,7 @@ input[name$='-DELETE'] {
 }
 
 .preview-ul .muted,
-.muted {
-  color: var(--text-muted)
-}
+.muted { color: var(--text-muted) }
 
 .file-pill {
   display: inline-block;
@@ -783,14 +722,9 @@ input[name$='-DELETE'] {
   flex-wrap: wrap
 }
 
-.paginacao .range {
-  color: var(--text-muted)
-}
+.paginacao .range { color: var(--text-muted) }
 
-.pager-btns {
-  display: flex;
-  gap: .5rem
-}
+.pager-btns { display: flex; gap: .5rem }
 
 .pager {
   background: #3a3a3a;
@@ -800,14 +734,9 @@ input[name$='-DELETE'] {
   text-decoration: none
 }
 
-.pager:hover {
-  background: #4a4a4a
-}
+.pager:hover { background: #4a4a4a }
 
-.empty-state {
-  padding: 1.1rem 0;
-  text-align: center
-}
+.empty-state { padding: 1.1rem 0; text-align: center }
 
 /* ------------------------------------------------------------------
    LISTA DE TEXTO LIVRE (Resumo)
@@ -816,18 +745,15 @@ input[name$='-DELETE'] {
   list-style: none;
   margin: .25rem 0 0;
   padding: .25rem;
-  max-height: 360px;
-  /* rolagem para listas longas */
+  max-height: 360px; /* rolagem para listas longas */
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: .5rem;
-  /* espaço entre os “cards” */
+  gap: .5rem; /* espaço entre os “cards” */
 }
 
 .text-item {
-  background: var(--bg-input);
-  /* fundo do item */
+  background: var(--bg-input); /* fundo do item */
   border: 1px solid var(--border-2);
   border-radius: .55rem;
   padding: .6rem .75rem;
@@ -838,9 +764,7 @@ input[name$='-DELETE'] {
 }
 
 /* zebra leve (opcional) */
-.text-item:nth-child(odd) {
-  background: #2f2f2f;
-}
+.text-item:nth-child(odd) { background: #2f2f2f; }
 
 /* ------------------------------------------------------------------
    FIXES ESPECÍFICOS (filtros laterais + gráficos)
@@ -860,9 +784,7 @@ input[name$='-DELETE'] {
   background: var(--bg-input);
 }
 
-#aba-respostas .filters-panel input::placeholder {
-  color: var(--text-muted);
-}
+#aba-respostas .filters-panel input::placeholder { color: var(--text-muted); }
 
 /* Ícone do datepicker (Chrome) visível em tema escuro */
 #aba-respostas .filters-panel input[type="date"]::-webkit-calendar-picker-indicator {
@@ -871,25 +793,20 @@ input[name$='-DELETE'] {
 }
 
 /* Gráficos: não “vazar” do card e altura compacta */
-#aba-respostas .pergunta-card {
-  overflow: hidden;
-}
+#aba-respostas .pergunta-card { overflow: hidden; }
 
 #aba-respostas canvas {
   display: block;
   width: 100% !important;
   max-width: 100% !important;
-  height: 260px !important;
-  /* ajuste conforme desejar */
+  height: 260px !important; /* ajuste conforme desejar */
   max-height: 260px !important;
 }
 
 /* ───────────────────────────────────────────────────────────────
    LEGENDA CUSTOM DOS GRÁFICOS (coluna lateral) – texto branco
    ─────────────────────────────────────────────────────────────── */
-#aba-respostas .legend-col {
-  color: var(--text-light);
-}
+#aba-respostas .legend-col { color: var(--text-light); }
 
 #aba-respostas .legend-list {
   list-style: none;
@@ -914,35 +831,20 @@ input[name$='-DELETE'] {
   border: 1px solid rgba(255, 255, 255, .25);
 }
 
-#aba-respostas .legend-text {
-  color: #fff;
-}
-
-#aba-respostas .legend-text strong {
-  color: #fff;
-}
+#aba-respostas .legend-text { color: #fff; }
+#aba-respostas .legend-text strong { color: #fff; }
 
 /* ------------------------------------------------------------------
    RESPONSIVO
    ------------------------------------------------------------------ */
 @media(max-width:900px) {
-  .filters-grid {
-    grid-template-columns: repeat(6, 1fr)
-  }
-
-  .filters-grid .f-item {
-    grid-column: span 3
-  }
-
-  .filters-grid .f-item.grow {
-    grid-column: span 6
-  }
+  .filters-grid { grid-template-columns: repeat(6, 1fr) }
+  .filters-grid .f-item { grid-column: span 3 }
+  .filters-grid .f-item.grow { grid-column: span 6 }
 }
 
 @media(max-width:720px) {
-  .builder-wrapper {
-    padding: 1.5rem
-  }
+  .builder-wrapper { padding: 1.5rem }
 
   .gform-toolbar {
     flex-direction: column;
@@ -950,9 +852,7 @@ input[name$='-DELETE'] {
     margin: -1.5rem -1.5rem 1.5rem
   }
 
-  .tb-group:last-child {
-    gap: 1.2rem
-  }
+  .tb-group:last-child { gap: 1.2rem }
 
   .campo-duplo,
   .pergunta-body .campo-duplo {
@@ -968,15 +868,11 @@ input[name$='-DELETE'] {
 }
 
 @media(max-width:600px) {
-  .filters-grid {
-    grid-template-columns: repeat(2, 1fr)
-  }
+  .filters-grid { grid-template-columns: repeat(2, 1fr) }
 
   .filters-grid .f-item,
   .filters-grid .f-item.grow,
-  .filters-grid .f-item.actions {
-    grid-column: span 2
-  }
+  .filters-grid .f-item.actions { grid-column: span 2 }
 }
 
 /* ── Layout do gráfico + legenda na direita ───────────────────────── */
@@ -998,10 +894,7 @@ input[name$='-DELETE'] {
 
 /* Responsivo: empilha em telas pequenas */
 @media (max-width: 720px) {
-  #aba-respostas .chart-row {
-    flex-direction: column;
-  }
-
+  #aba-respostas .chart-row { flex-direction: column; }
   #aba-respostas .legend-col {
     flex: 0 0 auto;
     max-width: 100%;
@@ -1011,7 +904,6 @@ input[name$='-DELETE'] {
 /* -----------------------------------------------------------------
   Closed Message
   ------------------------------------------------------------------- */
-
 .closed-wrap {
   max-width: 720px;
   margin: 2.5rem auto;
@@ -1046,10 +938,7 @@ input[name$='-DELETE'] {
   margin: 0
 }
 
-.closed-body {
-  margin: .25rem 0 1.25rem;
-  line-height: 1.55
-}
+.closed-body { margin: .25rem 0 1.25rem; line-height: 1.55 }
 
 .chip-info {
   display: inline-block;
@@ -1060,12 +949,9 @@ input[name$='-DELETE'] {
   color: #eee
 }
 
-.btn-row {
-  display: flex;
-  gap: .6rem;
-  flex-wrap: wrap
-}
+.btn-row { display: flex; gap: .6rem; flex-wrap: wrap }
 
+/* Botões genéricos dessa seção (não conflitam com .btn-primario/.secundario/.danger) */
 .btn {
   border: none;
   border-radius: .6rem;
@@ -1077,104 +963,48 @@ input[name$='-DELETE'] {
   gap: .4rem
 }
 
-.btn-primary {
-  background: var(--accent, #2EC2D6);
-  color: #fff
-}
-
-.btn-secondary {
-  background: #555;
-  color: #fff
-}
+.btn-primary { background: var(--accent, #2EC2D6); color: #fff }
+.btn-secondary { background: #555; color: #fff }
 
 /* ------------------------------------------------------------------
    Light theme adjustments
    ------------------------------------------------------------------ */
-body.light-theme .closed-wrap{
-  background-color: var(--bg-container);
-}
+body.light-theme .closed-wrap { background-color: var(--bg-container); }
+body.light-theme .closed-wrap h1 { color: #fff; }
+body.light-theme .closed-wrap a { color: #fff; }
 
-body.light-theme .closed-wrap h1{
-  color: #fff;
-}
+body.light-theme .builder-wrapper { background-color: var(--bg-container); }
+body.light-theme .builder-wrapper .header-card { background-color: var(--bg-container-child); }
+body.light-theme .builder-wrapper .header-card input { background-color: var(--bg-container); }
+body.light-theme .builder-wrapper .header-card textarea { background-color: var(--bg-container); }
 
-body.light-theme .closed-wrap a{
-  color: #fff;
-}
+body.light-theme input { background-color: var(--bg-container-child); }
+body.light-theme select { background-color: var(--bg-container-child); }
 
-body.light-theme .builder-wrapper {
-  background-color: var(--bg-container);
-}
+body.light-theme .form-card { background-color: var(--bg-container); }
+body.light-theme .form-card textarea { background-color: #677480; }
 
-body.light-theme .builder-wrapper .header-card {
-  background-color: var(--bg-container-child);
-}
-
-body.light-theme .builder-wrapper .header-card input {
-  background-color: var(--bg-container);
-}
-
-body.light-theme .builder-wrapper .header-card textarea {
-  background-color: var(--bg-container);
-}
-
-body.light-theme input {
-  background-color: var(--bg-container-child);
-}
-
-body.light-theme select {
-  background-color: var(--bg-container-child);
-}
-
-body.light-theme .form-card {
-  background-color: var(--bg-container);
-}
-
-body.light-theme .form-card textarea {
-  background-color: #677480;
-}
-
+/* Secundário no tema claro (corrigido: regra única, sem conflito) */
 body.light-theme .btn-secundario {
-  background-color: #ff4d4f;
+  background-color: var(--accent);
   color: #fff;
 }
 
-body.light-theme .tb-link {
-  color: #fff;
-}
+body.light-theme .tb-link { color: #fff; }
 
-body.light-theme .pergunta-card {
-  background-color: var(--bg-container-child);
-}
+body.light-theme .pergunta-card { background-color: var(--bg-container-child); }
+body.light-theme .pergunta-card input { background-color: var(--bg-container); }
+body.light-theme .pergunta-card select { background-color: var(--bg-container); }
 
-body.light-theme .pergunta-card input {
-  background-color: var(--bg-container);
-}
+body.light-theme .btn-add-option { background-color: var(--accent); }
 
-body.light-theme .pergunta-card select {
-  background-color: var(--bg-container);
-}
+body.light-theme #colabs-list td { background-color: var(--bg-container); }
 
-body.light-theme .btn-add-option {
-  background-color: var(--accent);
-}
-
-body.light-theme button.btn-secundario {
-  background-color: var(--accent);
-}
-
-body.light-theme #colabs-list td {
-  background-color: var(--bg-container);
-}
-
-#colabs-list td {
-  border: 1px solid #404040;
-}
+#colabs-list td { border: 1px solid #404040; }
 
 body.light-theme .pergunta-card #colab-list select {
   background-color: var(--bg-container-child);
 }
-
 
 /* ───────────────────────────────────────────────────────────────
    Colaboradores – papel/ações (coluna "Papel")
@@ -1225,10 +1055,7 @@ body.light-theme .pergunta-card #colab-list select {
   cursor: pointer;
 }
 
-.btn-ghost:hover {
-  border-color: #888;
-  color: #eee
-}
+.btn-ghost:hover { border-color: #888; color: #eee }
 
 /* ───────────────────────────────────────────────────────────────
    Autocomplete / resultados de busca (colabs + alvo manual)
@@ -1251,22 +1078,53 @@ body.light-theme .pergunta-card #colab-list select {
   border-bottom: 1px solid #eee;
 }
 
-.resultados-pesquisa .list-group-item:last-child {
-  border-bottom: 0;
-}
+.resultados-pesquisa .list-group-item:last-child { border-bottom: 0; }
 
-.resultados-pesquisa .list-group-item:hover {
-  background: #f5f7fa;
-}
+.resultados-pesquisa .list-group-item:hover { background: #f5f7fa; }
 
 /* util */
-.btn-sm {
-  padding: .25rem .5rem;
-  border-radius: 8px;
+.btn-sm { padding: .25rem .5rem; border-radius: 8px; }
+
+.field-errors { color:#ffb4b4; font-size:.92rem; margin-top:.35rem; }
+.alert-area .alert { background:#3b1f1f; border:1px solid #a44; color:#ffdcdc; padding:.6rem .8rem; border-radius:.4rem; }
+
+/* ======== AVISOS DO BUILDER (badge + mini-errors) ======== */
+.card-flag.warn{
+  padding:.1rem .45rem;
+  border-radius:.45rem;
+  background:rgb(255, 0, 0);
+  color: #fff;
 }
 
+/*--- tema claro ---*/
 
 
-  .field-errors { color:#ffb4b4; font-size:.92rem; margin-top:.35rem; }
-  .alert-area .alert { background:#3b1f1f; border:1px solid #a44; color:#ffdcdc; padding:.6rem .8rem; border-radius:.4rem; }
 
+body.light-theme .filters-panel {
+  background: var(--bg-container-child)
+
+}
+
+body.light-theme #aba-respostas .filters-panel input,
+body.light-theme #aba-respostas .filters-panel select,
+body.light-theme #aba-respostas .filters-panel textarea {
+  background: var(--bg-container);
+}
+
+body.light-theme .tab.active {
+  background-color: var(--bg-container-child);
+
+}
+
+body.light-theme .chip-ghost {
+  background-color: var(--bg-container-child);
+  border: 1px solid #b5b5b5;
+}
+
+body.light-theme h1 {
+  color: #fff;
+}
+
+body.light-theme .text-item:nth-child(odd) {
+  background: var(--bg-container);
+}

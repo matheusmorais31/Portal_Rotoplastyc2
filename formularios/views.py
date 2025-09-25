@@ -25,6 +25,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
+from urllib.parse import urlencode
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 
 from .forms import CampoForm, CampoFormSetBuilder, CampoFormSetCreate, FormularioForm
@@ -34,7 +35,6 @@ from .models import (
 )
 
 logger = logging.getLogger(__name__)
-
 UserModel = get_user_model()
 
 # Se True, anônimos veem a tela "obrigado" após o envio (em vez do detalhe)
@@ -225,7 +225,6 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
             )
             .distinct()
         )
-
 
     def get_formset_class(self):
         return CampoFormSetBuilder
@@ -548,18 +547,6 @@ def exibir_formulario(request: HttpRequest, pk: int):
 def enviar_resposta_formulario(request: HttpRequest, pk: int):
     """
     Recebe e valida o POST de respostas de um formulário.
-
-    Regras:
-      - Respeita disponibilidade (pausado, abre_em, fecha_em, limite_resps).
-      - Valida obrigatoriedade por tipo de campo.
-      - Upload: valida quantidade, tamanho (MB) e extensões por categoria (FILE_CATS).
-      - coletar_nome=True: exige __nome__ para anônimo; logado coleta do usuário.
-      - Bloqueia envio se NENHUMA pergunta ativa tiver sido respondida.
-      - Em caso de erro, re-renderiza o mesmo template (embed ou página cheia)
-        com valores “ecoados” e mensagens por campo.
-      - Sucesso:
-          • EMBED: renderiza "formularios/obrigado_embed.html"
-          • PÁGINA: renderiza "formularios/obrigado.html"
     """
     form = get_object_or_404(Formulario, pk=pk)
     if request.method != "POST":
@@ -672,7 +659,7 @@ def enviar_resposta_formulario(request: HttpRequest, pk: int):
                 add_err(c, f"O campo “{c.rotulo}” é obrigatório.")
             continue
 
-        # ----- DEMAIS TIPOS (texto, parágrafo, multipla, lista, escala, data, hora) -----
+        # ----- DEMAIS TIPOS -----
         val = (dados.get(cid) or "").strip()
         if val:
             any_answered = True
@@ -759,7 +746,6 @@ def enviar_resposta_formulario(request: HttpRequest, pk: int):
     logger.info("Resposta %s salva no form %s (embed=%s)", resposta.pk, form.pk, embed_mode)
 
     # ===================== ATUALIZAR ESTADO POR USUÁRIO =====================
-    # Marca que este usuário respondeu agora. Isso não roda em F5, somente no POST válido.
     if request.user.is_authenticated:
         st, created = FormularioUserState.objects.get_or_create(
             formulario=form,
@@ -798,6 +784,7 @@ class DetalheRespostaView(DetailView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
+        # CORREÇÃO: self.request.user (sem parênteses)
         u = self.request.user
 
         # ✔ gerente pode ver
@@ -818,7 +805,6 @@ class DetalheRespostaView(DetailView):
                     pass
             return obj
         raise Http404
-
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -861,8 +847,6 @@ def _get_form_or_404(pk: int, user, for_edit: bool = False) -> Formulario:
                        pk, getattr(user, "username", None))
         raise Http404
     return form
-
-
 
 
 def _filtrar_respostas(request: HttpRequest, form: Formulario):
@@ -951,7 +935,6 @@ class AbaRespostasView(LoginRequiredMixin, DetailView):
         if not obj.can_user_view(u):
             raise Http404
         return obj
-
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -1104,7 +1087,6 @@ def exportar_respostas_csv(request: HttpRequest, pk: int):
     return resp
 
 
-
 # --------------------------------------------------------------------------- #
 # EXPORTAR ANEXOS (ZIP)                                                       #
 # --------------------------------------------------------------------------- #
@@ -1155,8 +1137,27 @@ def excluir_respostas(request: HttpRequest, pk: int):
     logger.info("Excluídas %s respostas do formulário %s", deletadas, form.pk)
 
     if _is_htmx(request):
+        # preserva estado/filtros se vierem via POST, e mantém aba 'individual'
+        allowed = {"q", "de", "ate", "tem_anexo", "campo", "valor", "ord", "pp", "page", "tab", "filters_open"}
+        params = [(k, v) for k, v in request.POST.items() if k in allowed and v is not None]
+        if not any(k == "tab" for k, _ in params):
+            params.append(("tab", "individual"))
+
         url = reverse("formularios:aba_respostas", kwargs={"pk": form.pk})
-        return HttpResponse(status=204, headers={"HX-Redirect": url})
+        if params:
+            url = f"{url}?{urlencode(params, doseq=True)}"
+
+        # 🪄 Trampolim HTMX (não altera a barra de endereço)
+        html = (
+            f'<div hx-get="{url}" '
+            f'hx-trigger="load" '
+            f'hx-target="#resp-section" '
+            f'hx-select="#aba-respostas" '
+            f'hx-swap="innerHTML" '
+            f'hx-push-url="false"></div>'
+        )
+        return HttpResponse(html)
+
     return redirect("formularios:aba_respostas", form.pk)
 
 
@@ -1302,3 +1303,82 @@ def _find_user_by_ref(ref: str):
     )
     logger.debug("_find_user_by_ref: lookup '%s' -> %s", ref, getattr(u, "pk", None))
     return u
+
+
+# --------------------------------------------------------------------------- #
+# EXCLUSÃO INDIVIDUAL                                                         #
+# --------------------------------------------------------------------------- #
+@login_required
+@require_POST
+@transaction.atomic
+def deletar_resposta(request: HttpRequest, pk: int):
+    """
+    Exclui UMA resposta e, se for HTMX, recarrega apenas a aba de respostas
+    dentro do builder (sem alterar a URL do navegador).
+    """
+    resp = get_object_or_404(Resposta.objects.select_related("formulario"), pk=pk)
+    form = _get_form_or_404(resp.formulario_id, request.user, for_edit=True)
+
+    logger.info(
+        "Excluindo resposta id=%s do formulário %s por user=%s",
+        resp.pk, form.pk, getattr(request.user, "id", None)
+    )
+    resp.delete()
+
+    if _is_htmx(request):
+        # Reconstrói os filtros recebidos via POST (hx-include)
+        allowed_keys = {
+            "q", "de", "ate", "tem_anexo", "campo", "valor",
+            "ord", "pp", "page", "tab", "filters_open"
+        }
+        params = []
+        for k, v in request.POST.items():
+            if k in allowed_keys and v is not None:
+                params.append((k, v))
+
+        # Garante que a aba permaneça em 'individual' (o botão manda isso via hx-vals)
+        if not any(k == "tab" for k, _ in params):
+            params.append(("tab", "individual"))
+
+        url = reverse("formularios:aba_respostas", kwargs={"pk": form.pk})
+        if params:
+            url = f"{url}?{urlencode(params, doseq=True)}"
+
+        # 🪄 Trampolim HTMX (não altera a barra de endereço)
+        html = (
+            f'<div hx-get="{url}" '
+            f'hx-trigger="load" '
+            f'hx-target="#resp-section" '
+            f'hx-select="#aba-respostas" '
+            f'hx-swap="innerHTML" '
+            f'hx-push-url="false"></div>'
+        )
+        return HttpResponse(html)
+
+    # Fluxo normal (não-HTMX): volta para a aba
+    return redirect("formularios:aba_respostas", form.pk)
+
+
+@login_required
+@require_POST
+@transaction.atomic
+def deletar_formulario(request: HttpRequest, pk: int):
+    """
+    Exclui O FORMULÁRIO (cascade: campos, respostas e valores).
+    Regras: precisa poder EDITAR o formulário (dono, colaborador editor
+    ou quem possuir 'pode_gerenciar').
+    """
+    form = _get_form_or_404(pk, request.user, for_edit=True)
+    titulo = form.titulo
+    logger.warning(
+        "Excluindo formulário id=%s (%r) por user=%s",
+        form.pk, titulo, getattr(request.user, "id", None)
+    )
+    form.delete()
+
+    # HTMX: volta para a lista "Meus formulários"
+    if _is_htmx(request):
+        return HttpResponse(status=204, headers={"HX-Redirect": reverse("formularios:listar_meus")})
+
+    # Padrão: vai para a lista "Meus formulários"
+    return redirect("formularios:listar_meus")
