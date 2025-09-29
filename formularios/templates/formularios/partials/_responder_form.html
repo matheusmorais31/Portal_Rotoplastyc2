@@ -67,6 +67,7 @@
 
           <div class="pergunta-body">
             {% if campo.tipo == "texto_curto" %}
+              {% with tv=campo.validacao_json %}
               <input type="text"
                      name="{{ campo.id }}"
                      id="campo-{{ campo.id }}"
@@ -74,16 +75,27 @@
                      placeholder="Sua resposta"
                      value="{{ campo.posted|default_if_none:'' }}"
                      aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
-                     {% if campo.obrigatorio %}required{% endif %}>
+                     {% if campo.obrigatorio %}required{% endif %}
+                     {% if tv.only_digits or tv.text_only_digits %}data-only-digits="1" inputmode="numeric" pattern="\d*" aria-describedby="digits-hint-{{ campo.id }}"{% endif %}>
+              {% if tv.only_digits or tv.text_only_digits %}
+                <small id="digits-hint-{{ campo.id }}" class="texto-ajuda only-digits-hint">Esse campo aceita somente números.</small>
+              {% endif %}
+              {% endwith %}
 
             {% elif campo.tipo == "paragrafo" %}
+              {% with tv=campo.validacao_json %}
               <textarea name="{{ campo.id }}"
                         id="campo-{{ campo.id }}"
                         rows="4"
                         class="input-texto"
                         placeholder="Sua resposta"
                         aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
-                        {% if campo.obrigatorio %}required{% endif %}>{{ campo.posted|default_if_none:'' }}</textarea>
+                        {% if campo.obrigatorio %}required{% endif %}
+                        {% if tv.only_digits or tv.text_only_digits %}data-only-digits="1" inputmode="numeric" pattern="\d*" aria-describedby="digits-hint-{{ campo.id }}"{% endif %}>{{ campo.posted|default_if_none:'' }}</textarea>
+              {% if tv.only_digits or tv.text_only_digits %}
+                <small id="digits-hint-{{ campo.id }}" class="texto-ajuda only-digits-hint">Aceita somente números.</small>
+              {% endif %}
+              {% endwith %}
 
             {% elif campo.tipo == "multipla" %}
               <div class="options-block radios" aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}">
@@ -925,6 +937,100 @@
     boot(document);
   }
 
+  document.addEventListener('htmx:afterSwap', function(e){ boot(e.target); });
+})();
+</script>
+
+{# ======= SOMENTE NÚMEROS (texto curto / parágrafo quando marcado) ======= #}
+<script>
+(function(){
+  var LOG = true;
+  function log(){ if (LOG) console.log.apply(console, ['[RESP/NUM]'].concat([].slice.call(arguments))); }
+
+  var SEL = '[data-only-digits="1"]';
+  function digitsOnly(s){ return String(s||'').replace(/\D+/g, ''); }
+
+  function setCaret(el, pos){
+    try { el.setSelectionRange(pos, pos); } catch(e){}
+  }
+
+  function onPasteOrDrop(e){
+    var el = e.target;
+    if (!el.matches(SEL)) return;
+    e.preventDefault();
+    var txt = '';
+    if (e.type === 'paste'){
+      var cd = e.clipboardData || window.clipboardData;
+      txt = (cd && cd.getData('text')) || '';
+    } else if (e.type === 'drop'){
+      txt = e.dataTransfer ? (e.dataTransfer.getData('text') || '') : '';
+    }
+    var ins = digitsOnly(txt);
+    var s = el.selectionStart || 0, r = el.selectionEnd || 0;
+    var v = el.value || '';
+    el.value = v.slice(0, s) + ins + v.slice(r);
+    setCaret(el, s + ins.length);
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+  }
+
+  function wire(el){
+    if (!el || el.__digitsReady) return;
+    el.__digitsReady = true;
+
+    // Bloqueia caracteres não numéricos antes de inserir (quando suportado)
+    el.addEventListener('beforeinput', function(e){
+      if (!el.matches(SEL)) return;
+      var t = e.inputType || '';
+      if (t && t.indexOf('delete') === 0) return; // backspace/delete
+      if (t === 'insertFromPaste' || t === 'insertFromDrop') return; // tratado abaixo
+      var data = (e.data != null ? String(e.data) : '');
+      if (data && /\D/.test(data)) e.preventDefault();
+    });
+
+    // Fallback robusto: saneia qualquer coisa que passou
+    el.addEventListener('input', function(){
+      if (!el.matches(SEL)) return;
+      var v = el.value || '';
+      var s = el.selectionStart || 0;
+      var nv = digitsOnly(v);
+      if (v !== nv){
+        var delta = v.length - nv.length;
+        el.value = nv;
+        setCaret(el, Math.max(0, s - delta));
+      }
+    });
+
+    // Fallback adicional para teclas (permite navegação/edição)
+    el.addEventListener('keydown', function(e){
+      if (!el.matches(SEL)) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      var allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Tab','Enter'];
+      if (allowed.indexOf(e.key) !== -1) return;
+      if (e.key && e.key.length === 1 && /\D/.test(e.key)) e.preventDefault();
+    });
+
+    // Colar / Arrastar → inserir versão numérica
+    el.addEventListener('paste', onPasteOrDrop);
+    el.addEventListener('drop',  onPasteOrDrop);
+
+    // Saneia valor inicial, se houver
+    if (el.value){
+      var nv0 = digitsOnly(el.value);
+      if (el.value !== nv0) el.value = nv0;
+    }
+
+    log('ativado', el.id || el.name || el);
+  }
+
+  function boot(scope){
+    Array.prototype.forEach.call((scope||document).querySelectorAll(SEL), wire);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ boot(document); });
+  } else {
+    boot(document);
+  }
   document.addEventListener('htmx:afterSwap', function(e){ boot(e.target); });
 })();
 </script>

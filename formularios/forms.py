@@ -154,8 +154,8 @@ class CampoForm(forms.ModelForm):
             self.initial["sqlhub_value_field"]   = sh.get("value_field") or ""
             self.initial["sqlhub_label_field"]   = sh.get("label_field") or ""
 
-        # NOVO: se já for um campo de upload, popular o hidden valid_json
-        if getattr(self.instance, "tipo", None) == "arquivo":
+        # NOVO: se já for um campo de upload **ou texto**, popular o hidden valid_json
+        if getattr(self.instance, "tipo", None) in {"arquivo", "texto_curto", "paragrafo"}:
             v = getattr(self.instance, "validacao_json", None)
             if v:
                 try:
@@ -203,7 +203,7 @@ class CampoForm(forms.ModelForm):
 
         data["logica_json"] = lj
 
-        # Validação de upload (se veio)
+        # Validação de upload/texto (se veio)
         vraw = self.data.get(f"{self.prefix}-valid_json") or self.cleaned_data.get("valid_json")
         if vraw:
             try:

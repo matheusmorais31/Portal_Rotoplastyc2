@@ -341,6 +341,38 @@ textarea {
   border-color: var(--danger)
 }
 
+/* ÍCONE DUPLICAR (PNG) */
+.pergunta-head .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin-left: .35rem;
+  border: 1px solid #404040;
+
+  background: #303030;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
+}
+.pergunta-head .icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  border-color: #d1d5db;
+  background: #2EC2D6;
+}
+.pergunta-head .icon-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 6px rgba(0,0,0,.06);
+}
+.pergunta-head .icon-btn img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
 .pergunta-body {
   margin-top: .5rem;
   display: flex;
@@ -1082,7 +1114,7 @@ body.light-theme .pergunta-card #colab-list select {
 
 .resultados-pesquisa .list-group-item:hover { background: #f5f7fa; }
 
-/* util */
+*/* util */*  /* (mantido como comentário para não quebrar o CSS) */
 .btn-sm { padding: .25rem .5rem; border-radius: 8px; }
 
 .field-errors { color:#ffb4b4; font-size:.92rem; margin-top:.35rem; }
@@ -1097,12 +1129,8 @@ body.light-theme .pergunta-card #colab-list select {
 }
 
 /*--- tema claro ---*/
-
-
-
 body.light-theme .filters-panel {
   background: var(--bg-container-child)
-
 }
 
 body.light-theme #aba-respostas .filters-panel input,
@@ -1113,7 +1141,6 @@ body.light-theme #aba-respostas .filters-panel textarea {
 
 body.light-theme .tab.active {
   background-color: var(--bg-container-child);
-
 }
 
 body.light-theme .chip-ghost {
@@ -1121,9 +1148,7 @@ body.light-theme .chip-ghost {
   border: 1px solid #b5b5b5;
 }
 
-body.light-theme h1 {
-  color: #fff;
-}
+body.light-theme h1 { color: #fff; }
 
 body.light-theme .text-item:nth-child(odd) {
   background: var(--bg-container);

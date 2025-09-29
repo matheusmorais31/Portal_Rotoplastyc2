@@ -16,6 +16,14 @@
       <span class="lbl-text">Obrigatório</span>
     </label>
 
+    <!-- Duplicar pergunta (ícone PNG) -->
+    <button type="button" class="btn-dup icon-btn" title="Duplicar" aria-label="Duplicar">
+      <img
+        src="{% static 'images/versao.png' %}"
+        srcset="{% static 'images/versao.png' %} 1x, {% static 'images/versao@2x.png' %} 2x"
+        alt="" width="20" height="20" decoding="async">
+    </button>
+
     <button type="button" class="btn-trash" title="Remover"
             onclick="
               const c=this.closest('.pergunta-card');
@@ -123,7 +131,6 @@
         </div>
       </div>
 
-      
       {# holder de erro específico #}
       <ul class="mini-errors" data-error-holder="sqlhub"></ul>
     </div>
@@ -160,6 +167,16 @@
 
       {# holder de erro específico #}
       <ul class="mini-errors" data-error-holder="upload"></ul>
+    </div>
+
+    {# ── Validação de TEXTO/PARÁGRAFO (Somente números) ── #}
+    <div class="text-config hide">
+      <h4 style="margin:.5rem 0 .25rem">Validação</h4>
+      <label class="toggle-label" style="margin:0;gap:.4rem;cursor:pointer;">
+        <input type="checkbox" class="cfg-only-digits">
+        <span class="toggle-custom"></span>
+        <span class="lbl-text">Aceitar somente números</span>
+      </label>
     </div>
 
     {{ subform.valid_json }}

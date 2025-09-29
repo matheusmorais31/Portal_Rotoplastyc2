@@ -6,6 +6,7 @@ import json
 import hashlib
 import logging
 import zipfile
+import re
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -384,7 +385,7 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
                         logger.debug("Categoria desconhecida '%s' p/ campo %s; ignorando. (known=%s)",
                                      c, inst.pk, sorted(KNOWN_CATS))
 
-                # Se veio “apenas específicos” mas sem categorias, preserva as antigas (protege contra overwrite do autosave)
+                # Se veio “apenas específicos” mas sem categorias, preserva as antigas
                 if not tipos_livres and not categorias:
                     old = (inst.validacao_json or {}).get("categorias") or []
                     if old:
@@ -401,12 +402,26 @@ class EditarFormularioView(LoginRequiredMixin, UpdateView):
                     "max_mb": max_mb,
                 }
                 logger.debug("Salvando validacao_json (id=%s): %s", inst.pk, inst.validacao_json)
+
+            elif tipo in {"texto_curto", "paragrafo"}:
+                # Para textos, aceitamos valid_json com { "only_digits": true }
+                raw = form.data.get(pfx + "-valid_json", "{}")
+                try:
+                    cfg_in = json.loads(raw) if raw else {}
+                except json.JSONDecodeError:
+                    logger.warning("valid_json inválido (texto) p/ campo %s – %s (mantendo antigo)", inst.pk, raw)
+                    cfg_in = {}
+
+                only = bool(cfg_in.get("only_digits") or cfg_in.get("text_only_digits"))
+                inst.validacao_json = {"only_digits": only} if only else {}
+                logger.debug("Salvando validacao_json (texto) id=%s: %s", inst.pk, inst.validacao_json)
+
             else:
                 # Em alguns frontends o hidden -valid_json vem para todos os campos.
                 raw_ghost = form.data.get(pfx + "-valid_json")
                 if raw_ghost:
                     logger.debug(
-                        "Ignorando valid_json recebido para tipo != arquivo (prefix=%s id=%s raw=%r)",
+                        "Ignorando valid_json recebido para tipo != arquivo/texto (prefix=%s id=%s raw=%r)",
                         pfx, getattr(form.instance, "pk", None), raw_ghost
                     )
 
@@ -665,6 +680,14 @@ def enviar_resposta_formulario(request: HttpRequest, pk: int):
             any_answered = True
         if c.obrigatorio and not val:
             add_err(c, f"O campo “{c.rotulo}” é obrigatório.")
+
+        # Apenas números para texto/parágrafo (quando configurado)
+        if val and c.tipo in {"texto_curto", "paragrafo"}:
+            cfg = c.validacao_json or {}
+            only = bool(cfg.get("only_digits") or cfg.get("text_only_digits"))
+            if only:
+                if not re.fullmatch(r"\d+", val or ""):
+                    add_err(c, f'O campo “{c.rotulo}” aceita apenas números.')
 
     # Se houver perguntas ativas e nenhuma foi respondida, bloqueia envio
     if active_campos and not any_answered:

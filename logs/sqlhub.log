@@ -76,3 +76,24 @@ DEBUG 2025-09-25 10:36:56,401 views 47026 140245799597760 options_api pk=1 Fallb
 DEBUG 2025-09-25 10:37:59,194 views 47026 140245799597760 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
 DEBUG 2025-09-25 10:37:59,195 views 47026 140245799597760 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
 DEBUG 2025-09-25 10:37:59,317 views 47026 140245799597760 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-26 14:54:13,794 views 56684 140438001399488 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-26 14:54:13,794 views 56684 140438001399488 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-26 14:54:13,929 views 56684 140438001399488 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-26 16:10:06,055 views 57645 140187679057600 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-26 16:10:06,056 views 57645 140187679057600 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-26 16:10:06,336 views 57645 140187679057600 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 09:24:55,963 views 65017 140656386193088 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 09:24:55,964 views 65017 140656386193088 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 09:24:56,091 views 65017 140656386193088 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 09:32:20,183 views 65017 140656310658752 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 09:32:20,183 views 65017 140656310658752 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 09:32:20,309 views 65017 140656310658752 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 09:43:56,689 views 65017 140656167982784 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 09:43:56,689 views 65017 140656167982784 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 09:43:56,811 views 65017 140656167982784 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 09:44:49,701 views 65017 140656150148800 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 09:44:49,702 views 65017 140656150148800 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 09:44:49,824 views 65017 140656150148800 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 09:45:58,599 views 65017 140656159590080 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 09:45:58,600 views 65017 140656159590080 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 09:45:58,824 views 65017 140656159590080 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
