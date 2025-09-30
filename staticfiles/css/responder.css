@@ -453,3 +453,13 @@ body.light-theme .ss-columns{ background: var(--bg-container-child); }
    Fallback JS (:has) – classe aplicada no card ativo
    ==================== */
 .pergunta-card.z-top { z-index: 9999; }
+
+
+.only-digits-hint { 
+font-weight: 500; 
+color: red;
+}
+
+
+
+

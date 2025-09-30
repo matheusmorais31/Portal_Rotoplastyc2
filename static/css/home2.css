@@ -1,71 +1,60 @@
-/* home2.css ───────────────────────────────────────────────────────────────
-   Home + Widget de Previsão do Tempo
-   - some em resoluções < 1366×768
-   - em >=1366×768 vira overlay FIXO no canto e reserva um gutter à direita
-   - zoom muito alto (≈200%) e altura muito baixa escondem o card
-   Última revisão: 24-set-2025
+/* home2.css — Widget Tempo (modern) • Última revisão: 30-set-2025
+   - Ajuste para aparecer até 150% de zoom (limiar ~900x500)
+   - Anti-overflow no zoom alto
+   - Card com glass + gradiente, chips e barra de chuva
 */
 
-/* ---------------------------------------------------- Reset & Variáveis */
+/* ---------------------------------------------------- Reset & Vars */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --top-bar-height: 3.5rem; /* ≈56px */
+:root{
+  --top-bar-height: 3.5rem;
+  --bg: #0f1115;
+  --card: rgba(255,255,255,0.06);
+  --card-strong: rgba(255,255,255,0.12);
+  --stroke: rgba(255,255,255,0.18);
+  --text: #f5f7fb;
+  --muted: #c9cfdb;
+  --brand: #2EC2D6;
+  --warn: #e8b20f;
+  --shadow: 0 12px 40px rgba(0,0,0,.45);
 }
 
-/* ---------------------------------------------------------------- Layout */
-body {
-  font-family: Arial, sans-serif;
+/* ---------------------------------------------------- Page layout */
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   display: grid;
-  grid-template-columns: 1fr 21.875rem; /* ícones + coluna do clima (350px) */
-  justify-content: center;
-  align-items: start;
+  grid-template-columns: 1fr 22rem; /* ícones + coluna clima */
   min-height: 100vh;
   padding-top: var(--top-bar-height);
+  background: radial-gradient(1200px 800px at 85% 10%, #18202a 0%, #0f1115 60%);
+  color: var(--text);
   overflow-x: hidden;
 }
 
-a { text-decoration: none; }
+a{ text-decoration: none; }
 
-/* -------------------------------------- ÍCONES / ABAS (grid de atalhos) */
-.icon-grid-container {
+/* --------------------------- Grid de atalhos (mantido) */
+.icon-grid-container{
   display: grid;
   grid-template-columns: repeat(auto-fill, 145px);
   gap: 2rem;
   justify-content: center;
   grid-column: 1;
 }
-
-.modal-content { display: inline-block; }
-
-.modal-container {
-  background-color: rgba(23,23,24,0);
+.modal-content{ display: inline-block; }
+.modal-container{
+  background: rgba(23,23,24,0);
+  width: 145px; height:145px;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  transition:.2s ease-in-out; box-shadow: 0 0 8px #141212;
+  border-radius: 10px; border: 1px solid #8d8989;
   backdrop-filter: blur(5px);
-  width: 145px;
-  height: 145px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: .2s ease-in-out;
-  box-shadow: 0 0 8px #141212;
-  border-radius: 10px;
-  border: 1px solid #8d8989;
 }
-.modal-title { margin: .9375rem .3125rem; font-size: 1rem; color: #fff; }
-.modal-img   { width: 3.4375rem; height: 3.4375rem; object-fit: contain; margin-top: .9375rem; cursor: pointer;}
-.modal-container:hover { transform: scale(1.05); box-shadow: 0 0 1.0625rem #2EC2D6; }
+.modal-title{ margin:.9375rem .3125rem; font-size:1rem; color:#fff; }
+.modal-img{ width:3.4375rem; height:3.4375rem; object-fit:contain; margin-top:.9375rem; cursor:pointer; }
+.modal-container:hover{ transform: scale(1.05); box-shadow: 0 0 1.0625rem var(--brand); }
 
-/* ------------------------------------------------------------ BOTÃO VOLTAR */
-.back-button{
-  position: absolute; top: 1.25rem; right: 1.25rem;
-  background-color: #2EC2D6; color: #fff;
-  padding: .625rem 1.25rem; border: none; border-radius: .3125rem; font-size: 1rem;
-  cursor: pointer; transition: background-color .3s ease, box-shadow .3s ease;
-}
-.back-button:hover{ background-color:#1EB2C1; box-shadow:0 0 .625rem #2EC2D6; }
-
-/* --------------------------------------------- WIDGET DE PREVISÃO DO TEMPO */
+/* ---------------------------------------------------- Weather card */
 .weather-card{
   position: sticky;
   top: calc(var(--top-bar-height) + .75rem);
@@ -73,97 +62,160 @@ a { text-decoration: none; }
   justify-self: end;
   align-self: start;
 
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-
-  width: auto;
-  max-width: 21.875rem;                 /* 350px */
+  width: 22rem; max-width: 22rem;
   max-height: calc(100vh - var(--top-bar-height) - 1rem);
-  padding: .75rem; overflow: hidden;
-
+  padding: .9rem .9rem 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
   background-color: rgba(23,23,24,.06);
   backdrop-filter: blur(5px);
-  color: #fff; border-radius: .9375rem; border: 1px solid #8d8989;
-  box-shadow: 0 0 1.5625rem #000;
-  font-family: 'Roboto', sans-serif;
-  z-index: 1;                            /* abaixo do modal (9999) */
+  box-shadow: var(--shadow);
+
+  /* anti-vazamento visual quando o conteúdo cresce */
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
-/* ----------------------------- Tipografia/ícones internos */
-.current-weather-container h2 { font-size: 1.15rem; }
-.current-weather-container h1 { font-size: 1.9rem; margin: .25rem 0; }
-.weather-icon                { width: 2.9rem; height: auto; margin: .25rem auto; }
-.current-weather-container p  { font-size: .9rem; }
+/* --------------------------- Sections inside card */
+.wx-header{
+  display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+  padding-bottom:.5rem; border-bottom: 1px dashed var(--stroke);
+}
+.wx-title{ display:flex; align-items:center; gap:.5rem; font-weight:600; letter-spacing:.2px; }
+.wx-updated{ display:flex; align-items:center; gap:.4rem; color: var(--muted); font-size:.9rem; }
+.wx-ico{ width:1.1rem; height:1.1rem; fill: currentColor; opacity:.9; }
 
-.forecast-container h2  { font-size: 1.15rem; }
-#previsao-dia p         { font-size: .9rem; }
-.temp-container h1      { font-size: 1.9rem; }
+.wx-now{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  padding:.6rem 0 .2rem 0; gap:.3rem;
+}
+.wx-big-ico{ width:3.2rem; height:auto; margin:.2rem 0; filter: drop-shadow(0 6px 12px rgba(0,0,0,.35)); }
+.wx-temp{ display:flex; align-items:flex-start; gap:.15rem; line-height: .9; }
+.wx-temp-value{ font-size: 3.1rem; font-weight: 700; letter-spacing: -1px; }
+.wx-temp-unit{ font-size: 1.4rem; opacity:.9; }
+.wx-cond{ font-size:.98rem; color: var(--text); opacity:.95; }
 
-.forecast-content { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.15rem .3rem; }
-#previsao-dia      { flex:1 1 10rem; min-width:10rem; text-align:center; }
-.temp-container    { display:flex; flex-direction:column; align-items:center; }
-.rain-icon         { width:.9375rem; height:auto; margin-right:.3125rem; }
-.prev-day,.next-day{ font-size:1.3rem; background:none; border:none; color:#fff; cursor:pointer; transition:color .3s ease; }
-.prev-day:hover,.next-day:hover{ color:#2EC2D6; }
-.separator-line    { width:100%; height:1px; background:#8d8989; margin:1rem 0; }
+.wx-chips{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.35rem; justify-content:center; }
+.wx-chip{
+  border: 1px solid var(--stroke); border-radius: 999px; padding:.35rem .6rem;
+  background: rgba(255,255,255,0.05);
+  display:flex; align-items:baseline; gap:.35rem;
+}
+.wx-chip-label{ font-size:.8rem; color: var(--muted); }
+.wx-chip-value{ font-size:.95rem; }
 
-/* ------------------------------------------------------- AJUSTES GERAIS */
-@media (max-width: 120rem){ .weather-icon{ width:2.7rem; } }
-@media (max-width: 90rem){  .weather-card{ max-width:20rem; } }
+.wx-badge{
+  margin-top:.45rem; font-size:.75rem; text-transform: uppercase; letter-spacing:.4px;
+  padding:.28rem .5rem; border-radius:6px; border:1px solid var(--stroke);
+  display:inline-flex; align-items:center; gap:.35rem; color: var(--muted);
+}
+.wx-badge-warn{ color:#1f1400; background: linear-gradient(180deg,#ffd873,#f7c54e); border-color: rgba(0,0,0,.12); }
 
-/* ====== ESCONDER EM RESOLUÇÃO BAIXA (<1366×768) ========================= */
-@media (max-width: 1365.98px), (max-height: 767.98px){
+.wx-sep{ width:100%; height:1px; border:0; background: var(--stroke); margin:.7rem 0; }
+
+.wx-forecast-head{ display:flex; align-items:center; justify-content:space-between; }
+.wx-forecast-head h3{ font-size:1rem; }
+.wx-note{ font-size:.85rem; color: var(--muted); }
+
+.wx-forecast-main{
+  display:flex; align-items:center; justify-content:space-between; gap:.35rem; margin-top:.4rem;
+}
+.wx-nav{
+  width:2.2rem; height:2.2rem; border-radius:999px; border:1px solid var(--stroke);
+  background: rgba(255,255,255,0.04); color: var(--text);
+  display:grid; place-items:center; cursor:pointer; transition: transform .15s ease, background .2s;
+  flex: 0 0 2.2rem; /* base */
+}
+.wx-nav:hover{ background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+.wx-nav:active{ transform: translateY(0); }
+
+.wx-day{
+  flex:1 1 auto;
+  min-width: 0;           /* permite encolher de verdade em flex */
+  text-align:center; display:grid; gap:.35rem;
+}
+.wx-date{ font-size:.92rem; color: var(--muted); }
+.wx-mid-ico{ width:2.4rem; height:auto; margin:.1rem auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,.3)); }
+
+.wx-range{
+  display:flex; align-items:baseline; justify-content:center;
+  gap:.35rem .5rem; flex-wrap: wrap; line-height: 1.05;
+}
+.wx-max{ font-size:1.8rem; font-weight:700; }
+.wx-min{ font-size:.95rem; color: var(--muted); }
+
+.wx-rain{ display:grid; gap:.35rem; place-items:center; margin-top:.15rem; }
+.wx-rain-bar{
+  width:100%; height:.5rem; border-radius:999px; overflow:hidden;
+  background: rgba(255,255,255,.08); border:1px solid var(--stroke);
+}
+.wx-rain-fill{
+  --rain: 0; /* 0..100 */
+  width: calc(var(--rain) * 1%); height: 100%;
+  background: linear-gradient(90deg, #54d4ea, #2EC2D6);
+  box-shadow: 0 0 12px rgba(46,194,214,.55);
+  transition: width .6s cubic-bezier(.22,1,.36,1);
+}
+.wx-rain-label{ display:flex; align-items:center; gap:.35rem; color: var(--muted); }
+.rain-icon{ width:.95rem; height:auto; }
+
+.wx-cond-small{ font-size:.92rem; color: var(--text); opacity:.9; }
+
+/* Vazios/erros */
+.wx-empty{
+  display:grid; place-items:center; text-align:center; gap:.5rem; color: var(--muted);
+  min-height: 6rem;
+}
+.wx-empty .wx-ico{ width:1.4rem; height:1.4rem; }
+
+body.light-theme .wx-temp-value,
+  .wx-temp-unit,
+  .wx-title,
+  .wx-chip-value,
+  .wx-forecast-head,
+  .wx-max {
+  color: #fff;
+}
+
+/* ----------------------------------------- Responsividade & overlay */
+.separator-line{ display:none; } /* (mantido: não usamos aqui) */
+
+/* ===== NOVOS LIMITES =====
+   Esconde o card só quando a viewport ficar MENOR que ~900x500
+   (equivalente a 1366x768 em ~150% de zoom) */
+@media (max-width: 900px), (max-height: 500px){
   .weather-card{ display: none !important; }
-  body{
-    grid-template-columns: 1fr;   /* ícones ocupam 100% */
-    padding-right: 0;
-  }
+  body{ grid-template-columns: 1fr; padding-right: 0; }
 }
 
-/* ====== OVERLAY COM GUTTER (>=1366×768) =================================
-   - card fixo no canto
-   - reserva ~24rem de espaço à direita para nada passar por baixo */
-@media (min-width: 1366px) and (min-height: 768px){
-  body{
-    grid-template-columns: 1fr;   /* uma coluna pros ícones */
-    padding-right: 24rem;         /* ~384px de “gutter” */
-  }
+/* Mostra e ancora em layout “dock” quando >= ~901x501 */
+@media (min-width: 901px) and (min-height: 501px){
+  body{ grid-template-columns: 1fr; padding-right: 24rem; }
   .weather-card{
     position: fixed !important;
-    right: 1.25rem;
-    bottom: 1.25rem;              /* troque por top:1.25rem se preferir no topo */
-    left: auto; top: auto;
-    z-index: 10;
+    right: 1.25rem; bottom: 1.25rem; left:auto; top:auto; z-index: 10;
   }
 }
-
-/* telas muito largas: mantém o gutter */
 @media (min-width: 1600px){
   body{ padding-right: 24rem; }
 }
 
-/* ====== ZOOM/Hi-DPI e ALTURA MUITO BAIXA ================================= */
-/* 200%+ de zoom: some o card para liberar espaço */
-@media (min-resolution: 1.95dppx){
-  .weather-card{ display: none !important; }
-  body{ padding-right: 0; grid-template-columns: 1fr; }
-}
-
-/* altura bem baixa: esconde também */
+/* Zoom/altura muito baixa:
+   — reduz tipografia
+   — ativa scroll interno no card se necessário (não vaza) */
 @media (max-height: 640px){
-  .weather-card{ display: none !important; }
-  body{ padding-right: 0; grid-template-columns: 1fr; }
+  .wx-temp-value{ font-size: 2.6rem; }
+  .wx-mid-ico{ width: 2rem; }
+  .wx-max{ font-size: 1.55rem; }
+  .wx-min{ font-size: .9rem; }
+  .wx-chip{ padding: .28rem .5rem; }
+  .wx-forecast-main{ gap: .25rem; }
+  .wx-nav{ flex: 0 0 2rem; }
 }
-
-/* ====== (Opcional) zoom 125–175% → ajuste de tipografia/escala leve ===== */
-@media (min-resolution: 1.25dppx) and (max-resolution: 1.49dppx){
-  html{ font-size: 15px; }
-  .modal-container{ transform: scale(.96); transform-origin: center; }
-}
-@media (min-resolution: 1.5dppx) and (max-resolution: 1.69dppx){
-  html{ font-size: 14px; }
-  .modal-container{ transform: scale(.93); }
-}
-@media (min-resolution: 1.7dppx) and (max-resolution: 1.94dppx){
-  html{ font-size: 13.5px; }
-  .modal-container{ transform: scale(.92); }
+@media (max-height: 560px){
+  .weather-card{
+    max-height: calc(100vh - var(--top-bar-height) - .75rem);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }

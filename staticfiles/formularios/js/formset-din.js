@@ -8,11 +8,13 @@
  * • ESCOPADO ao #campos-formset
  * • Habilita/Desabilita inputs p/ não irem ao POST indevido
  * • Validação visual (cliente) p/ “Rótulo”, “Tipo” e configs (SQLHub/Upload)
+ * • NOVO: Duplicar pergunta + validação de texto (apenas números)
  *****************************************************************/
 
 (function () {
   const LOG = true;
   const log = (...args) => LOG && console.debug("[CLIENT]", ...args);
+  let EMPTY_TPL = ""; // cache de linha vazia (campo_vazio)
 
   // ===== Escopo / utils =====
   const getFormset = () => document.getElementById("campos-formset");
@@ -46,7 +48,7 @@
     });
   };
 
-  // ===== Helpers JSON (opções/lista + upload) =====
+  // ===== Helpers JSON (opções/lista + upload + texto) =====
   function updateSingleOptionsJsonField(block) {
     const list = block.querySelector(".options-list");
     const hidden = block.querySelector("input[name$='-opcoes_json']");
@@ -64,12 +66,14 @@
     const tipo = getTipoValue(card);
     if (!hidden) return;
 
-    // se não for 'arquivo' → limpa/desabilita
+    // se não for 'arquivo' → limpa/desabilita (a menos de texto)
     if (tipo !== "arquivo") {
       const before = hidden.value;
-      if (hidden.value) hidden.value = "";
-      setDisabled(hidden, true, "tipo!=arquivo");
-      log("valid_json LIMPO (tipo!=arquivo)", { prefix: getPrefix(card), tipo, before, disabled: hidden.disabled });
+      if (!["texto_curto","paragrafo"].includes(tipo)) {
+        if (hidden.value) hidden.value = "";
+        setDisabled(hidden, true, "tipo!=arquivo");
+        log("valid_json LIMPO (tipo!=arquivo)", { prefix: getPrefix(card), tipo, before, disabled: hidden.disabled });
+      }
       return;
     }
 
@@ -106,6 +110,15 @@
     });
   }
 
+  function buildTextValidationJson(card){
+    const hidden = card.querySelector("input[name$='-valid_json']");
+    if (!hidden) return;
+    if (!["texto_curto","paragrafo"].includes(getTipoValue(card))) { hidden.value = ""; return; }
+    const only = !!card.querySelector(".text-config .cfg-only-digits")?.checked;
+    hidden.value = JSON.stringify({ only_digits: only });
+    log("text valid_json atualizado:", { prefix: getPrefix(card), only_digits: only });
+  }
+
   function updateAllHiddenJson() {
     // opções (considerando origem quando tipo=lista)
     qsaFS(".pergunta-card").forEach((card) => {
@@ -125,10 +138,15 @@
       }
     });
 
-    // arquivo (sempre recalcula o JSON – mas só para tipo=arquivo)
+    // arquivo
     qsaFS(".pergunta-card").forEach((c) => {
       const tipo = getTipoValue(c);
       if (tipo === "arquivo") buildFileValidationJson(c);
+    });
+
+    // texto/parágrafo
+    qsaFS(".pergunta-card").forEach((c) => {
+      if (["texto_curto","paragrafo"].includes(getTipoValue(c))) buildTextValidationJson(c);
     });
 
     // toolbar toggle → sombra
@@ -182,7 +200,7 @@
   document.addEventListener("DOMContentLoaded", initSortable);
   document.addEventListener("htmx:afterSwap", initSortable);
 
-  // ===== Visibilidade + habilitação (inclui origem/sqlhub) =====
+  // ===== Visibilidade + habilitação (inclui origem/sqlhub e blocos de validação) =====
   function applyVisibilityAndDisabling(card) {
     if (!card || !card.closest("#campos-formset")) return;
 
@@ -192,6 +210,7 @@
     const sqlBlk    = card.querySelector(".sqlhub-config");
     const optsBlk   = card.querySelector(".options-block");
     const cfgBlk    = card.querySelector(".file-config");
+    const textBlk   = card.querySelector(".text-config");
 
     const hiddenOpts  = card.querySelector("input[name$='-opcoes_json']");
     const hiddenValid = card.querySelector("input[name$='-valid_json']");
@@ -201,23 +220,26 @@
     const showSql     = isLista && origemHidden === "sqlhub";
     const showOpts    = ["multipla","checkbox"].includes(tipo) || (isLista && origemHidden !== "sqlhub");
     const showCfg     = (tipo === "arquivo");
+    const showTxt     = ["texto_curto","paragrafo"].includes(tipo);
 
     originBlk?.classList.toggle("hide", !showOrigin);
     sqlBlk?.classList.toggle("hide", !showSql);
     optsBlk?.classList.toggle("hide", !showOpts);
     cfgBlk?.classList.toggle("hide", !showCfg);
+    textBlk?.classList.toggle("hide", !showTxt);
 
     if (hiddenOpts) {
       if (showOpts) setDisabled(hiddenOpts, false);
       else { hiddenOpts.value = ""; setDisabled(hiddenOpts, true, "sem_opcoes"); }
     }
     if (hiddenValid) {
-      if (showCfg) setDisabled(hiddenValid, false);
-      else { hiddenValid.value = ""; setDisabled(hiddenValid, true, "tipo!=arquivo"); }
+      const enable = showCfg || showTxt;
+      if (enable) setDisabled(hiddenValid, false);
+      else { hiddenValid.value = ""; setDisabled(hiddenValid, true, "sem_valid_json"); }
     }
 
-    log("toggleBlocks prefix=%s tipo=%s origem=%s → origin=%s sql=%s opts=%s cfg=%s",
-      getPrefix(card), tipo, origemHidden, showOrigin, showSql, showOpts, showCfg);
+    log("toggleBlocks prefix=%s tipo=%s origem=%s → origin=%s sql=%s opts=%s cfg=%s txt=%s",
+      getPrefix(card), tipo, origemHidden, showOrigin, showSql, showOpts, showCfg, showTxt);
 
     if (showSql) initSqlhub(card, /*restore*/true);
   }
@@ -508,6 +530,17 @@
     maxMb?.addEventListener("change", () => numHandler(maxMb));
   }
 
+  // ===== eventos do bloco de texto =====
+  function wireTextConfigEvents(card){
+    const chk = card.querySelector(".text-config .cfg-only-digits");
+    if (!chk) return;
+    chk.addEventListener("change", ()=>{
+      buildTextValidationJson(card);
+      debouncedTriggerAutosave();
+      validateCard(card);
+    });
+  }
+
   // ===== Inicialização de cada card =====
   function initCard(card) {
     if (!card || card.dataset.ready) return;
@@ -551,6 +584,8 @@
 
     // eventos do bloco de upload
     wireFileConfigEvents(card);
+    // eventos do bloco de texto
+    wireTextConfigEvents(card);
 
     // se houver config de upload prévia, restaura UI a partir do hidden
     const cfg = card.querySelector(".file-config");
@@ -560,21 +595,28 @@
         try {
           const data = JSON.parse(hiddenInput.value);
           const toggle = card.querySelector(".cfg-tipos-toggle");
-          if (toggle) {
+          if (toggle && getTipoValue(card) === "arquivo") {
             toggle.checked = !data.tipos_livres;
             card.querySelector(".cfg-tipos-list")?.classList.toggle("hide", data.tipos_livres);
           }
-          (data.categorias || []).forEach((cat) => {
-            const cb = card.querySelector(`.cfg-type-item input[value="${cat}"]`);
-            if (cb) cb.checked = true;
-          });
-          const maxArqs = card.querySelector(".cfg-max-arqs");
-          if (maxArqs && data.max_arquivos) maxArqs.value = data.max_arquivos;
-          const maxMb = card.querySelector(".cfg-max-mb");
-          if (maxMb && data.max_mb) maxMb.value = data.max_mb;
-          log("initCard(upload) ok:", { prefix: getPrefix(card), data });
+          if (getTipoValue(card) === "arquivo") {
+            (data.categorias || []).forEach((cat) => {
+              const cb = card.querySelector(`.cfg-type-item input[value="${cat}"]`);
+              if (cb) cb.checked = true;
+            });
+            const maxArqs = card.querySelector(".cfg-max-arqs");
+            if (maxArqs && data.max_arquivos) maxArqs.value = data.max_arquivos;
+            const maxMb = card.querySelector(".cfg-max-mb");
+            if (maxMb && data.max_mb) maxMb.value = data.max_mb;
+          }
+          // Restaurar texto
+          if (["texto_curto","paragrafo"].includes(getTipoValue(card))) {
+            const chk = card.querySelector(".text-config .cfg-only-digits");
+            if (chk) chk.checked = !!(data && (data.only_digits || data.text_only_digits));
+          }
+          log("initCard(valid_json) ok:", { prefix: getPrefix(card), data });
         } catch (e) {
-          log("initCard(upload) parse fail", e);
+          log("initCard(valid_json) parse fail", e);
         }
       }
     }
@@ -624,6 +666,13 @@
       validateCard(card);
     }
 
+    // qualquer mudança dentro do text-config
+    if (e.target.closest(".text-config")) {
+      debouncedTriggerAutosave();
+      const card = e.target.closest(".pergunta-card");
+      validateCard(card);
+    }
+
     debouncedTriggerAutosave();
   });
 
@@ -664,6 +713,125 @@
     }
   });
 
+  // ===== DUPLICAR PERGUNTA =====
+  async function duplicateCard(src){
+    const wrap = getFormset();
+    if (!wrap) return;
+
+    // garante template
+    if (!EMPTY_TPL) {
+      const addBtn = document.getElementById("btn-add-question");
+      if (addBtn?.dataset.endpoint) {
+        try {
+          const r = await fetch(addBtn.dataset.endpoint);
+          EMPTY_TPL = await r.text();
+        } catch {}
+      }
+    }
+    if (!EMPTY_TPL) return;
+
+    // cria um novo card logo APÓS o original
+    const p = wrap.dataset.prefix;
+    const total = document.getElementById(`id_${p}-TOTAL_FORMS`);
+    const idx = parseInt(total.value, 10);
+    src.insertAdjacentHTML("afterend", EMPTY_TPL.replace(/__prefix__/g, idx));
+    total.value = idx + 1;
+
+    // referencia o novo card
+    const dst = src.nextElementSibling;
+    initCards(); // aplica visuais/handlers
+
+    // ===== copia valores básicos =====
+    const get = (card, sel) => card.querySelector(sel);
+    // tipo
+    const tipo = getTipoValue(src);
+    const selNew = get(dst, "select[name$='-tipo']");
+    if (selNew){ selNew.value = tipo; selNew.dispatchEvent(new Event('change')); }
+    // rótulo (sufixo “(cópia)”)
+    const rotSrc = get(src, "input[name$='-rotulo']");
+    const rotDst = get(dst, "input[name$='-rotulo']");
+    if (rotDst && rotSrc) rotDst.value = (rotSrc.value || "") + " (cópia)";
+    // ajuda
+    const ajSrc = get(src, "input[name$='-ajuda']");
+    const ajDst = get(dst, "input[name$='-ajuda']");
+    if (ajDst && ajSrc) ajDst.value = ajSrc.value || "";
+    // obrigatório
+    const obSrc = get(src, "input[name$='-obrigatorio']");
+    const obDst = get(dst, "input[name$='-obrigatorio']");
+    if (obDst && obSrc) obDst.checked = obSrc.checked;
+
+    // ===== origem/SQLHub =====
+    const hidOrigSrc = get(src, "input[name$='-origem_opcoes']");
+    const hidOrigDst = get(dst, "input[name$='-origem_opcoes']");
+    if (hidOrigSrc && hidOrigDst) hidOrigDst.value = hidOrigSrc.value || "manual";
+    // copia hiddens do SQLHub
+    ["-sqlhub_connection_id","-sqlhub_query_id","-sqlhub_value_field","-sqlhub_label_field"].forEach(suf=>{
+      const a = get(src, `input[name$='${suf}']`);
+      const b = get(dst, `input[name$='${suf}']`);
+      if (a && b) b.value = a.value || "";
+    });
+
+    // ===== opções manuais =====
+    if (["multipla","checkbox"].includes(tipo) || (tipo==="lista" && (hidOrigDst?.value||"manual")!=="sqlhub")) {
+      const listSrc = src.querySelector(".options-block .options-list");
+      const listDst = dst.querySelector(".options-block .options-list");
+      if (listSrc && listDst) {
+        listDst.innerHTML = "";
+        listSrc.querySelectorAll("input[type='text']").forEach(inp=>{
+          const row = document.createElement("div");
+          row.className = "opt-row";
+          row.innerHTML = '<input type="text" class="form-control" placeholder="Texto da opção">' +
+                          '<button type="button" class="opt-del" title="Remover">×</button>';
+          row.querySelector("input").value = inp.value;
+          listDst.appendChild(row);
+        });
+      }
+    }
+
+    // ===== upload: copia config e regera JSON =====
+    if (tipo === "arquivo") {
+      const sToggle = src.querySelector(".cfg-tipos-toggle");
+      const dToggle = dst.querySelector(".cfg-tipos-toggle");
+      if (sToggle && dToggle) dToggle.checked = sToggle.checked;
+
+      const cats = [...src.querySelectorAll(".cfg-tipos-list input:checked")].map(i=>i.value);
+      dst.querySelectorAll(".cfg-tipos-list input").forEach(i=>{ i.checked = cats.includes(i.value); });
+
+      const sMaxA = src.querySelector(".cfg-max-arqs"); const dMaxA = dst.querySelector(".cfg-max-arqs");
+      const sMaxM = src.querySelector(".cfg-max-mb");   const dMaxM = dst.querySelector(".cfg-max-mb");
+      if (dMaxA && sMaxA) dMaxA.value = sMaxA.value || "1";
+      if (dMaxM && sMaxM) dMaxM.value = sMaxM.value || "10";
+    }
+
+    // ===== texto: “apenas números” =====
+    if (["texto_curto","paragrafo"].includes(tipo)) {
+      const sChk = src.querySelector(".text-config .cfg-only-digits");
+      const dChk = dst.querySelector(".text-config .cfg-only-digits");
+      if (sChk && dChk) dChk.checked = sChk.checked;
+    }
+
+    // liga visuais, normaliza, gera JSONs e salva
+    applyVisibilityAndDisabling(dst);
+    validateCard(dst);
+    updateAllHiddenJson();
+    syncTotalAndOrder();
+    debouncedTriggerAutosave();
+
+    // se for Lista+SQLHub, restaurar (carrega async conexões/consultas e aplica hiddens)
+    if (tipo === "lista" && (hidOrigDst?.value==="sqlhub")) {
+      initSqlhub(dst, true);
+    }
+  }
+
+  // clique no botão de duplicar
+  document.body.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".btn-dup");
+    if (!btn) return;
+    e.preventDefault();
+    const card = btn.closest(".pergunta-card");
+    if (card) duplicateCard(card);
+  });
+
   // ===== autosave título/descrição =====
   document.addEventListener("input", (e) => { if (e.target.closest(".header-card")) debouncedTriggerAutosave(); });
   document.addEventListener("change", (e) => { if (e.target.closest(".header-card")) debouncedTriggerAutosave(); });
@@ -693,19 +861,18 @@
     const wrap = getFormset();
     if (!btn || !wrap) return;
 
-    let tpl = "";
     fetch(btn.dataset.endpoint)
       .then((r) => { if (!r.ok) throw 0; return r.text(); })
-      .then((t) => { tpl = t; btn.disabled = false; })
+      .then((t) => { EMPTY_TPL = t; btn.disabled = false; })
       .catch(() => (btn.textContent = "Erro ao carregar"));
 
     btn.addEventListener("click", (e) => {
       e.preventDefault();
-      if (!tpl) return;
+      if (!EMPTY_TPL) return;
       const p = wrap.dataset.prefix;
       const total = document.getElementById(`id_${p}-TOTAL_FORMS`);
       const idx = parseInt(total.value, 10);
-      wrap.insertAdjacentHTML("beforeend", tpl.replace(/__prefix__/g, idx));
+      wrap.insertAdjacentHTML("beforeend", EMPTY_TPL.replace(/__prefix__/g, idx));
       total.value = idx + 1;
       initCards();          // inicializa tudo (inclui SQLHub/validações)
       initSortable();

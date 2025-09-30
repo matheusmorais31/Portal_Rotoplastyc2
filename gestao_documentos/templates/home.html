@@ -69,10 +69,20 @@
     background: #111;
   }
 
-  /* efeito opcional de "shake" quando tentar fechar antes da hora */
   @keyframes shake { 10%, 90% {transform: translateX(-1px);} 20%, 80% {transform: translateX(2px);}
     30%, 50%, 70% {transform: translateX(-4px);} 40%, 60% {transform: translateX(4px);} }
   .shake { animation: shake .4s linear; }
+
+  /* ===== Selo do provedor (pequenininho) ===== */
+  .provider-row{display:flex;justify-content:flex-end;margin:.25rem 0 .3rem}
+  .provider-chip{
+    font-size:.72rem;line-height:1; color:#bdbdbd;
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:999px; padding:.18rem .5rem; opacity:.9;
+    display:inline-flex; align-items:center; gap:.35rem;
+    background: rgba(255,255,255,.04);
+  }
+  .provider-chip svg{width:12px;height:12px;opacity:.9;display:block}
 </style>
 {% endblock %}
 
@@ -103,149 +113,204 @@
   <div class="icon-grid-container">
     <a href="{% url 'tecnicon' %}" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/Tecnicon.png' %}" class="modal-img">
+        <img src="{% static 'images/Tecnicon.png' %}" class="modal-img" alt="">
         <span class="modal-title">Tecnicon</span>
       </div>
     </a>
     <a href="{% url 'allcance' %}" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/Allcance.png' %}" class="modal-img">
+        <img src="{% static 'images/Allcance.png' %}" class="modal-img" alt="">
         <span class="modal-title">Allcance</span>
       </div>
     </a>
-    <a href="https://mail.google.com/mail" target="_blank" id="email-link" class="modal-content">
+    <a href="https://mail.google.com/mail" target="_blank" id="email-link" class="modal-content" rel="noopener">
       <div class="modal-container">
-        <img src="{% static 'images/gmail.png' %}" class="modal-img">
+        <img src="{% static 'images/gmail.png' %}" class="modal-img" alt="">
         <span class="modal-title">Gmail</span>
       </div>
     </a>
-    <a href="https://rotoview.irp.rotoplastyc.com/" target="_blank" class="modal-content">
+    <a href="https://rotoview.irp.rotoplastyc.com/" target="_blank" class="modal-content" rel="noopener">
       <div class="modal-container">
-        <img src="{% static 'images/Rotoview.png' %}" class="modal-img">
+        <img src="{% static 'images/Rotoview.png' %}" class="modal-img" alt="">
         <span class="modal-title">Rotoview</span>
       </div>
     </a>
     <a href="{% url 'glpi' %}" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/GLPI.png' %}" class="modal-img">
+        <img src="{% static 'images/GLPI.png' %}" class="modal-img" alt="">
         <span class="modal-title">GLPI</span>
       </div>
     </a>
-    <a href="https://irp.rotoplastyc.com/sistemas/" target="_blank" class="modal-content">
+    <a href="https://irp.rotoplastyc.com/sistemas/" target="_blank" class="modal-content" rel="noopener">
       <div class="modal-container">
-        <img src="{% static 'images/Sistemas Rotoplastyc.png' %}" class="modal-img">
+        <img src="{% static 'images/Sistemas Rotoplastyc.png' %}" class="modal-img" alt="">
         <span class="modal-title">Sistemas Rotoplastyc</span>
       </div>
     </a>
     <a href="{% url 'gestao' %}" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/GestaoPessoas.png' %}" class="modal-img">
+        <img src="{% static 'images/GestaoPessoas.png' %}" class="modal-img" alt="">
         <span class="modal-title">Gestão de Pessoas</span>
       </div>
     </a>
-    <a href="https://irp.rotoplastyc.com/agenda/" target="_blank" class="modal-content">
+    <a href="https://irp.rotoplastyc.com/agenda/" target="_blank" class="modal-content" rel="noopener">
       <div class="modal-container">
-        <img src="{% static 'images/Tarifador.png' %}" class="modal-img">
+        <img src="{% static 'images/Tarifador.png' %}" class="modal-img" alt="">
         <span class="modal-title">Tarifador</span>
       </div>
     </a>
     <a href="{% url 'mural' %}" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/Mural.png' %}" class="modal-img">
+        <img src="{% static 'images/Mural.png' %}" class="modal-img" alt="">
         <span class="modal-title">Mural de Sugestões</span>
       </div>
     </a>
     <a href="{% url 'ideias_protagonistas' %}" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/pensando.png' %}" class="modal-img">
+        <img src="{% static 'images/pensando.png' %}" class="modal-img" alt="">
         <span class="modal-title">Ideias Protagonistas</span>
       </div>
     </a>
-    <a href="{% url 'indicadores' %}" target="_blank" class="modal-content">
+    <a href="{% url 'indicadores' %}" target="_blank" class="modal-content" rel="noopener">
       <div class="modal-container">
-        <img src="{% static 'images/Indicadores.png' %}" class="modal-img">
+        <img src="{% static 'images/Indicadores.png' %}" class="modal-img" alt="">
         <span class="modal-title">Indicadores</span>
       </div>
     </a>
-    <a href="https://sig.grupoadvis.com.br/login" target="_blank" class="modal-content">
+    <a href="https://sig.grupoadvis.com.br/login" target="_blank" class="modal-content" rel="noopener">
       <div class="modal-container">
-        <img src="{% static 'images/SIG.png' %}" class="modal-img">
+        <img src="{% static 'images/SIG.png' %}" class="modal-img" alt="">
         <span class="modal-title">SIG</span>
       </div>
     </a>
     <a href="{% url 'manuais' %}" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/Manuais.png' %}" class="modal-img">
+        <img src="{% static 'images/Manuais.png' %}" class="modal-img" alt="">
         <span class="modal-title">Manuais</span>
       </div>
     </a>
-      <a href="http://plmpro:3000/" class="modal-content">
+    <a href="http://plmpro:3000/" class="modal-content">
       <div class="modal-container">
-        <img src="{% static 'images/teamcenter.png' %}" class="modal-img">
+        <img src="{% static 'images/teamcenter.png' %}" class="modal-img" alt="">
         <span class="modal-title">Teamcenter</span>
       </div>
     </a>
   </div>
 
-  <div class="weather-card">
-    {% if erro %}
-      <p>{{ erro }}</p>
-    {% else %}
-      {% if clima_atual %}
-        <div class="current-weather-container">
-          <h2>Clima Atual</h2>
-          <p>{{ clima_atual.data }}</p>
-          {% if clima_atual.icone %}
-            <img src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="Ícone do tempo" class="weather-icon">
+  <!-- ===================== Weather (modern) ===================== -->
+  <div class="weather-card" role="region" aria-label="Previsão do tempo">
+    {% if provider %}
+      <div class="provider-row">
+        <span class="provider-chip" title="{{ api_tooltip }}">
+          {% if provider == 'openmeteo' %}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19a5 5 0 0 1 0-10 6 6 0 0 1 11.31-1.99A4.5 4.5 0 1 1 18 19H6z"/></svg>
+            Dados: Open-Meteo
+          {% elif provider == 'climatempo' %}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-14V2m0 20v-2M4.22 4.22 5.64 5.64M18.36 18.36l1.42 1.42M2 12h2m16 0h2M4.22 19.78 5.64 18.36M18.36 5.64l1.42-1.42"/></svg>
+            Dados: Climatempo
           {% endif %}
-          <h1 class="title-weather">{{ clima_atual.temperatura_atual }}°C</h1>
-          <p>Sensação: {{ clima_atual.sensacao }}°C</p>
-          <p>Umidade: {{ clima_atual.humidade }}%</p>
-          <p>{{ clima_atual.condicao }}</p>
+        </span>
+      </div>
+    {% endif %}
+
+    {% if erro %}
+
+    {% else %}
+
+      {% if clima_atual %}
+      <header class="wx-header">
+        <div class="wx-title">
+          <span>Tempo agora</span>
         </div>
-      {% else %}
-        <p>Dados do clima atual não disponíveis.</p>
-      {% endif %}
+        <div class="wx-updated" title="Última atualização">
+          <svg class="wx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3a9 9 0 1 0 8.94 10.06h-2.02A7 7 0 1 1 13 5v2l4-3-4-3v2Z"/></svg>
+          <span>{{ clima_atual.data }}</span>
+        </div>
+      </header>
 
-      <div class="separator-line"></div>
+      <section class="wx-now">
+        {% if clima_atual.icone %}
+          <img class="wx-big-ico" src="{% static 'images/' %}{{ clima_atual.icone }}.png" alt="" aria-hidden="true">
+        {% endif %}
 
-      {% if previsao %}
-        <div class="forecast-container">
-          <h2>Previsão do Dia</h2>
-          <div class="forecast-content">
-            <button class="prev-day" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
-            <div id="previsao-dia">
-              <p>{{ previsao.data_br }}</p>
-              {% if previsao.condicao_icone %}
-                <img src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="Ícone do tempo" class="weather-icon">
-              {% else %}
-                <p>Sem ícone para a condição: {{ previsao.condicao }}</p>
-              {% endif %}
-              <div class="temp-container">
-                <h1 class="title-weather">{{ previsao.temperatura_max }}°C</h1>
-                <p>Min: {{ previsao.temperatura_min }}°C Max: {{ previsao.temperatura_max }}°C</p>
-              </div>
-              <p>
-                <img src="{% static 'images/rain-icon.png' %}" alt="Chuva" class="rain-icon">
-                {{ previsao.probabilidade_chuva }}%
-              </p>
-              <p>{{ previsao.condicao }}</p>
-            </div>
-            <button class="next-day" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
+        <div class="wx-temp" aria-label="Temperatura atual">
+          <span class="wx-temp-value">{{ clima_atual.temperatura_atual|floatformat:0 }}</span><span class="wx-temp-unit">°C</span>
+        </div>
+
+        <div class="wx-cond">{{ clima_atual.condicao }}</div>
+
+        <div class="wx-chips" role="list">
+          <div class="wx-chip" role="listitem">
+            <span class="wx-chip-label">Sensação</span>
+            <strong class="wx-chip-value">{{ clima_atual.sensacao|floatformat:0 }}°C</strong>
+          </div>
+          <div class="wx-chip" role="listitem">
+            <span class="wx-chip-label">Umidade</span>
+            <strong class="wx-chip-value">{{ clima_atual.humidade|floatformat:0 }}%</strong>
           </div>
         </div>
+
+        {% if clima_stale %}
+          <div class="wx-badge wx-badge-warn" title="Mostrando do cache/LKG">offline / cache</div>
+        {% endif %}
+      </section>
       {% else %}
-        <p>Dados de previsão não disponíveis.</p>
+        <div class="wx-empty"><p>Dados do clima atual não disponíveis.</p></div>
       {% endif %}
+
+      <hr class="wx-sep"/>
+
+      {% if previsao %}
+      <section class="wx-forecast" aria-label="Previsão do dia selecionado">
+        <div class="wx-forecast-head">
+          <h3>Previsão do dia</h3>
+          {% if previsao_stale %}
+            <span class="wx-note">usando última previsão (LKG)</span>
+          {% endif %}
+        </div>
+
+        <div class="wx-forecast-main">
+          <button class="wx-nav prev" aria-label="Dia anterior" onclick="mudarDia({{ dia_atual|add:'-1' }})">&#8249;</button>
+
+          <div id="previsao-dia" class="wx-day">
+            <div class="wx-date">{{ previsao.data_br }}</div>
+
+            {% if previsao.condicao_icone %}
+              <img class="wx-mid-ico" src="{% static 'images/' %}{{ previsao.condicao_icone }}.png" alt="" aria-hidden="true">
+            {% endif %}
+
+            <div class="wx-range" aria-label="Temperatura do dia">
+              <span class="wx-max">{{ previsao.temperatura_max|floatformat:0 }}°C</span>
+              <span class="wx-min">min {{ previsao.temperatura_min|floatformat:0 }}°C</span>
+            </div>
+
+            <div class="wx-rain" aria-label="Probabilidade de chuva">
+              <div class="wx-rain-label">
+                <img src="{% static 'images/rain-icon.png' %}" alt="" class="rain-icon" aria-hidden="true">
+                {{ previsao.probabilidade_chuva }}%
+              </div>
+            </div>
+
+            <div class="wx-cond-small">{{ previsao.condicao }}</div>
+          </div>
+
+          <button class="wx-nav next" aria-label="Próximo dia" onclick="mudarDia({{ dia_atual|add:'1' }})">&#8250;</button>
+        </div>
+      </section>
+      {% else %}
+        <div class="wx-empty"><p>Dados de previsão não disponíveis.</p></div>
+      {% endif %}
+
     {% endif %}
   </div>
+  <!-- ===================== /Weather ===================== -->
 
   <script>
     let canCloseForm = false;
 
     function mudarDia(dia) {
       const queryString = new URLSearchParams(window.location.search);
-      queryString.set('dia', dia);
+      queryString.set('dia', String(dia));
       window.location.search = queryString.toString();
     }
 
@@ -276,10 +341,15 @@
             btn.disabled = false;
             btn.title = 'Fechar';
           }
-          // fecha sozinho após 900ms (deixe ou remova conforme preferir)
           setTimeout(()=>fecharFormPopup(), 900);
         }
       }
+    });
+
+    // Navegação por setas do teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft')  { mudarDia({{ dia_atual|add:'-1' }}); }
+      if (e.key === 'ArrowRight') { mudarDia({{ dia_atual|add:'1' }}); }
     });
   </script>
 {% endblock %}

@@ -97,3 +97,15 @@ DEBUG 2025-09-29 09:44:49,824 views 65017 140656150148800 options_api pk=1 Fallb
 DEBUG 2025-09-29 09:45:58,599 views 65017 140656159590080 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
 DEBUG 2025-09-29 09:45:58,600 views 65017 140656159590080 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
 DEBUG 2025-09-29 09:45:58,824 views 65017 140656159590080 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 10:32:29,675 views 65017 140656032650944 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 10:32:29,675 views 65017 140656032650944 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 10:32:29,810 views 65017 140656032650944 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 15:19:48,975 views 2552 139709204309696 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 15:19:48,975 views 2552 139709204309696 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 15:19:49,131 views 2552 139709204309696 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 17:24:42,434 views 5859 140591652398784 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 17:24:42,435 views 5859 140591652398784 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 17:24:42,577 views 5859 140591652398784 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-09-29 17:27:20,698 views 5859 140591887263424 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-09-29 17:27:20,699 views 5859 140591887263424 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-09-29 17:27:20,825 views 5859 140591887263424 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''

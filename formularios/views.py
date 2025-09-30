@@ -807,26 +807,28 @@ class DetalheRespostaView(DetailView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        # CORREÇÃO: self.request.user (sem parênteses)
         u = self.request.user
 
-        # ✔ gerente pode ver
-        if u.has_perm("formularios.pode_gerenciar"):
-            return obj
-
-        is_owner = (obj.formulario.dono_id == getattr(u, "id", None))
-        is_sender = (obj.enviado_por_id == getattr(u, "id", None))
+        # ticket de sessão (opcional — permite link temporário, inclusive anônimo)
         sess_key = f"can_view_resp_{obj.pk}"
-        has_ticket = self.request.session.get(sess_key)
+        has_ticket = bool(self.request.session.get(sess_key))
 
-        if is_owner or is_sender or has_ticket:
+        # regras de acesso
+        is_owner  = (getattr(u, "id", None) == obj.formulario.dono_id)
+        is_sender = (getattr(u, "id", None) == obj.enviado_por_id)
+        can_view_form = u.is_authenticated and obj.formulario.can_user_view(u)
+        is_manager = u.is_authenticated and u.has_perm("formularios.pode_gerenciar")
+
+        if is_manager or is_owner or is_sender or can_view_form or has_ticket:
             if has_ticket:
                 try:
                     del self.request.session[sess_key]
-                    self.request.session.modified = True
                 except KeyError:
                     pass
+                else:
+                    self.request.session.modified = True
             return obj
+
         raise Http404
 
     def get_context_data(self, **kwargs):

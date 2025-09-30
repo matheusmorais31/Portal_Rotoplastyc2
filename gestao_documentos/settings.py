@@ -312,3 +312,14 @@ FERNET_KEYS = [os.getenv("FERNET_KEY")]
 if not FERNET_KEYS or not FERNET_KEYS[0]:
     digest = hashlib.sha256(SECRET_KEY.encode()).digest()
     FERNET_KEYS = [base64.urlsafe_b64encode(digest).decode()]
+
+# ====== CLIMATEMPO  ======  # <<<
+CLIMATEMPO_TOKEN = config('CLIMATEMPO_TOKEN', default=None)         # <<<
+CLIMATEMPO_CIDADE_ID = config('CLIMATEMPO_CIDADE_ID', default=5585, cast=int)  # <<<
+
+
+# ====== OPEN-METEO  ======
+OPENMETEO_LAT = config('OPENMETEO_LAT', default=-28.28389, cast=float)   # Carazinho-RS
+OPENMETEO_LON = config('OPENMETEO_LON', default=-52.78639, cast=float)
+OPENMETEO_TIMEZONE = config('OPENMETEO_TIMEZONE', default=TIME_ZONE)
+
