@@ -22,31 +22,30 @@ def _prepare_grouped_entregas(queryset):
     raw_grouped_entregas = {}
     for entrega in queryset:
         key_cc = f"{entrega.centro_custo or 'Sem CC'} - {entrega.descricao_centro_custo or 'Sem Descrição'}"
-        if key_cc not in raw_grouped_entregas:
-            raw_grouped_entregas[key_cc] = []
-        raw_grouped_entregas[key_cc].append(entrega)
+        raw_grouped_entregas.setdefault(key_cc, []).append(entrega)
 
     final_grouped_entregas = {}
     for key_cc, entregas_list in raw_grouped_entregas.items():
         summed_items = {}
         for entrega in entregas_list:
-            item_sum_key = (
-                entrega.data_entrega,
-                entrega.codigo_estoque,
-                entrega.descricao_epi
-            )
+            # Coalesce defensivo
+            data_entrega = entrega.data_entrega  # DateField (não-nulo)
+            codigo_estoque = entrega.codigo_estoque or ""   # evita None
+            descricao_epi  = entrega.descricao_epi or ""    # evita None
+
+            item_sum_key = (data_entrega, codigo_estoque, descricao_epi)
             if item_sum_key not in summed_items:
                 summed_items[item_sum_key] = {
-                    'data_entrega': entrega.data_entrega,
-                    'codigo_estoque': entrega.codigo_estoque,
-                    'descricao_epi': entrega.descricao_epi,
+                    'data_entrega': data_entrega,
+                    'codigo_estoque': codigo_estoque,
+                    'descricao_epi': descricao_epi,
                     'quantidade_total': 0,
                     'detalhes_individuais': [],
                     'ids_originais': []
                 }
+
             summed_items[item_sum_key]['quantidade_total'] += entrega.quantidade_entregue
             summed_items[item_sum_key]['ids_originais'].append(entrega.id)
-
             summed_items[item_sum_key]['detalhes_individuais'].append({
                 'id': entrega.id,
                 'unidade': entrega.unidade,
@@ -60,12 +59,13 @@ def _prepare_grouped_entregas(queryset):
                 'sequencial_baixa_erp': entrega.sequencial_baixa_erp,
                 'data_baixa_erp': entrega.data_baixa_erp,
             })
-        
+
+        # Ordena usando valores já coalescidos
         final_grouped_entregas[key_cc] = sorted(
             summed_items.values(),
-            key=lambda x: (x['data_entrega'], x['codigo_estoque'])
+            key=lambda x: (x['data_entrega'], x['codigo_estoque'] or "")
         )
-    
+
     return dict(sorted(final_grouped_entregas.items()))
 
 

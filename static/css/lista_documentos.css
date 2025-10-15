@@ -216,6 +216,7 @@ h1 {
     max-width: 90%;
     text-align: center;
     position: relative;
+    
 }
 
 .modal-content h2 {
@@ -233,6 +234,7 @@ h1 {
     font-size: 14px;
     box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
     resize: none;
+    color: #000000;
 }
 
 .modal-content button {
@@ -259,7 +261,7 @@ h1 {
 
 .close {
     background: none;
-    color: white;
+    color: rgb(123, 19, 19);
     font-size: 28px;
     font-weight: bold;
     position: absolute;
@@ -269,7 +271,7 @@ h1 {
 }
 
 .close:hover, .close:focus {
-    color: #ccc;
+    color: #ff0000;
     text-decoration: none;
 }
 
@@ -363,4 +365,9 @@ h1 {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+body.light-theme .modal-content {
+    background-color: #515e6c;
+    
 }

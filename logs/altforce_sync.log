@@ -1,0 +1,225 @@
+INFO 2025-10-15 10:43:32,127 services 148119 140095755158208 Buscando AltForce /leads?start=1697425200000&end=1700017199999
+INFO 2025-10-15 10:43:34,153 services 148119 140095755158208 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 10:43:34,865 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 155, 'created': 0, 'updated': 155, 'lead_produtos_created': 0, 'lead_produtos_updated': 172, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 172, 'errors': []}
+INFO 2025-10-15 10:43:34,867 services 148119 140095755158208 Buscando AltForce /leads?start=1700017200000&end=1702609199999
+INFO 2025-10-15 10:43:36,120 services 148119 140095755158208 AltForce retornou 121 leads no intervalo
+INFO 2025-10-15 10:43:36,666 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 121, 'created': 0, 'updated': 121, 'lead_produtos_created': 0, 'lead_produtos_updated': 131, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 131, 'errors': []}
+INFO 2025-10-15 10:43:36,668 services 148119 140095755158208 Buscando AltForce /leads?start=1702609200000&end=1705201199999
+INFO 2025-10-15 10:43:37,738 services 148119 140095755158208 AltForce retornou 110 leads no intervalo
+INFO 2025-10-15 10:43:38,185 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 110, 'created': 0, 'updated': 110, 'lead_produtos_created': 0, 'lead_produtos_updated': 116, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 116, 'errors': []}
+INFO 2025-10-15 10:43:38,186 services 148119 140095755158208 Buscando AltForce /leads?start=1705201200000&end=1707793199999
+INFO 2025-10-15 10:43:39,724 services 148119 140095755158208 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 10:43:40,624 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 155, 'created': 0, 'updated': 155, 'lead_produtos_created': 0, 'lead_produtos_updated': 180, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 180, 'errors': []}
+INFO 2025-10-15 10:43:40,625 services 148119 140095755158208 Buscando AltForce /leads?start=1707793200000&end=1710385199999
+INFO 2025-10-15 10:43:41,967 services 148119 140095755158208 AltForce retornou 154 leads no intervalo
+INFO 2025-10-15 10:43:42,748 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 154, 'created': 0, 'updated': 154, 'lead_produtos_created': 0, 'lead_produtos_updated': 182, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 182, 'errors': []}
+INFO 2025-10-15 10:43:42,749 services 148119 140095755158208 Buscando AltForce /leads?start=1710385200000&end=1712977199999
+INFO 2025-10-15 10:43:43,833 services 148119 140095755158208 AltForce retornou 105 leads no intervalo
+INFO 2025-10-15 10:43:44,292 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 105, 'created': 0, 'updated': 105, 'lead_produtos_created': 0, 'lead_produtos_updated': 129, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 129, 'errors': []}
+INFO 2025-10-15 10:43:44,294 services 148119 140095755158208 Buscando AltForce /leads?start=1712977200000&end=1715569199999
+INFO 2025-10-15 10:43:45,745 services 148119 140095755158208 AltForce retornou 162 leads no intervalo
+INFO 2025-10-15 10:43:46,461 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 162, 'created': 0, 'updated': 162, 'lead_produtos_created': 0, 'lead_produtos_updated': 197, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 197, 'errors': []}
+INFO 2025-10-15 10:43:46,462 services 148119 140095755158208 Buscando AltForce /leads?start=1715569200000&end=1718161199999
+INFO 2025-10-15 10:43:47,838 services 148119 140095755158208 AltForce retornou 131 leads no intervalo
+INFO 2025-10-15 10:43:48,407 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 131, 'created': 0, 'updated': 131, 'lead_produtos_created': 0, 'lead_produtos_updated': 150, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 150, 'errors': []}
+INFO 2025-10-15 10:43:48,409 services 148119 140095755158208 Buscando AltForce /leads?start=1718161200000&end=1720753199999
+INFO 2025-10-15 10:43:49,770 services 148119 140095755158208 AltForce retornou 143 leads no intervalo
+INFO 2025-10-15 10:43:50,516 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 143, 'created': 0, 'updated': 143, 'lead_produtos_created': 0, 'lead_produtos_updated': 173, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 173, 'errors': []}
+INFO 2025-10-15 10:43:50,518 services 148119 140095755158208 Buscando AltForce /leads?start=1720753200000&end=1723345199999
+INFO 2025-10-15 10:43:52,185 services 148119 140095755158208 AltForce retornou 184 leads no intervalo
+INFO 2025-10-15 10:43:53,046 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 184, 'created': 0, 'updated': 184, 'lead_produtos_created': 0, 'lead_produtos_updated': 217, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 217, 'errors': []}
+INFO 2025-10-15 10:43:53,048 services 148119 140095755158208 Buscando AltForce /leads?start=1723345200000&end=1725937199999
+INFO 2025-10-15 10:43:54,687 services 148119 140095755158208 AltForce retornou 223 leads no intervalo
+INFO 2025-10-15 10:43:55,807 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 223, 'created': 0, 'updated': 223, 'lead_produtos_created': 0, 'lead_produtos_updated': 240, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 240, 'errors': []}
+INFO 2025-10-15 10:43:55,809 services 148119 140095755158208 Buscando AltForce /leads?start=1725937200000&end=1728529199999
+INFO 2025-10-15 10:43:57,552 services 148119 140095755158208 AltForce retornou 204 leads no intervalo
+INFO 2025-10-15 10:43:58,463 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 204, 'created': 0, 'updated': 204, 'lead_produtos_created': 0, 'lead_produtos_updated': 226, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 226, 'errors': []}
+INFO 2025-10-15 10:43:58,464 services 148119 140095755158208 Buscando AltForce /leads?start=1728529200000&end=1731121199999
+INFO 2025-10-15 10:43:59,834 services 148119 140095755158208 AltForce retornou 160 leads no intervalo
+INFO 2025-10-15 10:44:00,978 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 160, 'created': 0, 'updated': 160, 'lead_produtos_created': 0, 'lead_produtos_updated': 169, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 169, 'errors': []}
+INFO 2025-10-15 10:44:00,980 services 148119 140095755158208 Buscando AltForce /leads?start=1731121200000&end=1733713199999
+INFO 2025-10-15 10:44:02,875 services 148119 140095755158208 AltForce retornou 169 leads no intervalo
+INFO 2025-10-15 10:44:03,689 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 169, 'created': 0, 'updated': 169, 'lead_produtos_created': 0, 'lead_produtos_updated': 177, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 177, 'errors': []}
+INFO 2025-10-15 10:44:03,691 services 148119 140095755158208 Buscando AltForce /leads?start=1733713200000&end=1736305199999
+INFO 2025-10-15 10:44:05,580 services 148119 140095755158208 AltForce retornou 163 leads no intervalo
+INFO 2025-10-15 10:44:06,441 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 163, 'created': 0, 'updated': 163, 'lead_produtos_created': 0, 'lead_produtos_updated': 174, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 174, 'errors': []}
+INFO 2025-10-15 10:44:06,443 services 148119 140095755158208 Buscando AltForce /leads?start=1736305200000&end=1738897199999
+INFO 2025-10-15 10:44:07,743 services 148119 140095755158208 AltForce retornou 150 leads no intervalo
+INFO 2025-10-15 10:44:08,375 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 150, 'created': 0, 'updated': 150, 'lead_produtos_created': 0, 'lead_produtos_updated': 155, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 155, 'errors': []}
+INFO 2025-10-15 10:44:08,377 services 148119 140095755158208 Buscando AltForce /leads?start=1738897200000&end=1741489199999
+INFO 2025-10-15 10:44:09,604 services 148119 140095755158208 AltForce retornou 111 leads no intervalo
+INFO 2025-10-15 10:44:10,181 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 111, 'created': 0, 'updated': 111, 'lead_produtos_created': 0, 'lead_produtos_updated': 119, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 119, 'errors': []}
+INFO 2025-10-15 10:44:10,182 services 148119 140095755158208 Buscando AltForce /leads?start=1741489200000&end=1744081199999
+INFO 2025-10-15 10:44:12,218 services 148119 140095755158208 AltForce retornou 70 leads no intervalo
+INFO 2025-10-15 10:44:12,535 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 70, 'created': 0, 'updated': 70, 'lead_produtos_created': 0, 'lead_produtos_updated': 77, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 77, 'errors': []}
+INFO 2025-10-15 10:44:12,537 services 148119 140095755158208 Buscando AltForce /leads?start=1744081200000&end=1746673199999
+INFO 2025-10-15 10:44:13,243 services 148119 140095755158208 AltForce retornou 57 leads no intervalo
+INFO 2025-10-15 10:44:13,504 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 57, 'created': 0, 'updated': 57, 'lead_produtos_created': 0, 'lead_produtos_updated': 65, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 65, 'errors': []}
+INFO 2025-10-15 10:44:13,505 services 148119 140095755158208 Buscando AltForce /leads?start=1746673200000&end=1749265199999
+INFO 2025-10-15 10:44:14,427 services 148119 140095755158208 AltForce retornou 75 leads no intervalo
+INFO 2025-10-15 10:44:14,902 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 75, 'created': 0, 'updated': 75, 'lead_produtos_created': 0, 'lead_produtos_updated': 91, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 91, 'errors': []}
+INFO 2025-10-15 10:44:14,903 services 148119 140095755158208 Buscando AltForce /leads?start=1749265200000&end=1751857199999
+INFO 2025-10-15 10:44:15,889 services 148119 140095755158208 AltForce retornou 82 leads no intervalo
+INFO 2025-10-15 10:44:16,236 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 82, 'created': 0, 'updated': 82, 'lead_produtos_created': 0, 'lead_produtos_updated': 89, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 89, 'errors': []}
+INFO 2025-10-15 10:44:16,237 services 148119 140095755158208 Buscando AltForce /leads?start=1751857200000&end=1754449199999
+INFO 2025-10-15 10:44:17,147 services 148119 140095755158208 AltForce retornou 78 leads no intervalo
+INFO 2025-10-15 10:44:17,486 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 78, 'created': 0, 'updated': 78, 'lead_produtos_created': 0, 'lead_produtos_updated': 80, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 80, 'errors': []}
+INFO 2025-10-15 10:44:17,487 services 148119 140095755158208 Buscando AltForce /leads?start=1754449200000&end=1757041199999
+INFO 2025-10-15 10:44:19,134 services 148119 140095755158208 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 10:44:19,758 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 155, 'created': 0, 'updated': 155, 'lead_produtos_created': 0, 'lead_produtos_updated': 138, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 138, 'errors': []}
+INFO 2025-10-15 10:44:19,759 services 148119 140095755158208 Buscando AltForce /leads?start=1757041200000&end=1759633199999
+INFO 2025-10-15 10:44:21,170 services 148119 140095755158208 AltForce retornou 128 leads no intervalo
+INFO 2025-10-15 10:44:21,678 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 128, 'created': 0, 'updated': 128, 'lead_produtos_created': 0, 'lead_produtos_updated': 117, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 117, 'errors': []}
+INFO 2025-10-15 10:44:21,679 services 148119 140095755158208 Buscando AltForce /leads?start=1759633200000&end=1760535812127
+INFO 2025-10-15 10:44:22,359 services 148119 140095755158208 AltForce retornou 64 leads no intervalo
+INFO 2025-10-15 10:44:22,630 services 148119 140095755158208 Sync AltForce (leads) concluído: {'count': 64, 'created': 12, 'updated': 52, 'lead_produtos_created': 12, 'lead_produtos_updated': 36, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 48, 'errors': []}
+INFO 2025-10-15 13:38:29,793 services 149105 140221743571648 Buscando AltForce /leads?start=1697425200000&end=1700017199999
+INFO 2025-10-15 13:38:35,508 services 149105 140221743571648 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 13:38:36,811 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 155, 'created': 155, 'updated': 0, 'lead_produtos_created': 172, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 172, 'errors': []}
+INFO 2025-10-15 13:38:36,813 services 149105 140221743571648 Buscando AltForce /leads?start=1700017200000&end=1702609199999
+INFO 2025-10-15 13:38:38,033 services 149105 140221743571648 AltForce retornou 121 leads no intervalo
+INFO 2025-10-15 13:38:39,118 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 121, 'created': 121, 'updated': 0, 'lead_produtos_created': 131, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 131, 'errors': []}
+INFO 2025-10-15 13:38:39,120 services 149105 140221743571648 Buscando AltForce /leads?start=1702609200000&end=1705201199999
+INFO 2025-10-15 13:38:40,138 services 149105 140221743571648 AltForce retornou 110 leads no intervalo
+INFO 2025-10-15 13:38:41,114 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 110, 'created': 108, 'updated': 2, 'lead_produtos_created': 113, 'lead_produtos_updated': 3, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 116, 'errors': []}
+INFO 2025-10-15 13:38:41,116 services 149105 140221743571648 Buscando AltForce /leads?start=1705201200000&end=1707793199999
+INFO 2025-10-15 13:38:42,434 services 149105 140221743571648 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 13:38:43,963 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 155, 'created': 155, 'updated': 0, 'lead_produtos_created': 180, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 180, 'errors': []}
+INFO 2025-10-15 13:38:43,964 services 149105 140221743571648 Buscando AltForce /leads?start=1707793200000&end=1710385199999
+INFO 2025-10-15 13:38:45,467 services 149105 140221743571648 AltForce retornou 154 leads no intervalo
+INFO 2025-10-15 13:38:47,091 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 154, 'created': 150, 'updated': 4, 'lead_produtos_created': 178, 'lead_produtos_updated': 4, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 182, 'errors': []}
+INFO 2025-10-15 13:38:47,092 services 149105 140221743571648 Buscando AltForce /leads?start=1710385200000&end=1712977199999
+INFO 2025-10-15 13:38:49,147 services 149105 140221743571648 AltForce retornou 105 leads no intervalo
+INFO 2025-10-15 13:38:49,920 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 105, 'created': 87, 'updated': 18, 'lead_produtos_created': 107, 'lead_produtos_updated': 22, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 129, 'errors': []}
+INFO 2025-10-15 13:38:49,921 services 149105 140221743571648 Buscando AltForce /leads?start=1712977200000&end=1715569199999
+INFO 2025-10-15 13:38:52,471 services 149105 140221743571648 AltForce retornou 162 leads no intervalo
+INFO 2025-10-15 13:38:53,652 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 162, 'created': 162, 'updated': 0, 'lead_produtos_created': 197, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 197, 'errors': []}
+INFO 2025-10-15 13:38:53,653 services 149105 140221743571648 Buscando AltForce /leads?start=1715569200000&end=1718161199999
+INFO 2025-10-15 13:38:55,464 services 149105 140221743571648 AltForce retornou 131 leads no intervalo
+INFO 2025-10-15 13:38:56,502 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 131, 'created': 123, 'updated': 8, 'lead_produtos_created': 142, 'lead_produtos_updated': 8, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 150, 'errors': []}
+INFO 2025-10-15 13:38:56,503 services 149105 140221743571648 Buscando AltForce /leads?start=1718161200000&end=1720753199999
+INFO 2025-10-15 13:38:58,141 services 149105 140221743571648 AltForce retornou 143 leads no intervalo
+INFO 2025-10-15 13:38:59,116 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 143, 'created': 139, 'updated': 4, 'lead_produtos_created': 168, 'lead_produtos_updated': 5, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 173, 'errors': []}
+INFO 2025-10-15 13:38:59,117 services 149105 140221743571648 Buscando AltForce /leads?start=1720753200000&end=1723345199999
+INFO 2025-10-15 13:39:01,250 services 149105 140221743571648 AltForce retornou 184 leads no intervalo
+INFO 2025-10-15 13:39:02,661 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 184, 'created': 178, 'updated': 6, 'lead_produtos_created': 211, 'lead_produtos_updated': 6, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 217, 'errors': []}
+INFO 2025-10-15 13:39:02,662 services 149105 140221743571648 Buscando AltForce /leads?start=1723345200000&end=1725937199999
+INFO 2025-10-15 13:39:05,342 services 149105 140221743571648 AltForce retornou 223 leads no intervalo
+INFO 2025-10-15 13:39:06,795 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 223, 'created': 223, 'updated': 0, 'lead_produtos_created': 240, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 240, 'errors': []}
+INFO 2025-10-15 13:39:06,797 services 149105 140221743571648 Buscando AltForce /leads?start=1725937200000&end=1728529199999
+INFO 2025-10-15 13:39:08,542 services 149105 140221743571648 AltForce retornou 204 leads no intervalo
+INFO 2025-10-15 13:39:09,751 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 204, 'created': 196, 'updated': 8, 'lead_produtos_created': 218, 'lead_produtos_updated': 8, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 226, 'errors': []}
+INFO 2025-10-15 13:39:09,752 services 149105 140221743571648 Buscando AltForce /leads?start=1728529200000&end=1731121199999
+INFO 2025-10-15 13:39:11,536 services 149105 140221743571648 AltForce retornou 160 leads no intervalo
+INFO 2025-10-15 13:39:12,588 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 160, 'created': 152, 'updated': 8, 'lead_produtos_created': 161, 'lead_produtos_updated': 8, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 169, 'errors': []}
+INFO 2025-10-15 13:39:12,589 services 149105 140221743571648 Buscando AltForce /leads?start=1731121200000&end=1733713199999
+INFO 2025-10-15 13:39:15,765 services 149105 140221743571648 AltForce retornou 169 leads no intervalo
+INFO 2025-10-15 13:39:16,864 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 169, 'created': 169, 'updated': 0, 'lead_produtos_created': 177, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 177, 'errors': []}
+INFO 2025-10-15 13:39:16,865 services 149105 140221743571648 Buscando AltForce /leads?start=1733713200000&end=1736305199999
+INFO 2025-10-15 13:39:18,401 services 149105 140221743571648 AltForce retornou 163 leads no intervalo
+INFO 2025-10-15 13:39:19,499 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 163, 'created': 152, 'updated': 11, 'lead_produtos_created': 163, 'lead_produtos_updated': 11, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 174, 'errors': []}
+INFO 2025-10-15 13:39:19,500 services 149105 140221743571648 Buscando AltForce /leads?start=1736305200000&end=1738897199999
+INFO 2025-10-15 13:39:20,789 services 149105 140221743571648 AltForce retornou 150 leads no intervalo
+INFO 2025-10-15 13:39:22,305 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 150, 'created': 144, 'updated': 6, 'lead_produtos_created': 148, 'lead_produtos_updated': 7, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 155, 'errors': []}
+INFO 2025-10-15 13:39:22,306 services 149105 140221743571648 Buscando AltForce /leads?start=1738897200000&end=1741489199999
+INFO 2025-10-15 13:39:24,933 services 149105 140221743571648 AltForce retornou 111 leads no intervalo
+INFO 2025-10-15 13:39:26,046 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 111, 'created': 105, 'updated': 6, 'lead_produtos_created': 113, 'lead_produtos_updated': 6, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 119, 'errors': []}
+INFO 2025-10-15 13:39:26,047 services 149105 140221743571648 Buscando AltForce /leads?start=1741489200000&end=1744081199999
+INFO 2025-10-15 13:39:27,061 services 149105 140221743571648 AltForce retornou 70 leads no intervalo
+INFO 2025-10-15 13:39:27,843 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 70, 'created': 70, 'updated': 0, 'lead_produtos_created': 77, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 77, 'errors': []}
+INFO 2025-10-15 13:39:27,844 services 149105 140221743571648 Buscando AltForce /leads?start=1744081200000&end=1746673199999
+INFO 2025-10-15 13:39:28,658 services 149105 140221743571648 AltForce retornou 57 leads no intervalo
+INFO 2025-10-15 13:39:29,264 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 57, 'created': 53, 'updated': 4, 'lead_produtos_created': 60, 'lead_produtos_updated': 5, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 65, 'errors': []}
+INFO 2025-10-15 13:39:29,265 services 149105 140221743571648 Buscando AltForce /leads?start=1746673200000&end=1749265199999
+INFO 2025-10-15 13:39:30,612 services 149105 140221743571648 AltForce retornou 75 leads no intervalo
+INFO 2025-10-15 13:39:31,232 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 75, 'created': 74, 'updated': 1, 'lead_produtos_created': 90, 'lead_produtos_updated': 1, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 91, 'errors': []}
+INFO 2025-10-15 13:39:31,238 services 149105 140221743571648 Buscando AltForce /leads?start=1749265200000&end=1751857199999
+INFO 2025-10-15 13:39:32,752 services 149105 140221743571648 AltForce retornou 82 leads no intervalo
+INFO 2025-10-15 13:39:33,380 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 82, 'created': 82, 'updated': 0, 'lead_produtos_created': 89, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 89, 'errors': []}
+INFO 2025-10-15 13:39:33,381 services 149105 140221743571648 Buscando AltForce /leads?start=1751857200000&end=1754449199999
+INFO 2025-10-15 13:39:34,993 services 149105 140221743571648 AltForce retornou 78 leads no intervalo
+INFO 2025-10-15 13:39:35,446 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 78, 'created': 76, 'updated': 2, 'lead_produtos_created': 78, 'lead_produtos_updated': 2, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 80, 'errors': []}
+INFO 2025-10-15 13:39:35,447 services 149105 140221743571648 Buscando AltForce /leads?start=1754449200000&end=1757041199999
+INFO 2025-10-15 13:39:37,716 services 149105 140221743571648 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 13:39:38,590 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 155, 'created': 152, 'updated': 3, 'lead_produtos_created': 135, 'lead_produtos_updated': 3, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 138, 'errors': []}
+INFO 2025-10-15 13:39:38,591 services 149105 140221743571648 Buscando AltForce /leads?start=1757041200000&end=1759633199999
+INFO 2025-10-15 13:39:39,936 services 149105 140221743571648 AltForce retornou 128 leads no intervalo
+INFO 2025-10-15 13:39:40,663 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 128, 'created': 126, 'updated': 2, 'lead_produtos_created': 115, 'lead_produtos_updated': 2, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 117, 'errors': []}
+INFO 2025-10-15 13:39:40,665 services 149105 140221743571648 Buscando AltForce /leads?start=1759633200000&end=1760546309793
+INFO 2025-10-15 13:39:41,556 services 149105 140221743571648 AltForce retornou 70 leads no intervalo
+INFO 2025-10-15 13:39:42,024 services 149105 140221743571648 Sync AltForce (leads) concluído: {'count': 70, 'created': 70, 'updated': 0, 'lead_produtos_created': 54, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 54, 'errors': []}
+INFO 2025-10-15 13:45:57,222 services 149552 139649338102464 Buscando AltForce /leads?start=1697425200000&end=1700017199999
+INFO 2025-10-15 13:45:58,978 services 149552 139649338102464 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 13:45:59,939 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 155, 'created': 155, 'updated': 0, 'lead_produtos_created': 172, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 172, 'errors': []}
+INFO 2025-10-15 13:45:59,940 services 149552 139649338102464 Buscando AltForce /leads?start=1700017200000&end=1702609199999
+INFO 2025-10-15 13:46:00,787 services 149552 139649338102464 AltForce retornou 121 leads no intervalo
+INFO 2025-10-15 13:46:01,519 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 121, 'created': 121, 'updated': 0, 'lead_produtos_created': 131, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 131, 'errors': []}
+INFO 2025-10-15 13:46:01,520 services 149552 139649338102464 Buscando AltForce /leads?start=1702609200000&end=1705201199999
+INFO 2025-10-15 13:46:02,354 services 149552 139649338102464 AltForce retornou 110 leads no intervalo
+INFO 2025-10-15 13:46:03,053 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 110, 'created': 108, 'updated': 2, 'lead_produtos_created': 113, 'lead_produtos_updated': 3, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 116, 'errors': []}
+INFO 2025-10-15 13:46:03,055 services 149552 139649338102464 Buscando AltForce /leads?start=1705201200000&end=1707793199999
+INFO 2025-10-15 13:46:03,913 services 149552 139649338102464 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 13:46:04,780 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 155, 'created': 155, 'updated': 0, 'lead_produtos_created': 180, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 180, 'errors': []}
+INFO 2025-10-15 13:46:04,781 services 149552 139649338102464 Buscando AltForce /leads?start=1707793200000&end=1710385199999
+INFO 2025-10-15 13:46:05,697 services 149552 139649338102464 AltForce retornou 154 leads no intervalo
+INFO 2025-10-15 13:46:06,666 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 154, 'created': 150, 'updated': 4, 'lead_produtos_created': 178, 'lead_produtos_updated': 4, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 182, 'errors': []}
+INFO 2025-10-15 13:46:06,668 services 149552 139649338102464 Buscando AltForce /leads?start=1710385200000&end=1712977199999
+INFO 2025-10-15 13:46:07,407 services 149552 139649338102464 AltForce retornou 105 leads no intervalo
+INFO 2025-10-15 13:46:08,040 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 105, 'created': 87, 'updated': 18, 'lead_produtos_created': 107, 'lead_produtos_updated': 22, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 129, 'errors': []}
+INFO 2025-10-15 13:46:08,041 services 149552 139649338102464 Buscando AltForce /leads?start=1712977200000&end=1715569199999
+INFO 2025-10-15 13:46:09,120 services 149552 139649338102464 AltForce retornou 162 leads no intervalo
+INFO 2025-10-15 13:46:10,025 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 162, 'created': 162, 'updated': 0, 'lead_produtos_created': 197, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 197, 'errors': []}
+INFO 2025-10-15 13:46:10,026 services 149552 139649338102464 Buscando AltForce /leads?start=1715569200000&end=1718161199999
+INFO 2025-10-15 13:46:10,890 services 149552 139649338102464 AltForce retornou 131 leads no intervalo
+INFO 2025-10-15 13:46:11,611 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 131, 'created': 123, 'updated': 8, 'lead_produtos_created': 142, 'lead_produtos_updated': 8, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 150, 'errors': []}
+INFO 2025-10-15 13:46:11,612 services 149552 139649338102464 Buscando AltForce /leads?start=1718161200000&end=1720753199999
+INFO 2025-10-15 13:46:12,620 services 149552 139649338102464 AltForce retornou 143 leads no intervalo
+INFO 2025-10-15 13:46:13,481 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 143, 'created': 139, 'updated': 4, 'lead_produtos_created': 168, 'lead_produtos_updated': 5, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 173, 'errors': []}
+INFO 2025-10-15 13:46:13,482 services 149552 139649338102464 Buscando AltForce /leads?start=1720753200000&end=1723345199999
+INFO 2025-10-15 13:46:14,558 services 149552 139649338102464 AltForce retornou 184 leads no intervalo
+INFO 2025-10-15 13:46:15,660 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 184, 'created': 178, 'updated': 6, 'lead_produtos_created': 211, 'lead_produtos_updated': 6, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 217, 'errors': []}
+INFO 2025-10-15 13:46:15,661 services 149552 139649338102464 Buscando AltForce /leads?start=1723345200000&end=1725937199999
+INFO 2025-10-15 13:46:16,859 services 149552 139649338102464 AltForce retornou 223 leads no intervalo
+INFO 2025-10-15 13:46:18,275 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 223, 'created': 223, 'updated': 0, 'lead_produtos_created': 240, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 240, 'errors': []}
+INFO 2025-10-15 13:46:18,276 services 149552 139649338102464 Buscando AltForce /leads?start=1725937200000&end=1728529199999
+INFO 2025-10-15 13:46:19,433 services 149552 139649338102464 AltForce retornou 204 leads no intervalo
+INFO 2025-10-15 13:46:20,734 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 204, 'created': 196, 'updated': 8, 'lead_produtos_created': 218, 'lead_produtos_updated': 8, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 226, 'errors': []}
+INFO 2025-10-15 13:46:20,735 services 149552 139649338102464 Buscando AltForce /leads?start=1728529200000&end=1731121199999
+INFO 2025-10-15 13:46:21,789 services 149552 139649338102464 AltForce retornou 160 leads no intervalo
+INFO 2025-10-15 13:46:22,667 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 160, 'created': 152, 'updated': 8, 'lead_produtos_created': 161, 'lead_produtos_updated': 8, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 169, 'errors': []}
+INFO 2025-10-15 13:46:22,669 services 149552 139649338102464 Buscando AltForce /leads?start=1731121200000&end=1733713199999
+INFO 2025-10-15 13:46:23,757 services 149552 139649338102464 AltForce retornou 169 leads no intervalo
+INFO 2025-10-15 13:46:25,038 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 169, 'created': 169, 'updated': 0, 'lead_produtos_created': 177, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 177, 'errors': []}
+INFO 2025-10-15 13:46:25,040 services 149552 139649338102464 Buscando AltForce /leads?start=1733713200000&end=1736305199999
+INFO 2025-10-15 13:46:26,137 services 149552 139649338102464 AltForce retornou 163 leads no intervalo
+INFO 2025-10-15 13:46:27,584 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 163, 'created': 152, 'updated': 11, 'lead_produtos_created': 163, 'lead_produtos_updated': 11, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 174, 'errors': []}
+INFO 2025-10-15 13:46:27,586 services 149552 139649338102464 Buscando AltForce /leads?start=1736305200000&end=1738897199999
+INFO 2025-10-15 13:46:28,536 services 149552 139649338102464 AltForce retornou 150 leads no intervalo
+INFO 2025-10-15 13:46:29,795 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 150, 'created': 144, 'updated': 6, 'lead_produtos_created': 148, 'lead_produtos_updated': 7, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 155, 'errors': []}
+INFO 2025-10-15 13:46:29,796 services 149552 139649338102464 Buscando AltForce /leads?start=1738897200000&end=1741489199999
+INFO 2025-10-15 13:46:32,662 services 149552 139649338102464 AltForce retornou 111 leads no intervalo
+INFO 2025-10-15 13:46:33,615 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 111, 'created': 105, 'updated': 6, 'lead_produtos_created': 113, 'lead_produtos_updated': 6, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 119, 'errors': []}
+INFO 2025-10-15 13:46:33,616 services 149552 139649338102464 Buscando AltForce /leads?start=1741489200000&end=1744081199999
+INFO 2025-10-15 13:46:34,327 services 149552 139649338102464 AltForce retornou 70 leads no intervalo
+INFO 2025-10-15 13:46:34,947 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 70, 'created': 70, 'updated': 0, 'lead_produtos_created': 77, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 77, 'errors': []}
+INFO 2025-10-15 13:46:34,948 services 149552 139649338102464 Buscando AltForce /leads?start=1744081200000&end=1746673199999
+INFO 2025-10-15 13:46:35,431 services 149552 139649338102464 AltForce retornou 57 leads no intervalo
+INFO 2025-10-15 13:46:35,861 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 57, 'created': 53, 'updated': 4, 'lead_produtos_created': 60, 'lead_produtos_updated': 5, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 65, 'errors': []}
+INFO 2025-10-15 13:46:35,862 services 149552 139649338102464 Buscando AltForce /leads?start=1746673200000&end=1749265199999
+INFO 2025-10-15 13:46:36,614 services 149552 139649338102464 AltForce retornou 75 leads no intervalo
+INFO 2025-10-15 13:46:37,066 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 75, 'created': 74, 'updated': 1, 'lead_produtos_created': 90, 'lead_produtos_updated': 1, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 91, 'errors': []}
+INFO 2025-10-15 13:46:37,067 services 149552 139649338102464 Buscando AltForce /leads?start=1749265200000&end=1751857199999
+INFO 2025-10-15 13:46:37,745 services 149552 139649338102464 AltForce retornou 82 leads no intervalo
+INFO 2025-10-15 13:46:38,353 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 82, 'created': 82, 'updated': 0, 'lead_produtos_created': 89, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 89, 'errors': []}
+INFO 2025-10-15 13:46:38,355 services 149552 139649338102464 Buscando AltForce /leads?start=1751857200000&end=1754449199999
+INFO 2025-10-15 13:46:39,263 services 149552 139649338102464 AltForce retornou 78 leads no intervalo
+INFO 2025-10-15 13:46:39,813 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 78, 'created': 76, 'updated': 2, 'lead_produtos_created': 78, 'lead_produtos_updated': 2, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 80, 'errors': []}
+INFO 2025-10-15 13:46:39,814 services 149552 139649338102464 Buscando AltForce /leads?start=1754449200000&end=1757041199999
+INFO 2025-10-15 13:46:42,713 services 149552 139649338102464 AltForce retornou 155 leads no intervalo
+INFO 2025-10-15 13:46:43,656 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 155, 'created': 152, 'updated': 3, 'lead_produtos_created': 135, 'lead_produtos_updated': 3, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 138, 'errors': []}
+INFO 2025-10-15 13:46:43,657 services 149552 139649338102464 Buscando AltForce /leads?start=1757041200000&end=1759633199999
+INFO 2025-10-15 13:46:44,999 services 149552 139649338102464 AltForce retornou 128 leads no intervalo
+INFO 2025-10-15 13:46:45,753 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 128, 'created': 126, 'updated': 2, 'lead_produtos_created': 115, 'lead_produtos_updated': 2, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 117, 'errors': []}
+INFO 2025-10-15 13:46:45,754 services 149552 139649338102464 Buscando AltForce /leads?start=1759633200000&end=1760546757222
+INFO 2025-10-15 13:46:46,574 services 149552 139649338102464 AltForce retornou 70 leads no intervalo
+INFO 2025-10-15 13:46:46,932 services 149552 139649338102464 Sync AltForce (leads) concluído: {'count': 70, 'created': 70, 'updated': 0, 'lead_produtos_created': 54, 'lead_produtos_updated': 0, 'lead_produtos_deleted': 0, 'lead_produtos_seen': 54, 'errors': []}

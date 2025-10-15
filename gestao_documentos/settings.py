@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rh',
     'formularios',
     'sqlhub',
+    'altforce_sync',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -148,11 +149,20 @@ LOGGING_DIR.mkdir(parents=True, exist_ok=True)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+
     'formatters': {
-        'verbose': {'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}', 'style': '{'},
-        'simple':  {'format': '{levelname} {asctime} [{name}] {message}', 'style': '{'},
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {asctime} [{name}] {message}',
+            'style': '{',
+        },
     },
+
     'handlers': {
+        # Django core
         'file_django': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -161,6 +171,8 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'verbose',
         },
+
+        # Apps do projeto
         'file_documentos': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -201,8 +213,6 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'verbose',
         },
-
-        # Handler adicionado para sqlhub
         'file_sqlhub': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -212,18 +222,67 @@ LOGGING = {
             'formatter': 'verbose',
         },
 
-        'console': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'simple'},
-    },
-    'loggers': {
-        'django':      {'handlers': ['file_django', 'console'], 'level': 'INFO', 'propagate': True},
-        'documentos':  {'handlers': ['file_documentos', 'console'], 'level': 'DEBUG', 'propagate': False},
-        'bi':          {'handlers': ['file_bi', 'console'], 'level': 'DEBUG', 'propagate': False},
-        'custom_email_logger': {'handlers': ['file_email', 'console'], 'level': 'INFO', 'propagate': False},
-        'ia':          {'handlers': ['file_ia', 'console'], 'level': 'DEBUG', 'propagate': False},
-        'formularios': {'handlers': ['file_formularios', 'console'], 'level': 'DEBUG', 'propagate': False},
+        # ⇩ novo: logs do app AltForce
+        'file_altforce': {
+            'level': 'INFO',  # mude para 'DEBUG' se quiser detalhar mais
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGGING_DIR / 'altforce_sync.log',
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
 
-        # Logger adicionado para sqlhub
-        'sqlhub': {'handlers': ['file_sqlhub', 'console'], 'level': 'DEBUG', 'propagate': False},
+        # Console
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['file_django', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'documentos': {
+            'handlers': ['file_documentos', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'bi': {
+            'handlers': ['file_bi', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'custom_email_logger': {
+            'handlers': ['file_email', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'ia': {
+            'handlers': ['file_ia', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'formularios': {
+            'handlers': ['file_formularios', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'sqlhub': {
+            'handlers': ['file_sqlhub', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        # ⇩ novo: logger do app AltForce
+        'altforce_sync': {
+            'handlers': ['file_altforce', 'console'],
+            'level': 'INFO',     # use 'DEBUG' para mais detalhes
+            'propagate': False,  # evita duplicar no logger raiz
+        },
     },
 }
 

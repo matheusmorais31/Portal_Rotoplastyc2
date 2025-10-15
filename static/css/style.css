@@ -981,7 +981,7 @@ body.light-theme .sidebar-logo-container .logo-dark-theme {
 .table th, .table td { padding: .5rem .6rem; border-bottom: 1px solid #2a2a2a; text-align: left; }
 .btn { padding: .45rem .8rem; border-radius: 8px; border: 1px solid #2a2a2a; background: #1e1e1e; cursor: pointer; }
 .btn:hover { filter: brightness(1.15); }
-.btn-primary { background: #3b82f6; border-color: #3b82f6; color: white; }
+
 .btn-sm { font-size: .85rem; padding: .3rem .6rem; }
 .input, select, textarea { width: 100%; padding: .45rem .6rem; border-radius: 6px; border: 1px solid #2a2a2a; background: #0f0f0f; color: #ddd; }
 .alert { padding: .5rem .75rem; border-radius: 8px; margin-bottom: .5rem; }

@@ -1,0 +1,162 @@
+# altforce_sync/management/commands/sync_altforce_budgets.py
+from __future__ import annotations
+
+from datetime import datetime, timedelta
+
+from django.conf import settings
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+
+from altforce_sync.conf import config
+from altforce_sync.services import sync_budgets
+
+
+def _parse_ymd(s: str) -> datetime:
+    """
+    Aceita:
+      - 'YYYY-MM-DD'
+      - 'YYYY-MM-DDTHH:MM'
+      - 'YYYY-MM-DDTHH:MM:SS'
+    Retorna datetime coerente com a config do projeto:
+      - se USE_TZ=True -> aware na tz padrão
+      - se USE_TZ=False -> naive
+    """
+    s = s.strip()
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        dt = datetime.fromisoformat(s + "T00:00:00")
+
+    if settings.USE_TZ and timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, timezone.get_default_timezone())
+    return dt
+
+
+def _fmt_dt_safe(dt: datetime) -> str:
+    """
+    Se aware -> aplica localtime pra exibir na tz local.
+    Se naive -> retorna direto.
+    """
+    if dt is None:
+        return "-"
+    if timezone.is_aware(dt):
+        return timezone.localtime(dt).strftime("%Y-%m-%d %H:%M:%S%z")
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
+class Command(BaseCommand):
+    help = (
+        "Sincroniza orçamentos (/budgets) do AltForce para "
+        "fApiOrcamentos, dApiOrcamentosProduto, dApiOrcamentosOpcionais "
+        "e dApiOrcamentosObservacoes."
+    )
+
+    def add_arguments(self, parser):
+        parser.add_argument("--start", type=str, help="YYYY-MM-DD[THH:MM[:SS]]")
+        parser.add_argument("--end",   type=str, help="YYYY-MM-DD[THH:MM[:SS]]")
+        parser.add_argument("--days",  type=int, help="Atalho: últimos N dias (ignora --start/--end)")
+
+        # flags avançadas
+        parser.add_argument(
+            "--refetch-optionals-detail",
+            dest="refetch_optionals_detail",
+            action="store_true",
+            help="Quando presente, tenta refetch do detalhe para preencher opcionais ausentes.",
+        )
+        parser.add_argument(
+            "--no-refetch-optionals-detail",
+            dest="refetch_optionals_detail",
+            action="store_false",
+            help="Desativa o refetch do detalhe (padrão).",
+        )
+        parser.add_argument(
+            "--overwrite-empty-optionals",
+            dest="overwrite_empty_optionals",
+            action="store_true",
+            help="Força gravar [] em opcionais quando a API vier vazia (útil para hard-sync).",
+        )
+        parser.add_argument(
+            "--no-overwrite-empty-optionals",
+            dest="overwrite_empty_optionals",
+            action="store_false",
+            help="Não força limpeza de opcionais vazios (padrão).",
+        )
+        parser.set_defaults(refetch_optionals_detail=False, overwrite_empty_optionals=False)
+
+    def handle(self, *args, **opts):
+        # Guardas de configuração
+        if not (config.company_id and config.api_key):
+            self.stderr.write(self.style.ERROR(
+                "Configure ALT_FORCE_COMPANY_ID e ALT_FORCE_API_KEY no .env."
+            ))
+            return
+
+        start_dt = None
+        end_dt = None
+        days = opts.get("days")
+
+        # Resolve janela
+        if days:
+            end_dt = timezone.now()
+            start_dt = end_dt - timedelta(days=int(days))
+            if settings.USE_TZ:
+                tz = timezone.get_default_timezone()
+                if timezone.is_naive(start_dt):
+                    start_dt = timezone.make_aware(start_dt, tz)
+                if timezone.is_naive(end_dt):
+                    end_dt = timezone.make_aware(end_dt, tz)
+        else:
+            if opts.get("start"):
+                start_dt = _parse_ymd(opts["start"])
+            if opts.get("end"):
+                end_dt = _parse_ymd(opts["end"])
+
+        # Log da janela
+        if start_dt and end_dt:
+            self.stdout.write(f"Janela: {_fmt_dt_safe(start_dt)} -> {_fmt_dt_safe(end_dt)}")
+        elif days:
+            self.stdout.write(f"Janela: últimos {days} dias até agora.")
+        else:
+            self.stdout.write("Sem parâmetros: usará a janela padrão (últimos 7 dias).")
+
+        refetch_optionals_detail = bool(opts.get("refetch_optionals_detail", False))
+        overwrite_empty_optionals = bool(opts.get("overwrite_empty_optionals", False))
+
+        # Executa sync
+        try:
+            res = sync_budgets(
+                start_dt=start_dt,
+                end_dt=end_dt,
+                days=None,
+                refetch_optionals_detail=refetch_optionals_detail,
+                overwrite_empty_optionals=overwrite_empty_optionals,
+            )
+        except Exception as exc:
+            self.stderr.write(self.style.ERROR(f"Falha ao sincronizar budgets: {exc}"))
+            raise
+
+        # Monta mensagem final com produtos, opcionais e observações
+        msg = (
+            f"OK: {res.get('count', 0)} budgets — "
+            f"{res.get('created', 0)} criados, {res.get('updated', 0)} atualizados. "
+            f"PRODUTOS: {res.get('orc_produtos_created', 0)} criados, "
+            f"{res.get('orc_produtos_updated', 0)} atualizados, "
+            f"{res.get('orc_produtos_deleted', 0)} removidos "
+            f"(vistos={res.get('orc_produtos_seen', 0)}). "
+            f"OPCIONAIS: {res.get('orc_opcionais_created', 0)} criados, "
+            f"{res.get('orc_opcionais_updated', 0)} atualizados "
+            f"(vistos={res.get('orc_opcionais_seen', 0)}). "
+            f"OBSERVAÇÕES: {res.get('orc_observacoes_created', 0)} criadas, "
+            f"{res.get('orc_observacoes_updated', 0)} atualizadas "
+            f"(vistos={res.get('orc_observacoes_seen', 0)})."
+        )
+        self.stdout.write(self.style.SUCCESS(msg))
+
+        # Lista erros (se houver)
+        errors = res.get("errors") or []
+        if errors:
+            self.stderr.write(self.style.WARNING(f"Erros: {len(errors)}"))
+            for e in errors[:10]:
+                self.stderr.write(f" - {e}")
+            if len(errors) > 10:
+                self.stderr.write(" ... (demais erros omitidos)")

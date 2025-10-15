@@ -1,1 +1,347 @@
 DEBUG 2025-09-29 16:58:00,003 views 5306 140370118698688 Acesso registrado via PDF.js para o usuário matheus.oliveira no documento DS07 - Lista Mestra de Controle de Documentos - TESTE
+DEBUG 2025-10-08 10:03:11,621 views 70063 140612716189376 === nova_revisao start ===
+DEBUG 2025-10-08 10:03:11,622 views 70063 140612716189376 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:03:11,624 views 70063 140612716189376 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:03:11,627 views 70063 140612716189376 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:04:15,778 views 70063 140612716189376 === nova_revisao start ===
+DEBUG 2025-10-08 10:04:15,779 views 70063 140612716189376 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:04:15,781 views 70063 140612716189376 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:04:15,788 views 70063 140612716189376 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:04:17,775 views 70063 140612699403968 === nova_revisao start ===
+DEBUG 2025-10-08 10:04:17,775 views 70063 140612699403968 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:04:17,777 views 70063 140612699403968 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:04:17,779 views 70063 140612699403968 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:08:10,603 views 70063 140612836771520 === nova_revisao start ===
+DEBUG 2025-10-08 10:08:10,604 views 70063 140612836771520 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:08:10,605 views 70063 140612836771520 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:08:10,609 views 70063 140612836771520 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:08:11,348 views 70063 140612724582080 === nova_revisao start ===
+DEBUG 2025-10-08 10:08:11,349 views 70063 140612724582080 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:08:11,351 views 70063 140612724582080 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:08:11,354 views 70063 140612724582080 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:08:11,871 views 70063 140612815795904 === nova_revisao start ===
+DEBUG 2025-10-08 10:08:11,871 views 70063 140612815795904 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:08:11,873 views 70063 140612815795904 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:08:11,876 views 70063 140612815795904 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:08:12,485 views 70063 140612724582080 === nova_revisao start ===
+DEBUG 2025-10-08 10:08:12,486 views 70063 140612724582080 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:08:12,488 views 70063 140612724582080 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:08:12,493 views 70063 140612724582080 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:08:12,899 views 70063 140612716189376 === nova_revisao start ===
+DEBUG 2025-10-08 10:08:12,900 views 70063 140612716189376 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:08:12,902 views 70063 140612716189376 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:08:12,906 views 70063 140612716189376 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:09:11,755 views 70063 140612815795904 === nova_revisao start ===
+DEBUG 2025-10-08 10:09:11,756 views 70063 140612815795904 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:09:11,757 views 70063 140612815795904 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:09:11,762 views 70063 140612815795904 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:09:12,607 views 70063 140612815795904 === nova_revisao start ===
+DEBUG 2025-10-08 10:09:12,608 views 70063 140612815795904 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:09:12,610 views 70063 140612815795904 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:09:12,613 views 70063 140612815795904 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:10:07,777 views 70063 140612716189376 === nova_revisao start ===
+DEBUG 2025-10-08 10:10:07,778 views 70063 140612716189376 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:10:07,780 views 70063 140612716189376 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:10:07,784 views 70063 140612716189376 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:10:08,515 views 70063 140612699403968 === nova_revisao start ===
+DEBUG 2025-10-08 10:10:08,516 views 70063 140612699403968 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:10:08,518 views 70063 140612699403968 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:10:08,523 views 70063 140612699403968 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:10:15,698 views 70063 140612724582080 === nova_revisao start ===
+DEBUG 2025-10-08 10:10:15,699 views 70063 140612724582080 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:10:15,701 views 70063 140612724582080 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:10:15,705 views 70063 140612724582080 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:10:16,374 views 70063 140612836771520 === nova_revisao start ===
+DEBUG 2025-10-08 10:10:16,375 views 70063 140612836771520 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:10:16,377 views 70063 140612836771520 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:10:16,382 views 70063 140612836771520 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:10:16,910 views 70063 140612815795904 === nova_revisao start ===
+DEBUG 2025-10-08 10:10:16,911 views 70063 140612815795904 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:10:16,914 views 70063 140612815795904 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:10:16,920 views 70063 140612815795904 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:11:03,839 views 70063 140612815795904 === nova_revisao start ===
+DEBUG 2025-10-08 10:11:03,840 views 70063 140612815795904 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:11:03,843 views 70063 140612815795904 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:11:03,848 views 70063 140612815795904 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:11:04,511 views 70063 140612815795904 === nova_revisao start ===
+DEBUG 2025-10-08 10:11:04,511 views 70063 140612815795904 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:11:04,513 views 70063 140612815795904 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:11:04,517 views 70063 140612815795904 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:11:20,083 views 70063 140612724582080 === nova_revisao start ===
+DEBUG 2025-10-08 10:11:20,084 views 70063 140612724582080 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:11:20,086 views 70063 140612724582080 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:11:20,088 views 70063 140612724582080 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:11:20,684 views 70063 140612724582080 === nova_revisao start ===
+DEBUG 2025-10-08 10:11:20,684 views 70063 140612724582080 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:11:20,686 views 70063 140612724582080 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:11:20,689 views 70063 140612724582080 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:11:21,070 views 70063 140612836771520 === nova_revisao start ===
+DEBUG 2025-10-08 10:11:21,070 views 70063 140612836771520 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:11:21,072 views 70063 140612836771520 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:11:21,075 views 70063 140612836771520 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:11:21,445 views 70063 140612815795904 === nova_revisao start ===
+DEBUG 2025-10-08 10:11:21,445 views 70063 140612815795904 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:11:21,448 views 70063 140612815795904 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:11:21,455 views 70063 140612815795904 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:11:21,606 views 70063 140612716189376 === nova_revisao start ===
+DEBUG 2025-10-08 10:11:21,606 views 70063 140612716189376 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:11:21,609 views 70063 140612716189376 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:11:21,614 views 70063 140612716189376 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:14:43,696 views 70063 140612665833152 === nova_revisao start ===
+DEBUG 2025-10-08 10:14:43,697 views 70063 140612665833152 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:14:43,700 views 70063 140612665833152 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:14:43,704 views 70063 140612665833152 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:14:45,471 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:14:45,472 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:14:45,474 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:14:45,479 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:14:46,238 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:14:46,238 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:14:46,240 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:14:46,243 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:14:54,291 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:14:54,292 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:14:54,294 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:14:54,299 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:15:07,485 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:15:07,485 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:15:07,487 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:15:07,493 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:15:08,106 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:15:08,106 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:15:08,108 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:15:08,111 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:15:08,542 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:15:08,544 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:15:08,547 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:15:08,551 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:15:19,333 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:15:19,333 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:15:19,336 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:15:19,341 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:15:20,021 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:15:20,022 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:15:20,024 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:15:20,027 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:15:55,260 views 70063 140612657440448 === nova_revisao start ===
+DEBUG 2025-10-08 10:15:55,261 views 70063 140612657440448 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:15:55,263 views 70063 140612657440448 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:15:55,266 views 70063 140612657440448 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:16:54,627 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:16:54,628 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:16:54,629 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:16:54,635 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:16:55,543 views 70063 140612632262336 === nova_revisao start ===
+DEBUG 2025-10-08 10:16:55,543 views 70063 140612632262336 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:16:55,544 views 70063 140612632262336 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:16:55,547 views 70063 140612632262336 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:17:13,316 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:17:13,317 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:17:13,318 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:17:13,321 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:17:48,815 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:17:48,815 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:17:48,817 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:17:48,820 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:18:01,345 views 70063 140612657440448 === nova_revisao start ===
+DEBUG 2025-10-08 10:18:01,346 views 70063 140612657440448 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:18:01,347 views 70063 140612657440448 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:18:01,350 views 70063 140612657440448 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:18:02,074 views 70063 140612632262336 === nova_revisao start ===
+DEBUG 2025-10-08 10:18:02,075 views 70063 140612632262336 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:18:02,078 views 70063 140612632262336 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:18:02,084 views 70063 140612632262336 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:18:02,684 views 70063 140612665833152 === nova_revisao start ===
+DEBUG 2025-10-08 10:18:02,685 views 70063 140612665833152 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:18:02,686 views 70063 140612665833152 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:18:02,689 views 70063 140612665833152 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:18:07,653 views 70063 140612657440448 === nova_revisao start ===
+DEBUG 2025-10-08 10:18:07,654 views 70063 140612657440448 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:18:07,655 views 70063 140612657440448 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:18:07,659 views 70063 140612657440448 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:18:08,368 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:18:08,368 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:18:08,370 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:18:08,374 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:18:15,829 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:18:15,830 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:18:15,832 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:18:15,835 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:19:18,630 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:19:18,631 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:19:18,634 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:19:18,639 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:19:19,212 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:19:19,212 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:19:19,214 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:19:19,217 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:19:19,723 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:19:19,724 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:19:19,725 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:19:19,730 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:19:20,277 views 70063 140612665833152 === nova_revisao start ===
+DEBUG 2025-10-08 10:19:20,278 views 70063 140612665833152 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:19:20,279 views 70063 140612665833152 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:19:20,283 views 70063 140612665833152 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:22:35,656 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:22:35,656 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:22:35,658 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:22:35,661 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:22:45,773 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:22:45,774 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:22:45,776 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:22:45,779 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:22:46,478 views 70063 140612657440448 === nova_revisao start ===
+DEBUG 2025-10-08 10:22:46,479 views 70063 140612657440448 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:22:46,480 views 70063 140612657440448 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:22:46,484 views 70063 140612657440448 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:22:46,710 views 70063 140612632262336 === nova_revisao start ===
+DEBUG 2025-10-08 10:22:46,710 views 70063 140612632262336 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:22:46,712 views 70063 140612632262336 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:22:46,714 views 70063 140612632262336 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:22:46,903 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:22:46,904 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:22:46,905 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:22:46,908 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:27:21,800 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:27:21,804 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:27:21,806 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:27:21,832 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:27:22,570 views 70063 140612640655040 === nova_revisao start ===
+DEBUG 2025-10-08 10:27:22,571 views 70063 140612640655040 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:27:22,573 views 70063 140612640655040 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:27:22,576 views 70063 140612640655040 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:27:54,970 views 70063 140612649047744 === nova_revisao start ===
+DEBUG 2025-10-08 10:27:54,970 views 70063 140612649047744 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:27:54,972 views 70063 140612649047744 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:27:54,974 views 70063 140612649047744 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:54,333 views 70063 140612607084224 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:54,334 views 70063 140612607084224 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:54,337 views 70063 140612607084224 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:54,342 views 70063 140612607084224 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:55,139 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:55,139 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:55,141 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:55,146 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:55,803 views 70063 140612581906112 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:55,804 views 70063 140612581906112 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:55,805 views 70063 140612581906112 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:55,809 views 70063 140612581906112 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:56,306 views 70063 140612598691520 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:56,306 views 70063 140612598691520 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:56,309 views 70063 140612598691520 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:56,313 views 70063 140612598691520 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:56,783 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:56,784 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:56,790 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:56,794 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:57,270 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:57,271 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:57,272 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:57,276 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:57,746 views 70063 140612598691520 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:57,746 views 70063 140612598691520 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:57,748 views 70063 140612598691520 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:57,750 views 70063 140612598691520 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:33:58,232 views 70063 140612598691520 === nova_revisao start ===
+DEBUG 2025-10-08 10:33:58,233 views 70063 140612598691520 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:33:58,234 views 70063 140612598691520 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:33:58,238 views 70063 140612598691520 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:35:12,709 views 70063 140612607084224 === nova_revisao start ===
+DEBUG 2025-10-08 10:35:12,710 views 70063 140612607084224 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:35:12,712 views 70063 140612607084224 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:35:12,717 views 70063 140612607084224 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:38:04,891 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:38:04,892 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:38:04,894 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:38:04,897 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:38:07,030 views 70063 140612548335296 === nova_revisao start ===
+DEBUG 2025-10-08 10:38:07,031 views 70063 140612548335296 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:38:07,032 views 70063 140612548335296 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:38:07,035 views 70063 140612548335296 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:38:07,555 views 70063 140612548335296 === nova_revisao start ===
+DEBUG 2025-10-08 10:38:07,556 views 70063 140612548335296 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:38:07,557 views 70063 140612548335296 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:38:07,560 views 70063 140612548335296 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:38:07,776 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:38:07,776 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:38:07,779 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:38:07,784 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:40:55,099 views 70063 140612523157184 === nova_revisao start ===
+DEBUG 2025-10-08 10:40:55,100 views 70063 140612523157184 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:40:55,102 views 70063 140612523157184 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:40:55,108 views 70063 140612523157184 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:40:55,776 views 70063 140612531549888 === nova_revisao start ===
+DEBUG 2025-10-08 10:40:55,776 views 70063 140612531549888 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:40:55,778 views 70063 140612531549888 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:40:55,780 views 70063 140612531549888 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:40:56,511 views 70063 140612674225856 === nova_revisao start ===
+DEBUG 2025-10-08 10:40:56,511 views 70063 140612674225856 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:40:56,514 views 70063 140612674225856 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:40:56,518 views 70063 140612674225856 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:41:24,618 views 70063 140612523157184 === nova_revisao start ===
+DEBUG 2025-10-08 10:41:24,618 views 70063 140612523157184 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:41:24,621 views 70063 140612523157184 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:41:24,625 views 70063 140612523157184 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:41:25,272 views 70063 140612514764480 === nova_revisao start ===
+DEBUG 2025-10-08 10:41:25,272 views 70063 140612514764480 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:41:25,274 views 70063 140612514764480 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:41:25,279 views 70063 140612514764480 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:41:25,681 views 70063 140612523157184 === nova_revisao start ===
+DEBUG 2025-10-08 10:41:25,682 views 70063 140612523157184 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:41:25,684 views 70063 140612523157184 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:41:25,688 views 70063 140612523157184 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:42:18,934 views 70063 140612514764480 === nova_revisao start ===
+DEBUG 2025-10-08 10:42:18,935 views 70063 140612514764480 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:42:18,937 views 70063 140612514764480 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:42:18,942 views 70063 140612514764480 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:42:20,930 views 70063 140612506371776 === nova_revisao start ===
+DEBUG 2025-10-08 10:42:20,930 views 70063 140612506371776 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:42:20,932 views 70063 140612506371776 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:42:20,935 views 70063 140612506371776 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:42:28,879 views 70063 140612539942592 === nova_revisao start ===
+DEBUG 2025-10-08 10:42:28,886 views 70063 140612539942592 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:42:28,890 views 70063 140612539942592 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:42:28,894 views 70063 140612539942592 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:42:32,432 views 70063 140612531549888 === nova_revisao start ===
+DEBUG 2025-10-08 10:42:32,433 views 70063 140612531549888 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:42:32,435 views 70063 140612531549888 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:42:32,441 views 70063 140612531549888 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:47:19,532 views 70063 140612489586368 === nova_revisao start ===
+DEBUG 2025-10-08 10:47:19,532 views 70063 140612489586368 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:47:19,534 views 70063 140612489586368 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:47:19,537 views 70063 140612489586368 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:47:20,307 views 70063 140612464408256 === nova_revisao start ===
+DEBUG 2025-10-08 10:47:20,307 views 70063 140612464408256 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:47:20,308 views 70063 140612464408256 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:47:20,311 views 70063 140612464408256 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:47:45,734 views 70063 140612472800960 === nova_revisao start ===
+DEBUG 2025-10-08 10:47:45,735 views 70063 140612472800960 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:47:45,741 views 70063 140612472800960 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:47:45,757 views 70063 140612472800960 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:50:41,529 views 70063 140612481193664 === nova_revisao start ===
+DEBUG 2025-10-08 10:50:41,529 views 70063 140612481193664 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:50:41,532 views 70063 140612481193664 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:50:41,536 views 70063 140612481193664 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:50:50,422 views 70063 140612481193664 === nova_revisao start ===
+DEBUG 2025-10-08 10:50:50,423 views 70063 140612481193664 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:50:50,425 views 70063 140612481193664 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:50:50,438 views 70063 140612481193664 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:50:51,444 views 70063 140612464408256 === nova_revisao start ===
+DEBUG 2025-10-08 10:50:51,444 views 70063 140612464408256 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:50:51,446 views 70063 140612464408256 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:50:51,449 views 70063 140612464408256 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:50:57,180 views 70063 140612497979072 === nova_revisao start ===
+DEBUG 2025-10-08 10:50:57,180 views 70063 140612497979072 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:50:57,182 views 70063 140612497979072 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:50:57,185 views 70063 140612497979072 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:51:00,128 views 70063 140612481193664 === nova_revisao start ===
+DEBUG 2025-10-08 10:51:00,129 views 70063 140612481193664 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-08 10:51:00,130 views 70063 140612481193664 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-08 10:51:00,134 views 70063 140612481193664 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-08 10:51:41,815 views 70063 140612456015552 === nova_revisao start ===
+DEBUG 2025-10-08 10:51:41,816 views 70063 140612456015552 Parâmetros: documento_id=316, user=admin
+DEBUG 2025-10-08 10:51:41,817 views 70063 140612456015552 Documento atual: id=316, nome='DS07 - Lista Mestra de Controle de Documentos', revisao=10, codigo=d12ae220-b4d7-4e5d-815b-66bce17c742a
+INFO 2025-10-08 10:51:41,820 views 70063 140612456015552 Bloqueio por pendente: id=641 status=aguardando_elaborador
+DEBUG 2025-10-08 10:51:47,115 views 70063 140612456015552 Acesso registrado via PDF.js para o usuário admin no documento DS07 - Lista Mestra de Controle de Documentos - TESTE
+DEBUG 2025-10-08 10:59:45,549 views 70063 140612481193664 Acesso registrado via PDF.js para o usuário admin no documento DS07 - Lista Mestra de Controle de Documentos - TESTE

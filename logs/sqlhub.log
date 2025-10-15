@@ -109,3 +109,6 @@ DEBUG 2025-09-29 17:24:42,577 views 5859 140591652398784 options_api pk=1 Fallba
 DEBUG 2025-09-29 17:27:20,698 views 5859 140591887263424 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
 DEBUG 2025-09-29 17:27:20,699 views 5859 140591887263424 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
 DEBUG 2025-09-29 17:27:20,825 views 5859 140591887263424 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''
+DEBUG 2025-10-14 08:52:49,812 views 141261 139794439984832 options_api pk=1 Fallback scan_limit=2000 (soft_max=5000) q='' engine=firebird
+DEBUG 2025-10-14 08:52:49,812 views 141261 139794439984832 options_api pk=1 Fallback search idx=[1, 2, 3, 0] names=['REFERENCIA', 'DESCRICAO', 'REF_DESCRICAO', 'COD_PRODUTO']
+DEBUG 2025-10-14 08:52:49,934 views 141261 139794439984832 options_api pk=1 Fallback looked=200 found=200 limit=200 q=''

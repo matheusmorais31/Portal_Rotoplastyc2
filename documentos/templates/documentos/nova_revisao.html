@@ -6,7 +6,7 @@
 
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" type="text/css" href="{% static 'css/registrar.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/nova_revisao.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -20,7 +20,7 @@
             {{ mensagem }}
         </div>
     {% endif %}
-
+<div class="revisao-card">
     {% if revisao_pendente %}
         <p><strong>Revisão Pendente</strong></p>
         <ul>
@@ -28,7 +28,7 @@
             <li class="lista-revisao"><strong>Status:&nbsp;</strong>{{ revisao_pendente.get_status_display }}</li>
             <li class="lista-revisao"><strong>Data de Criação:&nbsp;</strong>{{ revisao_pendente.data_criacao|date:"d/m/Y H:i" }}</li>
         </ul>
-
+</div>
         <a href="javascript:history.back()" class="btn btn-primary">Voltar</a>
 
     {% else %}

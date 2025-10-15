@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, Set
 from datetime import timedelta
-
+from pathlib import Path
+import uuid
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -276,7 +277,17 @@ class FormularioUserState(models.Model):
 
 
 def upload_para(instancia: "ValorResposta", nome: str) -> str:
-    return f'formularios/{instancia.campo.id}/{instancia.resposta.id}/{nome}'
+    # pasta única para todos os uploads do app
+    base_dir = "formularios/uploads"
+
+    # preserva a extensão original, em minúsculas
+    ext = Path(nome).suffix.lower()  # ex: ".pdf", ".jpg" (ou "" se não tiver)
+
+    # nome único: timestamp + uuid (evita colisões)
+    uniq = f"{timezone.now():%Y%m%d%H%M%S%f}-{uuid.uuid4().hex}"
+
+    return f"{base_dir}/{uniq}{ext}"
+
 
 
 class ValorResposta(models.Model):
