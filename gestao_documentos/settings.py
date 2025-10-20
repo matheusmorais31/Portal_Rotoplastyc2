@@ -222,9 +222,9 @@ LOGGING = {
             'formatter': 'verbose',
         },
 
-        # ⇩ novo: logs do app AltForce
+        # Logs do app AltForce
         'file_altforce': {
-            'level': 'INFO',  # mude para 'DEBUG' se quiser detalhar mais
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': LOGGING_DIR / 'altforce_sync.log',
             'maxBytes': 10 * 1024 * 1024,
@@ -276,12 +276,10 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-
-        # ⇩ novo: logger do app AltForce
         'altforce_sync': {
             'handlers': ['file_altforce', 'console'],
-            'level': 'INFO',     # use 'DEBUG' para mais detalhes
-            'propagate': False,  # evita duplicar no logger raiz
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }
@@ -351,15 +349,13 @@ GEMINI_API_KEY = config('GEMINI_API_KEY', default=None)
 OPENAI_API_KEY = config('OPENAI_API_KEY', default=None)
 ASSISTANT_ID = "asst_n3bjyIruC73ZJVgygOKRtaqU"
 
-# Power BI (ROPC - use com cautela)
+# Power BI – Service Principal (client-credentials) – SEM ROPC
 POWERBI_TENANT_ID = config('POWERBI_TENANT_ID', default=None)
-POWERBI_USERNAME = config('POWERBI_USERNAME', default=None)
-POWERBI_PASSWORD = config('POWERBI_PASSWORD', default=None)
-POWERBI_CLIENT_ID_FOR_ROPC = config('POWERBI_CLIENT_ID_FOR_ROPC', default=None)
-POWERBI_GROUP_ID_DEFAULT = config('POWERBI_GROUP_ID_DEFAULT', default=None)
 POWERBI_CLIENT_ID = config("POWERBI_CLIENT_ID", default=None)
 POWERBI_CLIENT_SECRET = config("POWERBI_CLIENT_SECRET", default="")
 POWERBI_SCOPE = config("POWERBI_SCOPE", default="https://analysis.windows.net/powerbi/api/.default")
+POWERBI_GROUP_ID_DEFAULT = config('POWERBI_GROUP_ID_DEFAULT', default=None)
+POWERBI_AUTH_MODE = config("POWERBI_AUTH_MODE", default="sp")  # fixo em "sp"
 
 # Taxa de câmbio (exemplo)
 USD_TO_BRL_RATE = config('USD_TO_BRL_RATE', default=Decimal("5.00"), cast=Decimal)
@@ -372,13 +368,11 @@ if not FERNET_KEYS or not FERNET_KEYS[0]:
     digest = hashlib.sha256(SECRET_KEY.encode()).digest()
     FERNET_KEYS = [base64.urlsafe_b64encode(digest).decode()]
 
-# ====== CLIMATEMPO  ======  # <<<
-CLIMATEMPO_TOKEN = config('CLIMATEMPO_TOKEN', default=None)         # <<<
-CLIMATEMPO_CIDADE_ID = config('CLIMATEMPO_CIDADE_ID', default=5585, cast=int)  # <<<
-
+# ====== CLIMATEMPO  ======
+CLIMATEMPO_TOKEN = config('CLIMATEMPO_TOKEN', default=None)
+CLIMATEMPO_CIDADE_ID = config('CLIMATEMPO_CIDADE_ID', default=5585, cast=int)
 
 # ====== OPEN-METEO  ======
 OPENMETEO_LAT = config('OPENMETEO_LAT', default=-28.28389, cast=float)   # Carazinho-RS
 OPENMETEO_LON = config('OPENMETEO_LON', default=-52.78639, cast=float)
 OPENMETEO_TIMEZONE = config('OPENMETEO_TIMEZONE', default=TIME_ZONE)
-

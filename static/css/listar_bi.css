@@ -333,3 +333,53 @@ input#searchInput.search-input:focus {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+
+.last-upd{
+  display:inline;         /* sem pílula / sem flex */
+  padding:0;
+  margin:0;
+  border:0;
+  background:transparent;
+  font-size: inherit;
+}
+
+/* (opcional) só cor no valor, mantendo layout igual ao título */
+.last-upd .lastUpdText { color: inherit; }
+.last-upd.ok    .lastUpdText { color: #55ff0c; }  
+.last-upd.warn  .lastUpdText { color: #f59e0b; }   
+.last-upd.stale .lastUpdText { color: #ef4444; }   
+.last-upd.unknown .lastUpdText { color: #9ca3af; } 
+
+
+
+/* Botão Atualizar: estado base e loading */
+.refresh-btn{
+  position: relative;                 /* âncora p/ o spinner */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;                        /* opcional: dá área clicável */
+  height: 32px;
+}
+
+.refresh-btn.loading img{
+  opacity: 0;                         /* esconde o ícone durante o loading */
+}
+
+.refresh-btn.loading::after{
+  content: "";
+  position: absolute;                 /* centraliza no botão */
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;              /* metade do tamanho p/ centralizar */
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #ffffff;          /* “pedaço” que gira */
+  border-radius: 50%;
+  animation: spin 1s linear infinite; /* usa teu @keyframes spin existente */
+}
+
+/* (se preferir esconder de vez) */
+/* .refresh-btn.loading img { visibility: hidden; } */

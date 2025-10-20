@@ -1,81 +1,722 @@
+<!-- bi/visualizar_bi.html -->
 {% extends 'base.html' %}
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/visualizar_bi.css' %}">
+<link rel="stylesheet" href="{% static 'css/visualizar_bi.css' %}">
 {% endblock %}
 
 {% block content %}
-  <!-- Contêiner do relatório Power BI -->
-  <div id="reportContainer" class="h-full w-full"></div>
 
-  <!-- Power BI Client SDK (última versão estável) -->
+  <!-- Barra de ferramentas -->
+  <div class="bi-toolbar" role="toolbar" aria-label="Barra de ferramentas do relatório">
+    <div class="title">{{ bi_report.title }}</div>
+    <div class="spacer"></div>
+
+    <!-- Badge de última atualização (EPOCH + ISO) -->
+    <div class="last-upd" id="lastUpd"
+         data-last-epoch="{{ bi_report.last_updated|date:'U'|default:'' }}"
+         data-next-epoch="{{ bi_report.next_update|date:'U'|default:'' }}"
+         data-last-iso="{{ bi_report.last_updated|date:'c'|default:'' }}"
+         data-next-iso="{{ bi_report.next_update|date:'c'|default:'' }}"
+         title="Última atualização do dataset no Power BI">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="lastUpdText">Atualização: —</span>
+    </div>
+
+    <div class="dropdown" id="viewDropdown">
+      <button class="btn" id="btnView" aria-haspopup="true" aria-expanded="false">Exibição ▾</button>
+      <div class="menu" id="menuView" role="menu" aria-label="Exibição">
+        <button class="btn" data-view="fitToPage"  role="menuitem">🧩 Ajustar à página</button>
+        <button class="btn" data-view="fitToWidth" role="menuitem">↔️ Ajustar à largura</button>
+        <button class="btn" data-view="actualSize" role="menuitem">1:1 Tamanho real</button>
+      </div>
+    </div>
+
+    <button class="btn" id="btnFull">Tela inteira</button>
+
+    <!-- Botão Atualizar com spinner -->
+    <button class="btnrefresh" id="btnRefreshNow" aria-live="polite" aria-busy="false">
+      <span class="spinner" aria-hidden="true"></span>
+      <span class="label">Atualizar agora</span>
+    </button>
+
+    <button class="btn btn-danger" id="btnReset">Redefinir filtros</button>
+  </div>
+
+  <div id="reportContainer">
+    <div id="bootMask" class="boot-mask" aria-live="polite">
+      <div class="box">
+        Aplicando seus filtros… <span id="bootStep">iniciando</span>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.0/dist/powerbi.min.js"></script>
   <script>
     (() => {
-      const models    = window['powerbi-client'].models;
-      const reportId  = '{{ report_id }}';
-      const groupId   = '{{ bi_report.group_id }}';
-      const csrftoken = '{{ csrf_token }}';
+      const models        = window['powerbi-client'].models;
+      const reportId      = '{{ bi_report.report_id }}';
+      const groupId       = '{{ bi_report.group_id }}';
+      const serverState   = {{ initial_state_json|safe }} || {};
+      const serverStateUpdatedAt = '{{ initial_state_updated_at|default:"" }}';
+      const REFRESH_MS    = 50 * 60 * 1000; // 50 min
+      const TRACE_ID      = '{{ trace_id }}';
 
-      // Intervalo de renovação (ms) — 50 min para garantir margem antes do expirar real (60 min)
-      const REFRESH_INTERVAL = 50 * 60 * 1000;
+      // ==== escopo por usuário + versão por última atualização ====
+      const USER_ID = '{{ request.user.id }}';
+      const LS_VER  = '{{ bi_report.last_updated|date:"U"|default:"0" }}';
+      const LS_KEY       = `pbiState:${USER_ID}:${groupId}:${reportId}:v${LS_VER}`;
 
-      /** Gera nova token chamando a view Django */
-      async function fetchNewToken() {
-        const res = await fetch('{% url "bi:get_embed_params" %}', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken' : csrftoken
-          },
-          body: JSON.stringify({ report_id: reportId, group_id: groupId })
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (!data.embed_token) throw new Error('Resposta sem embed_token');
-        return data.embed_token;
+      // Chave "global" e por PÁGINA para o estado publicado (Power BI Desktop) — baseline
+      const BASE_BM_PREFIX = `pbiBase:${groupId}:${reportId}:v${LS_VER}`;
+      const BASE_BM_KEY    = `${BASE_BM_PREFIX}:_global`;
+      const pageBaseKey    = (pageName) => `${BASE_BM_PREFIX}:pg:${pageName}`;
+
+      let report;
+      let saveTimer;
+      let readyToCapture = false;
+      let tokenRefreshTimer = null;
+
+      // ========= LOG / MASK =========
+      function log(level, msg, obj) {
+        const t = performance.now().toFixed(1);
+        const tag = `[PBI:${level}] (${TRACE_ID}) ${t}ms ${msg}`;
+        if (obj !== undefined) (console[level] || console.log).call(console, tag, obj);
+        else (console[level] || console.log).call(console, tag);
+      }
+      const bootMask = document.getElementById('bootMask');
+      const bootStepEl = document.getElementById('bootStep');
+      const setBootStep = (t) => { if (bootStepEl) bootStepEl.textContent = t; };
+      const hideBootMask = () => { if (bootMask) bootMask.style.display = 'none'; };
+      const showBootMask = () => { if (bootMask) bootMask.style.display = ''; };
+
+      // ========= STATE HELPERS =========
+      function summarize(state) {
+        try {
+          const rf = Array.isArray(state?.reportFilters) ? state.reportFilters.length : 0;
+          const ap = state?.activePage || null;
+          const slicerPages = state?.slicers && typeof state.slicers === 'object' ? Object.keys(state.slicers).length : 0;
+          const slicerVisuals = slicerPages ? Object.values(state.slicers).reduce((a, v) => a + (v && typeof v === 'object' ? Object.keys(v).length : 0), 0) : 0;
+          const hasBm = typeof state?.bookmarkState === 'string' && state.bookmarkState.length > 0;
+          const bmLen = hasBm ? state.bookmarkState.length : 0;
+          return { rf, ap, slicerPages, slicerVisuals, hasBm, bmLen, keys: Object.keys(state || {}) };
+        } catch { return { rf: 0, ap: null, slicerPages: 0, slicerVisuals: 0, hasBm: false, bmLen: 0, keys: [] }; }
+      }
+      function loadLocalState() {
+        try {
+          const s = localStorage.getItem(LS_KEY);
+          const parsed = s ? JSON.parse(s) : {};
+          if (parsed && parsed._uid && parsed._uid !== USER_ID) {
+            log('info','loadLocalState skip: uid mismatch', { saved: parsed._uid, current: USER_ID });
+            return {};
+          }
+          log('debug', 'loadLocalState()', { summary: summarize(parsed), raw: parsed });
+          return parsed || {};
+        } catch (e) {
+          log('warn', 'loadLocalState parse error', e);
+          return {};
+        }
+      }
+      function saveLocalState(state, updatedAtMs) {
+        try {
+          if (!readyToCapture) { log('debug', 'saveLocalState skipped (not readyToCapture)'); return; }
+          const copy = JSON.parse(JSON.stringify(state || {}));
+          copy._uid = USER_ID;
+          copy._updatedAt = typeof updatedAtMs === 'number' ? updatedAtMs : Date.now();
+          localStorage.setItem(LS_KEY, JSON.stringify(copy));
+          log('debug', 'saveLocalState()', { summary: summarize(copy) });
+        } catch (e) {
+          log('warn', 'saveLocalState error', e);
+        }
+      }
+      function debounce(fn, delay=900) {
+        return (...args) => {
+          clearTimeout(saveTimer);
+          if (!readyToCapture) return;
+          saveTimer = setTimeout(() => fn.apply(this, args), delay);
+        };
+      }
+      async function snapshotCurrentState(){
+        const snap = {};
+        try { if (report?.getFilters) snap.reportFilters = await report.getFilters(); } catch(e){ log('debug','snapshot:getFilters fail', e); }
+        try {
+          if (report?.getActivePage){
+            const pg = await report.getActivePage();
+            if (pg) snap.activePage = pg.displayName || pg.name;
+          }
+        } catch(e){ log('debug','snapshot:getActivePage fail', e); }
+        try {
+          if (report?.bookmarksManager?.capture) {
+            const bm = await report.bookmarksManager.capture();
+            if (bm?.state) snap.bookmarkState = bm.state;
+          }
+        } catch(e){ log('debug','snapshot:bookmark fail', e); }
+        log('info','snapshotCurrentState →', summarize(snap));
+        return snap;
+      }
+      async function captureState() {
+        if (!readyToCapture) { log('debug', 'captureState skipped (not readyToCapture)'); return; }
+        const t0 = performance.now();
+        try {
+          const currentState = await snapshotCurrentState();
+          saveLocalState(currentState);
+          const res = await fetch('{% url "bi:salvar_estado_relatorio" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ report_id: reportId, group_id: groupId, state: currentState })
+          });
+          const txt = await res.text();
+          log('info', `save_state (normal) → ${res.status}`, txt);
+          try {
+            const j = JSON.parse(txt || '{}');
+            if (j?.ok && j.updated_at) saveLocalState(currentState, Date.parse(j.updated_at));
+          } catch {}
+        } catch (err) {
+          log('error', 'captureState error', err);
+        } finally {
+          log('debug', `captureState took ${(performance.now() - t0).toFixed(1)}ms`);
+        }
+      }
+      const saveStateDebounced = debounce(captureState, 900);
+
+      // ========= CSRF =========
+      function getCookie(name) {
+        const v = `; ${document.cookie}`;
+        const parts = v.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
       }
 
-      /** Embute relatório */
-      function embedReport(initialUrl, initialToken) {
+      // ========= URL / TOKEN helpers =========
+      const VALID_EMBED_URL = /^https:\/\/app\.powerbi\.(com|us|gov|cn)\/reportEmbed(\?|$)/i;
+      function normalizeEmbedUrl(u){
+        if (!u || typeof u !== 'string') return '';
+        return u.replace(/&amp;/g,'&').replace(/\s+/g,'').trim();
+      }
+      function ensureValidEmbedUrl(u){
+        const s = normalizeEmbedUrl(u);
+        return VALID_EMBED_URL.test(s) ? s : '';
+      }
+      function buildEmbedUrl(reportId, groupId){
+        return `https://app.powerbi.com/reportEmbed?reportId=${encodeURIComponent(reportId)}&groupId=${encodeURIComponent(groupId)}`;
+      }
+
+      const INITIAL_URL   = ensureValidEmbedUrl('{{ embed_url|escapejs }}') || buildEmbedUrl(reportId, groupId);
+      const INITIAL_TOKEN = '{{ embed_token|escapejs }}';
+
+      async function fetchEmbedParams() {
+        const res  = await fetch('{% url "bi:get_embed_params" %}', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ report_id: reportId, group_id: groupId })
+        });
+        const text = await res.text();
+        if (!res.ok) throw new Error(`get_embed_params HTTP ${res.status}`);
+        const data = JSON.parse(text || '{}');
+
+        const apiUrl  = data.embed_url || data.embedUrl || data.embedURL || data.url || '';
+        const url     = ensureValidEmbedUrl(apiUrl) || INITIAL_URL;
+        const token   = data.embed_token || INITIAL_TOKEN;
+
+        log('info','fetchEmbedParams resolved', { usingUrl: url.slice(0,100)+'…' });
+        return { url, token };
+      }
+
+      // ========= Helpers de baseline publicado (por página) =========
+      async function captureBaseForActivePageIfMissing(){
+        try{
+          if (!report?.bookmarksManager?.capture) return;
+          const ap = await report.getActivePage();
+          if (!ap) return;
+          const key = pageBaseKey(ap.name || ap.displayName || '');
+          if (!key) return;
+          if (!localStorage.getItem(key)){
+            const base = await report.bookmarksManager.capture(); // estado publicado na página ativa (antes de alterações)
+            if (base?.state){
+              localStorage.setItem(key, base.state);
+              // mantém também uma cópia "global" (primeira capturada)
+              if (!localStorage.getItem(BASE_BM_KEY)) localStorage.setItem(BASE_BM_KEY, base.state);
+              log('info','base bookmark capturado p/ página', { page: ap.displayName || ap.name });
+            }
+          }
+        }catch(e){
+          log('debug','captureBaseForActivePageIfMissing fail', e);
+        }
+      }
+
+      // ========= EMBED =========
+      async function embedReportPhased(embedUrl, accessToken) {
+        const url = ensureValidEmbedUrl(embedUrl) || INITIAL_URL;
+        const token = accessToken || INITIAL_TOKEN;
+
+        const container = document.getElementById('reportContainer');
         const config = {
           type: 'report',
           id:   reportId,
-          embedUrl:    initialUrl,
-          accessToken: initialToken,
+          embedUrl:    url,
+          accessToken: token,
           tokenType:   models.TokenType.Embed,
           permissions: models.Permissions.View,
+          phasedEmbedding: true,
+          filters: [],
           settings: {
             panes: { filters: { visible: true }, pageNavigation: { visible: true } },
             navContentPaneEnabled: true,
             layoutType:  models.LayoutType.Custom,
-            customLayout:{ displayOption: models.DisplayOption.FitToPage }
+            customLayout:{ displayOption: models.DisplayOption.FitToPage },
+            persistentFiltersEnabled: false
           }
         };
 
-        const container = document.getElementById('reportContainer');
-        powerbi.reset(container);
-        const report = powerbi.embed(container, config);
+        window.powerbi.reset(container);
+        report = window.powerbi.embed(container, config);
 
-        // 🔄 Refresh periódica independente de "tokenExpired" (evita erro SDK)
-        const timer = setInterval(async () => {
+        // Handlers
+        report.off && report.off('loaded');
+        report.off && report.off('rendered');
+        report.off && report.off('filtersApplied');
+        report.off && report.off('pageChanged');
+        report.off && report.off('dataSelected');
+
+        report.on('loaded', async () => {
+          log('info','event: loaded (phased)');
           try {
-            const newToken = await fetchNewToken();
-            await report.setAccessToken(newToken);
-          } catch (err) {
-            console.error('Falha ao renovar token:', err);
-            clearInterval(timer);
-            window.location.reload();
-          }
-        }, REFRESH_INTERVAL);
+            // Captura baseline "publicado" da página inicial se ainda não existir
+            await captureBaseForActivePageIfMissing();
 
-        // Se o usuário sair da página, limpa o timer.
-        window.addEventListener('beforeunload', () => clearInterval(timer));
+            // estado inicial melhor (server vs local)
+            const local = loadLocalState();
+            const serverRich = JSON.parse(JSON.stringify(serverState || {}));
+            if (serverStateUpdatedAt) serverRich._updatedAt = Date.parse(serverStateUpdatedAt);
+
+            const pick = (function better(a,b){
+              const sa = summarize(a), sb = summarize(b);
+              if (sa.hasBm !== sb.hasBm) return sb.hasBm ? b : a;
+              if (sa.hasBm && sb.hasBm && sa.bmLen !== sb.bmLen) return sb.bmLen > sa.bmLen ? b : a;
+              if (sb.slicerVisuals !== sa.slicerVisuals) return sb.slicerVisuals > sa.slicerVisuals ? b : a;
+              if (sb.rf !== sa.rf) return sb.rf > sa.rf ? b : a;
+              const aTs = typeof a?._updatedAt === 'number' ? a._updatedAt : 0;
+              const bTs = typeof b?._updatedAt === 'number' ? b._updatedAt : 0;
+              return (bTs - aTs) > 10000 ? b : a;
+            })(local, serverRich);
+
+            const bm  = typeof pick.bookmarkState === 'string' && pick.bookmarkState.length ? pick.bookmarkState : null;
+            const flt = Array.isArray(pick.reportFilters) ? pick.reportFilters : [];
+            const ap  = pick.activePage || null;
+
+            setBootStep('aplicando estado…');
+
+            if (bm && report?.bookmarksManager?.applyState) {
+              await report.bookmarksManager.applyState(bm);
+            } else {
+              if (flt.length) await report.setFilters(flt);
+              if (ap) {
+                const pages = await report.getPages();
+                const toGo = pages.find(p => p.displayName === ap || p.name === ap);
+                if (toGo) await toGo.setActive();
+              }
+            }
+
+            setBootStep('renderizando…');
+            await report.render();
+          } catch (e) {
+            log('error','pre-render restore fail', e);
+            try { await report.render(); } catch {}
+          }
+        });
+
+        report.on('rendered', () => {
+          log('info','event: rendered (phased)');
+          readyToCapture = true;
+          hideBootMask();
+          captureState();
+          refreshLastUpdBadgeRt();
+        });
+
+        report.on('filtersApplied', () => { if (!readyToCapture) return; saveStateDebounced(); });
+
+        report.on('pageChanged',  async () => {
+          if (!readyToCapture) return;
+          // Ao entrar numa página pela 1ª vez, capture o baseline "publicado" daquela página
+          await captureBaseForActivePageIfMissing();
+          saveStateDebounced();
+        });
+
+        report.on('dataSelected', () => { if (!readyToCapture) return; saveStateDebounced(); });
+
+        try {
+          await report.load();
+          log('info','report.load() OK');
+        } catch (e) {
+          log('error','report.load() fail', e);
+        }
       }
 
-      // Embed inicial com dados vindos do servidor Django
-      embedReport('{{ embed_url }}', '{{ embed_token }}');
+      // ========= BADGE: Última atualização =========
+      let TZ_ID = 'America/Sao_Paulo';
+      function fmtBr(dt){
+        try { return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short', timeStyle:'short', timeZone:TZ_ID}).format(dt); }
+        catch { return dt.toLocaleString('pt-BR'); }
+      }
+      function timeAgo(fromDate){
+        const s = Math.max(0, Math.floor((Date.now()-fromDate.getTime())/1000));
+        if (s < 60) return `há ${s}s`;
+        const m = Math.floor(s/60);
+        if (m < 60) return `há ${m} min`;
+        const h = Math.floor(m/60);
+        if (h < 24) return `há ${h} h`;
+        const d = Math.floor(h/24);
+        return `há ${d} d`;
+      }
+      function getDateFromAttrs(prefix){
+        const wrap = document.getElementById('lastUpd');
+        if (!wrap) return null;
+        const raw = wrap.getAttribute(`data-${prefix}-epoch`);
+        const hasEpoch = raw !== null && raw !== '' && !Number.isNaN(Number(raw));
+        const epoch = hasEpoch ? Number(raw) : 0;
+        if (epoch > 0) return new Date(epoch * 1000);
+        const iso = wrap.getAttribute(`data-${prefix}-iso`) || '';
+        if (iso) { const d = new Date(iso); if (!isNaN(d.getTime())) return d; }
+        return null;
+      }
+      function updateLastUpdBadge(){
+        const wrap  = document.getElementById('lastUpd');
+        const label = document.getElementById('lastUpdText');
+        if (!wrap || !label) return;
+
+        const dt  = getDateFromAttrs('last');
+        const ndt = getDateFromAttrs('next');
+
+        if (!dt){
+          wrap.classList.remove('ok','warn','stale');
+          wrap.classList.add('unknown');
+          label.textContent = 'Atualização: —';
+          wrap.title = 'Sem informação de atualização do dataset';
+          return;
+        }
+
+        const ageHours = (Date.now() - dt.getTime())/36e5;
+
+        wrap.classList.remove('unknown','ok','warn','stale');
+        if (ageHours <= 3) wrap.classList.add('ok');
+        else if (ageHours <= 24) wrap.classList.add('warn');
+        else wrap.classList.add('stale');
+
+        const base = `Atualização: ${fmtBr(dt)} (${timeAgo(dt)})`;
+        wrap.title = ndt
+          ? `Última atualização do dataset no Power BI: ${fmtBr(dt)}\nPróxima prevista: ${fmtBr(ndt)} (${TZ_ID})`
+          : `Última atualização do dataset no Power BI: ${fmtBr(dt)} (${TZ_ID})`;
+        label.textContent = base;
+      }
+
+      async function refreshLastUpdBadgeRt(){
+        const wrap = document.getElementById('lastUpd');
+        if (!wrap) return;
+
+        try{
+          const res = await fetch('{% url "bi:get_last_update_rt" %}', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'Accept':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ report_id: '{{ bi_report.report_id }}', group_id:  '{{ bi_report.group_id }}' }),
+            cache: 'no-store', credentials: 'same-origin',
+          });
+          const txt = await res.text();
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = JSON.parse(txt || '{}');
+
+          if (data && data.ok){
+            if (data.tz && typeof data.tz === 'string') TZ_ID = data.tz;
+            wrap.setAttribute('data-last-epoch', data.last_updated_epoch ?? '');
+            wrap.setAttribute('data-next-epoch', data.next_update_epoch ?? '');
+            wrap.setAttribute('data-last-iso',   data.last_updated_iso   ?? '');
+            wrap.setAttribute('data-next-iso',   data.next_update_iso    ?? '');
+          }
+        }catch(err){
+          console.warn('[PBI:lastUpdateRT:fail]', err);
+        }finally{
+          updateLastUpdBadge();
+        }
+      }
+
+      // ========= FLUXO: Atualizar dataset e recarregar o MESMO embed =========
+      function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+      function getBadgeLastEpoch(){
+        const wrap = document.getElementById('lastUpd');
+        if (!wrap) return 0;
+        const raw = wrap.getAttribute('data-last-epoch');
+        const n = Number(raw || 0);
+        return Number.isFinite(n) ? n : 0;
+      }
+      function setBtnLoading(btn, isLoading, textLoading = 'Atualizando…', textIdle = 'Atualizar agora'){
+        if (!btn) return;
+        const lbl = btn.querySelector('.label');
+        if (isLoading){
+          btn.classList.add('loading'); btn.disabled = true; btn.setAttribute('aria-busy','true');
+          if (lbl) lbl.textContent = textLoading;
+        } else {
+          btn.classList.remove('loading'); btn.disabled = false; btn.setAttribute('aria-busy','false');
+          if (lbl) lbl.textContent = textIdle;
+        }
+      }
+
+      // NOVO: checar status do refresh (API)
+      async function getRefreshStatus(afterEpoch){
+        const res = await fetch('{% url "bi:get_refresh_status" %}', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ report_id: reportId, group_id: groupId, after_epoch: afterEpoch || null }),
+          cache: 'no-store', credentials: 'same-origin'
+        });
+        const txt = await res.text();
+        if (!res.ok) throw new Error(`get_refresh_status HTTP ${res.status}`);
+        const data = JSON.parse(txt || '{}');
+        return data;
+      }
+
+      async function forceRefreshNow(){
+        const btn = document.getElementById('btnRefreshNow');
+        if (!btn) return;
+        try{
+          setBtnLoading(btn, true);
+          showBootMask(); setBootStep('forçando atualização do dataset…');
+
+          const beforeEpoch = getBadgeLastEpoch();
+
+          // 1) aciona refresh do dataset
+          const res = await fetch('{% url "bi:refresh_now" %}', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ report_id: reportId, group_id: groupId }),
+            cache: 'no-store', credentials: 'same-origin'
+          });
+          const txt = await res.text();
+          log('info', `refresh_now → ${res.status}`, txt);
+
+          if (res.status === 429){
+            try{
+              const j = JSON.parse(txt||'{}');
+              alert(`Uma atualização acabou de ser solicitada. Tente novamente em ~${j.retry_seconds || 60}s.`);
+            }catch{ alert('Aguarde um pouco antes de tentar novamente.'); }
+            return;
+          }
+          if (!res.ok){
+            alert('Falha ao acionar a atualização do dataset. Verifique credenciais/gateway.');
+            return;
+          }
+
+          // marco do disparo (para debug/telemetria no back)
+          const triggerEpoch = Math.floor(Date.now() / 1000);
+
+          // 2) polling até o epoch mudar OU até o serviço reportar falha
+          setBootStep('aguardando conclusão do refresh…');
+          const deadlineMs = Date.now() + (15 * 60 * 1000);
+          let changed = false;
+          let failed  = false;
+          let failMsg = '';
+
+          while (Date.now() < deadlineMs){
+            await sleep(10_000);
+
+            // atualiza badge (última atualização efetiva)
+            await refreshLastUpdBadgeRt();
+            const nowEpoch = getBadgeLastEpoch();
+            if (nowEpoch && nowEpoch > beforeEpoch){
+              changed = true;
+              break;
+            }
+
+            // checa status do refresh no serviço
+            try{
+              const st = await getRefreshStatus(triggerEpoch);
+              if (st && st.ok){
+                const s = (st.status || '').toLowerCase();
+                if (s === 'failed' || s === 'disabled' || s === 'cancelled'){
+                  failed  = true;
+                  failMsg = [st.error_message, st.error_code].filter(Boolean).join('\n\n') || 'O serviço reportou falha no refresh.';
+                  break;
+                }
+                if (s === 'inprogress' && st.start_epoch && (Date.now()/1000 - st.start_epoch) > (20*60)){
+                  failed  = true;
+                  failMsg = 'O refresh está em execução há muito tempo e pode estar travado (timeout).';
+                  break;
+                }
+              }
+            }catch(e){
+              console.warn('[refreshStatus] falha temporária', e);
+            }
+          }
+
+          // 3) recarrega SÓ o conteúdo do mesmo embed
+          if (changed){
+            setBootStep('aplicando dados novos…');
+            try {
+              await report.refresh();
+              log('info','report.refresh() OK');
+            } catch(e){
+              log('warn','report.refresh() falhou', e);
+            }
+            updateLastUpdBadge();
+            setBootStep('dados atualizados ✔');
+          } else if (failed){
+            setBootStep('falha no refresh');
+            const human = (failMsg || '').trim() || 'Falha ao atualizar o dataset no Power BI.';
+            alert(`Não foi possível concluir o refresh:\n\n${human}`);
+          } else {
+            setBootStep('refresh não confirmou no tempo limite');
+            alert('O serviço não confirmou a atualização dentro do tempo limite. Verifique o histórico do dataset no Power BI.');
+          }
+        }catch(err){
+          log('error', 'forceRefreshNow fail', err);
+          alert('Erro ao acionar atualização.');
+        }finally{
+          await sleep(600);
+          hideBootMask();
+          setBtnLoading(document.getElementById('btnRefreshNow'), false);
+        }
+      }
+
+      // ========= RESET ROBUSTO (retorna ao estado PUBLICADO por página) =========
+      // Fallback helpers (caso não exista baseline salvo)
+      async function clearSlicersOnPage(page){
+        try{
+          const visuals = await page.getVisuals();
+          for (const v of visuals){
+            const t = (v.type || '').toLowerCase();
+            if (t === 'slicer' && v.getSlicerState && v.setSlicerState){
+              try{
+                const st = await v.getSlicerState();
+                const newSt = { ...st, filters: [] };
+                await v.setSlicerState(newSt);
+              }catch(e){
+                log('debug','clear slicer fail', { name: v.name, e });
+              }
+            }
+          }
+        }catch(e){
+          log('debug','getVisuals fail', e);
+        }
+      }
+      async function clearCurrentPage(){
+        try{
+          const ap = await report.getActivePage();
+          if (ap){
+            try { await ap.setFilters([]); } catch{}
+            await clearSlicersOnPage(ap);
+          }
+        }catch{}
+      }
+
+      async function resetAll(){
+        try{
+          showBootMask(); setBootStep('redefinindo…'); readyToCapture = false;
+
+          // limpa estado salvo (servidor + local) — não mexe no baseline publicado
+          localStorage.removeItem(LS_KEY);
+          try{
+            await fetch('{% url "bi:salvar_estado_relatorio" %}', {
+              method:'POST',
+              headers:{ 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+              body: JSON.stringify({ report_id: reportId, group_id: groupId, state: {} })
+            });
+          }catch{}
+
+          // preserva a página atual
+          let active = null;
+          try { active = await report.getActivePage(); } catch{}
+          const pageName = active?.name || active?.displayName || '';
+
+          // baseline específico da página; se não tiver, tenta o global; por fim, fallback "limpo"
+          const pageBase = pageName ? localStorage.getItem(pageBaseKey(pageName)) : null;
+          const globalBase = localStorage.getItem(BASE_BM_KEY);
+
+          setBootStep('restaurando visualização publicada…');
+          let applied = false;
+          try{
+            if (pageBase && report?.bookmarksManager?.applyState){
+              await report.bookmarksManager.applyState(pageBase); // volta ao estado publicado daquela página
+              applied = true;
+            } else if (globalBase && report?.bookmarksManager?.applyState){
+              await report.bookmarksManager.applyState(globalBase);
+              // volta para onde o usuário estava
+              if (active){
+                const pages = await report.getPages();
+                const back = pages.find(p => p.name === pageName || p.displayName === pageName);
+                if (back) await back.setActive();
+              }
+              applied = true;
+            }
+          }catch(e){
+            log('debug','apply baseline fail', e);
+          }
+
+          // Fallback caso não exista baseline salvo: limpa filtros+slicers da página atual
+          if (!applied){
+            setBootStep('limpando filtros e seleções…');
+            await clearCurrentPage();
+          }
+
+          // refresh leve
+          try { await report.refresh(); } catch(e){ log('debug','report.refresh() pós-reset falhou', e); }
+
+          hideBootMask();
+          readyToCapture = true;
+          captureState();
+          refreshLastUpdBadgeRt();
+        }catch(e){
+          log('error','resetAll fail', e);
+          hideBootMask();
+        }
+      }
+
+      // ========= WIRES (UI) =========
+      const btnView = document.getElementById('btnView');
+      const menuView = document.getElementById('menuView');
+      btnView.addEventListener('click', () => {
+        const open = !menuView.classList.contains('open');
+        menuView.classList.toggle('open');
+        btnView.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }, { passive: true });
+      menuView.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button[data-view]');
+        if (!btn) return;
+        const key = btn.getAttribute('data-view');
+        const map = {
+          fitToPage:  models.DisplayOption.FitToPage,
+          fitToWidth: models.DisplayOption.FitToWidth,
+          actualSize: models.DisplayOption.ActualSize
+        };
+        if (report && map[key]){
+          report.updateSettings({
+            layoutType:  models.LayoutType.Custom,
+            customLayout:{ displayOption: map[key] },
+            panes: { filters: { visible: true }, pageNavigation: { visible: true } },
+            navContentPaneEnabled: true
+          }).catch(e => log('error','update displayOption fail', e));
+        }
+        menuView.classList.remove('open');
+        btnView.setAttribute('aria-expanded', 'false');
+      }, { passive: true });
+      document.addEventListener('click', (ev) => {
+        if (!menuView.contains(ev.target) && ev.target !== btnView) {
+          menuView.classList.remove('open');
+          btnView.setAttribute('aria-expanded', 'false');
+        }
+      }, { passive: true });
+
+      document.getElementById('btnFull').addEventListener('click', () => { try{ report && report.fullscreen(); }catch(e){ log('error','fullscreen fail', e); } }, { passive: true });
+      document.getElementById('btnReset').addEventListener('click', resetAll, { passive: true });
+      document.getElementById('btnRefreshNow').addEventListener('click', forceRefreshNow, { passive: true });
+
+      // Badge: inicial e periódicos
+      updateLastUpdBadge();
+      refreshLastUpdBadgeRt();
+      setInterval(updateLastUpdBadge,    60 * 1000);
+      setInterval(refreshLastUpdBadgeRt, 5  * 60 * 1000);
+
+      // ========= Embed inicial + loops =========
+      embedReportPhased(INITIAL_URL, INITIAL_TOKEN);
+      tokenRefreshTimer = setInterval(refreshAccessTokenLoop, REFRESH_MS);
     })();
   </script>
 {% endblock %}

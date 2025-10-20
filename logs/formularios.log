@@ -2821,3 +2821,8 @@ DEBUG 2025-10-14 08:53:53,195 views 141261 139794450474688 REQ [ENVIAR-RESP] POS
 DEBUG 2025-10-14 08:53:53,197 views 141261 139794450474688 Validação falhou form=43 erros=1
 DEBUG 2025-10-14 08:54:20,421 views 141261 139794423199424 REQ [ENVIAR-RESP] POST /formularios/43/responder/ | user=admin auth=True ip=127.0.0.1 | HTMX=False | POST keys=['csrfmiddlewaretoken', '259', '208'] | FILES={'261': ['Background mês 10 e 11 ti.jpg', 'matriz (4).csv', 'ChatGPT Image 30 de set. de 2025, 10_52_49.png', 'image (3).png', 'image (2).png']}
 INFO 2025-10-14 08:54:20,454 views 141261 139794423199424 Resposta 319 salva no form 43 (embed=False)
+DEBUG 2025-10-16 09:24:11,271 views 162567 140504419268288 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-16 15:25:31,781 views 162567 140503583377088 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-17 17:55:35,862 views 184850 140707087644352 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-20 09:08:32,309 views 210530 140198268630720 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-20 09:08:38,829 views 210530 140198268630720 Listando meus formulários: meus=1, compartilhados=0

@@ -1,5 +1,4 @@
 <!-- bi/templates/bi/listar_bi.html -->
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -9,128 +8,293 @@
 
 {% block content %}
 <div class="container">
-    <h1>Lista de BIs</h1>
+  <h1>Lista de BIs</h1>
 
-    <!-- Contêiner Flexível para Busca e Filtro -->
-    <div class="filters-container">
-        <!-- Campo de Busca -->
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="Buscar BIs...">
-        </div>
-
-        <!-- Campo de Filtro por Categoria (Opcional, caso você tenha categorias associadas) -->
-        <!-- Você pode implementar categorias com base em propriedades dos relatórios ou mantê-las no banco de dados -->
+  <!-- Busca -->
+  <div class="filters-container">
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar BIs...">
     </div>
+  </div>
 
-    <!-- Barra de Ícones -->
-    
+  <!-- Lista -->
+  <div class="bi-list" id="biList">
+    {% for bi in bi_reports %}
+      <div class="bi-container">
+        <div class="bi-item"
+             data-report-id="{{ bi.report_id }}"
+             data-group-id="{{ bi.group_id }}">
 
-    <!-- Lista de BIs -->
-    <div class="bi-list" id="biList">
-        {% for bi in bi_reports %}
-            <div class="bi-container">
-                <div class="bi-item">
-                    <!-- Ícone do BI -->
-                    <div class="bi-status">
-                        <img src="{% static 'images/bi-icon.png' %}" alt="BI" class="status-icon">
-                    </div>
+          <!-- Ícone -->
+          <div class="bi-status">
+            <img src="{% static 'images/bi-icon.png' %}" alt="BI" class="status-icon">
+          </div>
 
-                    <!-- Informações do BI -->
-                    <div class="bi-info">
-                        <div class="bi-grid">
-                            <div><strong>Título:</strong> {{ bi.title }}</div>
-                        
-                            <div>
-                                <strong>Última Atualização:</strong>
-                                {% if bi.last_updated %}
-                                    {{ bi.last_updated|date:"d/m/Y H:i" }}
-                                {% else %}
-                                    Não disponível
-                                {% endif %}
-                            </div>
-                           
-                        </div>
-                    </div>
+          <!-- Informações -->
+          <div class="bi-info">
+            <div class="bi-grid">
+              <div><strong>Título:</strong> {{ bi.title }}</div>
 
-                    <!-- Botões de Ação -->
-                    <div class="bi-actions">
-                        
-                        <!-- Visualizar-->
-                        <a href="{% url 'bi:bi_report_detail' bi.pk %}" class="action-icon {% if not request.user in bi.allowed_users.all %}disabled{% endif %}">
-                            <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
-                            <span class="tooltip-text">Visualizar</span>
-                        </a>
-                        
-                        <!-- Ver acessos -->
-                        {% if perms.bi.view_access %}
-                        <a href="{% url 'bi:visualizar_acessos_bi' bi.pk %}" class="action-icon">
-                            <img src="{% static 'images/acessou.png' %}" alt="Acessos" class="access-icon">
-                            <span class="tooltip-text">Acessos</span>
-                        </a>
-                        {% endif %}
-                        
-                        <!-- Editar -->
-                        {% if perms.bi.edit_bi %}
-                        <a href="{% url 'bi:edit_bi_report' bi.pk %}" class="action-icon">
-                            <img src="{% static 'images/edit-icon.png' %}" alt="Editar" class="edit-icon">
-                            <span class="tooltip-text">Editar</span>
-                        </a>
-                        {% endif %}
-                                            
-                    </div>
+              <!-- Atualização (mesmo visual do título) -->
+              <div>
+                <div class="last-upd" id="lastUpd-{{ bi.pk }}"
+                     data-last-epoch=""
+                     data-last-iso=""
+                     data-next-epoch=""
+                     data-next-iso=""
+                     title="Última atualização do dataset no Power BI">
+                  <strong>Atualização:</strong>
+                  <span class="lastUpdText">Carregando…</span>
                 </div>
+              </div>
+
+              <div></div>
             </div>
-        {% empty %}
-            <p class="no-bis-message">Nenhum BI encontrado.</p>
-        {% endfor %}
-    </div>
+          </div>
+
+          <!-- Ações -->
+          <div class="bi-actions">
+            <button type="button" class="action-icon refresh-btn"
+                    title="Atualizar dados do Power BI"
+                    aria-live="polite" aria-busy="false">
+              <img src="{% static 'images/refresh-icon.png' %}" alt="Atualizar">
+              <span class="tooltip-text">Atualizar</span>
+            </button>
+
+            <a href="{% url 'bi:bi_report_detail' bi.pk %}"
+               class="action-icon {% if not request.user in bi.allowed_users.all %}disabled{% endif %}">
+              <img src="{% static 'images/view-icon.png' %}" alt="Visualizar" class="view-icon">
+              <span class="tooltip-text">Visualizar</span>
+            </a>
+
+            {% if perms.bi.view_access %}
+            <a href="{% url 'bi:visualizar_acessos_bi' bi.pk %}" class="action-icon">
+              <img src="{% static 'images/acessou.png' %}" alt="Acessos" class="access-icon">
+              <span class="tooltip-text">Acessos</span>
+            </a>
+            {% endif %}
+
+            {% if perms.bi.edit_bi %}
+            <a href="{% url 'bi:edit_bi_report' bi.pk %}" class="action-icon">
+              <img src="{% static 'images/edit-icon.png' %}" alt="Editar" class="edit-icon">
+              <span class="tooltip-text">Editar</span>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="no-bis-message">Nenhum BI encontrado.</p>
+    {% endfor %}
+  </div>
 </div>
 
-<!-- Script para os Filtros de Busca -->
+<!-- Scripts -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchInput');
-        const biContainers = document.querySelectorAll('.bi-container');
+document.addEventListener('DOMContentLoaded', () => {
+  // ====== Busca ======
+  const searchInput  = document.getElementById('searchInput');
+  const biContainers = document.querySelectorAll('.bi-container');
 
-        function filterBIs() {
-            const searchTerm = searchInput.value.toLowerCase();
-            let hasResults = false;
-
-            biContainers.forEach(function(container) {
-                const biTitle = container.querySelector('.bi-grid div:nth-child(1)').innerText.toLowerCase();
-                
-                if (biTitle.includes(searchTerm)) {
-                    container.style.display = '';
-                    hasResults = true;
-                } else {
-                    container.style.display = 'none';
-                }
-            });
-
-            // Exibir ou Ocultar a Mensagem de "Nenhum BI Encontrado"
-            const totalVisibleBIs = Array.from(biContainers).filter(bi => bi.style.display !== 'none').length;
-            let noResultsMessage = document.getElementById('noResultsMessage');
-
-            if (totalVisibleBIs === 0) {
-                if (!noResultsMessage) {
-                    noResultsMessage = document.createElement('div');
-                    noResultsMessage.id = 'noResultsMessage';
-                    noResultsMessage.innerText = 'Nenhum BI encontrado.';
-                    noResultsMessage.style.textAlign = 'center';
-                    noResultsMessage.style.marginTop = '20px';
-                    noResultsMessage.style.color = '#f00';
-                    document.getElementById('biList').appendChild(noResultsMessage);
-                }
-                noResultsMessage.style.display = 'block';
-            } else {
-                if (noResultsMessage) {
-                    noResultsMessage.style.display = 'none';
-                }
-            }
-        }
-
-        // Adicionar Event Listener para o Campo de Busca
-        searchInput.addEventListener('keyup', filterBIs);
+  function filterBIs() {
+    const term = (searchInput.value || '').toLowerCase();
+    biContainers.forEach(container => {
+      const title = container.querySelector('.bi-grid div:nth-child(1)')?.innerText?.toLowerCase() || '';
+      container.style.display = title.includes(term) ? '' : 'none';
     });
+
+    const visible = Array.from(biContainers).filter(b => b.style.display !== 'none').length;
+    let msg = document.getElementById('noResultsMessage');
+    if (!visible) {
+      if (!msg) {
+        msg = document.createElement('div');
+        msg.id = 'noResultsMessage';
+        msg.innerText = 'Nenhum BI encontrado.';
+        msg.style.textAlign = 'center';
+        msg.style.marginTop = '20px';
+        msg.style.color = '#f00';
+        document.getElementById('biList').appendChild(msg);
+      }
+      msg.style.display = 'block';
+    } else if (msg) {
+      msg.style.display = 'none';
+    }
+  }
+  searchInput.addEventListener('keyup', filterBIs);
+
+  // ====== Utils ======
+  const TZ_DEFAULT = 'America/Sao_Paulo';
+
+  function fmtBr(dt, tz = TZ_DEFAULT){
+    try {
+      return new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short', timeZone: tz }).format(dt);
+    } catch { return dt.toLocaleString('pt-BR'); }
+  }
+  function timeAgo(fromDate){
+    const s = Math.max(0, Math.floor((Date.now()-fromDate.getTime())/1000));
+    if (s < 60) return `há ${s}s`;
+    const m = Math.floor(s/60); if (m < 60) return `há ${m} min`;
+    const h = Math.floor(m/60); if (h < 24) return `há ${h} h`;
+    const d = Math.floor(h/24); return `há ${d} d`;
+  }
+  function getDateFromAttrs(wrap, prefix){
+    const raw = wrap.getAttribute(`data-${prefix}-epoch`);
+    const hasEpoch = raw !== null && raw !== '' && !Number.isNaN(Number(raw));
+    const epoch = hasEpoch ? Number(raw) : 0;
+    if (epoch > 0) return new Date(epoch * 1000);
+    const iso = wrap.getAttribute(`data-${prefix}-iso`) || '';
+    const d = iso ? new Date(iso) : null;
+    return d && !isNaN(d.getTime()) ? d : null;
+  }
+  function updateBadge(el, tz = TZ_DEFAULT){
+    if (!el) return;
+    const label = el.querySelector('.lastUpdText');
+    const dt = getDateFromAttrs(el,'last');
+    const ndt= getDateFromAttrs(el,'next');
+
+    el.classList.remove('ok','warn','stale','unknown');
+    if (!dt){
+      el.classList.add('unknown');
+      if (label) label.textContent = '—';
+      el.title = 'Sem informação de atualização do dataset';
+      return;
+    }
+    const ageH = (Date.now() - dt.getTime())/36e5;
+    if (ageH <= 3) el.classList.add('ok');
+    else if (ageH <= 24) el.classList.add('warn');
+    else el.classList.add('stale');
+
+    if (label) label.textContent = `${fmtBr(dt, tz)} (${timeAgo(dt)})`;
+    el.title = ndt
+      ? `Última: ${fmtBr(dt, tz)}\nPróxima prevista: ${fmtBr(ndt, tz)}`
+      : `Última: ${fmtBr(dt, tz)}`;
+  }
+  function getCookie(name){
+    const v = `; ${document.cookie}`;
+    const parts = v.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+  }
+
+  // ====== Hidratar badges 100% via API ======
+  async function fetchAndPaintBadge(row){
+    const reportId = row.getAttribute('data-report-id');
+    const groupId  = row.getAttribute('data-group-id');
+    const badge    = row.querySelector('.last-upd');
+    if (!reportId || !groupId || !badge) return;
+
+    try{
+      const r = await fetch("{% url 'bi:get_last_update_rt' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json',
+          'Accept':'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ report_id: reportId, group_id: groupId }),
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
+      const txt = await r.text();
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+      const data = JSON.parse(txt || '{}');
+      if (data && data.ok){
+        badge.setAttribute('data-last-epoch', data.last_updated_epoch ?? '');
+        badge.setAttribute('data-last-iso',   data.last_updated_iso   ?? '');
+        badge.setAttribute('data-next-epoch', data.next_update_epoch ?? '');
+        badge.setAttribute('data-next-iso',   data.next_update_iso    ?? '');
+        updateBadge(badge, data.tz || TZ_DEFAULT);
+      } else {
+        updateBadge(badge, TZ_DEFAULT);
+      }
+    }catch(err){
+      console.warn('get_last_update_rt fail', err);
+      updateBadge(badge, TZ_DEFAULT);
+    }
+  }
+
+  // limitador de concorrência p/ não martelar a API
+  async function hydrateAllBadges(concurrency = 4){
+    const rows = Array.from(document.querySelectorAll('.bi-item'));
+    let i = 0;
+    async function worker(){
+      while(i < rows.length){
+        const row = rows[i++];
+        await fetchAndPaintBadge(row);
+      }
+    }
+    const n = Math.min(concurrency, rows.length || 1);
+    await Promise.all(Array.from({length:n}, worker));
+  }
+
+  // primeira hidratação via API + refresh “há X” a cada 60s
+  hydrateAllBadges();
+  setInterval(() => {
+    document.querySelectorAll('.last-upd').forEach(el => updateBadge(el));
+  }, 60_000);
+  // refresh dos badges na API a cada 5 minutos
+  setInterval(() => hydrateAllBadges(), 5 * 60_000);
+
+  // ====== Botão Atualizar (por BI) ======
+  function setBtnLoading(btn, isLoading){
+    btn.classList.toggle('loading', !!isLoading);
+    btn.disabled = !!isLoading;
+    btn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+  }
+  function getBadgeEpoch(el){
+    const n = Number(el?.getAttribute('data-last-epoch') || 0);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  async function refreshRow(row){
+    const btn   = row.querySelector('.refresh-btn');
+    const badge = row.querySelector('.last-upd');
+    const reportId = row.getAttribute('data-report-id');
+    const groupId  = row.getAttribute('data-group-id');
+    if (!btn || !badge || !reportId || !groupId) return;
+
+    try{
+      setBtnLoading(btn, true);
+      const beforeEpoch = getBadgeEpoch(badge);
+
+      // dispara refresh
+      const res = await fetch("{% url 'bi:refresh_now' %}", {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ report_id: reportId, group_id: groupId }),
+        cache: 'no-store', credentials: 'same-origin'
+      });
+      const txt = await res.text();
+      if (res.status === 429){
+        try { const j = JSON.parse(txt||'{}'); alert(`Uma atualização acabou de ser solicitada. Tente novamente em ~${j.retry_seconds || 60}s.`); }
+        catch { alert('Aguarde um pouco antes de tentar novamente.'); }
+        return;
+      }
+      if (!res.ok){ alert('Falha ao acionar a atualização do dataset.'); return; }
+
+      // polling até virar
+      const deadline = Date.now() + 15 * 60 * 1000;
+      while (Date.now() < deadline){
+        await new Promise(r => setTimeout(r, 10_000));
+        await fetchAndPaintBadge(row);
+        const nowEpoch = getBadgeEpoch(badge);
+        if (nowEpoch && nowEpoch > beforeEpoch) break;
+      }
+    }catch(err){
+      console.error('refreshRow fail', err);
+      alert('Erro ao acionar atualização.');
+    }finally{
+      setBtnLoading(btn, false);
+    }
+  }
+
+  document.querySelectorAll('.bi-item .refresh-btn').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      const row = ev.currentTarget.closest('.bi-item');
+      if (row) refreshRow(row);
+    }, { passive: true });
+  });
+});
 </script>
 {% endblock %}

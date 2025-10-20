@@ -52,3 +52,20 @@ class BIAccess(models.Model):
             ('permission_report', 'Relatório de permissões de BI'),
 
         ]
+
+
+class BIUserReportState(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    bi_report = models.ForeignKey('BIReport', on_delete=models.CASCADE)
+    # estrutura: {"reportFilters": [...], "activePage": "Página 1", "slicers": {"Página 1": {<visualName>: {...}}}
+    state = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'bi_report')
+        indexes = [
+            models.Index(fields=['user', 'bi_report']),
+        ]
+
+    def __str__(self):
+        return f"Estado {self.user} → {self.bi_report}"

@@ -2,6 +2,7 @@
 {% load static %}
 {% load i18n %}
 
+
 {% block title %}{% trans "Editar Relatório BI" %}{% endblock %}
 
 {% block extra_css %}
@@ -61,7 +62,7 @@
                             <td>{{ user.get_full_name }}</td>
                             <td>{% trans "Usuário" %}</td>
                             <td>
-                                <button type="button" class="btn btn-danger remover-participante" data-id="{{ user.id }}" data-tipo="usuario">
+                                <button type="button" class="btn-danger remover-participante" data-id="{{ user.id }}" data-tipo="usuario">
                                     {% trans "Remover" %}
                                 </button>
                             </td>
@@ -100,6 +101,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 
 <script>

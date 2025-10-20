@@ -14,5 +14,11 @@ urlpatterns = [
     path('buscar_grupos/', views.buscar_grupos, name='buscar_grupos'),
     path('bi_relatorios/', views.bi_relatorios, name='bi_relatorios'),
     path('permissoes/', views.relatorio_permissoes, name='relatorio_permissoes'),
+    path('salvar_estado_relatorio/', views.salvar_estado_relatorio, name='salvar_estado_relatorio'),
+    path('get_last_update_rt/', views.get_last_update_rt, name='get_last_update_rt'),
+    path('refresh_now/', views.refresh_now, name='refresh_now'),
+    path('get_refresh_status/', views.get_refresh_status, name='get_refresh_status'),
+
+
 
 ]

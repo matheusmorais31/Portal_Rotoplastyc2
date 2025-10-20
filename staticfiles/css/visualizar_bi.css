@@ -1,13 +1,211 @@
-/* visualizar_bi.css */
+/* ===== Variáveis de layout ===== */
+:root{
+  --bi-sidebar-w: 60px;
+  --bi-header-h: 50px;
+  --bi-toolbar-h: 44px;
 
-
-
-#reportContainer {
-  position: absolute; /* Garante posicionamento relativo ao conteúdo */
-  top: 50px; /* Alinha abaixo da barra superior */
-  left: 60px; /* Respeita a largura da barra lateral */
-  width: calc(100% - 60px); /* Subtrai a largura da barra lateral */
-  height: calc(100% - 50px); /* Subtrai a altura da barra superior */
-  overflow: hidden; /* Remove qualquer barra de rolagem */
-  background-color: transparent; /* O fundo do relatório permanece transparente */
+  --bi-z-toolbar: 10010;
+  --bi-z-menu: 10020;
+  --bi-z-mask: 9998;
 }
+
+/* ===== Toolbar ===== */
+.bi-toolbar{
+  position: fixed;
+  top: var(--bi-header-h);
+  left: var(--bi-sidebar-w);
+  right: 0;
+  height: var(--bi-toolbar-h);
+
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+
+  padding: .5rem .75rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  z-index: var(--bi-z-toolbar);
+  backdrop-filter: saturate(1.1) blur(2px);
+}
+.bi-toolbar .title{ font-weight: 600; color:#111827; }
+.bi-toolbar .spacer{ flex: 1; }
+
+/* ===== Badge última atualização ===== */
+.bi-toolbar .last-upd{
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .875rem;
+  padding: .25rem .6rem;
+  border-radius: 999px;
+  background: rgba(17,24,39,.04);
+  border: 1px solid rgba(17,24,39,.08);
+  color: #111827;
+  white-space: nowrap;
+  user-select: none;
+}
+.bi-toolbar .last-upd .dot{
+  width: .5rem;
+  height: .5rem;
+  border-radius: 999px;
+  background: #1db954; /* default */
+  box-shadow: 0 0 0 2px rgba(29,185,84,.15);
+}
+
+/* Suporte por CLASSE no wrapper (retrocompatível) */
+.bi-toolbar .last-upd.ok    .dot{ background:#1db954; box-shadow:0 0 0 2px rgba(29,185,84,.15); }  /* <= 3h (ver JS) */
+.bi-toolbar .last-upd.warn  .dot{ background:#f5a623; box-shadow:0 0 0 2px rgba(245,166,35,.18); }  /* 3–24h */
+.bi-toolbar .last-upd.stale .dot{ background:#e74c3c; box-shadow:0 0 0 2px rgba(231,76,60,.18); }   /* > 24h */
+.bi-toolbar .last-upd.unknown{ opacity:.7; }
+
+/* Suporte por ATRIBUTO no ponto (opcional) */
+.bi-toolbar .last-upd .dot[data-state="ok"]   { background:#1db954; box-shadow:0 0 0 2px rgba(29,185,84,.15); }
+.bi-toolbar .last-upd .dot[data-state="warn"] { background:#f5a623; box-shadow:0 0 0 2px rgba(245,166,35,.18); }
+.bi-toolbar .last-upd .dot[data-state="old"]  { background:#e74c3c; box-shadow:0 0 0 2px rgba(231,76,60,.18); }
+
+/* ===== Botões / Dropdown ===== */
+.btn{
+  appearance: none;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  border-radius: .5rem;
+  padding: .35rem .6rem;
+  font-size: .875rem;
+  line-height: 1.2;
+  cursor: pointer;
+
+  /* para spinner/alinhamento */
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+
+  transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+}
+.btn:hover{ background:#f9fafb; }
+.btn:focus{ outline: 2px solid #93c5fd; outline-offset: 2px; }
+.btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+.btn-danger{ background: #ff0000; color:#ffffff; border: none; }
+.btn-danger:hover{
+    background-color: #ff0000;
+    box-shadow: 0px 0px 10px #ff0000;
+}
+
+.dropdown{ position: relative; }
+.menu{
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: .5rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,.08);
+  min-width: 220px;
+  padding: .25rem;
+  display: none;
+  z-index: var(--bi-z-menu);
+}
+.menu.open{ display: block; }
+.menu .btn{ display:block; width:100%; text-align:left; margin:0; }
+
+.btnrefresh {
+  appearance: none;
+  border: none;
+  background: #1EB2C1;
+  color: #ffffff;
+  border-radius: .5rem;
+  padding: .35rem .6rem;
+  font-size: .875rem;
+  line-height: 1.2;
+  cursor: pointer;
+
+  /* para spinner/alinhamento */
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+
+}
+
+.btnrefresh:hover {
+    background-color: #2EC2D6;
+    box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+/* ===== Spinner do botão "Atualizar agora" ===== */
+.btnrefresh .spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  display: none;                /* visível somente em .loading */
+  animation: pbi-spin .8s linear infinite;
+}
+.btnrefresh.loading .spinner{ display: inline-block; }
+.btnrefresh.loading{
+  cursor: progress;
+  pointer-events: none;         /* evita duplo clique */
+}
+.btnrefresh .loading .label{ opacity:.9; }
+
+/* Reduzir movimento para acessibilidade */
+@media (prefers-reduced-motion: reduce){
+  .btnrefresh .spinner{ animation: none; }
+}
+
+/* Animação do spinner */
+@keyframes pbi-spin { to { transform: rotate(360deg); } }
+
+/* ===== Área do report ===== */
+#reportContainer{
+  position: fixed;
+  left:  var(--bi-sidebar-w);
+  top:   calc(var(--bi-header-h) + var(--bi-toolbar-h));
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  background: transparent;
+  min-height: 420px;
+}
+
+/* ===== Máscara de boot ===== */
+.boot-mask{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, .65);
+  color: #fff;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  z-index: var(--bi-z-mask);
+  backdrop-filter: blur(2px);
+}
+.boot-mask.is-hidden{ display: none; }
+.boot-mask .box{
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 4px 24px rgba(0,0,0,.35);
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 1024px){
+  :root{
+    --bi-sidebar-w: 56px;
+    --bi-toolbar-h: 46px;
+  }
+  .menu{ min-width: 180px; }
+}
+@media (max-width: 640px){
+  :root{
+    --bi-sidebar-w: 0px;
+    --bi-header-h: 48px;
+    --bi-toolbar-h: 48px;
+  }
+  .bi-toolbar{ padding: .5rem .6rem; gap: .4rem; }
+  .btn{ padding: .35rem .5rem; font-size: .82rem; }
+  .bi-toolbar .last-upd{ display:none; } /* opcional: esconder no mobile */
+}
+

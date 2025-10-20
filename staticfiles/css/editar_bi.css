@@ -81,19 +81,37 @@ label {
     color: white;
 }
 
+
 /* Botão Cancelar */
 .btn-secondary {
-    background-color: #2EC2D6;
+    background-color: #ff5555;
     color: white;
 }
 
-.btn-primary:hover, .btn-secondary:hover {
+.btn-primary:hover {
     background-color: #1EB2C1;
     box-shadow:  0px 0px 15px #2EC2D6;
 }
 
-button:hover {
-    color: #ffffff;
+.btn-secondary:hover {
+    background-color: #ff5555;
+    box-shadow:  0px 0px 15px #ff5555;
+}
+
+.btn-danger {
+    background-color: #ff5555;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;  
+}
+
+.btn-danger:hover {
+    background-color: #e04e4e;
+    box-shadow: 0px 0px 15px #ff5555;
 }
 
 /* Ajuste para que os botões fiquem centralizados */
@@ -123,7 +141,15 @@ h4 {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(17, 16, 16, 0.44);
+    color: #fff;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+.table tbody td {
+    padding: 10px;
+    font-size: 16px;
 }
 
 th, td {
@@ -134,7 +160,7 @@ th, td {
 }
 
 th {
-    background-color: #4e4a4a;
+    background-color: #18909F;
 }
 
 tr:nth-child(even) {
@@ -142,7 +168,7 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-    background-color: rgb(70, 65, 65);
+    background-color: #18909F;
 }
 
 /* Estilizar a lista de resultados de busca */
