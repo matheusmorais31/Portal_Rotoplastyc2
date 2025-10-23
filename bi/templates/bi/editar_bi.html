@@ -2,7 +2,6 @@
 {% load static %}
 {% load i18n %}
 
-
 {% block title %}{% trans "Editar Relatório BI" %}{% endblock %}
 
 {% block extra_css %}
@@ -10,36 +9,76 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container bi-edit">
     <h2>{% trans "Editar Relatório BI" %}: {{ bi_report.title }}</h2>
 
-    <form id="form-bi" method="POST" action="{% url 'bi:edit_bi_report' bi_report.pk %}">
+    <form id="form-bi" method="POST" action="{% url 'bi:edit_bi_report' bi_report.pk %}" novalidate>
         {% csrf_token %}
-        
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">
+                {% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+            </div>
+        {% endif %}
+
         <!-- Campo Título (Desabilitado) -->
         <div class="form-group">
-            <label for="id_title">{% trans "Título:" %}</label>
+            <label for="{{ form.title.id_for_label }}">{% trans "Título:" %}</label>
             {{ form.title }}
+            {% if form.title.errors %}
+                <div class="form-errors">{% for e in form.title.errors %}<div>{{ e }}</div>{% endfor %}</div>
+            {% endif %}
         </div>
-        
-        <!-- Campo Código Embed (Desabilitado) -->
+
+        <div class="divider"></div>
+
+        <!-- NOVA SEÇÃO: Dataflows do Workspace -->
         <div class="form-group">
-            <label for="id_embed_code">{% trans "Código Embed:" %}</label>
-            {{ form.embed_code }}
+            <h4>{% trans "Dataflows a atualizar antes deste relatório" %}</h4>
+
+            <div class="df-toolbar">
+                <input type="text" id="df_filter" class="form-control"
+                       placeholder="{% trans 'Filtrar por nome…' %}" autocomplete="off">
+                <button type="button" id="df_reload" class="btn btn-secondary">
+                    {% trans "Recarregar lista" %}
+                </button>
+                <button type="button" id="df_select_all" class="btn btn-outline-secondary">
+                    {% trans "Selecionar todos" %}
+                </button>
+                <button type="button" id="df_clear" class="btn btn-outline-secondary">
+                    {% trans "Limpar seleção" %}
+                </button>
+                
+            </div>
+
+            <div id="df_status" class="small-muted" aria-live="polite"></div>
+            <div id="dataflow_list">
+                <!-- checkboxes renderizados via JS -->
+            </div>
+            <div id="df_summary" class="small-muted"></div>
+
+            <!-- Campo oculto onde enviamos a seleção como JSON -->
+            <input type="hidden" id="upstream_dataflows_json" name="upstream_dataflows_json" value="[]">
         </div>
-        
+
+        <div class="divider"></div>
+
         <!-- Checkbox para permitir todos os usuários -->
         <div class="form-group">
             <div class="form-check">
                 {{ form.all_users }}
                 <label class="form-check-label" for="id_all_users">{% trans "Permitir a todos os usuários" %}</label>
             </div>
+            {% if form.all_users.errors %}
+                <div class="form-errors">{% for e in form.all_users.errors %}<div>{{ e }}</div>{% endfor %}</div>
+            {% endif %}
+           
         </div>
-        
+
         <!-- Campo Adicionar Participante (Usuário ou Grupo) -->
         <div class="form-group">
             <label for="buscar_participante_grupo">{% trans "Buscar Usuário ou Grupo:" %}</label>
-            <input type="text" id="buscar_participante_grupo" class="form-control" placeholder="{% trans "Digite o nome do usuário ou grupo..." %}" autocomplete="off">
+            <input type="text" id="buscar_participante_grupo" class="form-control" placeholder="{% trans 'Digite o nome do usuário ou grupo...' %}" autocomplete="off">
             <ul id="resultados_pesquisa" class="list-group resultados-pesquisa"></ul>
         </div>
 
@@ -48,51 +87,51 @@
             <h4>{% trans "Participantes Permitidos:" %}</h4>
             <table class="table">
                 <thead>
-                    <tr>
-                        <th>{% trans "ID" %}</th>
-                        <th>{% trans "Nome" %}</th>
-                        <th>{% trans "Tipo" %}</th>
-                        <th>{% trans "Ações" %}</th>
-                    </tr>
+                <tr>
+                    <th>{% trans "ID" %}</th>
+                    <th>{% trans "Nome" %}</th>
+                    <th>{% trans "Tipo" %}</th>
+                    <th>{% trans "Ações" %}</th>
+                </tr>
                 </thead>
                 <tbody id="participantes_adicionados">
-                    {% for user in bi_report.allowed_users.all %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.get_full_name }}</td>
-                            <td>{% trans "Usuário" %}</td>
-                            <td>
-                                <button type="button" class="btn-danger remover-participante" data-id="{{ user.id }}" data-tipo="usuario">
-                                    {% trans "Remover" %}
-                                </button>
-                            </td>
-                        </tr>
-                        <input type="hidden" name="allowed_users" value="{{ user.id }}">
-                    {% endfor %}
-                    
-                    {% for group in bi_report.allowed_groups.all %}
-                        <tr>
-                            <td>{{ group.id }}</td>
-                            <td>{{ group.name }}</td>
-                            <td>{% trans "Grupo" %}</td>
-                            <td>
-                                <button type="button" class="btn btn-danger remover-participante" data-id="{{ group.id }}" data-tipo="grupo">
-                                    {% trans "Remover" %}
-                                </button>
-                            </td>
-                        </tr>
-                        <input type="hidden" name="allowed_groups" value="{{ group.id }}">
-                    {% endfor %}
+                {% for user in bi_report.allowed_users.all %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.get_full_name|default:user.username }}</td>
+                        <td>{% trans "Usuário" %}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger remover-participante" data-id="{{ user.id }}" data-tipo="usuario">
+                                {% trans "Remover" %}
+                            </button>
+                        </td>
+                    </tr>
+                    <input type="hidden" name="allowed_users" value="{{ user.id }}">
+                {% endfor %}
+
+                {% for group in bi_report.allowed_groups.all %}
+                    <tr>
+                        <td>{{ group.id }}</td>
+                        <td>{{ group.name }}</td>
+                        <td>{% trans "Grupo" %}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger remover-participante" data-id="{{ group.id }}" data-tipo="grupo">
+                                {% trans "Remover" %}
+                            </button>
+                        </td>
+                    </tr>
+                    <input type="hidden" name="allowed_groups" value="{{ group.id }}">
+                {% endfor %}
                 </tbody>
             </table>
         </div>
 
         <!-- Botões de ação -->
         <div class="form-buttons">
-            <button type="button" class="btn-secondary" onclick="window.location.href='{% url 'bi:bi_report_list' %}'">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'bi:bi_report_list' %}'">
                 {% trans "Cancelar" %}
             </button>
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn btn-primary">
                 {% trans "Atualizar" %}
             </button>
         </div>
@@ -105,178 +144,334 @@
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 
 <script>
-    $(document).ready(function () {
-        console.log("JavaScript carregado.");
+    $(function () {
+        // Evita submit ao pressionar Enter no campo de busca
+        $('#buscar_participante_grupo').on('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); }
+        });
 
-        // Arrays para rastrear participantes adicionados
+        // =========================
+        // Seção DATAFLOWS (Gen1)
+        // =========================
+        var groupId = "{{ bi_report.pbi_group_id|default:bi_report.group_id }}";
+        var listUrl = "{% url 'bi:pbi_list_dataflows' %}";
+
+        function keyOf(gid, did) {
+            return String(gid || '').toLowerCase() + ':' + String(did || '').toLowerCase();
+        }
+
+        var initialUpstreams = [];
+        try {
+            initialUpstreams = JSON.parse('{{ upstream_dataflows_json|escapejs }}') || [];
+        } catch(e) { initialUpstreams = []; }
+
+        var selectedMap = {};
+        initialUpstreams.forEach(function (it) {
+            if (it && it.group_id && it.dataflow_id) {
+                var k = keyOf(it.group_id, it.dataflow_id);
+                selectedMap[k] = { group_id: it.group_id, dataflow_id: it.dataflow_id, name: it.name || "" };
+            }
+        });
+
+        var workspaceDataflows = [];
+
+        function renderDataflowList(filterText) {
+            var $list = $("#dataflow_list");
+            $list.empty();
+
+            if (!groupId) {
+                $list.append($("<div>").addClass("small-muted").text("{% trans 'Workspace (Group ID) não definido. Não é possível listar dataflows.' %}"));
+                return;
+            }
+            if (!workspaceDataflows.length) {
+                $list.append($("<div>").addClass("small-muted").text("{% trans 'Nenhum dataflow encontrado neste workspace.' %}"));
+                return;
+            }
+
+            var f = (filterText || "").toLowerCase();
+
+            workspaceDataflows.forEach(function (df) {
+                var name = df.name || df.id;
+                if (f && name.toLowerCase().indexOf(f) === -1) return;
+
+                var key = keyOf(df.group_id, df.id);
+                var checked = !!selectedMap[key];
+
+                var $check = $("<input>").attr({
+                    type: "checkbox",
+                    id: "df-" + df.id,
+                    value: df.id
+                }).addClass("form-check-input df-check")
+                  .data("group-id", df.group_id)
+                  .prop("checked", checked);
+
+                var $label = $("<label>").attr("for", "df-" + df.id).addClass("form-check-label")
+                    .append(document.createTextNode(name))
+                    .append($("<div>").addClass("small-muted mono").text(df.id));
+
+                var $row = $("<div>").addClass("form-check").append($check).append($label);
+                $list.append($row);
+            });
+        }
+
+        function setStatus(msg) { $("#df_status").text(msg || ""); }
+        function disableToolbar(disabled) {
+            $("#df_reload, #df_select_all, #df_clear, #df_filter").prop("disabled", !!disabled);
+        }
+        function updateSummary() {
+            var arr = Object.values(selectedMap || {});
+            if (!arr.length) $("#df_summary").text("{% trans 'Nenhum workflow selecionado.' %}");
+            else $("#df_summary").text("{% trans 'Usando workflow(s):' %} " + arr.map(x => x.name || x.dataflow_id).join(", "));
+        }
+
+        function loadDataflows() {
+            if (!groupId) {
+                setStatus("{% trans 'Workspace (Group ID) não definido. Não é possível listar dataflows.' %}");
+                $("#dataflow_list").empty();
+                updateSummary();
+                return;
+            }
+            setStatus("{% trans 'Carregando dataflows…' %}");
+            disableToolbar(true);
+
+            $.ajax({
+                url: listUrl,
+                method: "GET",
+                data: { group_id: groupId },
+                success: function (data) {
+                    var items = [];
+                    if (Array.isArray(data)) items = data;
+                    else if (data && data.ok === true) items = (data.items || []);
+                    else if (data && data.ok === false) {
+                        if (data.error === "forbidden" || data.status === 403)
+                            setStatus("{% trans 'Permissão insuficiente para listar dataflows neste workspace (403). Verifique o Service Principal/papéis.' %}");
+                        else if (data.error === "sem_access_token")
+                            setStatus("{% trans 'Sem access token para chamar a API do Power BI.' %}");
+                        else setStatus("{% trans 'Falha ao carregar dataflows.' %}");
+                        workspaceDataflows = [];
+                        renderDataflowList($("#df_filter").val());
+                        disableToolbar(false);
+                        updateSummary();
+                        return;
+                    }
+
+                    workspaceDataflows = (items || []).map(function (d) {
+                        var id = d.id || d.dataflow_id;
+                        return { id: id, name: d.name, group_id: d.group_id };
+                    });
+
+                    setStatus("{% trans 'Dataflows carregados.' %}");
+                    renderDataflowList($("#df_filter").val());
+                    disableToolbar(false);
+                    updateSummary();
+                },
+                error: function (xhr) {
+                    var msg = (xhr.status === 403)
+                        ? "{% trans 'Permissão insuficiente para listar dataflows (403). Verifique o Service Principal/papéis.' %}"
+                        : "{% trans 'Falha ao carregar dataflows.' %}";
+                    setStatus(msg);
+                    workspaceDataflows = [];
+                    renderDataflowList($("#df_filter").val());
+                    disableToolbar(false);
+                    updateSummary();
+                }
+            });
+        }
+
+        // inicializa
+        loadDataflows();
+
+        // eventos da toolbar
+        $("#df_reload").on("click", loadDataflows);
+        $("#df_filter").on("input", function () { renderDataflowList($(this).val()); });
+
+        $("#df_select_all").on("click", function () {
+            $("#dataflow_list .df-check").each(function () {
+                var gid = $(this).data("group-id");
+                var did = $(this).val();
+                var key = keyOf(gid, did);
+                $(this).prop("checked", true);
+                if (!selectedMap[key]) {
+                    var df = workspaceDataflows.find(function (x) { return keyOf(x.group_id, x.id) === key; });
+                    selectedMap[key] = { group_id: gid, dataflow_id: did, name: df ? (df.name || "") : "" };
+                }
+            });
+            updateSummary();
+        });
+
+        $("#df_clear").on("click", function () {
+            $("#dataflow_list .df-check").prop("checked", false);
+            selectedMap = {};
+            updateSummary();
+        });
+
+        $("#dataflow_list").on("change", ".df-check", function () {
+            var gid = $(this).data("group-id");
+            var did = $(this).val();
+            var key = keyOf(gid, did);
+            if ($(this).is(":checked")) {
+                var df = workspaceDataflows.find(function (x) { return keyOf(x.group_id, x.id) === key; });
+                selectedMap[key] = { group_id: gid, dataflow_id: did, name: df ? (df.name || "") : "" };
+            } else {
+                delete selectedMap[key];
+            }
+            updateSummary();
+        });
+
+        $("#form-bi").on("submit", function () {
+            var arr = Object.keys(selectedMap).map(function (k) {
+                return {
+                    group_id: selectedMap[k].group_id,
+                    dataflow_id: selectedMap[k].dataflow_id,
+                    name: selectedMap[k].name || ""
+                };
+            });
+            $("#upstream_dataflows_json").val(JSON.stringify(arr));
+            updateSummary();
+        });
+
+        // =========================
+        // Seção PARTICIPANTES
+        // =========================
         var participantesAdicionadosUsuario = [];
         var participantesAdicionadosGrupo = [];
 
-        // Inicializar participantesAdicionadosUsuario e participantesAdicionadosGrupo com os IDs já adicionados
         $('#participantes_adicionados tr').each(function() {
             var tipo = $(this).find('td:nth-child(3)').text().toLowerCase();
             var id = $(this).find('td:first').text();
-            if(tipo === 'usuário' || tipo === 'usuario'){
+            if (tipo.indexOf('usu') === 0){
                 participantesAdicionadosUsuario.push(id);
-            } else if(tipo === 'grupo'){
+            } else if (tipo.indexOf('gru') === 0){
                 participantesAdicionadosGrupo.push(id);
             }
         });
 
-        // URL para buscar participantes via AJAX
-        var buscarParticipantesUrl = "{% url 'usuarios:sugestoes' %}";
+        var buscarUsuariosUrl = "{% url 'bi:buscar_usuarios' %}";
+        var buscarGruposUrl  = "{% url 'bi:buscar_grupos' %}";
 
-        console.log("URL para buscar participantes:", buscarParticipantesUrl);
+        function renderResultados(usuarios, grupos) {
+            var $ul = $('#resultados_pesquisa');
+            $ul.empty();
 
-        // Função para buscar participantes conforme o usuário digita
-        $('#buscar_participante_grupo').on('input', function () {
-            var query = $(this).val();
-            console.log("Usuário digitou:", query);
+            (usuarios || []).forEach(function (u) {
+                var nome = u.name || u.username || u.email || ('ID ' + u.id);
+                var li = $('<li></li>')
+                    .addClass('list-group-item list-group-item-action')
+                    .text(nome + ' ({% trans "Usuário" %})')
+                    .attr('data-id', u.id)
+                    .attr('data-tipo', 'usuario');
+                $ul.append(li);
+            });
 
-            if (query.length > 0) {
-                $.ajax({
-                    url: buscarParticipantesUrl,
-                    data: {
-                        'q': query
-                    },
-                    success: function (data) {
-                        console.log("Dados recebidos:", data);
-                        $('#resultados_pesquisa').empty();
+            (grupos || []).forEach(function (g) {
+                var nomeg = g.name || ('ID ' + g.id);
+                var li = $('<li></li>')
+                    .addClass('list-group-item list-group-item-action')
+                    .text(nomeg + ' ({% trans "Grupo" %})')
+                    .attr('data-id', g.id)
+                    .attr('data-tipo', 'grupo');
+                $ul.append(li);
+            });
 
-                        data.forEach(function (item) {
-                            // item.tipo pode ser 'usuario' ou 'grupo'
-                            var tipo = item.tipo;
-                            var nome = item.nome;
-                            var tipoLabel = tipo === 'usuario' ? "{% trans 'Usuário' %}" : "{% trans 'Grupo' %}";
-                            var li = $('<li></li>')
-                                        .addClass('list-group-item list-group-item-action')
-                                        .text(nome + ' (' + tipoLabel + ')')
-                                        .attr('data-id', item.id)
-                                        .attr('data-tipo', tipo);
-                            $('#resultados_pesquisa').append(li);
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Erro na requisição AJAX:", error);
-                    }
-                });
-            } else {
-                $('#resultados_pesquisa').empty();
+            if (!$ul.children().length) {
+                $ul.append($('<li></li>').addClass('list-group-item small-muted').text("{% trans 'Nenhum resultado.' %}"));
             }
+        }
+
+        $('#buscar_participante_grupo').on('input', function () {
+            var query = $(this).val().trim();
+            if (query.length === 0) {
+                $('#resultados_pesquisa').empty();
+                return;
+            }
+            var reqUsuarios = $.ajax({ url: buscarUsuariosUrl, data: { q: query }, method: 'GET' });
+            var reqGrupos   = $.ajax({ url: buscarGruposUrl,  data: { q: query }, method: 'GET' });
+
+            $.when(reqUsuarios, reqGrupos).done(function (uResp, gResp) {
+                var usuarios = Array.isArray(uResp[0]) ? uResp[0] : [];
+                var grupos   = Array.isArray(gResp[0]) ? gResp[0] : [];
+                renderResultados(usuarios, grupos);
+            }).fail(function (_a, _b, err) {
+                console.error("Erro nas buscas de participantes:", err);
+            });
         });
 
-        // Seleciona um participante da lista
         $('#resultados_pesquisa').on('click', 'li', function () {
             var id = $(this).attr('data-id');
             var tipo = $(this).attr('data-tipo');
             var nome = $(this).text().split(' (')[0];
 
-            console.log("Participante selecionado:", nome, "Tipo:", tipo, "ID:", id);
-
             if (tipo === 'usuario') {
-                // Verificar se já foi adicionado
                 if (participantesAdicionadosUsuario.indexOf(id.toString()) === -1) {
                     participantesAdicionadosUsuario.push(id.toString());
-
-                    // Adicionar à tabela de participantes permitidos
                     var row = $('<tr></tr>');
                     row.append('<td>' + id + '</td>');
-                    row.append('<td>' + nome + '</td>');
+                    row.append('<td>' + $('<div>').text(nome).html() + '</td>');
                     row.append('<td>{% trans "Usuário" %}</td>');
                     var removerBtn = $('<button></button>')
-                                        .attr('type', 'button')
-                                        .addClass('btn btn-danger remover-participante')
-                                        .attr('data-id', id)
-                                        .attr('data-tipo', 'usuario')
-                                        .text("{% trans 'Remover' %}");
+                        .attr('type', 'button')
+                        .addClass('btn btn-danger remover-participante')
+                        .attr('data-id', id)
+                        .attr('data-tipo', 'usuario')
+                        .text("{% trans 'Remover' %}");
                     row.append($('<td></td>').append(removerBtn));
                     $('#participantes_adicionados').append(row);
 
-                    // Adicionar campo oculto
-                    var hiddenInput = $('<input>')
-                                        .attr('type', 'hidden')
-                                        .attr('name', 'allowed_users')
-                                        .attr('value', id);
+                    var hiddenInput = $('<input>').attr({ type: 'hidden', name: 'allowed_users', value: id });
                     $('#form-bi').append(hiddenInput);
                 }
             } else if (tipo === 'grupo') {
-                // Verificar se já foi adicionado
                 if (participantesAdicionadosGrupo.indexOf(id.toString()) === -1) {
                     participantesAdicionadosGrupo.push(id.toString());
-
-                    // Adicionar à tabela de participantes permitidos
                     var row = $('<tr></tr>');
                     row.append('<td>' + id + '</td>');
-                    row.append('<td>' + nome + '</td>');
+                    row.append('<td>' + $('<div>').text(nome).html() + '</td>');
                     row.append('<td>{% trans "Grupo" %}</td>');
                     var removerBtn = $('<button></button>')
-                                        .attr('type', 'button')
-                                        .addClass('btn btn-danger remover-participante')
-                                        .attr('data-id', id)
-                                        .attr('data-tipo', 'grupo')
-                                        .text("{% trans 'Remover' %}");
+                        .attr('type', 'button')
+                        .addClass('btn btn-danger remover-participante')
+                        .attr('data-id', id)
+                        .attr('data-tipo', 'grupo')
+                        .text("{% trans 'Remover' %}");
                     row.append($('<td></td>').append(removerBtn));
                     $('#participantes_adicionados').append(row);
 
-                    // Adicionar campo oculto
-                    var hiddenInput = $('<input>')
-                                        .attr('type', 'hidden')
-                                        .attr('name', 'allowed_groups')
-                                        .attr('value', id);
+                    var hiddenInput = $('<input>').attr({ type: 'hidden', name: 'allowed_groups', value: id });
                     $('#form-bi').append(hiddenInput);
                 }
             }
 
-            // Limpar os resultados de pesquisa e o campo de busca
             $('#resultados_pesquisa').empty();
             $('#buscar_participante_grupo').val('');
         });
 
-        // Remover participante (Usuário ou Grupo)
         $('#participantes_adicionados').on('click', '.remover-participante', function () {
             var id = $(this).attr('data-id');
             var tipo = $(this).attr('data-tipo');
 
-            console.log("Remover participante:", id, "Tipo:", tipo);
-
-            // Remover da tabela
             $(this).closest('tr').remove();
 
-            // Remover do array correspondente
-            if(tipo === 'usuario'){
-                participantesAdicionadosUsuario = participantesAdicionadosUsuario.filter(function(item) {
-                    return item !== id.toString();
-                });
-                // Remover o campo oculto correspondente
+            if (tipo === 'usuario'){
+                participantesAdicionadosUsuario = participantesAdicionadosUsuario.filter(function(item) { return item !== id.toString(); });
                 $('input[name="allowed_users"][value="' + id + '"]').remove();
-            } else if(tipo === 'grupo'){
-                participantesAdicionadosGrupo = participantesAdicionadosGrupo.filter(function(item) {
-                    return item !== id.toString();
-                });
-                // Remover o campo oculto correspondente
+            } else if (tipo === 'grupo'){
+                participantesAdicionadosGrupo = participantesAdicionadosGrupo.filter(function(item) { return item !== id.toString(); });
                 $('input[name="allowed_groups"][value="' + id + '"]').remove();
             }
         });
 
-        // Função para alternar a seleção de participantes com base no checkbox 'all_users'
         function toggleParticipantSelection() {
             if ($('#id_all_users').is(':checked')) {
-                // Desabilitar seleção de participantes
                 $('#buscar_participante_grupo').prop('disabled', true);
                 $('#resultados_pesquisa').empty();
                 $('#participantes_adicionados').empty();
-                // Remover campos ocultos de participantes
                 $('input[name="allowed_users"], input[name="allowed_groups"]').remove();
             } else {
-                // Habilitar seleção de participantes
                 $('#buscar_participante_grupo').prop('disabled', false);
             }
         }
 
-        // Inicializar estado na carga da página
         toggleParticipantSelection();
-
-        // Vincular a função de toggle ao evento de mudança do checkbox
         $('#id_all_users').on('change', toggleParticipantSelection);
     });
 </script>

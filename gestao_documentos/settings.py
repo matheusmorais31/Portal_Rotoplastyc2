@@ -356,6 +356,12 @@ POWERBI_CLIENT_SECRET = config("POWERBI_CLIENT_SECRET", default="")
 POWERBI_SCOPE = config("POWERBI_SCOPE", default="https://analysis.windows.net/powerbi/api/.default")
 POWERBI_GROUP_ID_DEFAULT = config('POWERBI_GROUP_ID_DEFAULT', default=None)
 POWERBI_AUTH_MODE = config("POWERBI_AUTH_MODE", default="sp")  # fixo em "sp"
+POWERBI_PROBE_GROUP_IDS = [
+    "dc152d8a-7555-42d7-b53d-fbe1ce0dff28",  # workspace do Dataflow
+    # adicione outros se fizer sentido
+]
+POWERBI_FALLBACK_REFRESH_SINGLETON = False
+POWERBI_FALLBACK_REFRESH_ALL = False
 
 # Taxa de câmbio (exemplo)
 USD_TO_BRL_RATE = config('USD_TO_BRL_RATE', default=Decimal("5.00"), cast=Decimal)
@@ -376,3 +382,4 @@ CLIMATEMPO_CIDADE_ID = config('CLIMATEMPO_CIDADE_ID', default=5585, cast=int)
 OPENMETEO_LAT = config('OPENMETEO_LAT', default=-28.28389, cast=float)   # Carazinho-RS
 OPENMETEO_LON = config('OPENMETEO_LON', default=-52.78639, cast=float)
 OPENMETEO_TIMEZONE = config('OPENMETEO_TIMEZONE', default=TIME_ZONE)
+

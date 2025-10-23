@@ -54,12 +54,14 @@
 
           <!-- Ações -->
           <div class="bi-actions">
+            {% if perms.bi.refresh_bi %}
             <button type="button" class="action-icon refresh-btn"
                     title="Atualizar dados do Power BI"
                     aria-live="polite" aria-busy="false">
               <img src="{% static 'images/refresh-icon.png' %}" alt="Atualizar">
               <span class="tooltip-text">Atualizar</span>
             </button>
+            {% endif %}
 
             <a href="{% url 'bi:bi_report_detail' bi.pk %}"
                class="action-icon {% if not request.user in bi.allowed_users.all %}disabled{% endif %}">

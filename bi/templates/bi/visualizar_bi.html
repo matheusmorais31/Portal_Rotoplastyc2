@@ -24,19 +24,39 @@
       <span id="lastUpdText">Atualização: —</span>
     </div>
 
+    <!-- Dropdown de visões -->
+    <div class="views-dropdown" id="viewsDropdown">
+      <button class="btn" id="btnViews" aria-haspopup="true" aria-expanded="false">Visões ▾</button>
+
+      <!-- Começa aqui, mas será portalizada para o <body> -->
+      <div class="views-menu" id="menuViews" role="menu" aria-label="Visões salvas" style="display:none;">
+        <div class="header">
+          <input type="text" id="viewsSearch" placeholder="Filtrar por nome…">
+          <span class="helpent">⏎ aplica</span>
+        </div>
+        <div class="views-list" id="viewsList"><!-- linhas via JS --></div>
+        <div style="padding:.25rem .35rem 0 .35rem; display:flex; gap:.4rem; justify-content:flex-end;">
+          <button class="btn" id="btnReloadViews" title="Recarregar visões">Recarregar</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" id="btnSaveView">Salvar visão</button>
+
+    <!-- Dropdown “Exibição” -->
     <div class="dropdown" id="viewDropdown">
       <button class="btn" id="btnView" aria-haspopup="true" aria-expanded="false">Exibição ▾</button>
-      <div class="menu" id="menuView" role="menu" aria-label="Exibição">
-        <button class="btn" data-view="fitToPage"  role="menuitem">🧩 Ajustar à página</button>
-        <button class="btn" data-view="fitToWidth" role="menuitem">↔️ Ajustar à largura</button>
-        <button class="btn" data-view="actualSize" role="menuitem">1:1 Tamanho real</button>
+      <div class="menu" id="menuView" role="menu" aria-label="Exibição" style="display:none;">
+        <button class="btndrop" data-view="fitToPage"  role="menuitem">🧩 Ajustar à página</button>
+        <button class="btndrop" data-view="fitToWidth" role="menuitem">↔️ Ajustar à largura</button>
+        <button class="btndrop" data-view="actualSize" role="menuitem">1:1 Tamanho real</button>
       </div>
     </div>
 
     <button class="btn" id="btnFull">Tela inteira</button>
 
     <!-- Botão Atualizar com spinner -->
-    <button class="btnrefresh" id="btnRefreshNow" aria-live="polite" aria-busy="false">
+    <button class="btnrefresh" id="btnRefreshNow" aria-live="polite" aria-busy="false" title="Aciona atualização do dataset e dataflows upstream (cascata)">
       <span class="spinner" aria-hidden="true"></span>
       <span class="label">Atualizar agora</span>
     </button>
@@ -52,6 +72,64 @@
     </div>
   </div>
 
+  <!-- Modal: Salvar/Editar visão -->
+  <div class="modal" id="saveViewModal" aria-hidden="true" role="dialog" aria-label="Salvar/Editar visão">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div id="modalTitle" style="font-weight:700">Salvar & compartilhar visão</div>
+        <button class="btnclose" id="btnCloseSaveModal">Fechar</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row inline">
+          <div class="form-row">
+            <label for="svName">Nome</label>
+            <input type="text" id="svName" maxlength="140" placeholder="Ex.: Vendas – Região Sul (YTD)">
+          </div>
+          <div class="form-row">
+            <label for="svVisibility">Visibilidade</label>
+            <select id="svVisibility">
+              <option value="private">Privada (só eu)</option>
+              <option value="public">Pública (todos que veem o BI)</option>
+              <option value="users">Usuários específicos</option>
+              <option value="groups">Grupos específicos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="svDesc">Descrição (opcional)</label>
+          <textarea id="svDesc" placeholder="Ajude os outros a entender o objetivo desta visão…"></textarea>
+        </div>
+
+        <!-- Usuários específicos (auto-complete) -->
+        <div class="form-row" id="rowUsers" style="display:none">
+          <label for="svUsersSearch">Compartilhar com usuários</label>
+          <input type="text" id="svUsersSearch" placeholder="Digite o nome, usuário ou e-mail">
+          <div id="svUsersSelected" class="help"></div>
+          <div id="usersSuggestBox" class="suggest"></div>
+        </div>
+
+        <!-- Grupos -->
+        <div class="form-row" id="rowGroups" style="display:none">
+          <label for="svGroups">Grupos (busca dinâmica)</label>
+          <input type="text" id="svGroups" placeholder="Digite e pressione Enter">
+          <div id="svGroupsSelected" class="help"></div>
+        </div>
+
+        <div class="help">
+          A visão guarda filtros, página ativa e seleções de slicers. Use <span class="kbd">Visões ▾</span> para aplicar depois.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btncancel" id="btnSaveViewCancel">Cancelar</button>
+        <button class="btnsave" id="btnSaveViewSubmit">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.0/dist/powerbi.min.js"></script>
   <script>
     (() => {
@@ -62,21 +140,47 @@
       const serverStateUpdatedAt = '{{ initial_state_updated_at|default:"" }}';
       const REFRESH_MS    = 50 * 60 * 1000; // 50 min
       const TRACE_ID      = '{{ trace_id }}';
+      const USER_ID       = '{{ request.user.id }}';
 
-      // ==== escopo por usuário + versão por última atualização ====
-      const USER_ID = '{{ request.user.id }}';
+      // URLs backend
+      const URL_SAVE_STATE   = '{% url "bi:salvar_estado_relatorio" %}';
+      const URL_EMBED_PARAMS = '{% url "bi:get_embed_params" %}';
+      const URL_LAST_RT      = '{% url "bi:get_last_update_rt" %}';
+      const URL_REFRESH_NOW  = '{% url "bi:refresh_now" %}';
+      const URL_REFRESH_ST   = '{% url "bi:get_refresh_status" %}';
+
+      const URL_VIEWS_LIST   = '{% url "bi:saved_views_list" %}';
+      const URL_VIEWS_SAVE   = '{% url "bi:saved_views_save" %}';
+      const URL_VIEWS_GET    = '{% url "bi:saved_views_get" %}';
+      const URL_VIEWS_DEL    = '{% url "bi:saved_views_delete" %}';
+      const URL_USER_SEARCH  = '{% url "bi:buscar_usuarios" %}';
+      const URL_GROUP_SEARCH = '{% url "bi:buscar_grupos" %}';
+
       const LS_VER  = '{{ bi_report.last_updated|date:"U"|default:"0" }}';
       const LS_KEY       = `pbiState:${USER_ID}:${groupId}:${reportId}:v${LS_VER}`;
-
-      // Chave "global" e por PÁGINA para o estado publicado (Power BI Desktop) — baseline
       const BASE_BM_PREFIX = `pbiBase:${groupId}:${reportId}:v${LS_VER}`;
-      const BASE_BM_KEY    = `${BASE_BM_PREFIX}:_global`;
-      const pageBaseKey    = (pageName) => `${BASE_BM_PREFIX}:pg:${pageName}`;
+      const BASE_BM_KEY    = `${BASE_BM_PREFIX}:__global`;
+      const norm = (s) => (typeof s === 'string' ? s.trim() : '');
+      const pageBaseKey    = (pageName) => `${BASE_BM_PREFIX}:pg:${norm(pageName)}`;
 
       let report;
-      let saveTimer;
       let readyToCapture = false;
       let tokenRefreshTimer = null;
+
+      let pendingBookmarkState = null;
+      let firstRenderDone = false;
+      let SKIP_STATE_RESTORE_ONCE = false;
+
+      // ========= Utils UI =========
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+      function toast(msg, ms=2600){ const t=$('#toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), ms); }
+      function getCookie(name) {
+        const v = `; ${document.cookie}`;
+        const parts = v.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+      }
 
       // ========= LOG / MASK =========
       function log(level, msg, obj) {
@@ -91,7 +195,6 @@
       const hideBootMask = () => { if (bootMask) bootMask.style.display = 'none'; };
       const showBootMask = () => { if (bootMask) bootMask.style.display = ''; };
 
-      // ========= STATE HELPERS =========
       function summarize(state) {
         try {
           const rf = Array.isArray(state?.reportFilters) ? state.reportFilters.length : 0;
@@ -131,10 +234,11 @@
         }
       }
       function debounce(fn, delay=900) {
+        let t=null;
         return (...args) => {
-          clearTimeout(saveTimer);
-          if (!readyToCapture) return;
-          saveTimer = setTimeout(() => fn.apply(this, args), delay);
+          clearTimeout(t);
+          if (!readyToCapture && fn === captureState) return;
+          t = setTimeout(() => fn.apply(this, args), delay);
         };
       }
       async function snapshotCurrentState(){
@@ -155,13 +259,38 @@
         log('info','snapshotCurrentState →', summarize(snap));
         return snap;
       }
+
+      async function applyStateObject(pick, { preRender = false } = {}){
+        const bm  = (typeof pick?.bookmarkState === 'string' && pick.bookmarkState.length) ? pick.bookmarkState : null;
+        const flt = Array.isArray(pick?.reportFilters) ? pick.reportFilters : [];
+        the_ap  = pick?.activePage || null;
+
+        if (preRender && bm) {
+          pendingBookmarkState = bm;
+        }
+
+        if (flt.length && report?.setFilters) {
+          try { await report.setFilters(flt); } catch(e){ log('debug','setFilters preRender fail', e); }
+        }
+        if (the_ap) {
+          try {
+            const pages = await report.getPages();
+            const toGo = pages.find(p => p.displayName === the_ap || p.name === the_ap);
+            if (toGo) await toGo.setActive();
+          } catch(e){ log('debug','setActive preRender fail', e); }
+        }
+
+        if (!preRender && bm && report?.bookmarksManager?.applyState) {
+          await report.bookmarksManager.applyState(bm);
+        }
+      }
+
       async function captureState() {
-        if (!readyToCapture) { log('debug', 'captureState skipped (not readyToCapture)'); return; }
         const t0 = performance.now();
         try {
           const currentState = await snapshotCurrentState();
           saveLocalState(currentState);
-          const res = await fetch('{% url "bi:salvar_estado_relatorio" %}', {
+          const res = await fetch(URL_SAVE_STATE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify({ report_id: reportId, group_id: groupId, state: currentState })
@@ -180,15 +309,6 @@
       }
       const saveStateDebounced = debounce(captureState, 900);
 
-      // ========= CSRF =========
-      function getCookie(name) {
-        const v = `; ${document.cookie}`;
-        const parts = v.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return '';
-      }
-
-      // ========= URL / TOKEN helpers =========
       const VALID_EMBED_URL = /^https:\/\/app\.powerbi\.(com|us|gov|cn)\/reportEmbed(\?|$)/i;
       function normalizeEmbedUrl(u){
         if (!u || typeof u !== 'string') return '';
@@ -205,25 +325,25 @@
       const INITIAL_URL   = ensureValidEmbedUrl('{{ embed_url|escapejs }}') || buildEmbedUrl(reportId, groupId);
       const INITIAL_TOKEN = '{{ embed_token|escapejs }}';
 
-      async function fetchEmbedParams() {
-        const res  = await fetch('{% url "bi:get_embed_params" %}', {
+      async function fetchEmbedParams(){
+        const res  = await fetch(URL_EMBED_PARAMS, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
           body: JSON.stringify({ report_id: reportId, group_id: groupId })
         });
         const text = await res.text();
         if (!res.ok) throw new Error(`get_embed_params HTTP ${res.status}`);
-        const data = JSON.parse(text || '{}');
+        let data = {};
+        try { data = JSON.parse(text || '{}'); } catch {}
 
-        const apiUrl  = data.embed_url || data.embedUrl || data.embedURL || data.url || '';
-        const url     = ensureValidEmbedUrl(apiUrl) || INITIAL_URL;
-        const token   = data.embed_token || INITIAL_TOKEN;
+        const candidate = data.embed_url || data.embedUrl || data.embedURL || data.url || '';
+        const url  = ensureValidEmbedUrl(candidate) || buildEmbedUrl(reportId, groupId);
+        const token = (data.embed_token || INITIAL_TOKEN || '').trim();
 
         log('info','fetchEmbedParams resolved', { usingUrl: url.slice(0,100)+'…' });
         return { url, token };
       }
 
-      // ========= Helpers de baseline publicado (por página) =========
       async function captureBaseForActivePageIfMissing(){
         try{
           if (!report?.bookmarksManager?.capture) return;
@@ -232,25 +352,36 @@
           const key = pageBaseKey(ap.name || ap.displayName || '');
           if (!key) return;
           if (!localStorage.getItem(key)){
-            const base = await report.bookmarksManager.capture(); // estado publicado na página ativa (antes de alterações)
+            const base = await report.bookmarksManager.capture();
             if (base?.state){
               localStorage.setItem(key, base.state);
-              // mantém também uma cópia "global" (primeira capturada)
               if (!localStorage.getItem(BASE_BM_KEY)) localStorage.setItem(BASE_BM_KEY, base.state);
-              log('info','base bookmark capturado p/ página', { page: ap.displayName || ap.name });
+              log('info','base bookmark capturado p/ página', { page: norm(ap.displayName || ap.name) });
             }
           }
-        }catch(e){
-          log('debug','captureBaseForActivePageIfMissing fail', e);
-        }
+        }catch(e){ log('debug','captureBaseForActivePageIfMissing fail', e); }
       }
 
-      // ========= EMBED =========
+      function hardClearContainer(){
+        const container = document.getElementById('reportContainer');
+        if (!container) return;
+        try { window.powerbi.reset(container); } catch {}
+        Array.from(container.querySelectorAll('iframe')).forEach(n => n.remove());
+      }
+      function waitTwoFrames(){ 
+        return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      }
+
       async function embedReportPhased(embedUrl, accessToken) {
-        const url = ensureValidEmbedUrl(embedUrl) || INITIAL_URL;
-        const token = accessToken || INITIAL_TOKEN;
+        const url = ensureValidEmbedUrl(embedUrl) || buildEmbedUrl(reportId, groupId);
+        const token = (accessToken || INITIAL_TOKEN || '').trim();
 
         const container = document.getElementById('reportContainer');
+        if (!container) throw new Error('reportContainer não encontrado');
+
+        hardClearContainer();
+        await waitTwoFrames();
+
         const config = {
           type: 'report',
           id:   reportId,
@@ -269,23 +400,74 @@
           }
         };
 
+        if (!ensureValidEmbedUrl(config.embedUrl)) {
+          throw new Error('Embed URL inválida após normalização');
+        }
+
         window.powerbi.reset(container);
-        report = window.powerbi.embed(container, config);
+        const rpt = window.powerbi.embed(container, config);
+        report = rpt;
 
-        // Handlers
-        report.off && report.off('loaded');
-        report.off && report.off('rendered');
-        report.off && report.off('filtersApplied');
-        report.off && report.off('pageChanged');
-        report.off && report.off('dataSelected');
+        rpt.off && rpt.off('loaded');
+        rpt.off && rpt.off('rendered');
+        rpt.off && rpt.off('filtersApplied');
+        rpt.off && rpt.off('pageChanged');
+        rpt.off && rpt.off('dataSelected');
 
-        report.on('loaded', async () => {
-          log('info','event: loaded (phased)');
+        rpt.on('rendered', async () => {
+          log('info','event: rendered (phased)');
           try {
-            // Captura baseline "publicado" da página inicial se ainda não existir
-            await captureBaseForActivePageIfMissing();
+            if (!firstRenderDone) {
+              if (pendingBookmarkState && report?.bookmarksManager?.applyState){
+                try{
+                  setBootStep('aplicando visão salva…');
+                  await report.bookmarksManager.applyState(pendingBookmarkState);
+                  pendingBookmarkState = null;
+                  try { await report.refresh(); } catch(e){ log('debug','refresh pós-bookmark fail', e); }
+                }catch(e){ log('debug','apply bookmark pós-render falhou', e); }
+              }
 
-            // estado inicial melhor (server vs local)
+              try {
+                await captureBaseForActivePageIfMissing();
+                if (!localStorage.getItem(BASE_BM_KEY) && report?.bookmarksManager?.capture){
+                  const base = await report.bookmarksManager.capture();
+                  if (base?.state) {
+                    localStorage.setItem(BASE_BM_KEY, base.state);
+                    log('info','baseline global capturado');
+                  }
+                }
+              } catch (e) {
+                log('debug','baseline pós-render falhou', e);
+              }
+
+              firstRenderDone = true;
+              SKIP_STATE_RESTORE_ONCE = false;
+              readyToCapture = true;
+              hideBootMask();
+              captureState();
+              refreshLastUpdBadgeRt();
+              await loadSavedViews();
+            } else {
+              if (readyToCapture) saveStateDebounced();
+            }
+          } catch (e) {
+            log('error','rendered handler fail', e);
+          }
+        });
+
+        rpt.on('filtersApplied', () => { if (!readyToCapture) return; saveStateDebounced(); });
+        rpt.on('pageChanged',  async () => {
+          if (!readyToCapture) return;
+          await captureBaseForActivePageIfMissing();
+          saveStateDebounced();
+        });
+        rpt.on('dataSelected', () => { if (!readyToCapture) return; saveStateDebounced(); });
+
+        try {
+          await rpt.load();
+          log('info','report.load() OK');
+
+          if (!SKIP_STATE_RESTORE_ONCE) {
             const local = loadLocalState();
             const serverRich = JSON.parse(JSON.stringify(serverState || {}));
             if (serverStateUpdatedAt) serverRich._updatedAt = Date.parse(serverStateUpdatedAt);
@@ -301,59 +483,30 @@
               return (bTs - aTs) > 10000 ? b : a;
             })(local, serverRich);
 
-            const bm  = typeof pick.bookmarkState === 'string' && pick.bookmarkState.length ? pick.bookmarkState : null;
-            const flt = Array.isArray(pick.reportFilters) ? pick.reportFilters : [];
-            const ap  = pick.activePage || null;
-
-            setBootStep('aplicando estado…');
-
-            if (bm && report?.bookmarksManager?.applyState) {
-              await report.bookmarksManager.applyState(bm);
-            } else {
-              if (flt.length) await report.setFilters(flt);
-              if (ap) {
-                const pages = await report.getPages();
-                const toGo = pages.find(p => p.displayName === ap || p.name === ap);
-                if (toGo) await toGo.setActive();
-              }
-            }
-
-            setBootStep('renderizando…');
-            await report.render();
-          } catch (e) {
-            log('error','pre-render restore fail', e);
-            try { await report.render(); } catch {}
+            setBootStep('aplicando seus filtros…');
+            await applyStateObject(pick, { preRender: true });
+          } else {
+            log('info','skip restore (hard reset)');
           }
-        });
 
-        report.on('rendered', () => {
-          log('info','event: rendered (phased)');
-          readyToCapture = true;
-          hideBootMask();
-          captureState();
-          refreshLastUpdBadgeRt();
-        });
-
-        report.on('filtersApplied', () => { if (!readyToCapture) return; saveStateDebounced(); });
-
-        report.on('pageChanged',  async () => {
-          if (!readyToCapture) return;
-          // Ao entrar numa página pela 1ª vez, capture o baseline "publicado" daquela página
-          await captureBaseForActivePageIfMissing();
-          saveStateDebounced();
-        });
-
-        report.on('dataSelected', () => { if (!readyToCapture) return; saveStateDebounced(); });
-
-        try {
-          await report.load();
-          log('info','report.load() OK');
+          setBootStep('renderizando…');
+          await rpt.render();
         } catch (e) {
-          log('error','report.load() fail', e);
+          log('error','load/render fail', e);
         }
       }
 
-      // ========= BADGE: Última atualização =========
+      async function refreshAccessTokenLoop(){
+        try{
+          if(!report) return;
+          const { token } = await fetchEmbedParams();
+          if (report.setAccessToken) {
+            await report.setAccessToken(token);
+            log('info','access token refreshed');
+          }
+        }catch(e){ log('debug','refreshAccessTokenLoop fail', e); }
+      }
+
       let TZ_ID = 'America/Sao_Paulo';
       function fmtBr(dt){
         try { return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short', timeStyle:'short', timeZone:TZ_ID}).format(dt); }
@@ -415,7 +568,7 @@
         if (!wrap) return;
 
         try{
-          const res = await fetch('{% url "bi:get_last_update_rt" %}', {
+          const res = await fetch(URL_LAST_RT, {
             method: 'POST',
             headers: { 'Content-Type':'application/json', 'Accept':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify({ report_id: '{{ bi_report.report_id }}', group_id:  '{{ bi_report.group_id }}' }),
@@ -439,7 +592,6 @@
         }
       }
 
-      // ========= FLUXO: Atualizar dataset e recarregar o MESMO embed =========
       function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
       function getBadgeLastEpoch(){
         const wrap = document.getElementById('lastUpd');
@@ -459,10 +611,8 @@
           if (lbl) lbl.textContent = textIdle;
         }
       }
-
-      // NOVO: checar status do refresh (API)
       async function getRefreshStatus(afterEpoch){
-        const res = await fetch('{% url "bi:get_refresh_status" %}', {
+        const res = await fetch(URL_REFRESH_ST, {
           method: 'POST',
           headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
           body: JSON.stringify({ report_id: reportId, group_id: groupId, after_epoch: afterEpoch || null }),
@@ -473,7 +623,6 @@
         const data = JSON.parse(txt || '{}');
         return data;
       }
-
       async function forceRefreshNow(){
         const btn = document.getElementById('btnRefreshNow');
         if (!btn) return;
@@ -483,11 +632,10 @@
 
           const beforeEpoch = getBadgeLastEpoch();
 
-          // 1) aciona refresh do dataset
-          const res = await fetch('{% url "bi:refresh_now" %}', {
+          const res = await fetch(URL_REFRESH_NOW, {
             method: 'POST',
             headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-            body: JSON.stringify({ report_id: reportId, group_id: groupId }),
+            body: JSON.stringify({ report_id: reportId, group_id: groupId, cascade: true }),
             cache: 'no-store', credentials: 'same-origin'
           });
           const txt = await res.text();
@@ -505,28 +653,17 @@
             return;
           }
 
-          // marco do disparo (para debug/telemetria no back)
           const triggerEpoch = Math.floor(Date.now() / 1000);
-
-          // 2) polling até o epoch mudar OU até o serviço reportar falha
           setBootStep('aguardando conclusão do refresh…');
           const deadlineMs = Date.now() + (15 * 60 * 1000);
-          let changed = false;
-          let failed  = false;
-          let failMsg = '';
+          let changed = false, failed = false, failMsg = '';
 
           while (Date.now() < deadlineMs){
             await sleep(10_000);
-
-            // atualiza badge (última atualização efetiva)
             await refreshLastUpdBadgeRt();
             const nowEpoch = getBadgeLastEpoch();
-            if (nowEpoch && nowEpoch > beforeEpoch){
-              changed = true;
-              break;
-            }
+            if (nowEpoch && nowEpoch > beforeEpoch){ changed = true; break; }
 
-            // checa status do refresh no serviço
             try{
               const st = await getRefreshStatus(triggerEpoch);
               if (st && st.ok){
@@ -542,20 +679,13 @@
                   break;
                 }
               }
-            }catch(e){
-              console.warn('[refreshStatus] falha temporária', e);
-            }
+            }catch(e){ console.warn('[refreshStatus] falha temporária', e); }
           }
 
-          // 3) recarrega SÓ o conteúdo do mesmo embed
           if (changed){
             setBootStep('aplicando dados novos…');
-            try {
-              await report.refresh();
-              log('info','report.refresh() OK');
-            } catch(e){
-              log('warn','report.refresh() falhou', e);
-            }
+            try { await report.refresh(); log('info','report.refresh() OK'); }
+            catch(e){ log('warn','report.refresh() falhou', e); }
             updateLastUpdBadge();
             setBootStep('dados atualizados ✔');
           } else if (failed){
@@ -576,8 +706,6 @@
         }
       }
 
-      // ========= RESET ROBUSTO (retorna ao estado PUBLICADO por página) =========
-      // Fallback helpers (caso não exista baseline salvo)
       async function clearSlicersOnPage(page){
         try{
           const visuals = await page.getVisuals();
@@ -593,128 +721,593 @@
               }
             }
           }
-        }catch(e){
-          log('debug','getVisuals fail', e);
-        }
+        }catch(e){ log('debug','getVisuals fail', e); }
       }
       async function clearCurrentPage(){
         try{
+          try { await report.setFilters([]); } catch(e){ log('debug','report.setFilters([]) fail', e); }
+
           const ap = await report.getActivePage();
           if (ap){
-            try { await ap.setFilters([]); } catch{}
+            try { await ap.setFilters([]); } catch(e){ log('debug','page.setFilters([]) fail', e); }
             await clearSlicersOnPage(ap);
           }
-        }catch{}
+        }catch(e){ log('debug','clearCurrentPage fail', e); }
       }
 
+      let _resetInFlight = false;
       async function resetAll(){
-        try{
-          showBootMask(); setBootStep('redefinindo…'); readyToCapture = false;
+        if (_resetInFlight) return;
+        _resetInFlight = true;
+        const btn = document.getElementById('btnReset');
+        if (btn) btn.disabled = true;
 
-          // limpa estado salvo (servidor + local) — não mexe no baseline publicado
+        try{
+          showBootMask(); setBootStep('redefinindo para publicado…');
+          readyToCapture = false;
+
           localStorage.removeItem(LS_KEY);
           try{
-            await fetch('{% url "bi:salvar_estado_relatorio" %}', {
+            await fetch(URL_SAVE_STATE, {
               method:'POST',
               headers:{ 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
               body: JSON.stringify({ report_id: reportId, group_id: groupId, state: {} })
             });
           }catch{}
 
-          // preserva a página atual
-          let active = null;
-          try { active = await report.getActivePage(); } catch{}
-          const pageName = active?.name || active?.displayName || '';
+          SKIP_STATE_RESTORE_ONCE = true;
+          firstRenderDone = false;
+          pendingBookmarkState = null;
 
-          // baseline específico da página; se não tiver, tenta o global; por fim, fallback "limpo"
-          const pageBase = pageName ? localStorage.getItem(pageBaseKey(pageName)) : null;
-          const globalBase = localStorage.getItem(BASE_BM_KEY);
-
-          setBootStep('restaurando visualização publicada…');
-          let applied = false;
-          try{
-            if (pageBase && report?.bookmarksManager?.applyState){
-              await report.bookmarksManager.applyState(pageBase); // volta ao estado publicado daquela página
-              applied = true;
-            } else if (globalBase && report?.bookmarksManager?.applyState){
-              await report.bookmarksManager.applyState(globalBase);
-              // volta para onde o usuário estava
-              if (active){
-                const pages = await report.getPages();
-                const back = pages.find(p => p.name === pageName || p.displayName === pageName);
-                if (back) await back.setActive();
-              }
-              applied = true;
-            }
-          }catch(e){
-            log('debug','apply baseline fail', e);
+          let params;
+          try {
+            params = await fetchEmbedParams();
+            await embedReportPhased(params.url, params.token);
+          } catch (e1) {
+            log('warn','resetAll 1ª tentativa falhou – retry curto', e1);
+            await new Promise(r => setTimeout(r, 400));
+            params = await fetchEmbedParams();
+            await embedReportPhased(params.url, params.token);
           }
-
-          // Fallback caso não exista baseline salvo: limpa filtros+slicers da página atual
-          if (!applied){
-            setBootStep('limpando filtros e seleções…');
-            await clearCurrentPage();
-          }
-
-          // refresh leve
-          try { await report.refresh(); } catch(e){ log('debug','report.refresh() pós-reset falhou', e); }
-
-          hideBootMask();
-          readyToCapture = true;
-          captureState();
-          refreshLastUpdBadgeRt();
         }catch(e){
           log('error','resetAll fail', e);
+          alert('Não foi possível redefinir os filtros agora. Tente novamente.');
+        }finally{
           hideBootMask();
+          _resetInFlight = false;
+          if (btn) btn.disabled = false;
         }
       }
 
-      // ========= WIRES (UI) =========
-      const btnView = document.getElementById('btnView');
+      // ========= VISÕES SALVAS – UI/Fluxo =========
+      const btnViews = $('#btnViews');
+      const menuViews = $('#menuViews');
+      const viewsListEl = $('#viewsList');
+      const viewsSearch = $('#viewsSearch');
+      const btnReloadViews = $('#btnReloadViews');
+      const btnSaveView = $('#btnSaveView');
+
+      let cachedViews = []; // [{...}]
+      let viewsScrim = null; // overlay para fechar fora
+
+      function renderViewsList(filter=''){
+        const q = (filter || '').toLowerCase();
+        viewsListEl.innerHTML = '';
+        const items = cachedViews.filter(v => v.name.toLowerCase().includes(q));
+        if (!items.length){
+          const empty = document.createElement('div');
+          empty.className = 'view-row';
+          empty.innerHTML = '<div class="view-title">Nenhuma visão encontrada.</div>';
+          viewsListEl.appendChild(empty);
+          return;
+        }
+        for (const v of items){
+          const row = document.createElement('div');
+          row.className = 'view-row';
+
+          const left = document.createElement('div');
+          const title = document.createElement('div');
+          title.className = 'view-title';
+          title.textContent = v.name;
+          title.title = v.description || '';
+          title.style.cursor = 'pointer';
+          title.addEventListener('click', () => { closeViewsMenu(); applySavedView(v.id); });
+
+          const meta = document.createElement('div');
+          meta.className = 'view-meta';
+          const badVis = document.createElement('span');
+          badVis.className = 'badge-pill ' + (v.visibility === 'public' ? 'badge-pub': v.visibility === 'private' ? 'badge-priv': '');
+          badVis.textContent = v.visibility;
+          meta.innerHTML = `de <strong>${v.owner_name || v.owner}</strong> • ${new Date(v.updated_at).toLocaleString('pt-BR')}`;
+          meta.appendChild(badVis);
+          if (v.is_default){
+            const badDef = document.createElement('span');
+            badDef.className = 'badge-pill badge-def';
+            badDef.textContent = 'padrão';
+            meta.appendChild(badDef);
+          }
+          left.appendChild(title);
+          left.appendChild(meta);
+
+          const right = document.createElement('div');
+          right.className = 'view-actions';
+
+          const bApply = document.createElement('button');
+          bApply.className = 'mini';
+          bApply.textContent = 'Aplicar';
+          bApply.addEventListener('click', () => { closeViewsMenu(); applySavedView(v.id); });
+          right.appendChild(bApply);
+
+          if (v.token){
+            const bLink = document.createElement('button');
+            bLink.className = 'mini';
+            bLink.textContent = 'Copiar link';
+            bLink.addEventListener('click', () => { closeViewsMenu(); copyLinkForToken(v.token); });
+            right.appendChild(bLink);
+          }
+
+          if (v.is_owner){
+            const bEdit = document.createElement('button');
+            bEdit.className = 'mini';
+            bEdit.textContent = 'Editar';
+            bEdit.addEventListener('click', () => { closeViewsMenu(); openEditModalById(v.id); });
+            right.appendChild(bEdit);
+
+            const bDel = document.createElement('button');
+            bDel.className = 'minidel';
+            bDel.textContent = 'Excluir';
+            bDel.addEventListener('click', () => { closeViewsMenu(); deleteView(v.id); });
+            right.appendChild(bDel);
+          }
+
+          row.appendChild(left);
+          row.appendChild(right);
+          viewsListEl.appendChild(row);
+        }
+      }
+
+      async function loadSavedViews(){
+        try{
+          const url = new URL(URL_VIEWS_LIST, window.location.origin);
+          url.searchParams.set('report_id', reportId);
+          url.searchParams.set('group_id', groupId);
+          const res = await fetch(url.toString(), { credentials:'same-origin' });
+          const js  = await res.json();
+          if (!res.ok || !js?.ok) throw new Error('list fail');
+          cachedViews = js.views || [];
+          renderViewsList(viewsSearch.value);
+          log('info', 'savedViews loaded', { count: cachedViews.length });
+        }catch(e){
+          console.warn('loadSavedViews fail', e);
+          cachedViews = [];
+          renderViewsList('');
+        }
+      }
+
+      async function applySavedView(id){
+        showBootMask(); setBootStep('aplicando visão…'); readyToCapture = false;
+        try{
+          const res = await fetch(URL_VIEWS_GET + `?id=${encodeURIComponent(id)}&report_id=${encodeURIComponent(reportId)}&group_id=${encodeURIComponent(groupId)}`, { credentials:'same-origin' });
+          const js  = await res.json();
+          if (!res.ok || !js?.ok) throw new Error('get fail');
+          const state = js.state || (js.view && js.view.state) || {};
+          await applyStateObject(state);
+          try{ await report.refresh(); }catch{}
+          toast('Visão aplicada.');
+        }catch(e){
+          console.error('applySavedView fail', e);
+          alert('Falha ao aplicar visão.');
+        }finally{
+          hideBootMask();
+          readyToCapture = true;
+          saveStateDebounced();
+        }
+      }
+
+      async function deleteView(id){
+        if (!confirm('Excluir esta visão?')) return;
+        try{
+          const res = await fetch(URL_VIEWS_DEL, {
+            method:'POST',
+            headers:{'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({ id })
+          });
+          const js = await res.json();
+          if (!res.ok || !js?.ok) throw new Error('delete fail');
+          toast('Visão excluída.');
+          await loadSavedViews();
+        }catch(e){ console.error('deleteView fail', e); alert('Falha ao excluir visão.'); }
+      }
+
+      function copyLinkForToken(token){
+        const base = window.location.origin + "{{ request.path }}";
+        const link = `${base}?view=${encodeURIComponent(token)}`;
+        navigator.clipboard?.writeText(link).then(() => toast('Link copiado!')).catch(() => {
+          prompt('Copie o link:', link);
+        });
+      }
+
+      // ========= Modal (Salvar / Editar) =========
+      const modal = $('#saveViewModal');
+      const modalTitle = $('#modalTitle');
+      const btnOpenModal = $('#btnSaveView');
+      const btnCloseSaveModal = $('#btnCloseSaveModal');
+      const btnSaveModalCancel = $('#btnSaveViewCancel');
+      const btnSaveModalSubmit = $('#btnSaveViewSubmit');
+      const svName = $('#svName');
+      const svDesc = $('#svDesc');
+      const svVis  = $('#svVisibility');
+
+      const svUsersSearch   = document.getElementById('svUsersSearch');
+      const svUsersSelected = document.getElementById('svUsersSelected');
+      const usersSuggestBox = document.getElementById('usersSuggestBox');
+      let selectedUserIds   = [];
+
+      const rowUsers  = $('#rowUsers');
+      const rowGroups = $('#rowGroups');
+      const svGroups  = $('#svGroups');
+      const svGroupsSelected = $('#svGroupsSelected');
+      let selectedGroupIds = [];
+
+      let isEditing = false;
+      let editingViewId = null;
+
+      function pillsFromGroupIds(ids){
+        svGroupsSelected.innerHTML='';
+        (ids||[]).forEach(id=>{
+          const pill=document.createElement('span');
+          pill.className='badge-pill removable';
+          pill.textContent=`Grupo ${id}`;
+          const close=document.createElement('button'); close.type='button'; close.innerHTML='×';
+          close.addEventListener('click',()=>{ selectedGroupIds=selectedGroupIds.filter(g=>g!==id); pillsFromGroupIds(selectedGroupIds); });
+          pill.appendChild(close);
+          svGroupsSelected.appendChild(pill);
+        });
+      }
+
+      function renderUserChips(idsWithNames){
+        svUsersSelected.innerHTML = '';
+        (idsWithNames || []).forEach(u => {
+          const pill = document.createElement('span');
+          pill.className = 'badge-pill removable';
+          pill.textContent = u.name || (`Usuário ${u.id}`);
+          const close = document.createElement('button');
+          close.type='button'; close.innerHTML='×';
+          close.addEventListener('click', () => {
+            selectedUserIds = selectedUserIds.filter(x => x !== u.id);
+            renderUserChips(idsWithNames.filter(x => x.id !== u.id));
+          });
+          pill.appendChild(close);
+          svUsersSelected.appendChild(pill);
+        });
+      }
+      function _debounce(fn, ms=300){ let t=null; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+      const doUserSearch = _debounce(async (term) => {
+        if(!term || term.length < 2){ usersSuggestBox.classList.remove('open'); usersSuggestBox.innerHTML=''; return; }
+        try{
+          const url = new URL(URL_USER_SEARCH, window.location.origin);
+          url.searchParams.set('q', term);
+          const r = await fetch(url.toString(), { credentials:'same-origin' });
+          const list = await r.json();
+          const ul = document.createElement('div'); ul.className='suggest-list';
+          (list || []).forEach(item => {
+            const li = document.createElement('div');
+            li.className='suggest-item';
+            li.textContent = `${item.name} (${item.username})`;
+            li.addEventListener('click', () => {
+              if(!selectedUserIds.includes(item.id)){
+                selectedUserIds.push(item.id);
+                renderUserChips([...(selectedUserIds.map(id => list.find(x=>x.id===id) || {id, name:`Usuário ${id}`}))]);
+              }
+              svUsersSearch.value = '';
+              usersSuggestBox.classList.remove('open');
+              usersSuggestBox.innerHTML='';
+            });
+            ul.appendChild(li);
+          });
+          usersSuggestBox.innerHTML=''; usersSuggestBox.appendChild(ul);
+          usersSuggestBox.classList.toggle('open', (list || []).length > 0);
+        }catch{
+          usersSuggestBox.classList.remove('open'); usersSuggestBox.innerHTML='';
+        }
+      }, 250);
+
+      svUsersSearch?.addEventListener('input', (e)=> doUserSearch(e.target.value));
+      document.addEventListener('click', (e) => {
+        if (!usersSuggestBox.contains(e.target) && e.target !== svUsersSearch){
+          usersSuggestBox.classList.remove('open'); usersSuggestBox.innerHTML='';
+        }
+      }, {passive:true});
+
+      function openModalForCreate(){
+        isEditing=false; editingViewId=null;
+        modalTitle.textContent='Salvar & compartilhar visão';
+        btnSaveModalSubmit.textContent='Salvar';
+        const now=new Date();
+        svName.value=`Visão ${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+        svDesc.value=''; svVis.value='private';
+        selectedUserIds=[]; svUsersSearch.value=''; svUsersSelected.innerHTML='';
+        selectedGroupIds=[]; svGroups.value=''; pillsFromGroupIds([]);
+        updateVisibilityFields();
+        modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); setTimeout(()=>svName.focus(),50);
+      }
+
+      async function openEditModalById(id){
+        try{
+          const r=await fetch(`${URL_VIEWS_GET}?id=${encodeURIComponent(id)}&report_id=${encodeURIComponent(reportId)}&group_id=${encodeURIComponent(groupId)}`);
+          const js=await r.json(); if(!r.ok||!js?.ok) throw 0;
+          const v=js.view || js;
+          isEditing=true; editingViewId=id;
+          modalTitle.textContent='Editar visão';
+          btnSaveModalSubmit.textContent='Atualizar';
+          svName.value=v.name||''; svDesc.value=v.description||''; svVis.value=v.visibility||'private';
+
+          selectedUserIds = [...(v.shared_user_ids||[])];
+          renderUserChips((v.shared_users||[]).map(u=>({id:u.id, name:u.name})));
+
+          selectedGroupIds=[...(v.shared_group_ids||[])];
+          svGroups.value=''; pillsFromGroupIds(selectedGroupIds);
+
+          updateVisibilityFields();
+          modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); setTimeout(()=>svName.focus(),50);
+        }catch{ alert('Não foi possível abrir a visão para edição.'); }
+      }
+
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden','true');
+      }
+
+      function updateVisibilityFields(){
+        const v = svVis.value;
+        rowUsers.style.display  = v === 'users' ? '' : 'none';
+        rowGroups.style.display = v === 'groups' ? '' : 'none';
+      }
+      svVis.addEventListener('change', updateVisibilityFields);
+
+      svGroups.addEventListener('keydown', async (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        const term = svGroups.value.trim();
+        if (!term) return;
+        try{
+          const url = new URL(URL_GROUP_SEARCH, window.location.origin);
+          url.searchParams.set('q', term);
+          const r = await fetch(url.toString(), { credentials:'same-origin' });
+          const js = await r.json();
+          if (Array.isArray(js) && js.length){
+            const g = js[0];
+            if (!selectedGroupIds.includes(g.id)){
+              selectedGroupIds.push(g.id);
+              pillsFromGroupIds(selectedGroupIds);
+            }
+            svGroups.value = '';
+          }else{
+            alert('Nenhum grupo encontrado.');
+          }
+        }catch{ alert('Erro ao buscar grupos.'); }
+      });
+
+      async function submitSaveOrUpdate(){
+        try{
+          btnSaveModalSubmit.disabled=true;
+          const payload={
+            report_id:reportId,
+            group_id:groupId,
+            name:svName.value.trim(),
+            description:svDesc.value.trim(),
+            visibility:svVis.value,
+            shared_user_ids:selectedUserIds,
+            shared_group_ids:selectedGroupIds
+          };
+          if(!payload.name){ alert('Informe um nome para a visão.'); return; }
+
+          if(isEditing){
+            const res=await fetch(URL_VIEWS_SAVE,{
+              method:'POST',
+              headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+              body:JSON.stringify({...payload, overwrite_id: editingViewId})
+            });
+            const js=await res.json(); if(!res.ok||!js?.ok){ alert(js?.error||'Falha ao atualizar visão.'); return; }
+            toast('Visão atualizada.');
+          }else{
+            const state=await snapshotCurrentState();
+            const res=await fetch(URL_VIEWS_SAVE,{
+              method:'POST',
+              headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+              body:JSON.stringify({...payload, state})
+            });
+            const js=await res.json(); if(!res.ok||!js?.ok){
+              const err=js?.error||'Falha ao salvar visão.';
+              if(err==='duplicate_name') alert('Já existe uma visão sua com este nome.');
+              else alert(err);
+              return;
+            }
+            toast('Visão salva.');
+          }
+
+          closeModal();
+          await loadSavedViews();
+        }catch{ alert('Erro ao salvar/atualizar visão.'); }
+        finally{ btnSaveModalSubmit.disabled=false; }
+      }
+
+      // ========= MENU “Exibição ▾” — portal + scrim =========
+      const btnView  = document.getElementById('btnView');
       const menuView = document.getElementById('menuView');
-      btnView.addEventListener('click', () => {
-        const open = !menuView.classList.contains('open');
-        menuView.classList.toggle('open');
-        btnView.setAttribute('aria-expanded', open ? 'true' : 'false');
-      }, { passive: true });
-      menuView.addEventListener('click', (ev) => {
-        const btn = ev.target.closest('button[data-view]');
-        if (!btn) return;
-        const key = btn.getAttribute('data-view');
-        const map = {
-          fitToPage:  models.DisplayOption.FitToPage,
-          fitToWidth: models.DisplayOption.FitToWidth,
-          actualSize: models.DisplayOption.ActualSize
-        };
-        if (report && map[key]){
-          report.updateSettings({
-            layoutType:  models.LayoutType.Custom,
-            customLayout:{ displayOption: map[key] },
-            panes: { filters: { visible: true }, pageNavigation: { visible: true } },
-            navContentPaneEnabled: true
-          }).catch(e => log('error','update displayOption fail', e));
+      let viewScrim = null;
+
+      function placeMenuNearButton(menuEl, btnEl, offsetY = 6){
+        const r = btnEl.getBoundingClientRect();
+        menuEl.style.display = 'block';
+        const mw = Math.max(220, menuEl.offsetWidth || 220);
+        const top  = Math.round(r.bottom + offsetY + window.scrollY);
+        const left = Math.round(r.right - mw + window.scrollX);
+        menuEl.style.minWidth = mw + 'px';
+        menuEl.style.top  = top  + 'px';
+        menuEl.style.left = left + 'px';
+      }
+
+      function openViewMenu(){
+        if (!viewScrim){
+          viewScrim = document.createElement('div');
+          viewScrim.className = 'menu-scrim';
+          viewScrim.addEventListener('pointerdown', closeViewMenu);
+          document.body.appendChild(viewScrim);
+        }
+        if (menuView.parentElement !== document.body){
+          document.body.appendChild(menuView);
+        }
+        menuView.classList.add('open');
+        placeMenuNearButton(menuView, btnView);
+        btnView.setAttribute('aria-expanded', 'true');
+      }
+      function closeViewMenu(){
+        if (!menuView.classList.contains('open')){
+          if (viewScrim){ viewScrim.remove(); viewScrim = null; }
+          return;
         }
         menuView.classList.remove('open');
+        menuView.style.display = 'none';   // <-- garante esconder
         btnView.setAttribute('aria-expanded', 'false');
+        if (viewScrim){ viewScrim.remove(); viewScrim = null; }
+      }
+
+      btnView.addEventListener('click', () => {
+        const willOpen = !menuView.classList.contains('open');
+        if (willOpen) openViewMenu(); else closeViewMenu();
       }, { passive: true });
-      document.addEventListener('click', (ev) => {
-        if (!menuView.contains(ev.target) && ev.target !== btnView) {
-          menuView.classList.remove('open');
-          btnView.setAttribute('aria-expanded', 'false');
+
+      // Reposiciona em resize/scroll
+      window.addEventListener('resize', () => {
+        if (menuView.classList.contains('open')) placeMenuNearButton(menuView, btnView);
+      }, { passive:true });
+      window.addEventListener('scroll', () => {
+        if (menuView.classList.contains('open')) placeMenuNearButton(menuView, btnView);
+      }, { passive:true });
+
+      // ESC fecha
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeViewMenu();
+      }, true);
+
+      // Clique nas opções do menu Exibição
+      menuView.addEventListener('click', async (e) => {
+        const el = e.target.closest('.btndrop');
+        if (!el) return;
+        const opt = (el.getAttribute('data-view') || '').toLowerCase();
+        try{
+          if (!window.powerbi || !report) throw new Error('Report não pronto');
+          const displayMap = {
+            'fittopage':  models.DisplayOption.FitToPage,
+            'fittowidth': models.DisplayOption.FitToWidth,
+            'actualsize': models.DisplayOption.ActualSize,
+          };
+          const displayOption = displayMap[opt];
+          if (displayOption == null) return;
+
+          await report.updateSettings({
+            layoutType:  models.LayoutType.Custom,
+            customLayout:{ displayOption }
+          });
+
+          if (typeof toast === 'function') {
+            toast(opt === 'fittopage'  ? 'Ajustado à página.'
+                : opt === 'fittowidth' ? 'Ajustado à largura.'
+                : 'Tamanho real (1:1).');
+          }
+        } catch (err){
+          (console.error || console.log)?.('[Exibição] erro ao aplicar', err);
+          alert('Não foi possível aplicar a exibição agora.');
+        } finally {
+          closeViewMenu(); // fecha após escolher
         }
+      });
+
+      // ====== MENU "Visões" com portal + SCRIM ======
+      const onReposition = () => {
+        if (menuViews && menuViews.classList.contains('open')) placeMenuNearButton(menuViews, btnViews);
+      };
+      const onEsc = (e) => { if (e.key === 'Escape') closeViewsMenu(); };
+
+      function bindOutsideHandlers(){
+        window.addEventListener('resize', onReposition, { passive:true });
+        window.addEventListener('scroll', onReposition, { passive:true });
+        document.addEventListener('keydown', onEsc, true);
+        window.addEventListener('blur', closeViewsMenu, { passive:true });
+      }
+      function unbindOutsideHandlers(){
+        window.removeEventListener('resize', onReposition);
+        window.removeEventListener('scroll', onReposition);
+        document.removeEventListener('keydown', onEsc, true);
+        window.removeEventListener('blur', closeViewsMenu);
+      }
+
+      function openViewsMenu(){
+        if (!viewsScrim){
+          viewsScrim = document.createElement('div');
+          viewsScrim.className = 'menu-scrim';
+          viewsScrim.addEventListener('pointerdown', closeViewsMenu);
+          document.body.appendChild(viewsScrim);
+        }
+        if (menuViews.parentElement !== document.body){
+          document.body.appendChild(menuViews);
+        }
+        menuViews.classList.add('open');
+        placeMenuNearButton(menuViews, btnViews);
+        btnViews.setAttribute('aria-expanded', 'true');
+        bindOutsideHandlers();
+        setTimeout(() => viewsSearch?.focus(), 0);
+      }
+      function closeViewsMenu(){
+        if (!menuViews.classList.contains('open')) {
+          if (viewsScrim){ viewsScrim.remove(); viewsScrim=null; }
+          return;
+        }
+        menuViews.classList.remove('open');
+        menuViews.style.display = 'none';
+        btnViews.setAttribute('aria-expanded', 'false');
+        unbindOutsideHandlers();
+        if (viewsScrim){
+          viewsScrim.removeEventListener('pointerdown', closeViewsMenu);
+          viewsScrim.remove();
+          viewsScrim = null;
+        }
+      }
+
+      // Botão "Visões"
+      btnViews.addEventListener('click', async () => {
+        const willOpen = !menuViews.classList.contains('open');
+        if (willOpen && !cachedViews.length) await loadSavedViews();
+        if (willOpen) openViewsMenu(); else closeViewsMenu();
       }, { passive: true });
+
+      // filtro e recarregar
+      viewsSearch.addEventListener('input', () => renderViewsList(viewsSearch.value));
+      viewsSearch.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter'){
+          const first = (cachedViews || []).find(v => v.name.toLowerCase().includes((viewsSearch.value||'').toLowerCase()));
+          if (first) { closeViewsMenu(); applySavedView(first.id); }
+        }
+      });
+      btnReloadViews.addEventListener('click', loadSavedViews);
+
+      // Modal salvar/editar visão
+      btnSaveView.addEventListener('click', openModalForCreate, { passive: true });
+      btnCloseSaveModal.addEventListener('click', closeModal, { passive: true });
+      btnSaveModalCancel.addEventListener('click', closeModal, { passive: true });
+      btnSaveModalSubmit.addEventListener('click', submitSaveOrUpdate);
 
       document.getElementById('btnFull').addEventListener('click', () => { try{ report && report.fullscreen(); }catch(e){ log('error','fullscreen fail', e); } }, { passive: true });
       document.getElementById('btnReset').addEventListener('click', resetAll, { passive: true });
       document.getElementById('btnRefreshNow').addEventListener('click', forceRefreshNow, { passive: true });
 
-      // Badge: inicial e periódicos
       updateLastUpdBadge();
       refreshLastUpdBadgeRt();
       setInterval(updateLastUpdBadge,    60 * 1000);
       setInterval(refreshLastUpdBadgeRt, 5  * 60 * 1000);
 
-      // ========= Embed inicial + loops =========
       embedReportPhased(INITIAL_URL, INITIAL_TOKEN);
       tokenRefreshTimer = setInterval(refreshAccessTokenLoop, REFRESH_MS);
     })();

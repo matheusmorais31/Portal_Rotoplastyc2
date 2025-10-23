@@ -1,170 +1,381 @@
-/* bi_app/static/css/listar_bi.css */
-
-/* ========= Tamanhos consistentes ========= */
-:root{
-  --icon-box: 32px;     /* caixa clicável (botão/anchor) */
-  --icon-size: 24px;    /* tamanho do PNG/SVG dentro */
-}
+/* bi_app/static/css/lista_bi.css */
 
 /* Remove os marcadores (bolinhas) das listas */
-ul { list-style-type: none; padding-left: 0; }
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
 
 /* Estilo básico */
-.container { padding: 20px; }
-h1, h2 { color: #fff; }
-h1 { font-size: 24px; margin-bottom: 20px; margin-top: 5%; }
+
+
+.container {
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #fff;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    margin-top: 5%;
+}
 
 /* Contêiner Flexível para Busca e Filtro */
 .filters-container {
-  display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 /* Campo de Busca */
-.search-container { flex: 1 1 300px; }
-.search-input {
-  width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;
-  background-color: #ddd; color: #333; font-size: 16px;
+.search-container {
+    flex: 1 1 300px;
 }
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+    color: #333;
+    font-size: 16px;
+}
+
 input#searchInput.search-input:focus {
-  border-color: #2EC2D6; outline: none; background-color: #fff; color: #000;
+    border-color: #2EC2D6;
+    outline: none;
+    background-color: #fff;
+    color: #000;
 }
 
 /* Filtro por Categoria */
-.filter-container { flex: 0 1 200px; }
+.filter-container {
+    flex: 0 1 200px;
+}
+
 .filter-select {
-  width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;
-  background-color: #ddd; color: #333; font-size: 16px;
-  appearance: none; -webkit-appearance: none; -moz-appearance: none;
-  background-repeat: no-repeat; background-position: right 10px center; background-size: 12px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+    color: #333;
+    font-size: 16px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("{% static 'images/dropdown-arrow.png' %}");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
 }
 
 /* Ajuste Responsivo para o Dropdown */
-@media (max-width: 768px) { .filter-select { font-size: 14px; } }
+@media (max-width: 768px) {
+    .filter-select {
+        font-size: 14px;
+    }
+}
 
 /* Lista de BIs */
-.bi-container{
-  margin-top: 2%;
-  background-color: rgba(33,32,32,0.265);
-  margin-bottom: 20px; padding: 15px;
-  border-radius: 8px; border: 1px solid #bdbcbc;
-  transition: background-color .3s ease, transform .3s ease;
-}
-.bi-container:hover { transform: scale(1.01); }
-
-.bi-item { display: flex; align-items: center; width: 100%; }
-.bi-status { margin-right: 20px; }
-.bi-info { flex-grow: 1; }
-
-.bi-grid{
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 10px; grid-row-gap: 10px;
-}
-.bi-info div { margin: 5px 0; }
-
-/* ========= Ações — tudo do mesmo tamanho, alinhado ao rodapé ========= */
-.bi-actions{
-  margin-left: auto;
-  display: flex;
-  align-items: flex-end;     /* alinha os itens pela base */
-  gap: 10px;
+.bi-container {
+    margin-top: 2%;
+    background-color: rgba(33, 32, 32, 0.265); /* Leve transparência para destaque */
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #bdbcbc;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* âncoras e botões idênticos visualmente */
-.bi-actions .action-icon{
-  /* micro-ajuste vertical por item */
-  --nudge: 0px;                 /* default para todos */
-  display: grid;                /* grid facilita "grudar" conteúdo na base */
-  align-content: end;           /* conteúdo encostado no fundo */
-  justify-content: center;
-  width: var(--icon-box);
-  height: var(--icon-box);
-  padding: 0; margin: 0;
-  border: 0; background: transparent;
-  box-sizing: content-box;
-  line-height: 0;               /* remove baseline extra */
-  cursor: pointer;
-  position: relative;           /* base pro spinner */
-  -webkit-appearance: none;
-  appearance: none;
+.bi-container:hover {
+    transform: scale(1.01);
 }
 
-/* caixa interna (PNG/SVG) */
-.bi-actions .action-icon img,
-.icon-link img{
-  width: var(--icon-size);
-  height: var(--icon-size);
-  display: block;               /* remove espaço da linha */
-  object-fit: contain;
-  margin: 0;
-  transform: translateY(var(--nudge)); /* aplica micro-ajuste */
-  transform-origin: bottom center;
-  transition: transform .15s ease-in-out;
+.bi-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
 }
 
-/* hover — mantém o micro-ajuste e só acrescenta scale */
-.bi-actions .action-icon img:hover,
-.icon:hover{
-  transform: translateY(var(--nudge)) scale(1.15);
+.bi-status {
+    margin-right: 20px;
 }
 
-/* Ajuste específico do botão de atualizar
-   Se ainda parecer 1px abaixo, aumente para -2px */
-.refresh-btn{ --nudge: -1px; }
-
-/* Ícone do BI (coluna da esquerda) */
-.status-icon{ width: 40px; height: 40px; }
-
-/* Tooltip */
-.tooltip-text{
-  visibility: hidden; width: max-content; background-color: #555; color: #fff;
-  text-align: center; border-radius: 6px; padding: 5px 8px;
-  position: absolute; z-index: 1; bottom: 125%; left: 50%;
-  transform: translateX(-50%); opacity: 0; transition: opacity .3s; white-space: nowrap;
+.bi-info {
+    flex-grow: 1;
 }
-.tooltip-text::after{
-  content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
-  border-width: 5px; border-style: solid; border-color: #555 transparent transparent transparent;
+
+.bi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    grid-row-gap: 10px;
 }
+
+.bi-info div {
+    margin: 5px 0;
+}
+
+/* Botões de ação */
+.bi-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.action-icon, .icon-link {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.action-icon img, .icon-link img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.action-icon img:hover, .icon:hover {
+    transform: scale(1.5);
+}
+
+.icons-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.icon-link {
+    margin-right: 10px;
+}
+
+/* Ícone do BI */
+.status-icon {
+    width: 40px;
+    height: 40px;
+}
+
+/* Modal (se necessário) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background-color: rgb(7, 7, 7);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.16);
+    width: 600px;
+    max-width: 90%;
+    text-align: center;
+}
+
+/* Estilizar o título do modal */
+.modal-content h2 {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+/* Estilizar o campo de textarea para motivo */
+.modal-content textarea {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    font-size: 14px;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+    resize: none;
+}
+
+/* Estilizar os botões do modal */
+.modal-content button {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+.modal-content button#submitRejection {
+    background-color: #2EC2D6;
+    color: white;
+}
+
+.form-buttons {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.close {
+    background: none;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+}
+
+.close:hover, .close:focus {
+    color: #ccc;
+    text-decoration: none;
+}
+
+/* Tooltip personalizado para action-icon e icon-link */
+.tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
 .action-icon:hover .tooltip-text,
-.icon-link:hover .tooltip-text{ visibility: visible; opacity: 1; }
+.icon-link:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
 
 /* Responsividade */
-@media (max-width: 768px){
-  .filters-container{ flex-direction: column; align-items: stretch; }
-  .filter-container{ flex: 1 1 100%; }
-  .bi-item{ flex-direction: column; align-items: flex-start; }
-  .bi-grid{ grid-template-columns: 1fr; }
-  .bi-actions{ margin-left: 0; margin-top: 10px; }
-  .filter-select{ font-size: 14px; }
+@media (max-width: 768px) {
+    .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-container {
+        flex: 1 1 100%;
+    }
+
+    .bi-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .bi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bi-actions {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .filter-select {
+        font-size: 14px;
+    }
 }
 
-/* Spinner genérico */
-.loading-spinner{
-  border: 4px solid #f3f3f3; border-top: 4px solid #555555;
-  border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite;
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #555555;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
 }
-@keyframes spin{ 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
 
-/* Loading do botão Atualizar */
-.refresh-btn.loading img{ opacity: 0; }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+.last-upd{
+  display:inline;         
+  padding:0;
+  margin:0;
+  border:0;
+  background:transparent;
+  font-size: inherit;
+}
+
+/* (opcional) só cor no valor, mantendo layout igual ao título */
+.last-upd .lastUpdText { color: inherit; }
+.last-upd.ok    .lastUpdText { color: #55ff0c; }  
+.last-upd.warn  .lastUpdText { color: #f59e0b; }   
+.last-upd.stale .lastUpdText { color: #ef4444; }   
+.last-upd.unknown .lastUpdText { color: #9ca3af; } 
+
+
+
+/* Botão Atualizar: estado base e loading */
+.refresh-btn{
+  position: relative;                 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;                        
+  height: 32px;
+}
+
+.refresh-btn.loading img{
+  opacity: 0;                         
+}
+
 .refresh-btn.loading::after{
   content: "";
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 18px; height: 18px;
-  margin: -9px 0 0 -9px;
+  position: absolute;                 
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;              
   border: 2px solid rgba(255,255,255,.35);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  border-top-color: #ffffff;          
+  animation: spin 1s linear infinite; 
 }
-
-/* “Última atualização” (sem pílula; só texto) */
-.last-upd{ display:inline; padding:0; margin:0; border:0; background:transparent; font-size: inherit; }
-.last-upd .lastUpdText { color: inherit; }
-.last-upd.ok    .lastUpdText { color: #10b981; }
-.last-upd.warn  .lastUpdText { color: #f59e0b; }
-.last-upd.stale .lastUpdText { color: #ef4444; }
-.last-upd.unknown .lastUpdText { color: #9ca3af; }

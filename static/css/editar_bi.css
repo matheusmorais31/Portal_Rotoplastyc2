@@ -9,65 +9,59 @@
 html, body {
     height: 100%;
     font-family: Arial, sans-serif;
-    color: #333; /* Texto em cor escura para legibilidade */
+    color: #333;
 }
 
 /* Estilizar o contêiner do formulário */
 .container {
-    background-color: rgba(17, 16, 16, 0.44); /* Fundo semi-transparente */
-    padding: 20px 20px; /* Diminui o padding para reduzir a altura */
+    background-color: rgba(17, 16, 16, 0.44);
+    padding: 20px 20px;
     border-radius: 80px;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.169);
-    width: 600px; /* Diminuir a largura do contêiner */
-    max-width: 70%; /* Limita a largura máxima a 70% da tela */
-    text-align: center; /* Centraliza o texto no contêiner */
-    margin: 50px auto; /* Adiciona 50px de margem em cima e centraliza o contêiner */
+    width: 800px;
+    max-width: 70%;
+    text-align: center;
+    margin: 50px auto;
 }
 
 /* Estilizar os campos de texto */
 input[type="text"], input[type="password"], input[type="email"], input[type="search"] {
-    width: 90%; /* Ajusta a largura dos campos */
-    padding: 8px; /* Mantém um espaçamento interno confortável */
-    margin: 8px 0; /* Reduz a margem entre os campos */
-    border: none; /* Remove a borda */
-    border-radius: 10px; /* Bordas arredondadas */
-    background-color: #d3d3d3; /* Cor de fundo dos campos */
-    font-size: 14px; /* Tamanho da fonte */
-    box-shadow: none; /* Remove a sombra */
-    outline: none; /* Remove o contorno ao focar no campo */
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    font-size: 14px;
+    box-shadow: none;
+    outline: none;
 }
-
-/* Para remover a linha de foco padrão (em alguns navegadores) */
 input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
-    box-shadow: none; /* Remove a sombra ao focar */
-    background-color: #d3d3d3; /* Mantenha a cor de fundo */
+    box-shadow: none;
+    background-color: #d3d3d3;
 }
 
-/* Estilizar o título do formulário */
+/* Títulos e labels */
 h2 {
-    color: #ffffff; /* Cor do título */
-    margin-bottom: 15px; /* Reduz o espaçamento abaixo do título */
-}
-
-/* Estilizar os rótulos (labels) */
-label {
-    display: block; /* Garante que os rótulos ocupem uma linha inteira */
-    margin-bottom: 0px; /* Reduz o espaçamento entre o rótulo e o campo de entrada */
-    font-size: 18px;
-    color: #ffffff; /* Cor do texto dos rótulos */
-    text-align: center; /* Centraliza os rótulos */
-}
-
-/* Estilizar o grupo de formulários */
-.form-group {
+    color: #ffffff;
     margin-bottom: 15px;
 }
+label {
+    display: block;
+    margin-bottom: 0;
+    font-size: 18px;
+    color: #ffffff;
+    text-align: center;
+}
 
-/* Estilizar os botões */
+/* Grupos de formulário */
+.form-group { margin-bottom: 15px; }
+
+/* Botões */
 .btn,.btn-primary,.btn-secondary {
-    width: 100px; /* Diminui um pouco a largura dos botões */
-    padding: 6px; /* Reduz o padding para ajustar o tamanho do botão */
-    margin: 10px 5px; /* Reduz a margem entre os botões */
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
     border: none;
     border-radius: 10px;
     font-size: 16px;
@@ -76,28 +70,32 @@ label {
     display: inline-block;
 }
 
+.btn-outline-secondary{
+     background-color: #2EC2D6;
+    color: white;
+}
+
+
+.btn-outline-secondary:hover {
+    background-color: #1EB2C1;
+    box-shadow:  0px 0px 15px #2EC2D6;
+}
 .btn-primary {
     background-color: #2EC2D6;
     color: white;
 }
-
-
-/* Botão Cancelar */
 .btn-secondary {
     background-color: #ff5555;
     color: white;
 }
-
 .btn-primary:hover {
     background-color: #1EB2C1;
     box-shadow:  0px 0px 15px #2EC2D6;
 }
-
 .btn-secondary:hover {
     background-color: #ff5555;
     box-shadow:  0px 0px 15px #ff5555;
 }
-
 .btn-danger {
     background-color: #ff5555;
     color: white;
@@ -106,24 +104,29 @@ label {
     padding: 6px 12px;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s;  
+    transition: background-color 0.3s;
 }
-
 .btn-danger:hover {
     background-color: #e04e4e;
     box-shadow: 0px 0px 15px #ff5555;
 }
 
-/* Ajuste para que os botões fiquem centralizados */
+/* Botões – container */
 .form-buttons {
     text-align: center;
     margin-top: 30px;
+
+    /* movido do inline do HTML */
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-/* Estilização para exibir as mensagens de erro */
+/* Erros */
 .form-errors, .error-message {
-    color: #ff5555; /* Cor vermelha para chamar atenção */
-    background-color: rgba(255, 85, 85, 0.1); /* Fundo semi-transparente */
+    color: #ff5555;
+    background-color: rgba(255, 85, 85, 0.1);
     border: 1px solid #ff5555;
     box-shadow: inset 0px 0px 5px rgba(255, 85, 85, 0.2);
     border-radius: 5px;
@@ -133,11 +136,10 @@ label {
     text-align: left;
 }
 
-h4 {
-    color:#ffffff;
-}
+/* Títulos secundários */
+h4 { color:#ffffff; }
 
-/* Estilo para a tabela */
+/* Tabela */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -147,31 +149,18 @@ table {
     color: #fff;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
-.table tbody td {
-    padding: 10px;
-    font-size: 16px;
-}
-
+.table tbody td { padding: 10px; font-size: 16px; }
 th, td {
     padding: 12px 15px;
     text-align: left;
     border: 1px solid #ddd;
     color: #fff;
 }
+th { background-color: #18909F; }
+tr:nth-child(even) { background-color: rgb(59, 56, 56); }
+tr:hover { background-color: #18909F; }
 
-th {
-    background-color: #18909F;
-}
-
-tr:nth-child(even) {
-    background-color: rgb(59, 56, 56);
-}
-
-tr:hover {
-    background-color: #18909F;
-}
-
-/* Estilizar a lista de resultados de busca */
+/* Resultados de busca (ID) */
 #resultados_pesquisa {
     list-style-type: none;
     margin-top: 5px;
@@ -182,55 +171,31 @@ tr:hover {
     background-color: #fff;
     border-radius: 5px;
 }
-
 #resultados_pesquisa li {
     padding: 10px 15px;
     cursor: pointer;
     color: #333;
 }
+#resultados_pesquisa li:hover { background-color: #f0f2f5; }
 
-#resultados_pesquisa li:hover {
-    background-color: #f0f2f5;
-}
-
-/* Estilos para dispositivos móveis */
+/* Mobile */
 @media (max-width: 600px) {
-    .container {
-        padding: 20px;
-        border-radius: 10px;
-    }
-
-    h2 {
-        font-size: 24px;
-    }
-
-    label {
-        font-size: 16px;
-    }
-
-    input[type="text"], input[type="password"], input[type="email"] {
-        font-size: 14px;
-    }
-
-    button {
-        font-size: 14px;
-        padding: 8px 12px;
-    }
-
-    th, td {
-        font-size: 14px;
-        padding: 10px 12px;
-    }
+    .container { padding: 20px; border-radius: 10px; }
+    h2 { font-size: 24px; }
+    label { font-size: 16px; }
+    input[type="text"], input[type="password"], input[type="email"] { font-size: 14px; }
+    button { font-size: 14px; padding: 8px 12px; }
+    th, td { font-size: 14px; padding: 10px 12px; }
 }
 
-/* Estilos personalizados para o checkbox */
+/* Checkbox custom */
 .form-check {
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 15px 0;
+    
 }
-
 .form-check input[type="checkbox"] {
     width: 20px;
     height: 20px;
@@ -239,23 +204,64 @@ tr:hover {
     cursor: pointer;
     transition: transform 0.2s;
 }
-
-.form-check input[type="checkbox"]:hover {
-    transform: scale(1.1);
-}
-
+.form-check input[type="checkbox"]:hover { transform: scale(1.1); }
 .form-check-label {
     font-size: 18px;
     color: #ffffff;
     cursor: pointer;
 }
-
 .form-check input[type="checkbox"]:focus + .form-check-label {
     outline: 2px solid #2EC2D6;
     outline-offset: 4px;
 }
 
+/* Tema claro opcional */
 body.light-theme .container {
     background-color: #515e6c;
     color: #ffffff;
 }
+
+/* ======================================================================
+   👇 Estilos MOVIDOS do <style> interno do template (escopo .bi-edit)
+   ====================================================================== */
+
+/* Barra de ferramentas dos dataflows */
+.bi-edit .df-toolbar {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: .5rem;
+}
+.bi-edit .df-toolbar .hint { font-size: .9rem; opacity: .8; }
+
+/* Lista de dataflows */
+.bi-edit #dataflow_list {
+    max-height: 320px;
+    overflow: auto;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: .5rem .75rem;
+    background: rgba(17, 16, 16, 0.44);
+}
+.bi-edit #dataflow_list .form-check { margin: .35rem 0; }
+
+/* Tipografia utilitária */
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.small-muted { font-size: .9rem; color: #ffffff; }
+
+/* Divisor simples */
+.divider { border-top: 1px solid #e5e5e5; margin: 1rem 0; }
+
+/* Resultados de busca (classe) */
+.resultados-pesquisa { max-height: 260px; overflow: auto; margin-top: .5rem; }
+
+/* Ajustes que estavam inline */
+.bi-edit #df_filter { max-width: 320px; }
+.bi-edit #df_status { margin-bottom: .25rem; }
+.bi-edit #df_summary { margin-top: .5rem; }
+
+/* Preferência visual deste template para labels do checkbox */
+.bi-edit .form-check-label { color: #ffffff; }

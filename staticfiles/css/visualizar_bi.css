@@ -1,10 +1,14 @@
+/* =======================================================================
+   BI / Visualizar — CSS principal
+   ======================================================================= */
+
 /* ===== Variáveis de layout ===== */
 :root{
   --bi-sidebar-w: 60px;
   --bi-header-h: 50px;
   --bi-toolbar-h: 44px;
 
-  --bi-z-toolbar: 10010;
+  --bi-z-toolbar: 999;
   --bi-z-menu: 10020;
   --bi-z-mask: 9998;
 }
@@ -64,11 +68,11 @@
 .bi-toolbar .last-upd .dot[data-state="old"]  { background:#e74c3c; box-shadow:0 0 0 2px rgba(231,76,60,.18); }
 
 /* ===== Botões / Dropdown ===== */
-.btn{
+.btn {
   appearance: none;
   border: 1px solid #d1d5db;
   background: #fff;
-  color: #111827;
+  color: #000000;
   border-radius: .5rem;
   padding: .35rem .6rem;
   font-size: .875rem;
@@ -82,30 +86,92 @@
 
   transition: background .15s ease, border-color .15s ease, opacity .15s ease;
 }
+
+.btndrop {
+    appearance: none;
+    background: #ffffff00;
+    border: none;
+    border-radius: .5rem;
+    padding: .35rem .6rem;
+    font-size: .875rem;
+    line-height: 1.2;
+    cursor: pointer;
+    align-items: center;
+    gap: .5rem;
+    transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 0;
+    color: #ffffff;
+
+    
+
+}
+
+.btndrop:hover{
+  background:rgba(30, 178, 193, 0.5);
+}
+
+.btncancel, .btnsave, .btnclose {
+    width: 100px;
+    padding: 6px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+    color: #ffffff;
+}
+
+.btnsave { background: #2EC2D6; }
+
+.btncancel, .btnclose { background: #ff0000; }
+
+.btnsave:hover{
+  background-color: #2EC2D6;
+  box-shadow: 0px 0px 15px #2EC2D6;
+}
+
+.btncancel:hover, .btnclose:hover {
+  background: #ff0000;
+  box-shadow: 0px 0px 15px #ff0000;
+}
+
 .btn:hover{ background:#f9fafb; }
 .btn:focus{ outline: 2px solid #93c5fd; outline-offset: 2px; }
 .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
 .btn-danger{ background: #ff0000; color:#ffffff; border: none; }
 .btn-danger:hover{
-    background-color: #ff0000;
-    box-shadow: 0px 0px 10px #ff0000;
+  background-color: #ff0000;
+  box-shadow: 0px 0px 10px #ff0000;
 }
 
-.dropdown{ position: relative; }
+/* antes: position:absolute dentro da .dropdown */
 .menu{
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  position: fixed;                     /* <- fora da toolbar */
+  /* visual do vidro */
+  background: rgba(17,24,39,.55);
+  border: 1px solid rgba(255,255,255,.35);
   border-radius: .5rem;
-  box-shadow: 0 8px 30px rgba(0,0,0,.08);
+  box-shadow: 0 8px 30px rgba(0,0,0,.20);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  backdrop-filter: blur(10px) saturate(1.1);
+  background-clip: padding-box;
   min-width: 220px;
   padding: .25rem;
   display: none;
   z-index: var(--bi-z-menu);
 }
+.menu.open{ display:block; }
+
+
+
+
+
 .menu.open{ display: block; }
 .menu .btn{ display:block; width:100%; text-align:left; margin:0; }
 
@@ -124,12 +190,10 @@
   display: inline-flex;
   align-items: center;
   gap: .5rem;
-
 }
-
 .btnrefresh:hover {
-    background-color: #2EC2D6;
-    box-shadow: 0px 0px 10px #2EC2D6;
+  background-color: #2EC2D6;
+  box-shadow: 0px 0px 10px #2EC2D6;
 }
 
 /* ===== Spinner do botão "Atualizar agora" ===== */
@@ -190,7 +254,172 @@
   box-shadow: 0 4px 24px rgba(0,0,0,.35);
 }
 
-/* ===== Responsivo ===== */
+/* =======================================================================
+   (NOVO) — Visões salvas com efeito vidro (portal para <body>)
+   ======================================================================= */
+
+.views-dropdown{ position: relative; }
+
+/* Base visual do “vidro” — fica FIXO no viewport para enxergar o report atrás */
+.views-menu {
+  position: fixed;                 /* <- fora da toolbar */
+  inset: auto auto auto auto;      /* top/left definidos via JS */
+  min-width: 540px;
+  padding: .35rem .35rem .5rem;
+  z-index: 11000;                  /* acima do report + toolbar */
+
+  /* Efeito vidro */
+  background: rgba(17,24,39,.55);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: .5rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,.20);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  backdrop-filter: blur(10px) saturate(1.1);
+  background-clip: padding-box;
+
+  display: none;
+}
+.views-menu.open{ display:block; }
+
+.views-menu .header{
+  display:flex; align-items:center; gap:.5rem;
+  padding:.25rem .35rem .4rem .35rem;
+  border-bottom:1px dashed rgba(255,255,255,.35);
+  margin-bottom:.35rem;
+}
+.views-menu .header input{
+  flex:1;
+  border:1px solid rgba(255,255,255,.45);
+  border-radius:.5rem;
+  padding:.35rem .5rem;
+  font-size:.875rem;
+  background: #ddd;
+  color:#0b1220;
+}
+.views-menu .header input::placeholder{ color: rgba(11,18,32,.6); }
+
+.views-list{ max-height:340px; overflow:auto; padding:.1rem; }
+.view-row{
+  display:grid; grid-template-columns: 1fr auto; gap:.35rem; align-items:center;
+  padding:.45rem .5rem; border-radius:.5rem;
+}
+.view-row:hover{ background:rgba(30, 178, 193, 0.5); color:#fff; }
+
+.view-title{ font-weight:600; font-size:.9rem; color:#ffffff; }
+.view-meta{ font-size:.75rem; color:#cccaca; }
+.view-actions{ display:flex; gap:.3rem; }
+.view-actions .mini{
+  font-size:.75rem; padding:.25rem .45rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; cursor:pointer;
+}
+.view-actions .minidel{
+  font-size:.75rem; padding:.25rem .45rem; border-radius:.5rem; background:#ff0000; color: #ffffff; cursor:pointer; border: none;
+}
+.view-actions .mini:hover, .minidel:hover{ transform: scale(1.05);
+ }
+
+/* Badges usadas na lista de visões */
+.badge-pill{
+  font-size:.7rem;
+  padding:.05rem .4rem;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+  color:#374151; 
+  background:#fff;
+  margin-left:.35rem;
+}
+.badge-priv{ background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
+.badge-pub{ background:#ecfeff; border-color:#a5f3fc; color:#0e7490; }
+.badge-def{ background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
+
+/* ===== Modal base ===== */
+.modal{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(17,24,39,.55); z-index:10050; backdrop-filter: blur(2px);
+}
+.modal.open{ display:flex; }
+.modal-card{
+    width:min(760px, 96vw); 
+    max-height:90vh; 
+    overflow:auto;
+    background: rgba(17, 24, 39, .55);
+    border-radius: .5rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .20);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    backdrop-filter: blur(10px) saturate(1.1);
+    background-clip: padding-box;
+}
+.modal-header{
+  padding:14px 16px; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;
+}
+.modal-body{ padding:14px 16px; display:grid; gap:10px; }
+.modal-footer{ padding:12px 16px; border-top:1px solid #eee; display:flex; gap:8px; justify-content:flex-end; }
+
+/* Campos / layouts do modal */
+.form-row{ display:grid; gap:6px; }
+.form-row.inline{ grid-template-columns: 1fr 1fr; gap:10px; }
+input[type="text"], textarea, select{
+  background: #ffff;
+  border:1px solid #d1d5db; 
+  border-radius:.5rem; 
+  padding:.5rem .6rem; 
+  font-size:.9rem; 
+  width:100%;
+  color: #000000
+}
+textarea{ min-height:86px; resize:vertical; }
+
+.help{ font-size:.8rem; color:#00ff04; }
+.helpent{ font-size:.8rem; color:#ddd; }
+.kbd{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+  font-size:.8rem; border:1px solid #e5e7eb; background:#556d8400; padding:.05rem .3rem; border-radius:.35rem;
+}
+
+/* ===== Toast ===== */
+.toast{
+  position: fixed; right: 16px; bottom: 16px; z-index: 10060;
+  background: #111827; color:#fff; padding:.65rem .8rem; border-radius:.6rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,.25); display:none;
+}
+.toast.show{ display:block; }
+
+/* ===== Bloco copy ===== */
+.copy{
+  border:1px dashed #cbd5e1; border-radius:.5rem; padding:.35rem .5rem; font-size:.85rem; background:#f8fafc; color:#334155;
+  display:flex; align-items:center; gap:.5rem; justify-content:space-between;
+}
+.copy code{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; }
+
+/* ===== Chips removíveis (usado em usuários/grupos) ===== */
+.badge-pill.removable{ cursor:default; }
+.badge-pill.removable button{
+  margin-left:.35rem; border:none; background:transparent; cursor:pointer; color:#64748b;
+}
+
+/* ===== Auto-complete (usuários) ===== */
+.suggest{ position:relative; margin-top:.25rem; }
+.suggest.open:after{ content:''; }
+.suggest-list{
+  position:absolute; 
+  z-index:10080; 
+  top:2px; 
+  left:0; 
+  right:0;
+  background:#fff;
+  color: #000000;
+  border:1px solid #e5e7eb; 
+  border-radius:.5rem;
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+  max-height:220px; overflow:auto;
+  display:none;
+}
+.suggest.open .suggest-list{ display:block; }
+.suggest-item{ padding:.4rem .55rem; cursor:pointer; }
+.suggest-item:hover{ background:#2EC2D6; color: #ffffff; }
+
+/* =======================================================================
+   Responsivo
+   ======================================================================= */
 @media (max-width: 1024px){
   :root{
     --bi-sidebar-w: 56px;
@@ -198,6 +427,7 @@
   }
   .menu{ min-width: 180px; }
 }
+
 @media (max-width: 640px){
   :root{
     --bi-sidebar-w: 0px;
@@ -207,5 +437,7 @@
   .bi-toolbar{ padding: .5rem .6rem; gap: .4rem; }
   .btn{ padding: .35rem .5rem; font-size: .82rem; }
   .bi-toolbar .last-upd{ display:none; } /* opcional: esconder no mobile */
-}
 
+  .views-menu{ min-width:92vw; }
+  .modal-card{ width:96vw; }
+}

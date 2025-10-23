@@ -2826,3 +2826,27 @@ DEBUG 2025-10-16 15:25:31,781 views 162567 140503583377088 Listando meus formul�
 DEBUG 2025-10-17 17:55:35,862 views 184850 140707087644352 Listando meus formulários: meus=1, compartilhados=0
 DEBUG 2025-10-20 09:08:32,309 views 210530 140198268630720 Listando meus formulários: meus=1, compartilhados=0
 DEBUG 2025-10-20 09:08:38,829 views 210530 140198268630720 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-20 13:51:40,203 views 217982 139909952165568 Listando meus formulários: meus=0, compartilhados=1
+DEBUG 2025-10-21 10:02:52,399 views 238294 140032912324288 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-21 10:03:34,485 views 238294 140032912324288 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-21 10:28:34,041 views 238294 140032861968064 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-21 10:48:07,783 views 238294 140032786433728 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-21 18:56:09,520 views 257276 139909935380160 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-22 09:51:00,010 views 261441 140321203513024 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-22 09:51:01,832 views 261441 140321203513024 GET builder: campo id=261 tipo=arquivo valid_json.initial=null
+DEBUG 2025-10-22 09:51:01,834 views 261441 140321203513024 Abrindo builder form=43 campos_ativos=5
+DEBUG 2025-10-22 09:51:02,449 views 261441 140321203513024 colabs_fragment form_id=43 total=1 ids=[21]
+DEBUG 2025-10-22 09:51:02,458 views 261441 140321186727616 campo_vazio renderizado para prefix=campo_set-__prefix__
+DEBUG 2025-10-22 09:51:55,446 views 261441 140321220298432 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-22 09:53:04,803 views 261441 140321220298432 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-22 13:44:56,854 views 261441 140322096006848 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-22 14:49:11,899 views 261441 140321277998784 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-22 14:49:13,380 views 261441 140321277998784 GET builder: campo id=261 tipo=arquivo valid_json.initial=null
+DEBUG 2025-10-22 14:49:13,382 views 261441 140321277998784 Abrindo builder form=43 campos_ativos=5
+DEBUG 2025-10-22 14:49:13,994 views 261441 140321261213376 campo_vazio renderizado para prefix=campo_set-__prefix__
+DEBUG 2025-10-22 14:49:13,999 views 261441 140321294784192 colabs_fragment form_id=43 total=1 ids=[21]
+DEBUG 2025-10-23 10:03:45,295 views 288830 140314741307072 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-23 10:06:40,808 views 288830 140314492790464 Listando meus formulários: meus=0, compartilhados=1
+DEBUG 2025-10-23 10:20:11,511 views 932 140176316519104 Listando meus formulários: meus=0, compartilhados=1
+DEBUG 2025-10-23 10:41:45,388 views 1796 140541731796672 Listando meus formulários: meus=1, compartilhados=0
+DEBUG 2025-10-23 10:52:07,436 views 1796 140541622691520 Listando meus formulários: meus=1, compartilhados=0
