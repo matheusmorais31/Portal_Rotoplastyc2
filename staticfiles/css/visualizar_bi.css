@@ -436,8 +436,10 @@ textarea{ min-height:86px; resize:vertical; }
   }
   .bi-toolbar{ padding: .5rem .6rem; gap: .4rem; }
   .btn{ padding: .35rem .5rem; font-size: .82rem; }
-  .bi-toolbar .last-upd{ display:none; } /* opcional: esconder no mobile */
-
+  .bi-toolbar .last-upd{ display:none; } 
   .views-menu{ min-width:92vw; }
   .modal-card{ width:96vw; }
 }
+
+
+body.light-theme .modal-header, .form-row { color: #ffff; }
