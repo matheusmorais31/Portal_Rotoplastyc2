@@ -1,0 +1,238 @@
+/* ======================================================================
+   LISTA DE FORMULÁRIOS – UI escura (RESPONSIVO 1920x1200 @150%)
+   ====================================================================== */
+:root{
+  --bg-main:#1f1f1f;
+  --bg-layer:#242424;
+  --bg-input:#2a2a2a;
+
+  --bg-container:#515e6c;
+
+  --accent:#2EC2D6;
+  --accent-d:#24a3b4;
+
+  --text-light:#e8e8e8;
+  --text-muted:#b5b5b5;
+  --danger:#ff4d4f;
+
+  --tbl-pad-x: 1rem;   /* ajustado nos breakpoints */
+  --tbl-pad-y: .85rem; /* ajustado nos breakpoints */
+}
+
+/* reset leve */
+*, *::before, *::after { box-sizing:border-box; }
+button { font:inherit; background:transparent; border:0; padding:0; }
+
+/* ========= CONTÊINER / TÍTULO ========= */
+.form-card{
+  background:var(--bg-main);
+  padding:2rem 2.25rem;
+  border-radius:1rem;
+  max-width:min(1400px,96vw);
+  margin:2.25rem auto;
+  box-shadow:0 4px 14px rgba(0,0,0,.45);
+}
+.form-card h1{
+  color:var(--text-light);
+  font-size:clamp(1.1rem, 1.4vw, 1.6rem);
+  margin:0 0 1.1rem 0;
+  font-weight:700;
+}
+
+/* ========= TABELA ========= */
+.tabela-formularios{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;                      /* habilita ellipsis/limites */
+  background:transparent;
+}
+
+/* cabeçalho (sticky) */
+.tabela-formularios thead th{
+  position:sticky; top:0; z-index:2;
+  text-align:left;
+  color:#ffffff;
+  font-weight:700;
+  padding:calc(var(--tbl-pad-y) - .05rem) var(--tbl-pad-x);
+  background:var(--accent);
+  border-bottom:1px solid #3a3a3a;
+  font-size:clamp(.85rem, .95vw, 1rem);
+}
+.tabela-formularios thead th + th{
+  border-left:1px solid rgba(255,255,255,.9);
+}
+
+/* linhas */
+.tabela-formularios tbody tr{
+  background:#2a2a2a;
+  box-shadow:inset 0 -1px #333;
+}
+.tabela-formularios tbody tr:last-child{ box-shadow:none; }
+
+/* células */
+.tabela-formularios td{
+  background:transparent !important;
+  color:var(--text-light);
+  padding:var(--tbl-pad-y) var(--tbl-pad-x);
+  vertical-align:middle;
+  border:0;
+  font-size:clamp(.85rem, .95vw, 1rem);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tabela-formularios tbody td + td{
+  border-left:1px solid rgba(255,255,255,.08);
+}
+
+/* ===== larguras base (ajustáveis) ===== */
+/* — 1ª coluna (Título) precisa ellipsis */
+.tabela-formularios th:nth-child(1),
+.tabela-formularios td:nth-child(1){
+  /* largura relativa + limite por caracteres */
+  width:45%;
+  max-width:60ch;
+}
+
+/* datas e números: largura fixa confortável */
+.tabela-formularios th:nth-child(3),
+.tabela-formularios td:nth-child(3){ width:180px; } /* “Criado em” */
+
+/* quando existir coluna de Respostas/Status/Ações (tabela de 6 colunas) */
+.tabela-formularios:has(thead th:nth-child(6)) th:nth-child(4),
+.tabela-formularios:has(thead th:nth-child(6)) td:nth-child(4){ width:110px; } /* Respostas */
+.tabela-formularios:has(thead th:nth-child(6)) th:nth-child(5),
+.tabela-formularios:has(thead th:nth-child(6)) td:nth-child(5){ width:140px; } /* Status */
+.tabela-formularios:has(thead th:nth-child(6)) th:nth-child(6),
+.tabela-formularios:has(thead th:nth-child(6)) td:nth-child(6){ width:260px; } /* Ações */
+
+/* coluna Ações */
+.tabela-formularios td.actions{
+  display:flex; align-items:center; gap:.5rem;
+  flex-wrap:nowrap; min-width:0;
+}
+.tabela-formularios td.actions a,
+.tabela-formularios td.actions button{ margin:0; white-space:nowrap; }
+
+/* ========= BOTÕES ========= */
+.btn-primario,
+.btn-secundario{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:38px; padding:0 14px; line-height:1;
+  border-radius:.55rem; font-weight:600; border:none;
+  text-decoration:none; transition:background .2s, transform .02s, box-shadow .2s;
+  color:#fff; cursor:pointer;
+}
+.btn-primario{ background:var(--accent); }
+.btn-primario:hover{ background:var(--accent-d); }
+.btn-secundario{ background:#555; }
+.btn-secundario:hover{ background:#6b6b6b; }
+.btn-primario:active,.btn-secundario:active{ transform:translateY(1px); }
+.btn-primario:focus-visible,.btn-secundario:focus-visible{
+  outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.2);
+}
+.btn-danger{ background:#ff0000; }
+.btn-danger:hover{ background:#750202; }
+
+/* util */
+.mt-2{ margin-top:1rem; }
+.form-card>p{ color:var(--text-muted); }
+
+/* vazio */
+.form-card>p:only-child{
+  background:#232323; border:1px dashed #3a3a3a; color:var(--text-muted);
+  padding:1rem; border-radius:.6rem; text-align:center;
+}
+
+/* ===================== BREAKPOINTS ===================== */
+/* ➊ Até ~1380px: “modo compacto leve” (ajustes suaves) */
+@media (max-width:1380px){
+  :root{ --tbl-pad-x:.8rem; --tbl-pad-y:.7rem; }
+  .form-card{ padding:1.75rem; }
+  .tabela-formularios td.actions{ flex-wrap:wrap; gap:.45rem; }
+  .btn-primario, .btn-secundario{ height:34px; padding:0 12px; font-weight:600; }
+  /* título cede um pouco mais de espaço */
+  .tabela-formularios th:nth-child(1),
+  .tabela-formularios td:nth-child(1){ width:40%; max-width:52ch; }
+  /* ações um pouco mais enxutas */
+  .tabela-formularios:has(thead th:nth-child(6)) th:nth-child(6),
+  .tabela-formularios:has(thead th:nth-child(6)) td:nth-child(6){ width:230px; }
+}
+
+/* ➋ Até ~1280px (≈1920 @150%): foco em caber SEM scroll  */
+@media (max-width:1280px){
+  :root{ --tbl-pad-x:.7rem; --tbl-pad-y:.6rem; }
+  .form-card{ padding:1.5rem; }
+  .tabela-formularios thead th{ font-size:.9rem; }
+  .tabela-formularios td{ font-size:.9rem; }
+
+  /* título mais contido */
+  .tabela-formularios th:nth-child(1),
+  .tabela-formularios td:nth-child(1){ width:38%; max-width:46ch; }
+
+  /* embrulhar ações em 2 linhas, se necessário */
+  .tabela-formularios td.actions{ gap:.4rem; }
+  .btn-primario, .btn-secundario{ height:32px; padding:0 10px; font-size:.9rem; }
+
+  /* SOMENTE quando a tabela tem 6 colunas (Todos): esconde "Dono" */
+  .tabela-formularios:has(thead th:nth-child(6)) th:nth-child(2),
+  .tabela-formularios:has(thead th:nth-child(6)) td:nth-child(2){ display:none; }
+}
+
+/* ➌ Até ~1120px: se ainda apertar, esconder "Status" (somente 6 col.) */
+@media (max-width:1120px){
+  .tabela-formularios:has(thead th:nth-child(6)) th:nth-child(5),
+  .tabela-formularios:has(thead th:nth-child(6)) td:nth-child(5){ display:none; }
+  .tabela-formularios:has(thead th:nth-child(6)) th:nth-child(6),
+  .tabela-formularios:has(thead th:nth-child(6)) td:nth-child(6){ width:220px; }
+}
+
+/* ➍ Até 680px: vira cartões (como já tinhas) */
+@media (max-width:680px){
+  .form-card{ padding:1.25rem; }
+
+  .tabela-formularios thead{ display:none; }
+  .tabela-formularios,
+  .tabela-formularios tbody,
+  .tabela-formularios tr,
+  .tabela-formularios td{
+    display:block; width:100%;
+  }
+
+  .tabela-formularios tbody tr{
+    background:#242424; border:1px solid #333; border-radius:.75rem;
+    margin-bottom:.9rem; box-shadow:none; overflow:hidden;
+  }
+
+  .tabela-formularios tbody td{
+    border:none; border-bottom:1px solid #2e2e2e;
+    padding:.75rem 1rem .75rem 7.2rem; position:relative; white-space:normal;
+  }
+  .tabela-formularios tbody td:last-child{ border-bottom:none; }
+  .tabela-formularios tbody td::before{
+    content:attr(data-th);
+    position:absolute; left:0; top:0; height:100%; width:7rem;
+    display:flex; align-items:center; padding-left:.9rem;
+    font-weight:700; color:var(--text-muted);
+  }
+
+  .tabela-formularios tbody td.actions{
+    padding:.8rem; padding-left:.8rem; display:flex; gap:.5rem; flex-wrap:wrap;
+  }
+  .tabela-formularios tbody td.actions::before{ content:none; }
+  .tabela-formularios td.actions .btn-primario,
+  .tabela-formularios td.actions .btn-secundario{
+    flex:1 1 140px; justify-content:center; text-align:center;
+  }
+}
+
+/* ========= TEMA CLARO ========= */
+body.light-theme .form-card{ background-color:var(--bg-container); }
+body.light-theme .tabela-formularios tbody tr{ background:#677480; }
+body.light-theme .tabela-formularios tbody tr:hover{ background:#5f6c79; }
+body.light-theme h1, body.light-theme h2, body.light-theme a{ color:#ffffff; }
+
+/* acessibilidade */
+@media (prefers-reduced-motion:reduce){
+  .btn-primario, .btn-secundario{ transition:none; }
+}

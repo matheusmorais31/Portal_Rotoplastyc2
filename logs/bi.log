@@ -536,3 +536,651 @@ DEBUG 2025-10-23 11:52:19,562 utils 1796 140541563942592 PBI: report→dataset: 
 DEBUG 2025-10-23 11:52:19,704 utils 1796 140541563942592 PBI: probe dataset 35d23203-83e3-4d29-8e01-dcadfa84eebc → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
 DEBUG 2025-10-23 11:52:19,706 utils 1796 140541563942592 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
 DEBUG 2025-10-23 11:52:22,308 utils 1796 140541563942592 RT: refreshes HTTP 200
+DEBUG 2025-10-23 11:57:23,757 utils 1796 140541547157184 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 11:57:23,936 utils 1796 140541547157184 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 11:57:23,936 utils 1796 140541547157184 PBI: report→dataset: dataset_id=35d23203-83e3-4d29-8e01-dcadfa84eebc | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 11:57:24,101 utils 1796 140541547157184 PBI: probe dataset 35d23203-83e3-4d29-8e01-dcadfa84eebc → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 11:57:24,102 utils 1796 140541547157184 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 11:57:24,791 utils 1796 140541547157184 RT: refreshes HTTP 200
+DEBUG 2025-10-23 12:02:28,782 utils 1796 140541530371776 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 12:02:31,922 utils 1796 140541530371776 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 12:02:31,923 utils 1796 140541530371776 PBI: report→dataset: dataset_id=35d23203-83e3-4d29-8e01-dcadfa84eebc | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 12:02:32,106 utils 1796 140541530371776 PBI: probe dataset 35d23203-83e3-4d29-8e01-dcadfa84eebc → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 12:02:32,108 utils 1796 140541530371776 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 12:02:33,307 utils 1796 140541530371776 RT: refreshes HTTP 200
+DEBUG 2025-10-23 12:07:19,745 utils 1796 140541513586368 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 12:07:19,745 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 12:07:20,009 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 12:12:22,805 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970
+ERROR 2025-10-23 12:12:38,574 utils 1796 140541496800960 PBI: erro obtendo report 6659c548-6093-4bea-80ac-54b8026e4970 — HTTPSConnectionPool(host='api.powerbi.com', port=443): Max retries exceeded with url: /v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7fd28ba2f510>, 'Connection to api.powerbi.com timed out. (connect timeout=15)'))
+DEBUG 2025-10-23 13:03:11,199 utils 1796 140541488408256 PBI-Auth: client_credentials (service principal).
+DEBUG 2025-10-23 13:03:11,202 utils 1796 140541496800960 PBI-Auth: client_credentials (service principal).
+DEBUG 2025-10-23 13:03:11,212 utils 1796 140541505193664 PBI-Auth: client_credentials (service principal).
+DEBUG 2025-10-23 13:03:11,222 utils 1796 140541513586368 PBI-Auth: client_credentials (service principal).
+DEBUG 2025-10-23 13:03:11,802 utils 1796 140541488408256 PBI-Auth: token adquirido, expires_in=3599
+DEBUG 2025-10-23 13:03:11,803 utils 1796 140541488408256 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 13:03:11,810 utils 1796 140541496800960 PBI-Auth: token adquirido, expires_in=3599
+DEBUG 2025-10-23 13:03:11,810 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/80f25182-325d-48b5-b7ad-29ce4a800d54
+DEBUG 2025-10-23 13:03:11,856 utils 1796 140541513586368 PBI-Auth: token adquirido, expires_in=3599
+DEBUG 2025-10-23 13:03:11,856 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/c37d9449-39fe-47dc-bda4-da75b970d0aa
+DEBUG 2025-10-23 13:03:11,886 utils 1796 140541505193664 PBI-Auth: token adquirido, expires_in=3599
+DEBUG 2025-10-23 13:03:11,887 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:03:12,084 utils 1796 140541496800960 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:12,085 utils 1796 140541496800960 PBI: report→dataset: dataset_id=9f67817a-61a0-48a0-ba71-c524f5a2bf1a | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:12,096 utils 1796 140541488408256 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:12,096 utils 1796 140541488408256 PBI: report→dataset: dataset_id=35d23203-83e3-4d29-8e01-dcadfa84eebc | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:12,103 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:12,103 utils 1796 140541505193664 PBI: report→dataset: dataset_id=99fddc6d-4de3-4d63-beba-a143fe297fba | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:12,112 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:12,113 utils 1796 140541513586368 PBI: report→dataset: dataset_id=9bddc1bb-e64e-4e5c-9f11-5028df65112c | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:12,267 utils 1796 140541488408256 PBI: probe dataset 35d23203-83e3-4d29-8e01-dcadfa84eebc → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:12,267 utils 1796 140541505193664 PBI: probe dataset 99fddc6d-4de3-4d63-beba-a143fe297fba → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:12,268 utils 1796 140541513586368 PBI: probe dataset 9bddc1bb-e64e-4e5c-9f11-5028df65112c → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:12,270 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=50
+DEBUG 2025-10-23 13:03:12,270 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9bddc1bb-e64e-4e5c-9f11-5028df65112c/refreshes?$top=50
+DEBUG 2025-10-23 13:03:12,272 utils 1796 140541488408256 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 13:03:12,474 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:12,534 utils 1796 140541496800960 PBI: probe dataset 9f67817a-61a0-48a0-ba71-c524f5a2bf1a → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:12,535 utils 1796 140541496800960 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9f67817a-61a0-48a0-ba71-c524f5a2bf1a/refreshes?$top=50
+DEBUG 2025-10-23 13:03:12,585 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/fe9171b9-8051-4950-a4cb-24e3cfddfd00
+DEBUG 2025-10-23 13:03:12,717 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:12,717 utils 1796 140541513586368 PBI: report→dataset: dataset_id=a20f8fbd-fbef-456f-b875-9831362190ac | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:12,894 utils 1796 140541513586368 PBI: probe dataset a20f8fbd-fbef-456f-b875-9831362190ac → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:12,895 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a20f8fbd-fbef-456f-b875-9831362190ac/refreshes?$top=50
+DEBUG 2025-10-23 13:03:13,588 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:13,589 utils 1796 140541488408256 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:13,617 utils 1796 140541496800960 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:13,621 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:13,743 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/4143d097-9eba-4d83-9c7f-6a2ae06e14a5
+DEBUG 2025-10-23 13:03:13,748 utils 1796 140541488408256 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ef744b59-78fd-4054-aaae-bb23d1fbcb71
+DEBUG 2025-10-23 13:03:13,762 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/90cab255-b6c1-4525-9185-0b282462f6c8
+DEBUG 2025-10-23 13:03:13,780 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/592027f1-2e60-4bbd-b201-ddd4a2fe16bb
+DEBUG 2025-10-23 13:03:13,888 utils 1796 140541488408256 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:13,889 utils 1796 140541488408256 PBI: report→dataset: dataset_id=eac09539-6a1a-4c77-ac0a-a6ff42a433de | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:13,901 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:13,902 utils 1796 140541505193664 PBI: report→dataset: dataset_id=a8017073-afdf-4392-9959-fa3e6276ead9 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:13,903 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:13,903 utils 1796 140541513586368 PBI: report→dataset: dataset_id=f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:13,956 utils 1796 140541496800960 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:13,956 utils 1796 140541496800960 PBI: report→dataset: dataset_id=354d3b74-549b-4834-b05d-c9a58bed14b8 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:14,050 utils 1796 140541488408256 PBI: probe dataset eac09539-6a1a-4c77-ac0a-a6ff42a433de → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:14,051 utils 1796 140541513586368 PBI: probe dataset f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:14,052 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe/refreshes?$top=50
+DEBUG 2025-10-23 13:03:14,053 utils 1796 140541488408256 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/eac09539-6a1a-4c77-ac0a-a6ff42a433de/refreshes?$top=50
+DEBUG 2025-10-23 13:03:14,085 utils 1796 140541505193664 PBI: probe dataset a8017073-afdf-4392-9959-fa3e6276ead9 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:14,087 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a8017073-afdf-4392-9959-fa3e6276ead9/refreshes?$top=50
+DEBUG 2025-10-23 13:03:14,149 utils 1796 140541496800960 PBI: probe dataset 354d3b74-549b-4834-b05d-c9a58bed14b8 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:14,150 utils 1796 140541496800960 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/354d3b74-549b-4834-b05d-c9a58bed14b8/refreshes?$top=50
+DEBUG 2025-10-23 13:03:14,770 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:14,772 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:14,774 utils 1796 140541488408256 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:14,786 utils 1796 140541496800960 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:14,955 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8871bffe-1628-4f09-b550-4e1fed0952b7
+DEBUG 2025-10-23 13:03:14,958 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/1875aadc-84ae-4f38-8add-70f9d5b4f337
+DEBUG 2025-10-23 13:03:14,965 utils 1796 140541488408256 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/01c33348-8c83-4712-9406-56c9fa7c0322
+DEBUG 2025-10-23 13:03:14,971 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/341ba41b-e8bf-4a03-be6d-159642653410
+DEBUG 2025-10-23 13:03:15,097 utils 1796 140541496800960 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:15,098 utils 1796 140541496800960 PBI: report→dataset: dataset_id=59556dec-8ae6-465b-b129-74f5681cb2ba | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:15,123 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:15,123 utils 1796 140541505193664 PBI: report→dataset: dataset_id=65af87dd-6987-4159-b9c6-94ba207b5af3 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:15,143 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:15,143 utils 1796 140541513586368 PBI: report→dataset: dataset_id=d22ea999-649f-435a-a839-8aa141cdd985 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:15,158 utils 1796 140541488408256 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:15,159 utils 1796 140541488408256 PBI: report→dataset: dataset_id=e47999ad-d869-41f1-b88b-ff4b449fffa8 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:15,261 utils 1796 140541496800960 PBI: probe dataset 59556dec-8ae6-465b-b129-74f5681cb2ba → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:15,262 utils 1796 140541496800960 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/59556dec-8ae6-465b-b129-74f5681cb2ba/refreshes?$top=50
+DEBUG 2025-10-23 13:03:15,265 utils 1796 140541505193664 PBI: probe dataset 65af87dd-6987-4159-b9c6-94ba207b5af3 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:15,265 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/65af87dd-6987-4159-b9c6-94ba207b5af3/refreshes?$top=50
+DEBUG 2025-10-23 13:03:15,319 utils 1796 140541513586368 PBI: probe dataset d22ea999-649f-435a-a839-8aa141cdd985 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:15,320 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/d22ea999-649f-435a-a839-8aa141cdd985/refreshes?$top=50
+DEBUG 2025-10-23 13:03:15,327 utils 1796 140541488408256 PBI: probe dataset e47999ad-d869-41f1-b88b-ff4b449fffa8 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:15,328 utils 1796 140541488408256 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/e47999ad-d869-41f1-b88b-ff4b449fffa8/refreshes?$top=50
+DEBUG 2025-10-23 13:03:15,987 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:16,005 utils 1796 140541488408256 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:16,052 utils 1796 140541488408256 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/87e7d9da-6b98-4a42-a8f4-f12732d3ddec
+DEBUG 2025-10-23 13:03:16,058 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:16,059 utils 1796 140541496800960 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:16,092 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/c676e50c-1e0e-4310-b148-f933625e37e2
+DEBUG 2025-10-23 13:03:16,151 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/76015734-a6cc-43c0-bbfa-c722a537be6c
+DEBUG 2025-10-23 13:03:16,161 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/b93ce7ce-e238-405b-93fe-b5e0b817db88
+DEBUG 2025-10-23 13:03:16,209 utils 1796 140541488408256 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:16,210 utils 1796 140541488408256 PBI: report→dataset: dataset_id=47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:16,257 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:16,260 utils 1796 140541513586368 PBI: report→dataset: dataset_id=8596690c-0fd1-4698-8ee7-6b66c2c9eafa | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:16,324 utils 1796 140541496800960 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:16,324 utils 1796 140541496800960 PBI: report→dataset: dataset_id=a076f773-32fe-4a62-a4bc-5df202ba5419 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:16,387 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:16,387 utils 1796 140541488408256 PBI: probe dataset 47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:16,388 utils 1796 140541505193664 PBI: report→dataset: dataset_id=7cf4f065-b1c3-4c1b-93d2-ce7be34a5946 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:16,390 utils 1796 140541488408256 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea/refreshes?$top=50
+DEBUG 2025-10-23 13:03:16,401 utils 1796 140541513586368 PBI: probe dataset 8596690c-0fd1-4698-8ee7-6b66c2c9eafa → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:16,402 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8596690c-0fd1-4698-8ee7-6b66c2c9eafa/refreshes?$top=50
+DEBUG 2025-10-23 13:03:16,507 utils 1796 140541496800960 PBI: probe dataset a076f773-32fe-4a62-a4bc-5df202ba5419 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:16,508 utils 1796 140541496800960 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a076f773-32fe-4a62-a4bc-5df202ba5419/refreshes?$top=50
+DEBUG 2025-10-23 13:03:16,622 utils 1796 140541505193664 PBI: probe dataset 7cf4f065-b1c3-4c1b-93d2-ce7be34a5946 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:16,624 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/7cf4f065-b1c3-4c1b-93d2-ce7be34a5946/refreshes?$top=50
+DEBUG 2025-10-23 13:03:17,222 utils 1796 140541488408256 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:17,226 utils 1796 140541496800960 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:17,236 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:17,342 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/dc2984ea-fd6e-436e-ba3b-dcd506112a5f
+DEBUG 2025-10-23 13:03:17,351 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/c8248399-a9b9-4ad8-ae17-b09b09b381fe
+DEBUG 2025-10-23 13:03:17,360 utils 1796 140541488408256 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/960e0287-3c5f-449e-afc5-3c89e6929ba7
+DEBUG 2025-10-23 13:03:17,378 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:17,446 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ba6dc313-e97e-43f2-a0a9-11dc148d6e8d
+DEBUG 2025-10-23 13:03:17,501 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:17,501 utils 1796 140541488408256 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:17,502 utils 1796 140541505193664 PBI: report→dataset: dataset_id=9b8f162e-0d88-47f8-9aaa-4363d3c440cf | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:17,502 utils 1796 140541488408256 PBI: report→dataset: dataset_id=bc69a958-7c36-4e6a-9999-c855e82974bb | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:17,534 utils 1796 140541496800960 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:17,535 utils 1796 140541496800960 PBI: report→dataset: dataset_id=24d359dc-33ac-40ee-8bf7-7e43b9a847a2 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:17,603 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:17,603 utils 1796 140541513586368 PBI: report→dataset: dataset_id=ea030f35-3d22-495e-b892-7bf89cbf1e6a | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:17,635 utils 1796 140541488408256 PBI: probe dataset bc69a958-7c36-4e6a-9999-c855e82974bb → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:17,636 utils 1796 140541488408256 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/bc69a958-7c36-4e6a-9999-c855e82974bb/refreshes?$top=50
+DEBUG 2025-10-23 13:03:17,685 utils 1796 140541496800960 PBI: probe dataset 24d359dc-33ac-40ee-8bf7-7e43b9a847a2 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:17,686 utils 1796 140541496800960 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/24d359dc-33ac-40ee-8bf7-7e43b9a847a2/refreshes?$top=50
+DEBUG 2025-10-23 13:03:17,771 utils 1796 140541513586368 PBI: probe dataset ea030f35-3d22-495e-b892-7bf89cbf1e6a → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:17,773 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/ea030f35-3d22-495e-b892-7bf89cbf1e6a/refreshes?$top=50
+DEBUG 2025-10-23 13:03:17,785 utils 1796 140541505193664 PBI: probe dataset 9b8f162e-0d88-47f8-9aaa-4363d3c440cf → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:17,786 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9b8f162e-0d88-47f8-9aaa-4363d3c440cf/refreshes?$top=50
+DEBUG 2025-10-23 13:03:17,951 utils 1796 140542251882176 PBI: GET report info → https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:03:18,185 utils 1796 140542251882176 PBI: report info HTTP 200
+DEBUG 2025-10-23 13:03:18,186 utils 1796 140542251882176 PBI: report SGQ → dataset_id=99fddc6d-4de3-4d63-beba-a143fe297fba
+DEBUG 2025-10-23 13:03:18,349 utils 1796 140542251882176 PBI-DBG: GET dataset (myorg) HTTP 403
+DEBUG 2025-10-23 13:03:18,349 utils 1796 140542251882176 PBI-DBG: dataset body: {"Message":"API is not accessible for application"}
+DEBUG 2025-10-23 13:03:18,396 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:18,397 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:18,398 utils 1796 140541488408256 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:18,409 utils 1796 140541496800960 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:18,516 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/74897589-2edd-4bf9-8b9f-b6f5e81baa67
+DEBUG 2025-10-23 13:03:18,539 utils 1796 140542251882176 PBI: GenerateToken HTTP 200
+INFO 2025-10-23 13:03:18,540 utils 1796 140542251882176 PBI: [SGQ] embed_token gerado e cacheado (3000s).
+DEBUG 2025-10-23 13:03:18,553 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/65c888d8-6d60-4abd-a0cb-4ad942e1ecc7
+DEBUG 2025-10-23 13:03:18,554 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/0479dfcd-ca58-4fc6-a5ea-5df8796672cf
+DEBUG 2025-10-23 13:03:18,571 utils 1796 140541488408256 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/58169877-75ff-4417-9b65-b84bc5a0889a
+DEBUG 2025-10-23 13:03:18,679 utils 1796 140541496800960 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:18,679 utils 1796 140541496800960 PBI: report→dataset: dataset_id=ba1155e5-bc03-411f-8f9b-871e0919a0a7 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:18,748 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:18,748 utils 1796 140541505193664 PBI: report→dataset: dataset_id=8ac0c4d9-4409-472f-8412-e7465fcdb839 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:18,757 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:18,757 utils 1796 140541513586368 PBI: report→dataset: dataset_id=17128da0-166b-4578-8eee-db679d65bd16 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:18,767 utils 1796 140541488408256 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:03:18,768 utils 1796 140541488408256 PBI: report→dataset: dataset_id=9e75edef-fc51-4c28-9e2a-db6554d9ee24 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:03:18,898 utils 1796 140541505193664 PBI: probe dataset 8ac0c4d9-4409-472f-8412-e7465fcdb839 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:18,899 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8ac0c4d9-4409-472f-8412-e7465fcdb839/refreshes?$top=50
+DEBUG 2025-10-23 13:03:18,903 utils 1796 140541496800960 PBI: probe dataset ba1155e5-bc03-411f-8f9b-871e0919a0a7 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:18,904 utils 1796 140541496800960 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/ba1155e5-bc03-411f-8f9b-871e0919a0a7/refreshes?$top=50
+DEBUG 2025-10-23 13:03:18,921 utils 1796 140541513586368 PBI: probe dataset 17128da0-166b-4578-8eee-db679d65bd16 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:18,923 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/17128da0-166b-4578-8eee-db679d65bd16/refreshes?$top=50
+DEBUG 2025-10-23 13:03:19,008 utils 1796 140541488408256 PBI: probe dataset 9e75edef-fc51-4c28-9e2a-db6554d9ee24 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:03:19,009 utils 1796 140541488408256 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9e75edef-fc51-4c28-9e2a-db6554d9ee24/refreshes?$top=50
+DEBUG 2025-10-23 13:03:19,440 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:19,441 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:19,449 utils 1796 140541496800960 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:03:19,451 utils 1796 140541488408256 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:08:19,716 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:08:20,196 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:08:20,197 utils 1796 140541505193664 PBI: report→dataset: dataset_id=99fddc6d-4de3-4d63-beba-a143fe297fba | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:08:20,370 utils 1796 140541505193664 PBI: probe dataset 99fddc6d-4de3-4d63-beba-a143fe297fba → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:08:20,371 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=50
+DEBUG 2025-10-23 13:08:20,906 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:32:20,476 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/90cab255-b6c1-4525-9185-0b282462f6c8
+DEBUG 2025-10-23 13:32:20,476 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/01c33348-8c83-4712-9406-56c9fa7c0322
+DEBUG 2025-10-23 13:32:20,480 utils 1796 140541488408256 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 13:32:20,778 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/87e7d9da-6b98-4a42-a8f4-f12732d3ddec
+DEBUG 2025-10-23 13:32:20,885 utils 1796 140541488408256 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:32:20,886 utils 1796 140541488408256 PBI: report→dataset: dataset_id=35d23203-83e3-4d29-8e01-dcadfa84eebc | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:32:20,914 utils 1796 140541496800960 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:32:20,914 utils 1796 140541496800960 PBI: report→dataset: dataset_id=e47999ad-d869-41f1-b88b-ff4b449fffa8 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:32:20,920 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:32:20,921 utils 1796 140541505193664 PBI: report→dataset: dataset_id=f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:32:20,930 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:32:20,931 utils 1796 140541513586368 PBI: report→dataset: dataset_id=47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:32:21,092 utils 1796 140541496800960 PBI: probe dataset e47999ad-d869-41f1-b88b-ff4b449fffa8 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:32:21,094 utils 1796 140541496800960 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/e47999ad-d869-41f1-b88b-ff4b449fffa8/refreshes?$top=50
+DEBUG 2025-10-23 13:32:21,099 utils 1796 140541513586368 PBI: probe dataset 47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:32:21,100 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea/refreshes?$top=50
+DEBUG 2025-10-23 13:32:21,117 utils 1796 140541488408256 PBI: probe dataset 35d23203-83e3-4d29-8e01-dcadfa84eebc → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:32:21,118 utils 1796 140541488408256 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 13:32:21,135 utils 1796 140541505193664 PBI: probe dataset f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:32:21,136 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe/refreshes?$top=50
+DEBUG 2025-10-23 13:32:21,266 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:32:21,331 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:32:21,362 utils 1796 140541496800960 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:32:21,402 utils 1796 140541488408256 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:32:21,440 utils 1796 140541513586368 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/65c888d8-6d60-4abd-a0cb-4ad942e1ecc7
+DEBUG 2025-10-23 13:32:21,462 utils 1796 140541505193664 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/47311a50-0344-4766-bd51-29c2f96f8977
+DEBUG 2025-10-23 13:32:21,481 utils 1796 140541496800960 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:32:21,640 utils 1796 140541513586368 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:32:21,641 utils 1796 140541505193664 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:32:21,641 utils 1796 140541513586368 PBI: report→dataset: dataset_id=8ac0c4d9-4409-472f-8412-e7465fcdb839 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:32:21,641 utils 1796 140541505193664 PBI: report→dataset: dataset_id=9c183037-64d4-49cc-b22e-a3714cd8d926 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:32:21,726 utils 1796 140541496800960 PBI: reports/{id} HTTP 404
+DEBUG 2025-10-23 13:32:21,730 utils 1796 140541496800960 PBI: reports/{id} body: {"error":{"code":"PowerBIEntityNotFound","pbi.error":{"code":"PowerBIEntityNotFound","parameters":{},"details":[],"exceptionCulprit":1}}}
+ERROR 2025-10-23 13:32:21,731 utils 1796 140541496800960 PBI: erro obtendo report 8588e4b0-d643-4395-9b8c-129fa6857837 — 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:32:21,795 utils 1796 140541513586368 PBI: probe dataset 8ac0c4d9-4409-472f-8412-e7465fcdb839 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:32:21,796 utils 1796 140541505193664 PBI: probe dataset 9c183037-64d4-49cc-b22e-a3714cd8d926 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:32:21,801 utils 1796 140541513586368 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8ac0c4d9-4409-472f-8412-e7465fcdb839/refreshes?$top=50
+DEBUG 2025-10-23 13:32:21,803 utils 1796 140541505193664 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9c183037-64d4-49cc-b22e-a3714cd8d926/refreshes?$top=50
+DEBUG 2025-10-23 13:32:22,029 utils 1796 140541513586368 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:32:22,039 utils 1796 140541505193664 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:37:21,142 utils 1796 140542222509760 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/01c33348-8c83-4712-9406-56c9fa7c0322
+DEBUG 2025-10-23 13:37:21,148 utils 1796 140542247687872 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/90cab255-b6c1-4525-9185-0b282462f6c8
+DEBUG 2025-10-23 13:37:21,149 utils 1796 140542239295168 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/87e7d9da-6b98-4a42-a8f4-f12732d3ddec
+DEBUG 2025-10-23 13:37:21,157 utils 1796 140542230902464 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 13:37:26,365 utils 1796 140542230902464 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:37:26,366 utils 1796 140542230902464 PBI: report→dataset: dataset_id=35d23203-83e3-4d29-8e01-dcadfa84eebc | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:37:26,386 utils 1796 140542222509760 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:37:26,386 utils 1796 140542222509760 PBI: report→dataset: dataset_id=e47999ad-d869-41f1-b88b-ff4b449fffa8 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:37:26,428 utils 1796 140542247687872 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:37:26,429 utils 1796 140542247687872 PBI: report→dataset: dataset_id=f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:37:26,611 utils 1796 140542222509760 PBI: probe dataset e47999ad-d869-41f1-b88b-ff4b449fffa8 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:37:26,612 utils 1796 140542247687872 PBI: probe dataset f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:37:26,612 utils 1796 140542222509760 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/e47999ad-d869-41f1-b88b-ff4b449fffa8/refreshes?$top=50
+DEBUG 2025-10-23 13:37:26,614 utils 1796 140542247687872 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe/refreshes?$top=50
+DEBUG 2025-10-23 13:37:26,688 utils 1796 140542239295168 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:37:26,688 utils 1796 140542239295168 PBI: report→dataset: dataset_id=47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:37:26,912 utils 1796 140542239295168 PBI: probe dataset 47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:37:26,913 utils 1796 140542239295168 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea/refreshes?$top=50
+DEBUG 2025-10-23 13:37:26,993 utils 1796 140542230902464 PBI: probe dataset 35d23203-83e3-4d29-8e01-dcadfa84eebc → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:37:26,994 utils 1796 140542230902464 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 13:37:27,319 utils 1796 140542239295168 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:37:27,324 utils 1796 140542230902464 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:37:27,325 utils 1796 140542247687872 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:37:27,336 utils 1796 140542222509760 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:37:27,499 utils 1796 140542230902464 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/47311a50-0344-4766-bd51-29c2f96f8977
+DEBUG 2025-10-23 13:37:27,501 utils 1796 140542247687872 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/65c888d8-6d60-4abd-a0cb-4ad942e1ecc7
+DEBUG 2025-10-23 13:37:27,501 utils 1796 140542239295168 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:37:27,664 utils 1796 140542230902464 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:37:27,665 utils 1796 140542239295168 PBI: reports/{id} HTTP 404
+DEBUG 2025-10-23 13:37:27,666 utils 1796 140542230902464 PBI: report→dataset: dataset_id=9c183037-64d4-49cc-b22e-a3714cd8d926 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:37:27,666 utils 1796 140542239295168 PBI: reports/{id} body: {"error":{"code":"PowerBIEntityNotFound","pbi.error":{"code":"PowerBIEntityNotFound","parameters":{},"details":[],"exceptionCulprit":1}}}
+ERROR 2025-10-23 13:37:27,667 utils 1796 140542239295168 PBI: erro obtendo report 8588e4b0-d643-4395-9b8c-129fa6857837 — 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:37:27,683 utils 1796 140542247687872 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:37:27,683 utils 1796 140542247687872 PBI: report→dataset: dataset_id=8ac0c4d9-4409-472f-8412-e7465fcdb839 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:37:27,803 utils 1796 140542230902464 PBI: probe dataset 9c183037-64d4-49cc-b22e-a3714cd8d926 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:37:27,804 utils 1796 140542230902464 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9c183037-64d4-49cc-b22e-a3714cd8d926/refreshes?$top=50
+DEBUG 2025-10-23 13:37:27,863 utils 1796 140542247687872 PBI: probe dataset 8ac0c4d9-4409-472f-8412-e7465fcdb839 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:37:27,864 utils 1796 140542247687872 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8ac0c4d9-4409-472f-8412-e7465fcdb839/refreshes?$top=50
+DEBUG 2025-10-23 13:37:28,068 utils 1796 140542230902464 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:37:28,735 utils 1796 140542247687872 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:42:20,769 utils 1796 140542247687872 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 13:42:20,769 utils 1796 140542239295168 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:01c33348-8c83-4712-9406-56c9fa7c0322
+DEBUG 2025-10-23 13:42:20,770 utils 1796 140542222509760 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:87e7d9da-6b98-4a42-a8f4-f12732d3ddec
+DEBUG 2025-10-23 13:42:20,770 utils 1796 140542247687872 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 13:42:20,770 utils 1796 140542239295168 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/e47999ad-d869-41f1-b88b-ff4b449fffa8/refreshes?$top=50
+DEBUG 2025-10-23 13:42:20,771 utils 1796 140542222509760 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea/refreshes?$top=50
+DEBUG 2025-10-23 13:42:20,774 utils 1796 140542230902464 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:90cab255-b6c1-4525-9185-0b282462f6c8
+DEBUG 2025-10-23 13:42:20,774 utils 1796 140542230902464 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe/refreshes?$top=50
+DEBUG 2025-10-23 13:42:21,180 utils 1796 140542222509760 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:42:21,189 utils 1796 140542247687872 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:42:21,226 utils 1796 140542230902464 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:42:21,260 utils 1796 140542239295168 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:42:21,301 utils 1796 140542247687872 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:65c888d8-6d60-4abd-a0cb-4ad942e1ecc7
+DEBUG 2025-10-23 13:42:21,302 utils 1796 140542247687872 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8ac0c4d9-4409-472f-8412-e7465fcdb839/refreshes?$top=50
+DEBUG 2025-10-23 13:42:21,329 utils 1796 140542222509760 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:47311a50-0344-4766-bd51-29c2f96f8977
+DEBUG 2025-10-23 13:42:21,329 utils 1796 140542222509760 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9c183037-64d4-49cc-b22e-a3714cd8d926/refreshes?$top=50
+DEBUG 2025-10-23 13:42:21,357 utils 1796 140542239295168 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:42:21,492 utils 1796 140542247687872 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:42:21,509 utils 1796 140542239295168 PBI: reports/{id} HTTP 404
+DEBUG 2025-10-23 13:42:21,510 utils 1796 140542239295168 PBI: reports/{id} body: {"error":{"code":"PowerBIEntityNotFound","pbi.error":{"code":"PowerBIEntityNotFound","parameters":{},"details":[],"exceptionCulprit":1}}}
+ERROR 2025-10-23 13:42:21,510 utils 1796 140542239295168 PBI: erro obtendo report 8588e4b0-d643-4395-9b8c-129fa6857837 — 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:42:21,536 utils 1796 140542222509760 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:46:44,836 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:46:44,860 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 13:46:44,883 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/01c33348-8c83-4712-9406-56c9fa7c0322
+DEBUG 2025-10-23 13:46:44,887 utils 1796 140541703472832 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/90cab255-b6c1-4525-9185-0b282462f6c8
+DEBUG 2025-10-23 13:46:45,067 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:46:45,067 utils 1796 140541731796672 PBI: report→dataset: dataset_id=99fddc6d-4de3-4d63-beba-a143fe297fba | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:46:45,079 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:46:45,080 utils 1796 140541720258240 PBI: report→dataset: dataset_id=35d23203-83e3-4d29-8e01-dcadfa84eebc | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:46:45,083 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:46:45,084 utils 1796 140541711865536 PBI: report→dataset: dataset_id=e47999ad-d869-41f1-b88b-ff4b449fffa8 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:46:45,119 utils 1796 140541703472832 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:46:45,119 utils 1796 140541703472832 PBI: report→dataset: dataset_id=f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:46:45,247 utils 1796 140541720258240 PBI: probe dataset 35d23203-83e3-4d29-8e01-dcadfa84eebc → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:46:45,248 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 13:46:45,292 utils 1796 140541703472832 PBI: probe dataset f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:46:45,294 utils 1796 140541703472832 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe/refreshes?$top=50
+DEBUG 2025-10-23 13:46:45,296 utils 1796 140541731796672 PBI: probe dataset 99fddc6d-4de3-4d63-beba-a143fe297fba → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:46:45,297 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=50
+DEBUG 2025-10-23 13:46:45,312 utils 1796 140541711865536 PBI: probe dataset e47999ad-d869-41f1-b88b-ff4b449fffa8 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:46:45,313 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/e47999ad-d869-41f1-b88b-ff4b449fffa8/refreshes?$top=50
+DEBUG 2025-10-23 13:46:45,762 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:46:45,762 utils 1796 140541703472832 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:46:45,764 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:46:45,765 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:46:45,905 utils 1796 140541703472832 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/87e7d9da-6b98-4a42-a8f4-f12732d3ddec
+DEBUG 2025-10-23 13:46:45,931 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/65c888d8-6d60-4abd-a0cb-4ad942e1ecc7
+DEBUG 2025-10-23 13:46:45,932 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/47311a50-0344-4766-bd51-29c2f96f8977
+DEBUG 2025-10-23 13:46:45,939 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:46:46,075 utils 1796 140541703472832 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:46:46,075 utils 1796 140541703472832 PBI: report→dataset: dataset_id=47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:46:46,121 utils 1796 140541711865536 PBI: reports/{id} HTTP 404
+DEBUG 2025-10-23 13:46:46,121 utils 1796 140541711865536 PBI: reports/{id} body: {"error":{"code":"PowerBIEntityNotFound","pbi.error":{"code":"PowerBIEntityNotFound","parameters":{},"details":[],"exceptionCulprit":1}}}
+ERROR 2025-10-23 13:46:46,121 utils 1796 140541711865536 PBI: erro obtendo report 8588e4b0-d643-4395-9b8c-129fa6857837 — 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:46:46,128 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:46:46,129 utils 1796 140541731796672 PBI: report→dataset: dataset_id=8ac0c4d9-4409-472f-8412-e7465fcdb839 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:46:46,217 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:46:46,218 utils 1796 140541720258240 PBI: report→dataset: dataset_id=9c183037-64d4-49cc-b22e-a3714cd8d926 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:46:46,249 utils 1796 140541703472832 PBI: probe dataset 47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:46:46,250 utils 1796 140541703472832 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea/refreshes?$top=50
+DEBUG 2025-10-23 13:46:46,344 utils 1796 140541731796672 PBI: probe dataset 8ac0c4d9-4409-472f-8412-e7465fcdb839 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:46:46,345 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8ac0c4d9-4409-472f-8412-e7465fcdb839/refreshes?$top=50
+DEBUG 2025-10-23 13:46:46,407 utils 1796 140541720258240 PBI: probe dataset 9c183037-64d4-49cc-b22e-a3714cd8d926 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:46:46,408 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9c183037-64d4-49cc-b22e-a3714cd8d926/refreshes?$top=50
+DEBUG 2025-10-23 13:46:46,748 utils 1796 140541703472832 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:46:46,752 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:46:46,756 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:46,403 utils 1796 140541720258240 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:48:46,407 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=50
+DEBUG 2025-10-23 13:48:46,411 utils 1796 140541731796672 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 13:48:46,412 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 13:48:46,436 utils 1796 140541703472832 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:90cab255-b6c1-4525-9185-0b282462f6c8
+DEBUG 2025-10-23 13:48:46,437 utils 1796 140541703472832 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe/refreshes?$top=50
+DEBUG 2025-10-23 13:48:46,437 utils 1796 140541711865536 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:01c33348-8c83-4712-9406-56c9fa7c0322
+DEBUG 2025-10-23 13:48:46,438 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/e47999ad-d869-41f1-b88b-ff4b449fffa8/refreshes?$top=50
+DEBUG 2025-10-23 13:48:46,651 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:46,656 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:46,667 utils 1796 140541703472832 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:46,674 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:46,788 utils 1796 140541703472832 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:87e7d9da-6b98-4a42-a8f4-f12732d3ddec
+DEBUG 2025-10-23 13:48:46,790 utils 1796 140541703472832 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea/refreshes?$top=50
+DEBUG 2025-10-23 13:48:46,792 utils 1796 140541720258240 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:65c888d8-6d60-4abd-a0cb-4ad942e1ecc7
+DEBUG 2025-10-23 13:48:46,792 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8ac0c4d9-4409-472f-8412-e7465fcdb839/refreshes?$top=50
+DEBUG 2025-10-23 13:48:46,801 utils 1796 140541731796672 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:47311a50-0344-4766-bd51-29c2f96f8977
+DEBUG 2025-10-23 13:48:46,802 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9c183037-64d4-49cc-b22e-a3714cd8d926/refreshes?$top=50
+DEBUG 2025-10-23 13:48:46,805 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:48:46,962 utils 1796 140541711865536 PBI: reports/{id} HTTP 404
+DEBUG 2025-10-23 13:48:46,962 utils 1796 140541711865536 PBI: reports/{id} body: {"error":{"code":"PowerBIEntityNotFound","pbi.error":{"code":"PowerBIEntityNotFound","parameters":{},"details":[],"exceptionCulprit":1}}}
+ERROR 2025-10-23 13:48:46,962 utils 1796 140541711865536 PBI: erro obtendo report 8588e4b0-d643-4395-9b8c-129fa6857837 — 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:48:46,968 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:46,968 utils 1796 140541703472832 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:46,971 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:48:56,692 utils 1796 140541731796672 PBI: list dataflows HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:04,499 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/80f25182-325d-48b5-b7ad-29ce4a800d54
+DEBUG 2025-10-23 13:49:04,516 utils 1796 140541703472832 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/c37d9449-39fe-47dc-bda4-da75b970d0aa
+DEBUG 2025-10-23 13:49:04,569 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/fe9171b9-8051-4950-a4cb-24e3cfddfd00
+DEBUG 2025-10-23 13:49:05,769 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/4143d097-9eba-4d83-9c7f-6a2ae06e14a5
+DEBUG 2025-10-23 13:49:05,876 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:49:05,876 utils 1796 140541731796672 PBI: report→dataset: dataset_id=9f67817a-61a0-48a0-ba71-c524f5a2bf1a | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:49:05,901 utils 1796 140541703472832 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:49:05,901 utils 1796 140541703472832 PBI: report→dataset: dataset_id=9bddc1bb-e64e-4e5c-9f11-5028df65112c | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:49:05,910 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:49:05,910 utils 1796 140541711865536 PBI: report→dataset: dataset_id=a8017073-afdf-4392-9959-fa3e6276ead9 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:49:05,933 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:49:05,934 utils 1796 140541720258240 PBI: report→dataset: dataset_id=a20f8fbd-fbef-456f-b875-9831362190ac | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:49:06,074 utils 1796 140541703472832 PBI: probe dataset 9bddc1bb-e64e-4e5c-9f11-5028df65112c → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:06,075 utils 1796 140541703472832 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9bddc1bb-e64e-4e5c-9f11-5028df65112c/refreshes?$top=50
+DEBUG 2025-10-23 13:49:06,090 utils 1796 140541711865536 PBI: probe dataset a8017073-afdf-4392-9959-fa3e6276ead9 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:06,090 utils 1796 140541731796672 PBI: probe dataset 9f67817a-61a0-48a0-ba71-c524f5a2bf1a → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:06,091 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9f67817a-61a0-48a0-ba71-c524f5a2bf1a/refreshes?$top=50
+DEBUG 2025-10-23 13:49:06,093 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a8017073-afdf-4392-9959-fa3e6276ead9/refreshes?$top=50
+DEBUG 2025-10-23 13:49:06,099 utils 1796 140541720258240 PBI: probe dataset a20f8fbd-fbef-456f-b875-9831362190ac → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:06,100 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a20f8fbd-fbef-456f-b875-9831362190ac/refreshes?$top=50
+DEBUG 2025-10-23 13:49:06,597 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:49:06,599 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:49:06,605 utils 1796 140541703472832 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:49:06,676 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ef744b59-78fd-4054-aaae-bb23d1fbcb71
+DEBUG 2025-10-23 13:49:06,828 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:49:06,829 utils 1796 140541720258240 PBI: report→dataset: dataset_id=eac09539-6a1a-4c77-ac0a-a6ff42a433de | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:49:06,876 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:49:07,014 utils 1796 140541731796672 PBI: [SGQ] embed_token (cache) → pbi:embed:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:49:07,033 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8871bffe-1628-4f09-b550-4e1fed0952b7
+DEBUG 2025-10-23 13:49:07,038 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/592027f1-2e60-4bbd-b201-ddd4a2fe16bb
+DEBUG 2025-10-23 13:49:07,076 utils 1796 140541720258240 PBI: probe dataset eac09539-6a1a-4c77-ac0a-a6ff42a433de → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:07,077 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/eac09539-6a1a-4c77-ac0a-a6ff42a433de/refreshes?$top=50
+DEBUG 2025-10-23 13:49:07,186 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:49:07,187 utils 1796 140541695080128 PBI: report→dataset: dataset_id=354d3b74-549b-4834-b05d-c9a58bed14b8 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:49:07,187 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:49:07,188 utils 1796 140541711865536 PBI: report→dataset: dataset_id=59556dec-8ae6-465b-b129-74f5681cb2ba | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:49:07,326 utils 1796 140541695080128 PBI: probe dataset 354d3b74-549b-4834-b05d-c9a58bed14b8 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:07,327 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/354d3b74-549b-4834-b05d-c9a58bed14b8/refreshes?$top=50
+DEBUG 2025-10-23 13:49:07,336 utils 1796 140541711865536 PBI: probe dataset 59556dec-8ae6-465b-b129-74f5681cb2ba → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:49:07,337 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/59556dec-8ae6-465b-b129-74f5681cb2ba/refreshes?$top=50
+DEBUG 2025-10-23 13:49:07,407 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:49:07,852 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:49:07,879 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:50:08,648 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:50:08,649 utils 1796 140541695080128 PBI: cascade para dataset=99fddc6d-4de3-4d63-beba-a143fe297fba ds_group=dc152d8a-7555-42d7-b53d-fbe1ce0dff28 (report_group=dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:50:08,650 utils 1796 140541695080128 PBI: nenhum upstream configurado via UI — somente dataset.
+DEBUG 2025-10-23 13:50:08,650 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:50:08,651 utils 1796 140541695080128 PBI: POST refresh dataset url=https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes payload={'type': 'Full', 'notifyOption': 'NoNotification'}
+DEBUG 2025-10-23 13:50:09,222 utils 1796 140541695080128 PBI: refresh dataset HTTP 202
+INFO 2025-10-23 13:50:09,223 utils 1796 140541695080128 PBI: refresh acionado para dataset 99fddc6d-4de3-4d63-beba-a143fe297fba (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28) [Full]
+INFO 2025-10-23 13:50:09,223 views 1796 140541695080128 DATASET_REFRESH | ts=2025-10-23T13:50:09.223426 | user=joao.silva | report_title=SGQ | report_id=ef896c5d-a882-4b0c-bdcf-ec8e350917e2 | group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28 | type=Full | ok=True | detail=accepted
+DEBUG 2025-10-23 13:50:19,294 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:50:19,295 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=50
+DEBUG 2025-10-23 13:50:19,575 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:50:19,643 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:50:19,644 utils 1796 140541695080128 PBI: latest refresh GET https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=1
+DEBUG 2025-10-23 13:50:19,780 utils 1796 140541695080128 PBI: latest refresh HTTP 200
+DEBUG 2025-10-23 13:50:29,942 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:50:29,942 utils 1796 140541695080128 PBI: latest refresh GET https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=1
+DEBUG 2025-10-23 13:50:30,228 utils 1796 140541695080128 PBI: latest refresh HTTP 200
+DEBUG 2025-10-23 13:50:40,365 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:50:40,366 utils 1796 140541695080128 PBI: latest refresh GET https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=1
+DEBUG 2025-10-23 13:50:40,520 utils 1796 140541695080128 PBI: latest refresh HTTP 200
+DEBUG 2025-10-23 13:50:50,661 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:50:50,662 utils 1796 140541695080128 PBI: latest refresh GET https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=1
+DEBUG 2025-10-23 13:50:50,840 utils 1796 140541695080128 PBI: latest refresh HTTP 200
+DEBUG 2025-10-23 13:51:00,995 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:51:00,996 utils 1796 140541695080128 PBI: latest refresh GET https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=1
+DEBUG 2025-10-23 13:51:01,235 utils 1796 140541695080128 PBI: latest refresh HTTP 200
+DEBUG 2025-10-23 13:51:11,718 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:51:11,718 utils 1796 140541695080128 PBI: latest refresh GET https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=1
+DEBUG 2025-10-23 13:51:11,907 utils 1796 140541695080128 PBI: latest refresh HTTP 200
+DEBUG 2025-10-23 13:51:21,996 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef896c5d-a882-4b0c-bdcf-ec8e350917e2
+DEBUG 2025-10-23 13:51:21,997 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/99fddc6d-4de3-4d63-beba-a143fe297fba/refreshes?$top=50
+DEBUG 2025-10-23 13:51:22,162 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:27,833 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:c37d9449-39fe-47dc-bda4-da75b970d0aa
+DEBUG 2025-10-23 13:51:27,834 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9bddc1bb-e64e-4e5c-9f11-5028df65112c/refreshes?$top=50
+DEBUG 2025-10-23 13:51:27,842 utils 1796 140541720258240 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:6659c548-6093-4bea-80ac-54b8026e4970
+DEBUG 2025-10-23 13:51:27,843 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/35d23203-83e3-4d29-8e01-dcadfa84eebc/refreshes?$top=50
+DEBUG 2025-10-23 13:51:27,845 utils 1796 140541731796672 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:80f25182-325d-48b5-b7ad-29ce4a800d54
+DEBUG 2025-10-23 13:51:27,845 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9f67817a-61a0-48a0-ba71-c524f5a2bf1a/refreshes?$top=50
+DEBUG 2025-10-23 13:51:27,910 utils 1796 140541711865536 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:fe9171b9-8051-4950-a4cb-24e3cfddfd00
+DEBUG 2025-10-23 13:51:27,910 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a20f8fbd-fbef-456f-b875-9831362190ac/refreshes?$top=50
+DEBUG 2025-10-23 13:51:27,980 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,000 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,045 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,061 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,076 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:4143d097-9eba-4d83-9c7f-6a2ae06e14a5
+DEBUG 2025-10-23 13:51:28,077 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a8017073-afdf-4392-9959-fa3e6276ead9/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,143 utils 1796 140541731796672 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:ef744b59-78fd-4054-aaae-bb23d1fbcb71
+DEBUG 2025-10-23 13:51:28,143 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/eac09539-6a1a-4c77-ac0a-a6ff42a433de/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,170 utils 1796 140541711865536 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:90cab255-b6c1-4525-9185-0b282462f6c8
+DEBUG 2025-10-23 13:51:28,171 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f8c974eb-7f48-4ea5-b7e7-2cdbb92903fe/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,173 utils 1796 140541720258240 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:592027f1-2e60-4bbd-b201-ddd4a2fe16bb
+DEBUG 2025-10-23 13:51:28,173 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/354d3b74-549b-4834-b05d-c9a58bed14b8/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,267 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,335 utils 1796 140541695080128 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:8871bffe-1628-4f09-b550-4e1fed0952b7
+DEBUG 2025-10-23 13:51:28,336 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/59556dec-8ae6-465b-b129-74f5681cb2ba/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,396 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,429 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,459 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,478 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,551 utils 1796 140541731796672 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:01c33348-8c83-4712-9406-56c9fa7c0322
+DEBUG 2025-10-23 13:51:28,551 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/e47999ad-d869-41f1-b88b-ff4b449fffa8/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,591 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/341ba41b-e8bf-4a03-be6d-159642653410
+DEBUG 2025-10-23 13:51:28,593 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/1875aadc-84ae-4f38-8add-70f9d5b4f337
+DEBUG 2025-10-23 13:51:28,598 utils 1796 140541720258240 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:87e7d9da-6b98-4a42-a8f4-f12732d3ddec
+DEBUG 2025-10-23 13:51:28,598 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/47f7ff6c-09f8-4d2b-abc5-7b9d5e81e1ea/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,746 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,766 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:28,766 utils 1796 140541711865536 PBI: report→dataset: dataset_id=65af87dd-6987-4159-b9c6-94ba207b5af3 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:28,780 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:28,781 utils 1796 140541695080128 PBI: report→dataset: dataset_id=d22ea999-649f-435a-a839-8aa141cdd985 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:28,800 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:28,813 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/c676e50c-1e0e-4310-b148-f933625e37e2
+DEBUG 2025-10-23 13:51:28,879 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/76015734-a6cc-43c0-bbfa-c722a537be6c
+DEBUG 2025-10-23 13:51:28,961 utils 1796 140541695080128 PBI: probe dataset d22ea999-649f-435a-a839-8aa141cdd985 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:28,962 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/d22ea999-649f-435a-a839-8aa141cdd985/refreshes?$top=50
+DEBUG 2025-10-23 13:51:28,966 utils 1796 140541711865536 PBI: probe dataset 65af87dd-6987-4159-b9c6-94ba207b5af3 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:28,966 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/65af87dd-6987-4159-b9c6-94ba207b5af3/refreshes?$top=50
+DEBUG 2025-10-23 13:51:29,027 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:29,027 utils 1796 140541720258240 PBI: report→dataset: dataset_id=7cf4f065-b1c3-4c1b-93d2-ce7be34a5946 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:29,184 utils 1796 140541720258240 PBI: probe dataset 7cf4f065-b1c3-4c1b-93d2-ce7be34a5946 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:29,185 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/7cf4f065-b1c3-4c1b-93d2-ce7be34a5946/refreshes?$top=50
+DEBUG 2025-10-23 13:51:29,231 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:29,232 utils 1796 140541731796672 PBI: report→dataset: dataset_id=8596690c-0fd1-4698-8ee7-6b66c2c9eafa | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:29,238 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:29,241 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:29,349 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/b93ce7ce-e238-405b-93fe-b5e0b817db88
+DEBUG 2025-10-23 13:51:29,354 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/dc2984ea-fd6e-436e-ba3b-dcd506112a5f
+DEBUG 2025-10-23 13:51:29,375 utils 1796 140541731796672 PBI: probe dataset 8596690c-0fd1-4698-8ee7-6b66c2c9eafa → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:29,376 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8596690c-0fd1-4698-8ee7-6b66c2c9eafa/refreshes?$top=50
+DEBUG 2025-10-23 13:51:29,520 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:29,520 utils 1796 140541711865536 PBI: report→dataset: dataset_id=a076f773-32fe-4a62-a4bc-5df202ba5419 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:29,620 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:29,620 utils 1796 140541695080128 PBI: report→dataset: dataset_id=9b8f162e-0d88-47f8-9aaa-4363d3c440cf | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:29,653 utils 1796 140541711865536 PBI: probe dataset a076f773-32fe-4a62-a4bc-5df202ba5419 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:29,654 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/a076f773-32fe-4a62-a4bc-5df202ba5419/refreshes?$top=50
+DEBUG 2025-10-23 13:51:29,739 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:29,740 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:29,776 utils 1796 140541695080128 PBI: probe dataset 9b8f162e-0d88-47f8-9aaa-4363d3c440cf → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:29,777 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9b8f162e-0d88-47f8-9aaa-4363d3c440cf/refreshes?$top=50
+DEBUG 2025-10-23 13:51:29,857 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/c8248399-a9b9-4ad8-ae17-b09b09b381fe
+DEBUG 2025-10-23 13:51:29,862 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/960e0287-3c5f-449e-afc5-3c89e6929ba7
+DEBUG 2025-10-23 13:51:29,997 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:29,997 utils 1796 140541731796672 PBI: report→dataset: dataset_id=bc69a958-7c36-4e6a-9999-c855e82974bb | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:30,169 utils 1796 140541731796672 PBI: probe dataset bc69a958-7c36-4e6a-9999-c855e82974bb → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:30,170 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/bc69a958-7c36-4e6a-9999-c855e82974bb/refreshes?$top=50
+DEBUG 2025-10-23 13:51:30,251 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:30,253 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:30,268 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:30,269 utils 1796 140541720258240 PBI: report→dataset: dataset_id=24d359dc-33ac-40ee-8bf7-7e43b9a847a2 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:30,353 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/ba6dc313-e97e-43f2-a0a9-11dc148d6e8d
+DEBUG 2025-10-23 13:51:30,359 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/74897589-2edd-4bf9-8b9f-b6f5e81baa67
+DEBUG 2025-10-23 13:51:30,414 utils 1796 140541720258240 PBI: probe dataset 24d359dc-33ac-40ee-8bf7-7e43b9a847a2 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:30,415 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/24d359dc-33ac-40ee-8bf7-7e43b9a847a2/refreshes?$top=50
+DEBUG 2025-10-23 13:51:30,476 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:30,477 utils 1796 140541695080128 PBI: report→dataset: dataset_id=ea030f35-3d22-495e-b892-7bf89cbf1e6a | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:30,624 utils 1796 140541695080128 PBI: probe dataset ea030f35-3d22-495e-b892-7bf89cbf1e6a → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:30,625 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/ea030f35-3d22-495e-b892-7bf89cbf1e6a/refreshes?$top=50
+DEBUG 2025-10-23 13:51:30,664 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:30,679 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:30,715 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:30,716 utils 1796 140541711865536 PBI: report→dataset: dataset_id=ba1155e5-bc03-411f-8f9b-871e0919a0a7 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:30,761 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/0479dfcd-ca58-4fc6-a5ea-5df8796672cf
+DEBUG 2025-10-23 13:51:30,773 utils 1796 140541720258240 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:65c888d8-6d60-4abd-a0cb-4ad942e1ecc7
+DEBUG 2025-10-23 13:51:30,774 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/8ac0c4d9-4409-472f-8412-e7465fcdb839/refreshes?$top=50
+DEBUG 2025-10-23 13:51:30,891 utils 1796 140541711865536 PBI: probe dataset ba1155e5-bc03-411f-8f9b-871e0919a0a7 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:30,892 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/ba1155e5-bc03-411f-8f9b-871e0919a0a7/refreshes?$top=50
+DEBUG 2025-10-23 13:51:30,900 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:30,900 utils 1796 140541731796672 PBI: report→dataset: dataset_id=17128da0-166b-4578-8eee-db679d65bd16 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:30,927 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:31,040 utils 1796 140541731796672 PBI: probe dataset 17128da0-166b-4578-8eee-db679d65bd16 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:31,041 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:31,043 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/17128da0-166b-4578-8eee-db679d65bd16/refreshes?$top=50
+DEBUG 2025-10-23 13:51:31,087 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/58169877-75ff-4417-9b65-b84bc5a0889a
+DEBUG 2025-10-23 13:51:31,113 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/c003be3a-d4e7-4d6c-9291-caff58a03d1f
+DEBUG 2025-10-23 13:51:31,241 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:31,241 utils 1796 140541720258240 PBI: report→dataset: dataset_id=9e75edef-fc51-4c28-9e2a-db6554d9ee24 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:31,262 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:31,262 utils 1796 140541695080128 PBI: report→dataset: dataset_id=f62c3ba4-d9d3-46ac-85da-02783035ec78 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:31,412 utils 1796 140541695080128 PBI: probe dataset f62c3ba4-d9d3-46ac-85da-02783035ec78 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:31,413 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f62c3ba4-d9d3-46ac-85da-02783035ec78/refreshes?$top=50
+DEBUG 2025-10-23 13:51:31,425 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:31,502 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/a57e10bc-1863-4659-8d42-f67f4938fc2a
+DEBUG 2025-10-23 13:51:31,639 utils 1796 140541720258240 PBI: probe dataset 9e75edef-fc51-4c28-9e2a-db6554d9ee24 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:31,640 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9e75edef-fc51-4c28-9e2a-db6554d9ee24/refreshes?$top=50
+DEBUG 2025-10-23 13:51:31,643 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:31,643 utils 1796 140541711865536 PBI: report→dataset: dataset_id=d18299a4-212c-47eb-9983-5a3ddf7eaa8a | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:31,818 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:31,826 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:31,899 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/f9b62f90-0335-4858-9636-178e5b615630
+DEBUG 2025-10-23 13:51:31,919 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/a0250df9-cdd9-499e-9da3-20fee94929b7
+DEBUG 2025-10-23 13:51:31,971 utils 1796 140541711865536 PBI: probe dataset d18299a4-212c-47eb-9983-5a3ddf7eaa8a → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:31,973 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/d18299a4-212c-47eb-9983-5a3ddf7eaa8a/refreshes?$top=50
+DEBUG 2025-10-23 13:51:32,050 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:32,051 utils 1796 140541731796672 PBI: report→dataset: dataset_id=f3a3b75f-1934-4fde-8943-c0f5c74e8902 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:32,066 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:32,067 utils 1796 140541695080128 PBI: report→dataset: dataset_id=7db9d489-ab2f-4b37-9c56-f8385deb9b73 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:32,190 utils 1796 140541731796672 PBI: probe dataset f3a3b75f-1934-4fde-8943-c0f5c74e8902 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:32,191 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/f3a3b75f-1934-4fde-8943-c0f5c74e8902/refreshes?$top=50
+DEBUG 2025-10-23 13:51:32,222 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:32,234 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:32,241 utils 1796 140541695080128 PBI: probe dataset 7db9d489-ab2f-4b37-9c56-f8385deb9b73 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:32,242 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/7db9d489-ab2f-4b37-9c56-f8385deb9b73/refreshes?$top=50
+DEBUG 2025-10-23 13:51:32,322 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/7cac681e-7bae-4566-b009-b12ab590f6da
+DEBUG 2025-10-23 13:51:32,332 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e55062b1-5bf5-422e-98a4-461c779a6e16
+DEBUG 2025-10-23 13:51:32,476 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:32,477 utils 1796 140541720258240 PBI: report→dataset: dataset_id=3c9ca379-a1f6-4628-ba3c-cf2e6c0000ae | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:32,636 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:32,643 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:32,648 utils 1796 140541720258240 PBI: probe dataset 3c9ca379-a1f6-4628-ba3c-cf2e6c0000ae → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:32,651 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/3c9ca379-a1f6-4628-ba3c-cf2e6c0000ae/refreshes?$top=50
+DEBUG 2025-10-23 13:51:32,726 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/e64b8608-60f3-4e8c-9c75-b4f69a96252f
+DEBUG 2025-10-23 13:51:32,738 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8fa01888-3288-466e-b00b-83936741db62
+DEBUG 2025-10-23 13:51:32,847 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:32,847 utils 1796 140541711865536 PBI: report→dataset: dataset_id=eb32acd9-f668-4293-9b3a-7ba39e332070 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:32,890 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:32,891 utils 1796 140541695080128 PBI: report→dataset: dataset_id=dfb7d79f-195b-4476-8994-7b6c2b206fde | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:32,921 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:32,921 utils 1796 140541731796672 PBI: report→dataset: dataset_id=c202c7af-e9b8-4f5f-84f8-27b317b9bf64 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:32,978 utils 1796 140541711865536 PBI: probe dataset eb32acd9-f668-4293-9b3a-7ba39e332070 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:32,979 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/eb32acd9-f668-4293-9b3a-7ba39e332070/refreshes?$top=50
+DEBUG 2025-10-23 13:51:33,040 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:33,064 utils 1796 140541731796672 PBI: probe dataset c202c7af-e9b8-4f5f-84f8-27b317b9bf64 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:33,065 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/c202c7af-e9b8-4f5f-84f8-27b317b9bf64/refreshes?$top=50
+DEBUG 2025-10-23 13:51:33,126 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/857b1d16-f72e-423a-8e81-b0c0312711a9
+DEBUG 2025-10-23 13:51:33,273 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:33,274 utils 1796 140541720258240 PBI: report→dataset: dataset_id=4435b381-c3e0-4059-9a3d-4cc323330f39 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:33,285 utils 1796 140541695080128 PBI: probe dataset dfb7d79f-195b-4476-8994-7b6c2b206fde → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:33,287 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/dfb7d79f-195b-4476-8994-7b6c2b206fde/refreshes?$top=50
+DEBUG 2025-10-23 13:51:33,371 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:33,372 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:33,468 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/0d3db5c2-c86d-4db1-921c-b953f6afc5b7
+DEBUG 2025-10-23 13:51:33,481 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/5fbb3641-0b31-4652-b369-a37226e7aefe
+DEBUG 2025-10-23 13:51:33,589 utils 1796 140541720258240 PBI: probe dataset 4435b381-c3e0-4059-9a3d-4cc323330f39 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:33,590 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/4435b381-c3e0-4059-9a3d-4cc323330f39/refreshes?$top=50
+DEBUG 2025-10-23 13:51:33,594 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:33,595 utils 1796 140541731796672 PBI: report→dataset: dataset_id=1176a73e-2b55-4e72-ab8f-39439576423b | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:33,618 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:33,618 utils 1796 140541711865536 PBI: report→dataset: dataset_id=2ebd46bf-be47-469a-800d-77923d0ff893 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:33,752 utils 1796 140541731796672 PBI: probe dataset 1176a73e-2b55-4e72-ab8f-39439576423b → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:33,753 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/1176a73e-2b55-4e72-ab8f-39439576423b/refreshes?$top=50
+DEBUG 2025-10-23 13:51:33,788 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:33,789 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:33,828 utils 1796 140541711865536 PBI: probe dataset 2ebd46bf-be47-469a-800d-77923d0ff893 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:33,830 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/2ebd46bf-be47-469a-800d-77923d0ff893/refreshes?$top=50
+DEBUG 2025-10-23 13:51:33,938 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/b297fa5d-7b5a-4dd3-8278-25a19fc430c5
+DEBUG 2025-10-23 13:51:33,940 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/a7759300-2c04-4933-bc9f-ad78e3f58267
+DEBUG 2025-10-23 13:51:34,124 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:34,124 utils 1796 140541695080128 PBI: report→dataset: dataset_id=d19f64dd-5a6d-4638-821e-77c6533b03e1 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:34,188 utils 1796 140541720258240 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:34,188 utils 1796 140541720258240 PBI: report→dataset: dataset_id=660c98f9-b35e-4081-bc9b-59d5dabe89a7 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:34,220 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:34,220 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:34,328 utils 1796 140541711865536 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/d3b7eb1d-93ff-42bc-b446-954aee5889dc
+DEBUG 2025-10-23 13:51:34,332 utils 1796 140541731796672 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/0a3c64ca-628a-4c8c-b924-24e0922e3782
+DEBUG 2025-10-23 13:51:34,367 utils 1796 140541720258240 PBI: probe dataset 660c98f9-b35e-4081-bc9b-59d5dabe89a7 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:34,368 utils 1796 140541720258240 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/660c98f9-b35e-4081-bc9b-59d5dabe89a7/refreshes?$top=50
+DEBUG 2025-10-23 13:51:34,384 utils 1796 140541695080128 PBI: probe dataset d19f64dd-5a6d-4638-821e-77c6533b03e1 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:34,385 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/d19f64dd-5a6d-4638-821e-77c6533b03e1/refreshes?$top=50
+DEBUG 2025-10-23 13:51:34,478 utils 1796 140541711865536 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:34,478 utils 1796 140541711865536 PBI: report→dataset: dataset_id=5d07e02b-c8e1-4adc-af9f-edb70b369f25 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:34,491 utils 1796 140541731796672 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:34,492 utils 1796 140541731796672 PBI: report→dataset: dataset_id=705c3349-a1bb-40f6-bae5-3dc3f9907372 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:34,626 utils 1796 140541711865536 PBI: probe dataset 5d07e02b-c8e1-4adc-af9f-edb70b369f25 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:34,627 utils 1796 140541711865536 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/5d07e02b-c8e1-4adc-af9f-edb70b369f25/refreshes?$top=50
+DEBUG 2025-10-23 13:51:34,680 utils 1796 140541695080128 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:34,724 utils 1796 140541731796672 PBI: probe dataset 705c3349-a1bb-40f6-bae5-3dc3f9907372 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:34,725 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/705c3349-a1bb-40f6-bae5-3dc3f9907372/refreshes?$top=50
+DEBUG 2025-10-23 13:51:34,746 utils 1796 140541695080128 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/4ddddb52-b1c8-448c-bf96-c48368e60e2c
+DEBUG 2025-10-23 13:51:34,868 utils 1796 140541695080128 PBI: reports/{id} HTTP 200
+DEBUG 2025-10-23 13:51:34,869 utils 1796 140541695080128 PBI: report→dataset: dataset_id=403167a8-3a10-46b7-9133-a75a5a6429a5 | ds_group_id=dc152d8a-7555-42d7-b53d-fbe1ce0dff28
+DEBUG 2025-10-23 13:51:35,029 utils 1796 140541695080128 PBI: probe dataset 403167a8-3a10-46b7-9133-a75a5a6429a5 → HTTP 200 (group dc152d8a-7555-42d7-b53d-fbe1ce0dff28)
+DEBUG 2025-10-23 13:51:35,030 utils 1796 140541695080128 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/403167a8-3a10-46b7-9133-a75a5a6429a5/refreshes?$top=50
+DEBUG 2025-10-23 13:51:35,073 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:35,078 utils 1796 140541711865536 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:35,081 utils 1796 140541720258240 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:35,156 utils 1796 140541731796672 PBI: resolve cache HIT → pbi:resolve:dc152d8a-7555-42d7-b53d-fbe1ce0dff28:47311a50-0344-4766-bd51-29c2f96f8977
+DEBUG 2025-10-23 13:51:35,157 utils 1796 140541731796672 RT: GET refreshes https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/datasets/9c183037-64d4-49cc-b22e-a3714cd8d926/refreshes?$top=50
+DEBUG 2025-10-23 13:51:35,180 utils 1796 140541720258240 PBI: resolve dataset via https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:51:35,311 utils 1796 140541731796672 RT: refreshes HTTP 200
+DEBUG 2025-10-23 13:51:35,352 utils 1796 140541720258240 PBI: reports/{id} HTTP 404
+DEBUG 2025-10-23 13:51:35,352 utils 1796 140541720258240 PBI: reports/{id} body: {"error":{"code":"PowerBIEntityNotFound","pbi.error":{"code":"PowerBIEntityNotFound","parameters":{},"details":[],"exceptionCulprit":1}}}
+ERROR 2025-10-23 13:51:35,353 utils 1796 140541720258240 PBI: erro obtendo report 8588e4b0-d643-4395-9b8c-129fa6857837 — 404 Client Error: Not Found for url: https://api.powerbi.com/v1.0/myorg/groups/dc152d8a-7555-42d7-b53d-fbe1ce0dff28/reports/8588e4b0-d643-4395-9b8c-129fa6857837
+DEBUG 2025-10-23 13:51:35,531 utils 1796 140541695080128 RT: refreshes HTTP 200
