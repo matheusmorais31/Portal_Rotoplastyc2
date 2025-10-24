@@ -383,3 +383,6 @@ OPENMETEO_LAT = config('OPENMETEO_LAT', default=-28.28389, cast=float)   # Caraz
 OPENMETEO_LON = config('OPENMETEO_LON', default=-52.78639, cast=float)
 OPENMETEO_TIMEZONE = config('OPENMETEO_TIMEZONE', default=TIME_ZONE)
 
+
+
+POWERBI_REFRESH_LOCK_SECONDS = 10

@@ -72,8 +72,8 @@ label {
     border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #ff0000;
-    color: #ffffff;
+    background-color: #ff5555;
+    color:#ffffff;
     transition: background-color 0.3s;
     display: inline-block;
 }
@@ -97,7 +97,7 @@ label {
 
 /* Botão Cancelar */
 .form-buttons .btn-form {
-    background-color: #ff0000;
+    background-color: #ff5555;
     color: white;
 }
 
@@ -134,28 +134,22 @@ button[type="submit"]:hover {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(17, 16, 16, 0.44);
+    color: #fff;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
-
+.table tbody td { padding: 10px; font-size: 16px; }
 th, td {
     padding: 12px 15px;
     text-align: left;
     border: 1px solid #ddd;
     color: #fff;
 }
-
-th {
-    background-color: #4e4a4a;
-}
-
-tr:nth-child(even) {
-    background-color: rgb(59, 56, 56);
-}
-
-tr:hover {
-    background-color: rgb(70, 65, 65);
-}
-
+th { background-color: #18909F; }
+tr:nth-child(even) { background-color: rgb(59, 56, 56); }
+tr:hover { background-color: #18909F; }
 /* Estilizar a lista de resultados de busca */
 #resultados_pesquisa {
     list-style-type: none;

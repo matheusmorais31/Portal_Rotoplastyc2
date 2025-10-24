@@ -1,0 +1,157 @@
+/* Reset básico */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Estrutura */
+html, body {
+  height: 100%;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* Contêiner */
+.register-container {
+  background-color: rgba(17, 16, 16, 44%);
+  padding: 20px 20px;
+  border-radius: 20px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 16.9);
+  width: 600px;
+  max-width: 70%;
+  text-align: center;
+  margin: 50px auto;
+}
+
+/* Título */
+h2 {
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+/* Labels e grupos */
+label {
+  display: block;
+  margin-bottom: 0px;
+  font-size: 18px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.form-group { margin-bottom: 15px; }
+
+/* Inputs */
+input[type="text"] {
+  width: 90%;
+  padding: 8px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 10px;
+  background-color: #d3d3d3;
+  font-size: 14px;
+  box-shadow: none;
+  outline: none;
+}
+
+input[type="text"]:focus {
+  box-shadow: none;
+  background-color: #d3d3d3;
+}
+
+/* Botões */
+.btn-form {
+  width: 100px;
+  padding: 6px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #ff5555;
+  color: #ffffff;
+  transition: background-color 0.3s;
+  display: inline-block;
+}
+
+.form-buttons .btn-form-ok {
+  width: 100px;
+  padding: 6px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: inline-block;
+  background-color: #2EC2D6;
+  color: white;
+}
+
+.form-buttons .btn-form { background-color: #ff5555; color: white; }
+
+.btn-form:hover {
+  background-color: #d62e2e;
+  box-shadow: 0px 0px 10px #d62e2e;
+}
+
+button[type="submit"]:hover {
+  background-color: #2EC2D6;
+  box-shadow: 0px 0px 10px #2EC2D6;
+}
+
+/* Área de botões */
+.form-buttons {
+  text-align: center;
+  margin-top: 30px;
+}
+
+/* Tabela de participantes */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(17, 16, 16, 0.44);
+  color: #fff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.table tbody td { padding: 10px; font-size: 16px; }
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+  color: #fff;
+}
+
+th { background-color: #18909F; }
+tr:nth-child(even) { background-color: rgb(59, 56, 56); }
+tr:hover { background-color: #18909F; }
+
+/* Resultados da busca (autocomplete) */
+#resultados_pesquisa {
+  list-style-type: none;
+  margin-top: 5px;
+  padding: 0;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+#resultados_pesquisa li {
+  padding: 10px 15px;
+  cursor: pointer;
+  color: #333;
+}
+
+#resultados_pesquisa li:hover { background-color: #f0f2f5; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .register-container { padding: 20px; border-radius: 10px; }
+  h2 { font-size: 24px; }
+  label { font-size: 16px; }
+  input[type="text"] { font-size: 14px; }
+  button { font-size: 14px; padding: 8px 12px; }
+  th, td { font-size: 14px; padding: 10px 12px; }
+}

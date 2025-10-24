@@ -345,3 +345,129 @@ DEBUG 2025-10-08 10:51:41,817 views 70063 140612456015552 Documento atual: id=31
 INFO 2025-10-08 10:51:41,820 views 70063 140612456015552 Bloqueio por pendente: id=641 status=aguardando_elaborador
 DEBUG 2025-10-08 10:51:47,115 views 70063 140612456015552 Acesso registrado via PDF.js para o usuário admin no documento DS07 - Lista Mestra de Controle de Documentos - TESTE
 DEBUG 2025-10-08 10:59:45,549 views 70063 140612481193664 Acesso registrado via PDF.js para o usuário admin no documento DS07 - Lista Mestra de Controle de Documentos - TESTE
+DEBUG 2025-10-23 15:01:48,059 views 1796 140540850562752 === nova_revisao start ===
+DEBUG 2025-10-23 15:01:48,060 views 1796 140540850562752 Parâmetros: documento_id=316, user=admin
+DEBUG 2025-10-23 15:01:48,062 views 1796 140540850562752 Documento atual: id=316, nome='DS07 - Lista Mestra de Controle de Documentos', revisao=10, codigo=d12ae220-b4d7-4e5d-815b-66bce17c742a
+INFO 2025-10-23 15:01:48,068 views 1796 140540850562752 Bloqueio por pendente: id=641 status=aguardando_elaborador
+DEBUG 2025-10-23 15:01:51,200 views 1796 140540850562752 === nova_revisao start ===
+DEBUG 2025-10-23 15:01:51,200 views 1796 140540850562752 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-23 15:01:51,202 views 1796 140540850562752 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-23 15:01:51,205 views 1796 140540850562752 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-23 15:01:55,101 views 1796 140540850562752 === nova_revisao start ===
+DEBUG 2025-10-23 15:01:55,101 views 1796 140540850562752 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:01:55,104 views 1796 140540850562752 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:01:55,105 views 1796 140540850562752 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:01:55,110 views 1796 140540850562752 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:01:58,694 views 1796 140540850562752 === nova_revisao start ===
+DEBUG 2025-10-23 15:01:58,695 views 1796 140540850562752 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:01:58,697 views 1796 140540850562752 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:01:58,699 views 1796 140540850562752 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:01:58,701 views 1796 140540850562752 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:02,701 views 1796 140540850562752 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:02,701 views 1796 140540850562752 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:02,703 views 1796 140540850562752 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:02,704 views 1796 140540850562752 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:02,706 views 1796 140540850562752 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:03,608 views 1796 140540875740864 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:03,610 views 1796 140540875740864 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:03,612 views 1796 140540875740864 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:03,613 views 1796 140540875740864 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:03,616 views 1796 140540875740864 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:04,221 views 1796 140540858955456 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:04,221 views 1796 140540858955456 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:04,223 views 1796 140540858955456 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:04,224 views 1796 140540858955456 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:04,226 views 1796 140540858955456 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:04,636 views 1796 140540833777344 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:04,636 views 1796 140540833777344 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:04,638 views 1796 140540833777344 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:04,639 views 1796 140540833777344 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:04,641 views 1796 140540833777344 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:05,008 views 1796 140540867348160 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:05,008 views 1796 140540867348160 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:05,011 views 1796 140540867348160 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:05,012 views 1796 140540867348160 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:05,014 views 1796 140540867348160 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:05,200 views 1796 140540850562752 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:05,201 views 1796 140540850562752 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:05,203 views 1796 140540850562752 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:05,204 views 1796 140540850562752 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:05,207 views 1796 140540850562752 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:05,407 views 1796 140540875740864 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:05,407 views 1796 140540875740864 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:05,409 views 1796 140540875740864 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:05,410 views 1796 140540875740864 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:05,412 views 1796 140540875740864 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:05,637 views 1796 140540858955456 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:05,637 views 1796 140540858955456 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:05,639 views 1796 140540858955456 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:05,640 views 1796 140540858955456 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:05,642 views 1796 140540858955456 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:06,072 views 1796 140540825384640 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:06,072 views 1796 140540825384640 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:06,077 views 1796 140540825384640 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:06,080 views 1796 140540825384640 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:06,083 views 1796 140540825384640 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:06,234 views 1796 140540816991936 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:06,234 views 1796 140540816991936 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:06,237 views 1796 140540816991936 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:06,240 views 1796 140540816991936 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:06,244 views 1796 140540816991936 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:06,467 views 1796 140540791813824 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:06,468 views 1796 140540791813824 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:02:06,470 views 1796 140540791813824 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:02:06,473 views 1796 140540791813824 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:02:06,475 views 1796 140540791813824 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:02:14,037 views 1796 140540766635712 === nova_revisao start ===
+DEBUG 2025-10-23 15:02:14,038 views 1796 140540766635712 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-23 15:02:14,039 views 1796 140540766635712 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-23 15:02:14,042 views 1796 140540766635712 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-23 15:04:31,904 views 1796 140540766635712 === nova_revisao start ===
+DEBUG 2025-10-23 15:04:31,905 views 1796 140540766635712 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-23 15:04:31,906 views 1796 140540766635712 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-23 15:04:31,909 views 1796 140540766635712 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-23 15:04:35,739 views 1796 140540766635712 === nova_revisao start ===
+DEBUG 2025-10-23 15:04:35,740 views 1796 140540766635712 Parâmetros: documento_id=629, user=admin
+DEBUG 2025-10-23 15:04:35,741 views 1796 140540766635712 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=c16627f4-02a7-47fb-bb8f-7b508a21c023
+DEBUG 2025-10-23 15:04:35,743 views 1796 140540766635712 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:04:35,746 views 1796 140540766635712 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:04:37,149 views 1796 140540766635712 === nova_revisao start ===
+DEBUG 2025-10-23 15:04:37,150 views 1796 140540766635712 Parâmetros: documento_id=629, user=admin
+DEBUG 2025-10-23 15:04:37,152 views 1796 140540766635712 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=c16627f4-02a7-47fb-bb8f-7b508a21c023
+DEBUG 2025-10-23 15:04:37,154 views 1796 140540766635712 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:04:37,159 views 1796 140540766635712 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:04:37,726 views 1796 140540783421120 === nova_revisao start ===
+DEBUG 2025-10-23 15:04:37,727 views 1796 140540783421120 Parâmetros: documento_id=629, user=admin
+DEBUG 2025-10-23 15:04:37,729 views 1796 140540783421120 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=c16627f4-02a7-47fb-bb8f-7b508a21c023
+DEBUG 2025-10-23 15:04:37,731 views 1796 140540783421120 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:04:37,733 views 1796 140540783421120 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:05:30,278 views 1796 140540766635712 === nova_revisao start ===
+DEBUG 2025-10-23 15:05:30,280 views 1796 140540766635712 Parâmetros: documento_id=629, user=admin
+DEBUG 2025-10-23 15:05:30,283 views 1796 140540766635712 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=c16627f4-02a7-47fb-bb8f-7b508a21c023
+DEBUG 2025-10-23 15:05:30,285 views 1796 140540766635712 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:05:30,289 views 1796 140540766635712 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:05:31,055 views 1796 140540791813824 === nova_revisao start ===
+DEBUG 2025-10-23 15:05:31,055 views 1796 140540791813824 Parâmetros: documento_id=629, user=admin
+DEBUG 2025-10-23 15:05:31,058 views 1796 140540791813824 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=c16627f4-02a7-47fb-bb8f-7b508a21c023
+DEBUG 2025-10-23 15:05:31,060 views 1796 140540791813824 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:05:31,065 views 1796 140540791813824 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:08:51,211 views 1796 140540749850304 === nova_revisao start ===
+DEBUG 2025-10-23 15:08:51,212 views 1796 140540749850304 Parâmetros: documento_id=629, user=admin
+DEBUG 2025-10-23 15:08:51,213 views 1796 140540749850304 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=c16627f4-02a7-47fb-bb8f-7b508a21c023
+DEBUG 2025-10-23 15:08:51,215 views 1796 140540749850304 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:08:51,216 views 1796 140540749850304 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:08:52,058 views 1796 140540766635712 === nova_revisao start ===
+DEBUG 2025-10-23 15:08:52,059 views 1796 140540766635712 Parâmetros: documento_id=629, user=admin
+DEBUG 2025-10-23 15:08:52,060 views 1796 140540766635712 Documento atual: id=629, nome='DS09 - Politica da Qualidade - TESTE', revisao=3, codigo=c16627f4-02a7-47fb-bb8f-7b508a21c023
+DEBUG 2025-10-23 15:08:52,061 views 1796 140540766635712 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:08:52,063 views 1796 140540766635712 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:09:14,531 views 1796 140540775028416 === nova_revisao start ===
+DEBUG 2025-10-23 15:09:14,532 views 1796 140540775028416 Parâmetros: documento_id=635, user=admin
+DEBUG 2025-10-23 15:09:14,534 views 1796 140540775028416 Documento atual: id=635, nome='DS07 - Lista Mestra de Controle de Documentos - TESTE', revisao=12, codigo=6ea48162-f22a-4332-9a7a-9563f9857aa1
+INFO 2025-10-23 15:09:14,539 views 1796 140540775028416 Bloqueio por pendente: id=645 status=aguardando_analise
+DEBUG 2025-10-23 15:09:17,458 views 1796 140540775028416 === nova_revisao start ===
+DEBUG 2025-10-23 15:09:17,458 views 1796 140540775028416 Parâmetros: documento_id=384, user=admin
+DEBUG 2025-10-23 15:09:17,461 views 1796 140540775028416 Documento atual: id=384, nome='DS08 - Definições de Cadastro de Produto', revisao=8, codigo=ab8d9d88-634f-485c-bf55-bbdf2c18a069
+DEBUG 2025-10-23 15:09:17,463 views 1796 140540775028416 Método GET: exibindo formulário
+DEBUG 2025-10-23 15:09:17,467 views 1796 140540775028416 Renderizando template com formulário (GET ou erro)
+DEBUG 2025-10-23 15:09:38,212 views 1796 140540775028416 Acesso registrado via PDF.js para o usuário admin no documento DS07 - Lista Mestra de Controle de Documentos - TESTE

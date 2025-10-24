@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/visualizar_bi.css' %}">
+
 {% endblock %}
 
 {% block content %}
@@ -55,11 +56,18 @@
 
     <button class="btn" id="btnFull">Tela inteira</button>
 
-    <!-- Botão Atualizar com spinner -->
-    <button class="btnrefresh" id="btnRefreshNow" aria-live="polite" aria-busy="false" title="Aciona atualização do dataset e dataflows upstream (cascata)">
+    <!-- Botão Atualizar com spinner (inicia oculto; será exibido se NÃO houver refresh em andamento) -->
+    <button class="btnrefresh" id="btnRefreshNow" aria-live="polite" aria-busy="false" title="Aciona atualização do dataset e dataflows upstream (cascata)" style="display:none">
       <span class="spinner" aria-hidden="true"></span>
       <span class="label">Atualizar agora</span>
     </button>
+
+    <!-- Pill: status de refresh em andamento (Power BI Web manual/agendado ou via botão local) -->
+    <span id="refreshInProg" class="refresh-pill" style="display:none"
+          title="Há uma atualização em andamento no Power BI">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="refreshInProgText">Atualização em andamento…</span>
+    </span>
 
     <button class="btn btn-danger" id="btnReset">Redefinir filtros</button>
   </div>
@@ -263,7 +271,7 @@
       async function applyStateObject(pick, { preRender = false } = {}){
         const bm  = (typeof pick?.bookmarkState === 'string' && pick.bookmarkState.length) ? pick.bookmarkState : null;
         const flt = Array.isArray(pick?.reportFilters) ? pick.reportFilters : [];
-        the_ap  = pick?.activePage || null;
+        const the_ap  = pick?.activePage || null;
 
         if (preRender && bm) {
           pendingBookmarkState = bm;
@@ -368,7 +376,7 @@
         try { window.powerbi.reset(container); } catch {}
         Array.from(container.querySelectorAll('iframe')).forEach(n => n.remove());
       }
-      function waitTwoFrames(){ 
+      function waitTwoFrames(){
         return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       }
 
@@ -404,9 +412,12 @@
           throw new Error('Embed URL inválida após normalização');
         }
 
-        window.powerbi.reset(container);
+        // (não repetir reset aqui; já fizemos em hardClearContainer)
         const rpt = window.powerbi.embed(container, config);
         report = rpt;
+
+        // 👇 dá tempo do iframe inicializar o canal postMessage antes do load()
+        await waitTwoFrames();
 
         rpt.off && rpt.off('loaded');
         rpt.off && rpt.off('rendered');
@@ -589,6 +600,9 @@
           console.warn('[PBI:lastUpdateRT:fail]', err);
         }finally{
           updateLastUpdBadge();
+          // 🔥 reprograma a sonda conforme o "next_update" atualizado e dispara checagem imediata
+          scheduleAdaptiveProbe();
+          probeRefreshStart();
         }
       }
 
@@ -600,6 +614,15 @@
         const n = Number(raw || 0);
         return Number.isFinite(n) ? n : 0;
       }
+      // ➕ pega o "próximo update" para janelar a sonda
+      function getNextEpoch(){
+        const wrap = document.getElementById('lastUpd');
+        if (!wrap) return 0;
+        const raw = wrap.getAttribute('data-next-epoch');
+        const n = Number(raw || 0);
+        return Number.isFinite(n) ? n : 0;
+      }
+
       function setBtnLoading(btn, isLoading, textLoading = 'Atualizando…', textIdle = 'Atualizar agora'){
         if (!btn) return;
         const lbl = btn.querySelector('.label');
@@ -611,6 +634,7 @@
           if (lbl) lbl.textContent = textIdle;
         }
       }
+
       async function getRefreshStatus(afterEpoch){
         const res = await fetch(URL_REFRESH_ST, {
           method: 'POST',
@@ -623,10 +647,189 @@
         const data = JSON.parse(txt || '{}');
         return data;
       }
+
+      // --- NORMALIZAÇÃO DE STATUS (robusto a formatos diferentes) ---
+      function _lc(v){ return (v==null ? '' : String(v)).toLowerCase().trim(); }
+
+      // Decide apenas o "canal" do refresh → "via api" | "via PowerBI Web"
+      function inferChannelTag(obj, rawType){
+        const bag = [
+          rawType, obj.refresh_type, obj.type, obj.refreshType,
+          obj.trigger_source, obj.triggerSource,
+          obj.initiated_by, obj.initiatedBy,
+          obj.requested_by, obj.requestedBy,
+          obj.source, obj.via, obj.method, obj.origin
+        ].map(x => String(x || '')).join('|').toLowerCase();
+
+        if (/(api|enhancedapi|xmla|rest|sdk|powershell)/.test(bag)) return 'via api';
+        if (/(scheduled|agendado)/.test(bag)) return 'via PowerBI Web';
+        if (/(manual|on[-\s]?demand|ui|web)/.test(bag)) return 'via PowerBI Web';
+        return 'via PowerBI Web';
+      }
+
+      function normalizeOneRefresh(obj){
+        const rawStatus = _lc(obj.status ?? obj.state ?? obj.refresh_status ?? obj.stage);
+        const rawType   = _lc(obj.refresh_type ?? obj.type ?? obj.refreshType);
+        const inProgFlags = new Set(['inprogress','running','notstarted','pending','queued']);
+
+        const bools =
+          (obj.in_progress ?? obj.inProgress ?? obj.is_running ?? obj.running ?? false) ? true : false;
+
+        const hasStart = Number.isFinite(obj.start_epoch) || obj.startTime || obj.startDateTime;
+        const hasEnd   = Number.isFinite(obj.end_epoch)   || obj.endTime   || obj.endDateTime;
+
+        const inProgress = bools || inProgFlags.has(rawStatus) || (hasStart && !hasEnd);
+
+        const failed = new Set(['failed','cancelled','canceled','disabled','error']).has(rawStatus);
+
+        const origin = inferChannelTag(obj, rawType); // 👈 só "via api" | "via PowerBI Web"
+
+        const errMsg = obj.error_message ?? obj.errorMessage ?? obj.message ?? '';
+        const errCode= obj.error_code ?? obj.errorCode ?? '';
+
+        return {
+          inProgress, failed, origin, rawStatus, rawType,
+          errMsg: (typeof errMsg === 'string' ? errMsg : ''),
+          errCode: (typeof errCode === 'string' ? errCode : ''),
+          start_epoch: obj.start_epoch, end_epoch: obj.end_epoch
+        };
+      }
+
+      function pickStatusFromResponse(resp){
+        const list = Array.isArray(resp)            ? resp
+                   : Array.isArray(resp?.items)     ? resp.items
+                   : Array.isArray(resp?.refreshes) ? resp.refreshes
+                   : resp?.item ? [resp.item]
+                   : [resp];
+
+        const normalized = list.map(normalizeOneRefresh);
+
+        // Se qualquer falhou → prioriza falha
+        const anyFailed = normalized.find(x => x.failed);
+        if (anyFailed) return { inProgress:false, failed:true, origin:anyFailed.origin, error:anyFailed.errMsg, code:anyFailed.errCode, debug:normalized };
+
+        // Se qualquer em progresso → está em andamento
+        const anyRunning = normalized.find(x => x.inProgress);
+        if (anyRunning) return { inProgress:true, failed:false, origin:anyRunning.origin, debug:normalized };
+
+        // Nenhum em progresso e ninguém falhou → parado
+        return { inProgress:false, failed:false, origin:'via PowerBI Web', debug:normalized };
+      }
+
+      // ===== Helpers para botão/pill (mostrar/esconder) =====
+      function showRefreshBtn(show=true){
+        const btn = document.getElementById('btnRefreshNow');
+        if (!btn) return;
+        btn.style.display = show ? '' : 'none';
+      }
+      function syncRefreshControls(inProgress, label){
+        if (inProgress){
+          setRefreshPill(true, `Atualização em andamento… (${label || 'via PowerBI Web'})`);
+          showRefreshBtn(false);
+        } else {
+          setRefreshPill(false);
+          showRefreshBtn(true);
+        }
+      }
+
+      // ===== Pill de refresh (sonda + polling) =====
+      const pillEl = document.getElementById('refreshInProg');
+      const pillTextEl = document.getElementById('refreshInProgText');
+      function setRefreshPill(on, text){
+        if(!pillEl) return;
+        pillEl.style.display = on ? 'inline-flex' : 'none';
+        if (on && text && pillTextEl) pillTextEl.textContent = text;
+      }
+      let refreshPollTimer = null;
+      let refreshProbeTimer = null;
+
+      function stopRefreshPolling(){
+        if (refreshPollTimer){ clearInterval(refreshPollTimer); refreshPollTimer = null; }
+        // terminou (ou falhou) → esconder pill e voltar botão
+        syncRefreshControls(false);
+      }
+
+      async function startRefreshPolling(kindLabel='via PowerBI Web'){
+        if (refreshPollTimer){
+          // já está polling — só atualiza rótulo/visuais
+          syncRefreshControls(true, kindLabel);
+          return;
+        }
+        syncRefreshControls(true, kindLabel);
+        const TICK_MS = 10000; // 10s
+        refreshPollTimer = setInterval(async () => {
+          try{
+            const st = await getRefreshStatus();
+            const picked = pickStatusFromResponse(st);
+            console.debug('[refreshPolling] parsed ->', picked.debug);
+
+            if (picked.failed){
+              stopRefreshPolling();
+              const err = (picked.error || '').trim();
+              if (err) alert(`Falha na atualização:\n\n${err}`);
+              else alert('Falha na atualização do dataset (Power BI).');
+              return;
+            }
+
+            if (!picked.inProgress){
+              stopRefreshPolling();
+              await refreshLastUpdBadgeRt();
+              try { await report.refresh(); } catch(e) {}
+              toast('Dados atualizados.');
+            } else {
+              syncRefreshControls(true, picked.origin); // 👈 usa só “via …”
+            }
+          }catch(e){
+            console.warn('[refreshPolling] erro', e);
+          }
+        }, TICK_MS);
+      }
+
+      async function probeRefreshStart(){
+        try{
+          const st = await getRefreshStatus();
+          const picked = pickStatusFromResponse(st);
+          console.debug('[probeRefreshStart] parsed ->', picked.debug);
+
+          if (picked.failed){
+            // Falhou — não fica em progresso; mostra botão (e pode avisar silenciosamente)
+            stopRefreshPolling();
+            return;
+          }
+
+          if (picked.inProgress){
+            startRefreshPolling(picked.origin); // 👈 usa só “via …”
+          } else {
+            // Não há refresh em andamento → garantir que o botão esteja visível
+            stopRefreshPolling();
+          }
+        }catch(e){
+          // silencioso; manter estado atual
+          console.debug('[probeRefreshStart] erro', e);
+        }
+      }
+
+      // 🔁 Sonda adaptativa: acelera perto do próximo agendamento
+      function scheduleAdaptiveProbe(){
+        if (refreshProbeTimer){ clearInterval(refreshProbeTimer); refreshProbeTimer = null; }
+        const nextEpoch = getNextEpoch();
+        const nowSec    = Math.floor(Date.now()/1000);
+        const dist      = nextEpoch ? Math.abs(nextEpoch - nowSec) : 999999;
+        const HOT_WINDOW_S = 10 * 60; // ±10 min
+
+        const intervalMs = dist <= HOT_WINDOW_S ? 5 * 1000   // 5s na janela quente
+                          : 25 * 1000;                       // 25s fora dela
+
+        refreshProbeTimer = setInterval(probeRefreshStart, intervalMs);
+      }
+
       async function forceRefreshNow(){
         const btn = document.getElementById('btnRefreshNow');
         if (!btn) return;
         try{
+          // liga pill imediatamente e oculta botão
+          startRefreshPolling('via api'); // 👈 botão da tela = via api
+
           setBtnLoading(btn, true);
           showBootMask(); setBootStep('forçando atualização do dataset…');
 
@@ -635,7 +838,16 @@
           const res = await fetch(URL_REFRESH_NOW, {
             method: 'POST',
             headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-            body: JSON.stringify({ report_id: reportId, group_id: groupId, cascade: true }),
+            body: JSON.stringify({
+              report_id: reportId,
+              group_id: groupId,
+              cascade: true,
+              wait_for_dataflows: true,
+              fail_on_dataflow_error: true,
+              df_timeout_s: 3600,
+              poll_every_s: 20,
+              refresh_type: 'Full'
+            }),
             cache: 'no-store', credentials: 'same-origin'
           });
           const txt = await res.text();
@@ -666,14 +878,18 @@
 
             try{
               const st = await getRefreshStatus(triggerEpoch);
-              if (st && st.ok){
-                const s = (st.status || '').toLowerCase();
-                if (s === 'failed' || s === 'disabled' || s === 'cancelled'){
-                  failed  = true;
-                  failMsg = [st.error_message, st.error_code].filter(Boolean).join('\n\n') || 'O serviço reportou falha no refresh.';
-                  break;
-                }
-                if (s === 'inprogress' && st.start_epoch && (Date.now()/1000 - st.start_epoch) > (20*60)){
+              const picked = pickStatusFromResponse(st);
+
+              if (picked.failed){
+                failed  = true;
+                failMsg = picked.error || 'O serviço reportou falha no refresh.';
+                break;
+              }
+
+              // proteção: muito tempo “em progresso”
+              if (picked.inProgress){
+                const tooLong = (Date.now() - (triggerEpoch*1000)) > (20*60*1000);
+                if (tooLong){
                   failed  = true;
                   failMsg = 'O refresh está em execução há muito tempo e pode estar travado (timeout).';
                   break;
@@ -703,6 +919,7 @@
           await sleep(600);
           hideBootMask();
           setBtnLoading(document.getElementById('btnRefreshNow'), false);
+          // NÃO mostramos o botão aqui: quem decide é o polling (stopRefreshPolling ao concluir)
         }
       }
 
@@ -1226,20 +1443,20 @@
       });
 
       // ====== MENU "Visões" com portal + SCRIM ======
-      const onReposition = () => {
+      const btnViews_onReposition = () => {
         if (menuViews && menuViews.classList.contains('open')) placeMenuNearButton(menuViews, btnViews);
       };
       const onEsc = (e) => { if (e.key === 'Escape') closeViewsMenu(); };
 
       function bindOutsideHandlers(){
-        window.addEventListener('resize', onReposition, { passive:true });
-        window.addEventListener('scroll', onReposition, { passive:true });
+        window.addEventListener('resize', btnViews_onReposition, { passive:true });
+        window.addEventListener('scroll', btnViews_onReposition, { passive:true });
         document.addEventListener('keydown', onEsc, true);
         window.addEventListener('blur', closeViewsMenu, { passive:true });
       }
       function unbindOutsideHandlers(){
-        window.removeEventListener('resize', onReposition);
-        window.removeEventListener('scroll', onReposition);
+        window.removeEventListener('resize', btnViews_onReposition);
+        window.removeEventListener('scroll', btnViews_onReposition);
         document.removeEventListener('keydown', onEsc, true);
         window.removeEventListener('blur', closeViewsMenu);
       }
@@ -1303,13 +1520,31 @@
       document.getElementById('btnReset').addEventListener('click', resetAll, { passive: true });
       document.getElementById('btnRefreshNow').addEventListener('click', forceRefreshNow, { passive: true });
 
+      // Sonda/poll badge & status
       updateLastUpdBadge();
       refreshLastUpdBadgeRt();
       setInterval(updateLastUpdBadge,    60 * 1000);
       setInterval(refreshLastUpdBadgeRt, 5  * 60 * 1000);
 
+      // Ao voltar para a aba/ganhar foco → checagem imediata
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          refreshLastUpdBadgeRt();
+          probeRefreshStart();
+        }
+      }, { passive: true });
+      window.addEventListener('focus', () => {
+        refreshLastUpdBadgeRt();
+        probeRefreshStart();
+      }, { passive: true });
+
+      // Boot
       embedReportPhased(INITIAL_URL, INITIAL_TOKEN);
       tokenRefreshTimer = setInterval(refreshAccessTokenLoop, REFRESH_MS);
+
+      // primeiro ciclo “quente” da sonda adaptativa
+      scheduleAdaptiveProbe();
+      probeRefreshStart(); // ← ajusta pill e mostra/oculta o botão logo na entrada
     })();
   </script>
 {% endblock %}

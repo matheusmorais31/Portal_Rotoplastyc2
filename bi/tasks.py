@@ -209,25 +209,23 @@ def sincronizar_bi_reports():
 
 
 @shared_task
-def cascade_refresh_dataset_with_dataflows(
-    report_id: str,
-    report_group_id: str,
-    wait_timeout_seconds: int = 1800,   # mantidos para compat, não usados
-    poll_every_seconds: int = 15,       # mantidos para compat, não usados
-):
-    """
-    Dispara refresh dos dataflows (se configurados via UI) e, em seguida, do dataset.
-    Implementação "fire-and-forget" usando utils.cascade_refresh (sem polling).
-    Retorna o resumo do acionamento.
-    """
+def cascade_refresh_dataset_with_dataflows(report_id: str, report_group_id: str,
+                                           wait_for_dataflows: bool = True,
+                                           df_timeout_s: int = 1800,
+                                           poll_every_s: int = 15,
+                                           fail_on_dataflow_error: bool = True):
     from .utils import cascade_refresh
-
-    logger.info("CASCADE: acionando refresh para report=%s group=%s", report_id, report_group_id)
+    logger.info("CASCADE: acionando (wait=%s) report=%s group=%s", wait_for_dataflows, report_id, report_group_id)
     try:
-        result = cascade_refresh(report_id, report_group_id, refresh_type="Full")
+        result = cascade_refresh(
+            report_id, report_group_id, refresh_type="Full",
+            wait_for_dataflows=wait_for_dataflows,
+            df_timeout_s=df_timeout_s, poll_every_s=poll_every_s,
+            fail_on_dataflow_error=fail_on_dataflow_error
+        )
         df_count = len(result.get("dataflows") or [])
         d_ok = (result.get("dataset") or {}).get("ok")
-        logger.info("CASCADE: disparo concluído — dataflows=%d, dataset_ok=%s", df_count, d_ok)
+        logger.info("CASCADE: concluído — dataflows=%d, dataset_ok=%s", df_count, d_ok)
         return result
     except Exception:
         logger.exception("CASCADE: erro inesperado")

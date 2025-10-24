@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import Group
 from django.core.cache import cache
 from django.db.models import F, Value, CharField, IntegerField, Q
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -27,11 +27,11 @@ from .forms import BIReportForm, BIReportEditForm
 from .models import BIReport, BIAccess, BIUserReportState, BISavedView
 from .utils import (
     get_embed_params_user_owns_data,
-    get_latest_refresh_status,
-    get_report_last_refresh_time_rt,
-    trigger_dataset_refresh,
-    cascade_refresh,
-    list_workspace_dataflows,   # <- wrapper público no utils
+    get_latest_refresh_status,        # status “oficial” do dataset (último evento)
+    get_report_last_refresh_time_rt,  # última atualização efetiva do dataset (DateTime)
+    trigger_dataset_refresh,          # dispara apenas dataset
+    cascade_refresh,                  # dispara DF upstream + dataset (com opções de espera)
+    list_workspace_dataflows,         # lista dataflows do workspace (para UI de edição)
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -52,6 +52,25 @@ logger.exception = _noop
 
 _GUID = r"[0-9a-fA-F-]{36}"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Refresh “hint” compartilhado (para pílula “via api” aparecer para todos)
+# ─────────────────────────────────────────────────────────────────────────────
+_HINT_TTL_S = 20 * 60  # 20 min
+
+def _hint_key(group_id: str, report_id: str) -> str:
+    return f"pbi:refresh-hint:{group_id}:{report_id}"
+
+def _set_refresh_hint(group_id: str, report_id: str, started_at_epoch: int, origin: str = "api"):
+    cache.set(_hint_key(group_id, report_id),
+              {"origin": origin, "started_at": int(started_at_epoch)},
+              timeout=_HINT_TTL_S)
+
+def _get_refresh_hint(group_id: str, report_id: str):
+    return cache.get(_hint_key(group_id, report_id))
+
+def _clear_refresh_hint(group_id: str, report_id: str):
+    cache.delete(_hint_key(group_id, report_id))
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
@@ -64,7 +83,7 @@ def _meta_from_request(request) -> Dict[str, Any]:
         "method": request.method,
         "user": getattr(request.user, "username", None),
         "is_auth": bool(getattr(request.user, "is_authenticated", False)),
-        "ip": META.get("REMOTE_ADDR") or META.get("HTTP_X_FORWARDED_FOR"),
+        "ip": META.get("REMOTE_ADDR") or (META.get("HTTP_X_FORWARDED_FOR") or "").split(",")[0].strip(),
         "ua": META.get("HTTP_USER_AGENT"),
         "ct": META.get("CONTENT_TYPE"),
         "cl": META.get("CONTENT_LENGTH"),
@@ -113,7 +132,7 @@ def _extract_group_report_from_embed(embed_code: str) -> tuple[str | None, str |
     return None, None
 
 
-def _log_update_event(user, bi_title, report_id, group_id, result: dict, refresh_type: str):
+def _log_update_event(user, bi_title, report_id, group_id, result: dict, refresh_type: str, trace_id: str | None = None):
     """
     Log ÚNICO de atualização:
       - DATASET_REFRESH (sempre)
@@ -122,19 +141,17 @@ def _log_update_event(user, bi_title, report_id, group_id, result: dict, refresh
     """
     ts = timezone.now().isoformat()
     username = getattr(user, "username", "anon")
-
     # Dataset
     d = (result or {}).get("dataset") or {}
     update_logger.info(
-        "DATASET_REFRESH | ts=%s | user=%s | report_title=%s | report_id=%s | group_id=%s | type=%s | ok=%s | detail=%s",
-        ts, username, bi_title, report_id, group_id, refresh_type, d.get("ok"), (d.get("detail") or ""),
+        "DATASET_REFRESH | ts=%s | trace_id=%s | user=%s | report_title=%s | report_id=%s | group_id=%s | type=%s | ok=%s | detail=%s",
+        ts, trace_id, username, bi_title, report_id, group_id, refresh_type, d.get("ok"), (d.get("detail") or ""),
     )
-
     # Dataflows
     for df in (result or {}).get("dataflows") or []:
         update_logger.info(
-            "DATAFLOW_REFRESH | ts=%s | user=%s | report_title=%s | group_id=%s | dataflow_id=%s | ok=%s | detail=%s",
-            ts, username, bi_title, df.get("group_id"), df.get("dataflow_id"), df.get("ok"), (df.get("detail") or ""),
+            "DATAFLOW_REFRESH | ts=%s | trace_id=%s | user=%s | report_title=%s | group_id=%s | dataflow_id=%s | ok=%s | detail=%s",
+            ts, trace_id, username, bi_title, df.get("group_id"), df.get("dataflow_id"), df.get("ok"), (df.get("detail") or ""),
         )
 
 
@@ -523,12 +540,13 @@ def relatorio_permissoes(request):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# REAL-TIME: última atualização, refresh e status
+# REAL-TIME: última atualização, refresh e status (+ hint condividado)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @require_http_methods(["GET", "POST"])
 @login_required
 def get_last_update_rt(request):
+    trace_id = str(uuid.uuid4())
     # --- input (aceita GET ou POST JSON/form) ---
     if request.method == "GET":
         report_id = request.GET.get("report_id")
@@ -542,13 +560,17 @@ def get_last_update_rt(request):
         group_id = payload.get("group_id") or request.POST.get("group_id")
 
     if not report_id or not group_id:
-        return HttpResponseBadRequest("missing report_id/group_id")
+        r = HttpResponseBadRequest("missing report_id/group_id")
+        r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+        return r
 
     # --- busca registro ---
     try:
         bi = BIReport.objects.get(report_id=report_id, group_id=group_id)
     except BIReport.DoesNotExist:
-        return JsonResponse({"ok": False, "error": "not_found"}, status=404)
+        r = JsonResponse({"ok": False, "error": "not_found", "trace_id": trace_id}, status=404)
+        r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+        return r
 
     # --- helpers ---
     def _aware(dt):
@@ -578,7 +600,10 @@ def get_last_update_rt(request):
     ckey = f"pbi:lastupd:{group_id}:{report_id}"
     cached = cache.get(ckey)
     if cached:
-        return JsonResponse(cached)
+        cached["trace_id"] = trace_id
+        r = JsonResponse(cached)
+        r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+        return r
 
     # --- tempo real via Power BI API ---
     rt_dt = get_report_last_refresh_time_rt(report_id=report_id, report_group_id=group_id)
@@ -600,10 +625,13 @@ def get_last_update_rt(request):
         "last_updated_iso": to_iso(last_dt),
         "next_update_epoch": to_epoch(bi.next_update),
         "next_update_iso": to_iso(bi.next_update),
+        "trace_id": trace_id,
     }
 
     cache.set(ckey, resp, timeout=55)  # 55s para aliviar chamadas repetidas
-    return JsonResponse(resp)
+    r = JsonResponse(resp)
+    r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+    return r
 
 
 def _req_meta(request):
@@ -640,22 +668,41 @@ def refresh_now(request):
       - Se payload tiver {"cascade": true}: aciona dataflows upstream (se houver) e depois o dataset.
       - Senão: aciona apenas o dataset.
 
+    Parâmetros opcionais no payload (válidos quando cascade=true):
+      - wait_for_dataflows (bool, default False): espera dataflows concluírem antes de acionar o dataset
+      - df_timeout_s (int, default 1800): timeout total para aguardar dataflows
+      - poll_every_s (int, default 15): intervalo de polling para checar status dos dataflows
+      - fail_on_dataflow_error (bool, default True): se algum DF falhar/cancelar, não aciona o dataset
+
     Rate-limit por (group_id, report_id) usando cache.
     Sucesso: HTTP 202.
     """
+    trace_id = str(uuid.uuid4())
     payload, raw = _json_body(request)
+    meta = _req_meta(request)
 
     report_id = (payload.get("report_id") or "").strip()
     group_id = (payload.get("group_id") or "").strip()
     cascade = bool(payload.get("cascade") if "cascade" in payload else True)
     refresh_type = (payload.get("refresh_type") or "Full").strip() or "Full"
 
-    if not report_id or not group_id:
-        return JsonResponse({"ok": False, "error": "missing_params"}, status=400)
+    # novos flags opcionais
+    wait_for_dataflows = bool(payload.get("wait_for_dataflows", False))
+    df_timeout_s = int(payload.get("df_timeout_s", 1800))
+    poll_every_s = int(payload.get("poll_every_s", 15))
+    fail_on_dataflow_error = bool(payload.get("fail_on_dataflow_error", True))
 
-    # opcional: título do relatório para o log
+    if not report_id or not group_id:
+        return JsonResponse({"ok": False, "error": "missing_params", "trace_id": trace_id}, status=400)
+
+    # Validação de BI + permissão (evita 500 de cascata)
     bi = BIReport.objects.filter(report_id=report_id, group_id=group_id).first()
-    bi_title = bi.title if bi else report_id
+    if not bi:
+        return JsonResponse({"ok": False, "error": "bi_not_found", "trace_id": trace_id}, status=404)
+    if not _perm_check(request.user, bi):
+        return JsonResponse({"ok": False, "error": "forbidden", "trace_id": trace_id}, status=403)
+
+    bi_title = bi.title or report_id
 
     # ---- Rate limit por combinação group/report ----
     lock_ttl = int(getattr(django_settings, "POWERBI_REFRESH_LOCK_SECONDS", 60))
@@ -671,41 +718,74 @@ def refresh_now(request):
         cached_exp = cache.get(lock_key)
         retry_seconds = max(1, int(cached_exp) - now) if isinstance(cached_exp, int) else lock_ttl
         return JsonResponse(
-            {"ok": False, "error": "too_many_requests", "retry_seconds": retry_seconds},
+            {"ok": False, "error": "too_many_requests", "retry_seconds": retry_seconds, "trace_id": trace_id},
             status=429,
         )
 
-    # A partir daqui, se der erro interno, libera o lock para não travar novas tentativas
+    # Log de entrada
+    update_logger.info(
+        "REFRESH_NOW_START | trace_id=%s | user=%s | report_id=%s | group_id=%s | cascade=%s | refresh_type=%s | wait_for_dataflows=%s | df_timeout_s=%s | poll_every_s=%s | fail_on_dataflow_error=%s | meta=%s",
+        trace_id, getattr(request.user, "username", "anon"), report_id, group_id, cascade, refresh_type,
+        wait_for_dataflows, df_timeout_s, poll_every_s, fail_on_dataflow_error, meta
+    )
+
+    # A partir daqui, em erro inesperado, liberamos o lock
     try:
-        if cascade:
+        # cria o hint compartilhado ANTES de disparar, para todos verem “via api” imediatamente
+        _set_refresh_hint(group_id, report_id, started_at_epoch=int(time.time()), origin="api")
+
+        # Se cascade=True mas não houver dataflows configurados, caímos para refresh do dataset apenas
+        has_dfs = bool(bi.upstream_dataflows and isinstance(bi.upstream_dataflows, list))
+
+        if cascade and has_dfs:
             # Dispara dataflows (se houver) e depois dataset
-            result = cascade_refresh(report_id, group_id, refresh_type=refresh_type)
+            result = cascade_refresh(
+                report_id,
+                group_id,
+                refresh_type=refresh_type,
+                wait_for_dataflows=wait_for_dataflows,
+                df_timeout_s=df_timeout_s,
+                poll_every_s=poll_every_s,
+                fail_on_dataflow_error=fail_on_dataflow_error,
+            )
             status = 202 if result.get("ok") else 400
-            # 🔴 único log: atualização
-            _log_update_event(request.user, bi_title, report_id, group_id, result, refresh_type)
+            result = {**result, "trace_id": trace_id}
+            _log_update_event(request.user, bi_title, report_id, group_id, result, refresh_type, trace_id)
             return JsonResponse(result, status=status)
+
         else:
+            # Sem dataflows (ou cascade=False): apenas dataset
             ok, detail = trigger_dataset_refresh(report_id, group_id, refresh_type=refresh_type)
             status = 202 if ok else 400
-            # normaliza estrutura para log unificado
-            result = {"ok": True, "dataset": {"ok": ok, "detail": detail}, "dataflows": []}
-            # 🔴 único log: atualização
-            _log_update_event(request.user, bi_title, report_id, group_id, result, refresh_type)
-            return JsonResponse({"ok": ok, "detail": detail}, status=status)
+            result = {"ok": ok, "dataset": {"ok": ok, "detail": detail}, "dataflows": [], "trace_id": trace_id}
+            _log_update_event(request.user, bi_title, report_id, group_id, result, refresh_type, trace_id)
+            body = {"ok": ok, "detail": detail, "trace_id": trace_id}
+            return JsonResponse(body, status=status)
 
-    except Exception:
-        # Em erro inesperado, removemos o lock para não travar novas tentativas
+    except Exception as ex:
+        # Log estruturado com stack
+        update_logger.exception(
+            "REFRESH_NOW_FAIL | trace_id=%s | report_id=%s | group_id=%s | user=%s | payload=%s | meta=%s",
+            trace_id, report_id, group_id, getattr(request.user, "username", "anon"), payload, meta
+        )
         cache.delete(lock_key)
-        return JsonResponse({"ok": False, "error": "internal_error"}, status=500)
+        return JsonResponse({"ok": False, "error": "internal_error", "trace_id": trace_id}, status=500)
 
 
 @require_POST
 @login_required
 def get_refresh_status(request):
     """
-    Retorna o status do último refresh do dataset do report.
-    Se o último status for Failed/Disabled/Cancelled, já traz o erro parseado.
+    Retorna status de refresh consolidado.
+    - Sempre inclui o status “oficial” do dataset em `items`.
+    - Se existir “refresh hint” (alguém clicou via API) e o dataset ainda não virou,
+      sintetiza um item InProgress com origem `api`, para todos verem a pílula.
+    Body:
+      { report_id, group_id, after_epoch?, include_dataflows? }
+    Resposta:
+      { ok: true, items: [ ... ], trace_id }
     """
+    trace_id = str(uuid.uuid4())
     try:
         data = json.loads(request.body or "{}")
     except json.JSONDecodeError:
@@ -713,26 +793,88 @@ def get_refresh_status(request):
 
     report_id = data.get("report_id")
     group_id = data.get("group_id")
-    after_epoch = data.get("after_epoch")  # opcional, apenas informativo no front
+    after_epoch = data.get("after_epoch")  # opcional (ecoado)
+    include_dataflows = bool(data.get("include_dataflows", False))  # mantido p/ compat; hoje ignorado
 
     if not report_id or not group_id:
-        return JsonResponse({"ok": False, "error": "missing_params"}, status=400)
+        r = JsonResponse({"ok": False, "error": "missing_params", "trace_id": trace_id}, status=400)
+        r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+        return r
 
     # valida report e permissão
     try:
         bi = BIReport.objects.get(report_id=report_id, group_id=group_id)
     except BIReport.DoesNotExist:
-        return JsonResponse({"ok": False, "error": "not_found"}, status=404)
+        r = JsonResponse({"ok": False, "error": "not_found", "trace_id": trace_id}, status=404)
+        r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+        return r
 
     if not _perm_check(request.user, bi):
-        return JsonResponse({"ok": False, "error": "forbidden"}, status=403)
+        r = JsonResponse({"ok": False, "error": "forbidden", "trace_id": trace_id}, status=403)
+        r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+        return r
 
-    status_data = get_latest_refresh_status(report_id, group_id)
-    if not status_data.get("ok"):
-        return JsonResponse(status_data, status=502)
+    # 1) status “oficial” do dataset (último evento)
+    ds_status = get_latest_refresh_status(report_id, group_id)
+    if not ds_status.get("ok"):
+        ds_status["trace_id"] = trace_id
+        r = JsonResponse(ds_status, status=502)
+        r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+        return r
 
-    status_data["after_epoch"] = after_epoch
-    return JsonResponse(status_data)
+    # Normaliza como item (mantendo campos crus para o front deduzir)
+    items = []
+    item_ds = ds_status.get("item") or ds_status.get("data") or ds_status
+    # Marcação de origem padrão
+    if "origin" not in item_ds and "refresh_type" in item_ds:
+        rt = (item_ds.get("refresh_type") or "").lower()
+        item_ds["origin"] = "api" if ("api" in rt or "sdk" in rt or "xmla" in rt) else "web"
+    items.append(item_ds)
+
+    # 2) sticky server-side: se ninguém “in progress” mas temos hint válido e o dataset não virou, sintetiza
+    try:
+        hint = _get_refresh_hint(group_id, report_id)
+        if hint:
+            # última atualização confirmada do dataset
+            last_dt = get_report_last_refresh_time_rt(report_id=report_id, report_group_id=group_id)
+            last_epoch = int(last_dt.timestamp()) if last_dt else 0
+            started_at = int(hint.get("started_at", 0))
+
+            # Detecta “in progress” no item oficial
+            def _is_running(obj: dict) -> bool:
+                st = str(obj.get("status") or obj.get("state") or obj.get("refresh_status") or "").lower()
+                if st in {"inprogress", "running", "queued", "pending", "notstarted"}:
+                    return True
+                if obj.get("in_progress") or obj.get("running"):
+                    return True
+                # heurística: tem start sem end
+                if (obj.get("start_epoch") or obj.get("startTime") or obj.get("startDateTime")) and not (
+                    obj.get("end_epoch") or obj.get("endTime") or obj.get("endDateTime")
+                ):
+                    return True
+                return False
+
+            any_running = any(_is_running(x) for x in items)
+
+            if last_epoch <= started_at and not any_running:
+                # sintetiza um item “InProgress (api)”
+                items.append({
+                    "status": "InProgress",
+                    "refresh_type": "api_hint",
+                    "origin": hint.get("origin", "api"),
+                    "start_epoch": started_at,
+                })
+            # Se já virou e nada está rodando -> limpar hint
+            if last_epoch > started_at and not any_running:
+                _clear_refresh_hint(group_id, report_id)
+    except Exception:
+        # silencioso
+        pass
+
+    resp = {"ok": True, "items": items, "after_epoch": after_epoch, "trace_id": trace_id}
+    r = JsonResponse(resp)
+    r["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+    return r
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -744,16 +886,17 @@ def get_refresh_status(request):
 def saved_views_list(request):
     report_id = request.GET.get("report_id")
     group_id = request.GET.get("group_id")
+    trace_id = str(uuid.uuid4())
     if not report_id or not group_id:
-        return JsonResponse({"ok": False, "error": "missing_params"}, status=400)
+        return JsonResponse({"ok": False, "error": "missing_params", "trace_id": trace_id}, status=400)
 
     try:
         bi = BIReport.objects.get(report_id=report_id, group_id=group_id)
     except BIReport.DoesNotExist:
-        return JsonResponse({"ok": False, "error": "bi_not_found"}, status=404)
+        return JsonResponse({"ok": False, "error": "bi_not_found", "trace_id": trace_id}, status=404)
 
     if not _perm_check(request.user, bi):
-        return JsonResponse({"ok": False, "error": "forbidden"}, status=403)
+        return JsonResponse({"ok": False, "error": "forbidden", "trace_id": trace_id}, status=403)
 
     u = request.user
     qs = (
@@ -791,7 +934,7 @@ def saved_views_list(request):
             "token": v.share_token,
         })
 
-    return JsonResponse({"ok": True, "views": views_payload})
+    return JsonResponse({"ok": True, "views": views_payload, "trace_id": trace_id})
 
 
 @login_required
@@ -810,31 +953,32 @@ def saved_views_save(request):
       overwrite_id: id?  # opcional: sobrescrever visão do próprio owner
     }
     """
+    trace_id = str(uuid.uuid4())
     try:
         payload = json.loads(request.body or "{}")
     except json.JSONDecodeError:
-        return JsonResponse({"error": "invalid_json"}, status=400)
+        return JsonResponse({"error": "invalid_json", "trace_id": trace_id}, status=400)
 
     report_id = payload.get("report_id")
     group_id = payload.get("group_id")
     if not report_id or not group_id:
-        return JsonResponse({"error": "missing_params"}, status=400)
+        return JsonResponse({"error": "missing_params", "trace_id": trace_id}, status=400)
 
     try:
         bi = BIReport.objects.get(report_id=report_id, group_id=group_id)
     except BIReport.DoesNotExist:
-        return JsonResponse({"error": "bi_not_found"}, status=404)
+        return JsonResponse({"error": "bi_not_found", "trace_id": trace_id}, status=404)
 
     if not _perm_check(request.user, bi):
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden", "trace_id": trace_id}, status=403)
 
     name = (payload.get("name") or "").strip()
     if not name:
-        return JsonResponse({"error": "missing_name"}, status=400)
+        return JsonResponse({"error": "missing_name", "trace_id": trace_id}, status=400)
 
     state = payload.get("state") or {}
     if not isinstance(state, dict):
-        return JsonResponse({"error": "bad_state"}, status=400)
+        return JsonResponse({"error": "bad_state", "trace_id": trace_id}, status=400)
 
     visibility = (payload.get("visibility") or "private").lower()
     shared_user_ids = payload.get("shared_user_ids") or []
@@ -852,7 +996,7 @@ def saved_views_save(request):
         if BISavedView.objects.filter(
             bi_report=bi, owner=request.user, name=name
         ).exists():
-            return JsonResponse({"error": "duplicate_name"}, status=409)
+            return JsonResponse({"error": "duplicate_name", "trace_id": trace_id}, status=409)
         sv = BISavedView(bi_report=bi, owner=request.user, name=name)
 
     sv.name = name
@@ -895,12 +1039,13 @@ def saved_views_save(request):
         reverse("bi:bi_report_detail", args=[bi.pk]) + f"?view={sv.share_token}"
     )
 
-    return JsonResponse({"ok": True, "view": sv.as_brief(), "apply_url": apply_url})
+    return JsonResponse({"ok": True, "view": sv.as_brief(), "apply_url": apply_url, "trace_id": trace_id})
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def saved_views_get(request):
+    trace_id = str(uuid.uuid4())
     data = {}
     if request.method == "GET":
         data["id"] = request.GET.get("id")
@@ -911,20 +1056,20 @@ def saved_views_get(request):
         try:
             data = json.loads(request.body or "{}")
         except json.JSONDecodeError:
-            return JsonResponse({"error": "invalid_json"}, status=400)
+            return JsonResponse({"error": "invalid_json", "trace_id": trace_id}, status=400)
 
     report_id = data.get("report_id")
     group_id = data.get("group_id")
     if not report_id or not group_id:
-        return JsonResponse({"error": "missing_params"}, status=400)
+        return JsonResponse({"error": "missing_params", "trace_id": trace_id}, status=400)
 
     try:
         bi = BIReport.objects.get(report_id=report_id, group_id=group_id)
     except BIReport.DoesNotExist:
-        return JsonResponse({"error": "bi_not_found"}, status=404)
+        return JsonResponse({"error": "bi_not_found", "trace_id": trace_id}, status=404)
 
     if not _perm_check(request.user, bi):
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden", "trace_id": trace_id}, status=403)
 
     sv = None
     if data.get("id"):
@@ -933,9 +1078,9 @@ def saved_views_get(request):
         sv = BISavedView.objects.filter(share_token=data["token"], bi_report=bi).first()
 
     if not sv:
-        return JsonResponse({"error": "not_found"}, status=404)
+        return JsonResponse({"error": "not_found", "trace_id": trace_id}, status=404)
     if not sv.can_view(request.user):
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden", "trace_id": trace_id}, status=403)
 
     # monta payload completo p/ edição
     if sv.is_public:
@@ -965,7 +1110,7 @@ def saved_views_get(request):
         "token": sv.share_token,
     }
 
-    return JsonResponse({"ok": True, "state": sv.state, "view": view_payload})
+    return JsonResponse({"ok": True, "state": sv.state, "view": view_payload, "trace_id": trace_id})
 
 
 @login_required
@@ -975,17 +1120,18 @@ def saved_views_delete(request):
     Remove visão do owner (ou superuser).
     body: { id }
     """
+    trace_id = str(uuid.uuid4())
     try:
         payload = json.loads(request.body or "{}")
     except json.JSONDecodeError:
-        return JsonResponse({"error": "invalid_json"}, status=400)
+        return JsonResponse({"error": "invalid_json", "trace_id": trace_id}, status=400)
 
     sv = get_object_or_404(BISavedView, pk=payload.get("id"))
     if sv.owner != request.user and not request.user.is_superuser:
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden", "trace_id": trace_id}, status=403)
 
     sv.delete()
-    return JsonResponse({"ok": True})
+    return JsonResponse({"ok": True, "trace_id": trace_id})
 
 
 @login_required
@@ -995,22 +1141,23 @@ def saved_views_set_default(request):
     Define visão default do owner para o BI.
     body: { id }
     """
+    trace_id = str(uuid.uuid4())
     try:
         payload = json.loads(request.body or "{}")
     except json.JSONDecodeError:
-        return JsonResponse({"error": "invalid_json"}, status=400)
+        return JsonResponse({"error": "invalid_json", "trace_id": trace_id}, status=400)
 
     sv_id = payload.get("id")
     if not sv_id:
-        return JsonResponse({"error": "missing_id"}, status=400)
+        return JsonResponse({"error": "missing_id", "trace_id": trace_id}, status=400)
 
     sv = get_object_or_404(BISavedView, pk=sv_id)
     if sv.owner != request.user:
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden", "trace_id": trace_id}, status=403)
 
     sv.is_default = True
     sv.save()
-    return JsonResponse({"ok": True})
+    return JsonResponse({"ok": True, "trace_id": trace_id})
 
 
 @login_required
@@ -1028,25 +1175,26 @@ def saved_views_update(request):
       state: {...}                   # opcional — se enviado, substitui o state
     }
     """
+    trace_id = str(uuid.uuid4())
     try:
         payload = json.loads(request.body or "{}")
     except json.JSONDecodeError:
-        return JsonResponse({"error": "invalid_json"}, status=400)
+        return JsonResponse({"error": "invalid_json", "trace_id": trace_id}, status=400)
 
     sv_id = payload.get("id")
     if not sv_id:
-        return JsonResponse({"error": "missing_id"}, status=400)
+        return JsonResponse({"error": "missing_id", "trace_id": trace_id}, status=400)
 
     sv = get_object_or_404(BISavedView, pk=sv_id)
     bi = sv.bi_report
 
     # Permissões: só o dono (ou superuser) pode editar
     if sv.owner != request.user and not request.user.is_superuser:
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden", "trace_id": trace_id}, status=403)
 
     # Também valida que o usuário tem acesso a este BI
     if not _perm_check(request.user, bi):
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden", "trace_id": trace_id}, status=403)
 
     # Campos do payload
     name = (payload.get("name") or sv.name or "").strip()
@@ -1061,7 +1209,7 @@ def saved_views_update(request):
     if name and BISavedView.objects.filter(
         bi_report=bi, owner=sv.owner, name=name
     ).exclude(pk=sv.pk).exists():
-        return JsonResponse({"error": "duplicate_name"}, status=409)
+        return JsonResponse({"error": "duplicate_name", "trace_id": trace_id}, status=409)
 
     # Atualiza campos básicos
     if name:
@@ -1110,11 +1258,11 @@ def saved_views_update(request):
         reverse("bi:bi_report_detail", args=[bi.pk]) + f"?view={sv.share_token}"
     )
 
-    return JsonResponse({"ok": True, "view": sv.as_brief(), "apply_url": apply_url})
+    return JsonResponse({"ok": True, "view": sv.as_brief(), "apply_url": apply_url, "trace_id": trace_id})
 
 
 @login_required
-@require_http_methods(["GET"])
+@require_GET
 def buscar_usuarios(request):
     """
     Auto-complete de usuários.
@@ -1155,15 +1303,17 @@ def buscar_usuarios(request):
 @login_required
 @require_GET
 def pbi_list_dataflows(request):
+    trace_id = str(uuid.uuid4())
     group_id = (request.GET.get("group_id") or "").strip()
     if not group_id:
-        return JsonResponse({"ok": False, "error": "missing_group_id"}, status=400)
+        return JsonResponse({"ok": False, "error": "missing_group_id", "trace_id": trace_id}, status=400)
 
     res = list_workspace_dataflows(group_id)
     if isinstance(res, dict) and not res.get("ok", False):
+        res["trace_id"] = trace_id
         return JsonResponse(res, status=res.get("status", 502))
 
     items = (res.get("items") if isinstance(res, dict) else res) or []
     data = [{"id": it.get("dataflow_id"), "group_id": it.get("group_id") or group_id, "name": it.get("name") or ""} 
             for it in items]
-    return JsonResponse({"ok": True, "items": data})
+    return JsonResponse({"ok": True, "items": data, "trace_id": trace_id})

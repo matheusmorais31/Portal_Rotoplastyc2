@@ -4,6 +4,20 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/listar_bi.css' %}">
+<style>
+  /* Pill de refresh em andamento (mesmo visual do visualizar_bi) */
+  .refresh-pill{
+    display:inline-flex; align-items:center; gap:.45rem;
+    padding:.25rem .6rem; border:1px solid #e5e7eb; border-radius:999px;
+    background:rgba(245,158,11,.10); user-select:none;
+    margin-left:.5rem; font-size:.95rem;
+  }
+  .refresh-pill .dot{
+    width:8px; height:8px; border-radius:999px; background:#f59e0b;
+    box-shadow:0 0 0 0 rgba(245,158,11,.6); animation: pillping 1.2s infinite;
+  }
+  @keyframes pillping { to { box-shadow:0 0 0 10px rgba(245,158,11,0); } }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -35,7 +49,7 @@
             <div class="bi-grid">
               <div><strong>Título:</strong> {{ bi.title }}</div>
 
-              <!-- Atualização (mesmo visual do título) -->
+              <!-- Atualização + Pill -->
               <div>
                 <div class="last-upd" id="lastUpd-{{ bi.pk }}"
                      data-last-epoch=""
@@ -45,6 +59,13 @@
                      title="Última atualização do dataset no Power BI">
                   <strong>Atualização:</strong>
                   <span class="lastUpdText">Carregando…</span>
+
+                  <!-- Pill de status (inicialmente escondida) -->
+                  <span class="refresh-pill" data-role="row-refresh-pill" style="display:none"
+                        title="Há uma atualização em andamento">
+                    <span class="dot" aria-hidden="true"></span>
+                    <span class="pill-text">Atualização em andamento…</span>
+                  </span>
                 </div>
               </div>
 
@@ -177,8 +198,142 @@ document.addEventListener('DOMContentLoaded', () => {
     if (parts.length === 2) return parts.pop().split(';').shift();
     return '';
   }
+  function _lc(v){ return (v==null ? '' : String(v)).toLowerCase().trim(); }
 
-  // ====== Hidratar badges 100% via API ======
+  // --- Sufixo “via ...” (api | PowerBI Web) ---
+  function inferChannelTag(obj, rawType){
+    const bag = [
+      rawType, obj.refresh_type, obj.type, obj.refreshType,
+      obj.trigger_source, obj.triggerSource,
+      obj.initiated_by, obj.initiatedBy,
+      obj.requested_by, obj.requestedBy,
+      obj.source, obj.via, obj.method, obj.origin, obj.entityType
+    ].map(x => String(x || '')).join('|').toLowerCase();
+
+    if (/(api|enhancedapi|xmla|rest|sdk|powershell)/.test(bag)) return 'via api';
+    if (/(scheduled|agendado)/.test(bag)) return 'via PowerBI Web';
+    if (/(manual|on[-\s]?demand|ui|web)/.test(bag)) return 'via PowerBI Web';
+    return 'via PowerBI Web';
+  }
+
+  function normalizeOneRefresh(obj){
+    const rawStatus = _lc(obj.status ?? obj.state ?? obj.refresh_status ?? obj.stage);
+    const rawType   = _lc(obj.refresh_type ?? obj.type ?? obj.refreshType);
+    const inProgFlags = new Set(['inprogress','running','notstarted','pending','queued']);
+
+    const bools = (obj.in_progress ?? obj.inProgress ?? obj.is_running ?? obj.running ?? false) ? true : false;
+    const hasStart = Number.isFinite(obj.start_epoch) || obj.startTime || obj.startDateTime;
+    const hasEnd   = Number.isFinite(obj.end_epoch)   || obj.endTime   || obj.endDateTime;
+
+    const inProgress = bools || inProgFlags.has(rawStatus) || (hasStart && !hasEnd);
+    const failed = new Set(['failed','cancelled','canceled','disabled','error']).has(rawStatus);
+
+    const origin = inferChannelTag(obj, rawType);
+
+    const errMsg = obj.error_message ?? obj.errorMessage ?? obj.message ?? '';
+    const errCode= obj.error_code ?? obj.errorCode ?? '';
+
+    return {
+      inProgress, failed, origin, rawStatus, rawType,
+      errMsg: (typeof errMsg === 'string' ? errMsg : ''),
+      errCode: (typeof errCode === 'string' ? errCode : ''),
+      start_epoch: obj.start_epoch, end_epoch: obj.end_epoch
+    };
+  }
+  function pickStatusFromResponse(resp){
+    const list = Array.isArray(resp)            ? resp
+               : Array.isArray(resp?.items)     ? resp.items
+               : Array.isArray(resp?.refreshes) ? resp.refreshes
+               : resp?.item ? [resp.item]
+               : [resp];
+
+    const normalized = list.map(normalizeOneRefresh);
+
+    const anyFailed  = normalized.find(x => x.failed);
+    if (anyFailed) return { inProgress:false, failed:true, origin:anyFailed.origin, error:anyFailed.errMsg, code:anyFailed.errCode, debug:normalized };
+
+    const anyRunning = normalized.find(x => x.inProgress);
+    if (anyRunning) return { inProgress:true, failed:false, origin:anyRunning.origin, debug:normalized };
+
+    return { inProgress:false, failed:false, origin:'via PowerBI Web', debug:normalized };
+  }
+
+  // ====== Sticky origin helpers ======
+  const MAX_STICKY_MS = 20 * 60 * 1000; // segura no máx. 20 min se backend não reportar DF
+  function setRowStickyOrigin(row, origin, beforeEpoch){
+    row.__originSticky = origin;            // 'via api' ou 'via PowerBI Web'
+    row.__stickyStartAt = Date.now();
+    row.__beforeEpoch = Number(beforeEpoch || 0);
+  }
+  function clearRowSticky(row){
+    row.__originSticky = null;
+    row.__stickyStartAt = null;
+    row.__beforeEpoch = null;
+  }
+  function getRowOrigin(row, fallback){
+    return row.__originSticky || fallback || 'via PowerBI Web';
+  }
+  function shouldHoldSticky(row){
+    // mantém a pill se: (a) ainda dentro do tempo máx e (b) o timestamp do dataset não virou
+    const badge = row.querySelector('.last-upd');
+    const nowEpoch = Number(badge?.getAttribute('data-last-epoch') || 0);
+    const notTurned = !(nowEpoch && row.__beforeEpoch && nowEpoch > row.__beforeEpoch);
+    const withinTime = (Date.now() - (row.__stickyStartAt || 0)) < MAX_STICKY_MS;
+    return Boolean(row.__originSticky && withinTime && notTurned);
+  }
+
+  // ====== Botão Atualizar – animação/disable conforme origem ======
+  function setBtnLoading(btn, isLoading){
+    btn?.classList.toggle('loading', !!isLoading);
+    if (btn){
+      btn.disabled = !!isLoading;
+      btn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+    }
+  }
+  function updateRefreshBtnByStatus(row, { inProgress, origin }){
+    const btn = row.querySelector('.refresh-btn');
+    if (!btn) return;
+    const isApi = String(origin || '').toLowerCase().includes('api');
+    if (inProgress){
+      if (isApi){
+        // API -> anima e desabilita
+        setBtnLoading(btn, true);
+      } else {
+        // Web -> somente desabilita (sem classe .loading)
+        btn.classList.remove('loading');
+        btn.disabled = true;
+        btn.setAttribute('aria-busy','true');
+      }
+    } else {
+      // terminou -> liberar
+      setBtnLoading(btn, false);
+    }
+  }
+
+  // ====== API helpers (por linha) ======
+  async function getRowRefreshStatus(row, afterEpoch){
+    const reportId = row.getAttribute('data-report-id');
+    const groupId  = row.getAttribute('data-group-id');
+    if (!reportId || !groupId) return { inProgress:false, failed:false, origin:'via PowerBI Web' };
+
+    const r = await fetch("{% url 'bi:get_refresh_status' %}", {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({
+        report_id: reportId,
+        group_id: groupId,
+        after_epoch: afterEpoch || null,
+        include_dataflows: true
+      }),
+      cache: 'no-store', credentials: 'same-origin'
+    });
+    const txt = await r.text();
+    if (!r.ok) throw new Error(`get_refresh_status HTTP ${r.status}`);
+    const data = JSON.parse(txt || '{}');
+    return pickStatusFromResponse(data);
+  }
+
+  // ====== Badges via API ======
   async function fetchAndPaintBadge(row){
     const reportId = row.getAttribute('data-report-id');
     const groupId  = row.getAttribute('data-group-id');
@@ -216,6 +371,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ====== Pill helpers (por linha) ======
+  function setRowRefreshPill(row, on, text){
+    const pill = row.querySelector('[data-role="row-refresh-pill"]');
+    const pillText = pill?.querySelector('.pill-text');
+    if (!pill) return;
+    pill.style.display = on ? 'inline-flex' : 'none';
+    if (on && text && pillText) pillText.textContent = text;
+  }
+  function stopRowRefreshPolling(row){
+    if (row._pollTimer){ clearInterval(row._pollTimer); row._pollTimer = null; }
+    setRowRefreshPill(row, false);
+    updateRefreshBtnByStatus(row, { inProgress:false, origin:'api' });
+    clearRowSticky(row);
+  }
+  function startRowRefreshPolling(row, label='via PowerBI Web'){
+    // já polling? só atualiza texto
+    if (row._pollTimer){
+      setRowRefreshPill(row, true, `Atualização em andamento… (${getRowOrigin(row, label)})`);
+      updateRefreshBtnByStatus(row, { inProgress:true, origin:getRowOrigin(row, label) });
+      return;
+    }
+    setRowRefreshPill(row, true, `Atualização em andamento… (${getRowOrigin(row, label)})`);
+    updateRefreshBtnByStatus(row, { inProgress:true, origin:getRowOrigin(row, label) });
+
+    const TICK_MS = 10_000;
+    row._pollTimer = setInterval(async () => {
+      try{
+        const picked = await getRowRefreshStatus(row);
+        if (picked.failed){
+          stopRowRefreshPolling(row);
+          alert(picked.error || 'Falha na atualização do dataset.');
+          return;
+        }
+        if (picked.inProgress){
+          setRowRefreshPill(row, true, `Atualização em andamento… (${getRowOrigin(row, picked.origin)})`);
+          updateRefreshBtnByStatus(row, { inProgress:true, origin:getRowOrigin(row, picked.origin) });
+        } else {
+          // dataset não reporta progresso — segura a pill/botão se disparado pela tela e dataset ainda não virou
+          if (shouldHoldSticky(row)){
+            setRowRefreshPill(row, true, `Atualização em andamento… (${getRowOrigin(row)})`);
+            updateRefreshBtnByStatus(row, { inProgress:true, origin:getRowOrigin(row) });
+          } else {
+            stopRowRefreshPolling(row);
+            await fetchAndPaintBadge(row);
+          }
+        }
+      }catch(e){
+        if (shouldHoldSticky(row)){
+          setRowRefreshPill(row, true, `Atualização em andamento… (${getRowOrigin(row)})`);
+          updateRefreshBtnByStatus(row, { inProgress:true, origin:getRowOrigin(row) });
+        } else {
+          stopRowRefreshPolling(row);
+        }
+      }
+    }, TICK_MS);
+  }
+  async function probeRowRefreshStart(row){
+    try{
+      const picked = await getRowRefreshStatus(row);
+      if (picked.failed){
+        stopRowRefreshPolling(row);
+        return;
+      }
+      if (picked.inProgress){
+        startRowRefreshPolling(row, picked.origin);
+      } else {
+        if (!shouldHoldSticky(row)) stopRowRefreshPolling(row);
+      }
+    }catch(e){
+      // silencioso
+    }
+  }
+
   // limitador de concorrência p/ não martelar a API
   async function hydrateAllBadges(concurrency = 4){
     const rows = Array.from(document.querySelectorAll('.bi-item'));
@@ -224,6 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
       while(i < rows.length){
         const row = rows[i++];
         await fetchAndPaintBadge(row);
+        await probeRowRefreshStart(row); // 👈 sonda status de refresh
       }
     }
     const n = Math.min(concurrency, rows.length || 1);
@@ -235,15 +464,13 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(() => {
     document.querySelectorAll('.last-upd').forEach(el => updateBadge(el));
   }, 60_000);
-  // refresh dos badges na API a cada 5 minutos
+  // refresh dos badges + sonda de status a cada 25s/5min
+  setInterval(() => {
+    document.querySelectorAll('.bi-item').forEach(row => probeRowRefreshStart(row));
+  }, 25_000);
   setInterval(() => hydrateAllBadges(), 5 * 60_000);
 
   // ====== Botão Atualizar (por BI) ======
-  function setBtnLoading(btn, isLoading){
-    btn.classList.toggle('loading', !!isLoading);
-    btn.disabled = !!isLoading;
-    btn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
-  }
   function getBadgeEpoch(el){
     const n = Number(el?.getAttribute('data-last-epoch') || 0);
     return Number.isFinite(n) ? n : 0;
@@ -254,28 +481,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const badge = row.querySelector('.last-upd');
     const reportId = row.getAttribute('data-report-id');
     const groupId  = row.getAttribute('data-group-id');
-    if (!btn || !badge || !reportId || !groupId) return;
+    if (!badge || !reportId || !groupId) return;
 
     try{
-      setBtnLoading(btn, true);
       const beforeEpoch = getBadgeEpoch(badge);
 
-      // dispara refresh
+      // 🔒 sticky “via api” + anima botão agora
+      setRowStickyOrigin(row, 'via api', beforeEpoch);
+      updateRefreshBtnByStatus(row, { inProgress:true, origin:'via api' });
+      startRowRefreshPolling(row, 'via api');
+
+      // dispara refresh (dataset + dataflows em cascata)
       const res = await fetch("{% url 'bi:refresh_now' %}", {
         method: 'POST',
         headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ report_id: reportId, group_id: groupId }),
+        body: JSON.stringify({
+          report_id: reportId,
+          group_id:  groupId,
+          cascade: true,
+          wait_for_dataflows: true,
+          fail_on_dataflow_error: true,
+          df_timeout_s: 3600,
+          poll_every_s: 20,
+          refresh_type: 'Full'
+        }),
         cache: 'no-store', credentials: 'same-origin'
       });
       const txt = await res.text();
       if (res.status === 429){
         try { const j = JSON.parse(txt||'{}'); alert(`Uma atualização acabou de ser solicitada. Tente novamente em ~${j.retry_seconds || 60}s.`); }
         catch { alert('Aguarde um pouco antes de tentar novamente.'); }
+        // não iniciou — desfaz UI
+        stopRowRefreshPolling(row);
         return;
       }
-      if (!res.ok){ alert('Falha ao acionar a atualização do dataset.'); return; }
+      if (!res.ok){
+        alert('Falha ao acionar a atualização do dataset.');
+        stopRowRefreshPolling(row);
+        return;
+      }
 
-      // polling até virar
+      // polling leve da virada de timestamp
       const deadline = Date.now() + 15 * 60 * 1000;
       while (Date.now() < deadline){
         await new Promise(r => setTimeout(r, 10_000));
@@ -286,8 +532,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }catch(err){
       console.error('refreshRow fail', err);
       alert('Erro ao acionar atualização.');
+      stopRowRefreshPolling(row);
     }finally{
-      setBtnLoading(btn, false);
+      // Liberação final fica por conta do polling/sonda quando o processo terminar.
     }
   }
 

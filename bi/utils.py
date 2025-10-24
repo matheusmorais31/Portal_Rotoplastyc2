@@ -6,7 +6,7 @@ import json
 import logging
 import time
 import re
-from typing import Any, Dict, Optional, Iterable
+from typing import Any, Dict, Optional, Iterable, Tuple, List
 
 import datetime as dt
 
@@ -44,11 +44,89 @@ def _short(s: str | bytes | None, n: int = 500) -> str:
 
 
 # ════════════════════════════════════════
+# Sticky “hint” compartilhado de refresh (para pílula “via api”)
+# ════════════════════════════════════════
+
+REFRESH_HINT_TTL = int(getattr(settings, "POWERBI_REFRESH_HINT_TTL", 20 * 60))  # 20 min
+
+def refresh_hint_key(group_id: str, dataset_id: str) -> str:
+    return f"pbi:refresh-hint:{str(group_id).lower()}:{str(dataset_id).lower()}"
+
+def set_refresh_hint(group_id: str, dataset_id: str, started_at_epoch: int, origin: str = "api") -> None:
+    """
+    Salva um “hint” de refresh iniciado via API para todo mundo enxergar imediatamente.
+    """
+    cache.set(
+        refresh_hint_key(group_id, dataset_id),
+        {"origin": origin, "started_at": int(started_at_epoch)},
+        REFRESH_HINT_TTL,
+    )
+
+def get_refresh_hint(group_id: str, dataset_id: str) -> Optional[dict]:
+    """
+    Lê o hint (ou None).
+    """
+    return cache.get(refresh_hint_key(group_id, dataset_id))
+
+def clear_refresh_hint(group_id: str, dataset_id: str) -> None:
+    """
+    Apaga o hint.
+    """
+    cache.delete(refresh_hint_key(group_id, dataset_id))
+
+
+# ════════════════════════════════════════
+# HTTP – timeouts, UA e tentativa única de retry em 401
+# ════════════════════════════════════════
+
+DEFAULT_TIMEOUT = int(getattr(settings, "POWERBI_HTTP_TIMEOUT_SECONDS", 20))
+USER_AGENT = getattr(settings, "POWERBI_USER_AGENT", "django-bi/1.0 (+PowerBI)")
+
+def _auth_headers(token: str, extra: Optional[dict] = None) -> dict:
+    h = {
+        "Authorization": f"Bearer {token}",
+        "User-Agent": USER_AGENT,
+    }
+    if extra:
+        h.update(extra)
+    return h
+
+def _request(method: str, url: str, *, json_body: Any = None, headers: Optional[dict] = None,
+             timeout: Optional[int] = None) -> requests.Response:
+    """
+    Invólucro fino sobre requests com:
+      - timeout configurável (defaults a DEFAULT_TIMEOUT)
+      - User-Agent
+      - log básico
+    *Não* faz retry automático aqui. Retry 401 (token expirado) é feito pontualmente onde agrega valor.
+    """
+    to = int(timeout or DEFAULT_TIMEOUT)
+    h = {"User-Agent": USER_AGENT}
+    if headers:
+        h.update(headers)
+    logger.log(_api_level(), "HTTP %s %s", method, url)
+    if json_body is not None:
+        try:
+            logger.debug("HTTP body(out): %s", _short(json.dumps(json_body, ensure_ascii=False)))
+        except Exception:
+            logger.debug("HTTP body(out): <unserializable>")
+    resp = requests.request(method.upper(), url, json=json_body, headers=h, timeout=to)
+    logger.log(_api_level(), "HTTP ← %s", resp.status_code)
+    if not resp.ok:
+        logger.debug("HTTP body(in): %s", _short(resp.text))
+    return resp
+
+
+# ════════════════════════════════════════
 # 1) AUTH – access_token via Service Principal (client_credentials)
 # ════════════════════════════════════════
 
 _token_cache: Dict[str, Any] = {}
 _EXP: Optional[float] = None  # expiração do access_token (epoch seg)
+
+def _oauth_scope() -> str:
+    # Fallback padrão do AAD p/ Power BI se não configurado.
+    return getattr(settings, "POWERBI_SCOPE", "https://analysis.windows.net/powerbi/api/.default")
 
 def _save_tokens(result: Dict[str, Any]) -> None:
     """Guarda token em cache de processo, com margem de expiração."""
@@ -69,7 +147,7 @@ def _acquire_token_client_credentials() -> Optional[Dict[str, Any]]:
         client_credential=settings.POWERBI_CLIENT_SECRET,
         authority=f"https://login.microsoftonline.com/{settings.POWERBI_TENANT_ID}",
     )
-    res = app.acquire_token_for_client(scopes=[settings.POWERBI_SCOPE])
+    res = app.acquire_token_for_client(scopes=[_oauth_scope()])
     if "access_token" in res:
         _save_tokens(res)
         logger.debug("PBI-Auth: token adquirido, expires_in=%s", res.get("expires_in"))
@@ -123,16 +201,18 @@ def _is_token_still_safe(embed_token: str) -> bool:
     return (exp - time.time()) > _MIN_LIFETIME
 
 def _generate_embed_token(report_id: str, group_id: str, access_token: str) -> Optional[dict]:
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = _auth_headers(access_token)
 
     # 1) info do relatório
     info_url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/reports/{report_id}"
     try:
-        logger.log(_api_level(), "PBI: GET report info → %s", info_url)
-        info = requests.get(info_url, headers=headers, timeout=15)
-        logger.log(_api_level(), "PBI: report info HTTP %s", info.status_code)
-        if not info.ok:
-            logger.debug("PBI: report info body: %s", _short(info.text))
+        info = _request("GET", info_url, headers=headers)
+        if info.status_code == 401:
+            # tenta renovar token 1x
+            access_token2 = get_powerbi_access_token()  # força refresh
+            if not access_token2:
+                return None
+            info = _request("GET", info_url, headers=_auth_headers(access_token2))
         info.raise_for_status()
     except requests.RequestException as exc:
         logger.error("PBI: erro ao obter embedUrl – %s", exc)
@@ -148,7 +228,7 @@ def _generate_embed_token(report_id: str, group_id: str, access_token: str) -> O
     if dataset_id:
         ds_url = f"https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}"
         try:
-            ds = requests.get(ds_url, headers=headers, timeout=15)
+            ds = _request("GET", ds_url, headers=headers)
             logger.log(_api_level(), "PBI-DBG: GET dataset (myorg) HTTP %s", ds.status_code)
             if ds.ok:
                 js = ds.json()
@@ -158,22 +238,27 @@ def _generate_embed_token(report_id: str, group_id: str, access_token: str) -> O
                     js.get("isEffectiveIdentityRequired"),
                     js.get("isEffectiveIdentityRolesRequired"),
                 )
-            else:
-                logger.debug("PBI-DBG: dataset body: %s", _short(ds.text))
         except requests.RequestException as exc:
             logger.debug("PBI-DBG: não consegui ler dataset %s — %s", dataset_id, exc)
 
     # 2) GenerateToken (View)
     try:
-        gen = requests.post(
+        gen = _request(
+            "POST",
             f"{info_url}/GenerateToken",
-            json={"accessLevel": "View"},
+            json_body={"accessLevel": "View"},
             headers=headers,
-            timeout=15,
         )
-        logger.log(_api_level(), "PBI: GenerateToken HTTP %s", gen.status_code)
-        if not gen.ok:
-            logger.debug("PBI: GenerateToken body: %s", _short(gen.text))
+        if gen.status_code == 401:
+            access_token2 = get_powerbi_access_token()
+            if not access_token2:
+                return None
+            gen = _request(
+                "POST",
+                f"{info_url}/GenerateToken",
+                json_body={"accessLevel": "View"},
+                headers=_auth_headers(access_token2),
+            )
         gen.raise_for_status()
         embed_token = gen.json().get("token")
     except requests.RequestException as exc:
@@ -258,12 +343,10 @@ def _probe_dataset_workspace(dataset_id: str, candidates: list[str], headers: di
     for gid in candidates:
         url = f"https://api.powerbi.com/v1.0/myorg/groups/{gid}/datasets/{dataset_id}"
         try:
-            r = requests.get(url, headers=headers, timeout=15)
+            r = _request("GET", url, headers=headers)
             logger.log(_api_level(), "PBI: probe dataset %s → HTTP %s (group %s)", dataset_id, r.status_code, gid)
             if r.status_code == 200:
                 return gid
-            if not r.ok:
-                logger.debug("PBI: probe body (group %s): %s", gid, _short(r.text))
         except requests.RequestException as exc:
             logger.debug("PBI: probe dataset %s falhou no group %s — %s", dataset_id, gid, exc)
     return None
@@ -280,11 +363,9 @@ def _resolve_dataset_ids(report_id: str, report_group_id: str, headers: dict) ->
 
     info_url = f"https://api.powerbi.com/v1.0/myorg/groups/{report_group_id}/reports/{report_id}"
     try:
-        logger.log(_api_level(), "PBI: resolve dataset via %s", info_url)
-        ir = requests.get(info_url, headers=headers, timeout=15)
+        ir = _request("GET", info_url, headers=headers)
         logger.log(_api_level(), "PBI: reports/{id} HTTP %s", ir.status_code)
         if ir.status_code != 200:
-            logger.debug("PBI: reports/{id} body: %s", _short(ir.text))
             ir.raise_for_status()
         js = ir.json() or {}
         dataset_id = js.get("datasetId")
@@ -326,10 +407,10 @@ def get_report_last_refresh_time_rt(report_id: str, report_group_id: str) -> Opt
     """
     access_token = get_powerbi_access_token()
     if not access_token:
-        logger.error("RT: sem access_token.")
+        logger.error("RT: sem_access_token.")
         return None
 
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = _auth_headers(access_token)
 
     # Resolver dataset via endpoint direto (com cache)
     ids = _resolve_dataset_ids(report_id, report_group_id, headers)
@@ -337,86 +418,45 @@ def get_report_last_refresh_time_rt(report_id: str, report_group_id: str) -> Opt
         return None
     dataset_id, ds_group_id = ids
 
-    # Buscar refreshes do dataset e pegar o mais recente
+    # Buscar refreshes do dataset e pegar o mais recente (com 1 retry em ReadTimeout)
+    ref_url = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/refreshes?$top=50"
     try:
-        ref_url = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/refreshes?$top=50"
-        logger.log(_api_level(), "RT: GET refreshes %s", ref_url)
-        rr = requests.get(ref_url, headers=headers, timeout=15)
-        logger.log(_api_level(), "RT: refreshes HTTP %s", rr.status_code)
-        if not rr.ok:
-            logger.debug("RT: refreshes body: %s", _short(rr.text))
-        rr.raise_for_status()
-        newest = _pick_newest_refresh_dt((rr.json() or {}).get("value", []))
-        if not newest:
+        rr = _request("GET", ref_url, headers=headers)
+    except requests.ReadTimeout:
+        logger.warning("RT: timeout lendo refreshes — tentando novamente com timeout maior.")
+        try:
+            rr = _request("GET", ref_url, headers=headers, timeout=DEFAULT_TIMEOUT * 2)
+        except Exception as e:
+            logger.error("RT: erro buscando refreshes (retry) – %s", e)
             return None
-
-        if not settings.USE_TZ:
-            try:
-                local_tz = timezone.get_current_timezone()
-                return timezone.localtime(newest, local_tz).replace(tzinfo=None)
-            except Exception:
-                return None
-        return newest
     except Exception as e:
         logger.error("RT: erro buscando refreshes – %s", e, exc_info=True)
         return None
 
+    logger.log(_api_level(), "RT: refreshes HTTP %s", rr.status_code)
+    if not rr.ok:
+        return None
+
+    try:
+        newest = _pick_newest_refresh_dt((rr.json() or {}).get("value", []))
+    except Exception:
+        logger.debug("RT: payload inválido ao ler refreshes.")
+        newest = None
+
+    if not newest:
+        return None
+
+    if not settings.USE_TZ:
+        try:
+            local_tz = timezone.get_current_timezone()
+            return timezone.localtime(newest, local_tz).replace(tzinfo=None)
+        except Exception:
+            return None
+    return newest
+
 
 # ════════════════════════════════════════
 # 6) REFRESH – dataset
-# ════════════════════════════════════════
-
-def trigger_dataset_refresh(report_id: str, report_group_id: str, refresh_type: str = "Full") -> tuple[bool, str]:
-    """
-    Dispara o refresh do dataset do report.
-    Retorna (ok, detalhe).
-    """
-    access_token = get_powerbi_access_token()
-    if not access_token:
-        return False, "sem_access_token"
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-    }
-
-    ids = _resolve_dataset_ids(report_id, report_group_id, headers)
-    if not ids:
-        return False, "dataset_nao_encontrado"
-    dataset_id, ds_group_id = ids
-
-    url = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/refreshes"
-    payload = {"type": refresh_type, "notifyOption": "NoNotification"}
-    logger.log(_api_level(), "PBI: POST refresh dataset url=%s payload=%s", url, payload)
-
-    try:
-        r = requests.post(url, headers=headers, json=payload, timeout=15)
-        logger.log(_api_level(), "PBI: refresh dataset HTTP %s", r.status_code)
-        if r.status_code in (200, 202):
-            logger.info(
-                "PBI: refresh acionado para dataset %s (group %s) [%s]",
-                dataset_id, ds_group_id, refresh_type
-            )
-            return True, "accepted"
-        try:
-            j = r.json()
-        except Exception:
-            j = {}
-
-        code, msg = _parse_service_error(j)
-        detail = f"http_{r.status_code}"
-        if code:
-            detail += f":{code}"
-        if msg:
-            detail += f" — {msg[:300]}"  # limita tamanho
-        logger.error("PBI: refresh dataset falhou %s — %s", r.status_code, j)
-        return False, detail
-    except requests.RequestException as exc:
-        logger.error("PBI: erro POST refresh dataset — %s", exc)
-        return False, "request_exception"
-
-
-# ════════════════════════════════════════
-# 7) ERROS DO SERVIÇO – parsing (opcional)
 # ════════════════════════════════════════
 
 def _parse_service_error(raw: dict) -> tuple[str, str]:
@@ -481,20 +521,90 @@ def _parse_service_error(raw: dict) -> tuple[str, str]:
 
     return code, " — ".join(msg_parts).strip()
 
+def trigger_dataset_refresh(report_id: str, report_group_id: str, refresh_type: str = "Full") -> tuple[bool, str]:
+    """
+    Dispara o refresh do dataset do report.
+    Retorna (ok, detalhe).
+    """
+    access_token = get_powerbi_access_token()
+    if not access_token:
+        return False, "sem_access_token"
+    headers = _auth_headers(access_token, {"Content-Type": "application/json"})
+
+    ids = _resolve_dataset_ids(report_id, report_group_id, headers)
+    if not ids:
+        return False, "dataset_nao_encontrado"
+    dataset_id, ds_group_id = ids
+
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/refreshes"
+    payload = {"type": refresh_type, "notifyOption": "NoNotification"}
+    logger.log(_api_level(), "PBI: POST refresh dataset url=%s payload=%s", url, payload)
+
+    try:
+        r = _request("POST", url, json_body=payload, headers=headers)
+        if r.status_code == 401:
+            # refresh 1x o token e tenta novamente
+            access_token2 = get_powerbi_access_token()
+            if access_token2:
+                r = _request("POST", url, json_body=payload, headers=_auth_headers(access_token2, {"Content-Type": "application/json"}))
+        if r.status_code in (200, 202):
+            logger.info(
+                "PBI: refresh acionado para dataset %s (group %s) [%s]",
+                dataset_id, ds_group_id, refresh_type
+            )
+            return True, "accepted"
+        try:
+            j = r.json()
+        except Exception:
+            j = {}
+
+        code, msg = _parse_service_error(j)
+        detail = f"http_{r.status_code}"
+        if code:
+            detail += f":{code}"
+        if msg:
+            detail += f" — {msg[:300]}"  # limita tamanho
+        logger.error("PBI: refresh dataset falhou %s — %s", r.status_code, j)
+        return False, detail
+    except requests.RequestException as exc:
+        logger.error("PBI: erro POST refresh dataset — %s", exc)
+        return False, "request_exception"
+
 
 # ════════════════════════════════════════
-# 8) STATUS DO REFRESH – checagem do último job (opcional)
+# 7) STATUS DO REFRESH – checagem do último job (opcional)
 # ════════════════════════════════════════
 
-def get_latest_refresh_status(report_id: str, report_group_id: str) -> dict:
+def _infer_refresh_type(rec: dict) -> str:
+    """
+    Normaliza um rótulo amigável de 'refresh_type' para o front-end.
+    Preferências:
+      - requestType: Scheduled | OnDemand | ViaApi (varia por tenant)
+      - refreshType: idem em alguns payloads
+      - type: Full | Incremental | Calculate (não é origem, mas ajuda)
+    """
+    req = (rec.get("requestType") or rec.get("refreshType") or "").strip().lower()
+    if req in {"scheduled"}:
+        return "scheduled"
+    if req in {"ondemand", "on_demand"}:
+        return "manual"
+    if req in {"viaapi", "api"}:
+        return "api"
+    typ = (rec.get("type") or "").strip().lower()
+    # se vier só o "type" (ex.: Full/Incremental), devolve-o
+    return typ or (req or "")
+
+def get_latest_refresh_status(report_id: str, report_group_id: str, *, after_epoch: Optional[int] = None) -> dict:
     """
     Lê o último refresh do dataset do report e retorna um resumo.
+    Se after_epoch for informado, e o último registro for mais antigo que esse
+    instante (com pequena tolerância negativa), retorna status "Unknown".
     """
     access_token = get_powerbi_access_token()
     if not access_token:
         return {"ok": False, "error": "sem_access_token"}
 
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = _auth_headers(access_token)
 
     ids = _resolve_dataset_ids(report_id, report_group_id, headers)
     if not ids:
@@ -504,12 +614,10 @@ def get_latest_refresh_status(report_id: str, report_group_id: str) -> dict:
     url = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/refreshes?$top=1"
 
     try:
-        logger.log(_api_level(), "PBI: latest refresh GET %s", url)
-        r = requests.get(url, headers=headers, timeout=15)
+        r = _request("GET", url, headers=headers)
         logger.log(_api_level(), "PBI: latest refresh HTTP %s", r.status_code)
         if not r.ok:
-            logger.debug("PBI: latest refresh body: %s", _short(r.text))
-        r.raise_for_status()
+            return {"ok": False, "error": f"http_{r.status_code}"}
         data = r.json() or {}
         rows = data.get("value") or []
         last = rows[0] if rows else {}
@@ -517,6 +625,27 @@ def get_latest_refresh_status(report_id: str, report_group_id: str) -> dict:
         status = (last.get("status") or "Unknown").strip()
         start_dt = _parse_pbi_dt_to_utc(last.get("startTime"))
         end_dt = _parse_pbi_dt_to_utc(last.get("endTime"))
+
+        # Ajuste: label de tipo de refresh para o front
+        refresh_type = _infer_refresh_type(last)
+
+        # Ajuste: filtro opcional por after_epoch (evita confundir com execuções antigas)
+        if after_epoch is not None:
+            guard_neg = int(getattr(settings, "POWERBI_REFRESH_START_GUARD_NEG_S", 10))
+            base = max(0, int(after_epoch) - guard_neg)
+            start_ok = bool(start_dt and int(start_dt.timestamp()) >= base)
+            end_ok = bool(end_dt and int(end_dt.timestamp()) >= base)
+            if not (start_ok or end_ok):
+                # Não qualifica como "o refresh que estamos acompanhando"
+                return {
+                    "ok": True,
+                    "status": "Unknown",
+                    "start_epoch": None,
+                    "end_epoch": None,
+                    "error_code": "",
+                    "error_message": "",
+                    "refresh_type": "",
+                }
 
         error_code, error_message = _parse_service_error(last)
 
@@ -527,6 +656,7 @@ def get_latest_refresh_status(report_id: str, report_group_id: str) -> dict:
             "end_epoch": int(end_dt.timestamp()) if end_dt else None,
             "error_code": error_code,
             "error_message": error_message,
+            "refresh_type": refresh_type,
         }
     except requests.RequestException as exc:
         logger.error("PBI: erro lendo refreshes — %s", exc)
@@ -537,7 +667,7 @@ def get_latest_refresh_status(report_id: str, report_group_id: str) -> dict:
 
 
 # ════════════════════════════════════════
-# 9) CASCATA – descoberta de dataflows (Gen1-friendly) e refresh
+# 8) CASCATA – descoberta de dataflows (Gen1-friendly) e refresh
 # ════════════════════════════════════════
 
 def _dedup(seq: Iterable[dict], key=lambda x: (x.get("group_id"), x.get("dataflow_id"))) -> list[dict]:
@@ -670,9 +800,8 @@ def _list_upstream_datasets(dataset_id: str, ds_group_id: str, headers: dict) ->
     """Lista datasets “pais” (upstream) de um dataset (nem todo tenant suporta)."""
     url = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/upstreamDatasets"
     try:
-        r = requests.get(url, headers=headers, timeout=20)
+        r = _request("GET", url, headers=headers)
         logger.log(_api_level(), "PBI: upstreamDatasets HTTP %s (group %s/dataset %s)", r.status_code, ds_group_id, dataset_id)
-        logger.debug("PBI: upstreamDatasets body: %s", _short(r.text))
         if r.status_code == 404 or not r.ok:
             return []
         js = r.json() or {}
@@ -687,12 +816,11 @@ def _list_upstream_datasets(dataset_id: str, ds_group_id: str, headers: dict) ->
 def _list_workspace_dataflows(group_id: str, headers: dict):
     url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/dataflows"
     try:
-        r = requests.get(url, headers=headers, timeout=20)
+        r = _request("GET", url, headers=headers)
         logger.log(_api_level(), "PBI: list dataflows HTTP %s (group %s)", r.status_code, group_id)
         if r.status_code == 403:
             return {"ok": False, "error": "forbidden", "status": 403}
         if not r.ok:
-            logger.debug("PBI: list dataflows body: %s", _short(r.text))
             return {"ok": False, "error": f"http_{r.status_code}", "status": r.status_code}
         js = r.json() or {}
         vals = js.get("value") or []
@@ -712,7 +840,7 @@ def list_workspace_dataflows(group_id: str):
     if not access_token:
         logger.error("PBI: list_workspace_dataflows – sem_access_token")
         return {"ok": False, "error": "sem_access_token", "status": 401}
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = _auth_headers(access_token)
     return _list_workspace_dataflows(group_id, headers)
 
 # --------- Hints por nome (settings) -------------
@@ -779,9 +907,8 @@ def _discover_upstream_dataflows(dataset_id: str, ds_group_id: str, headers: dic
     # 1) upstreamDataflows
     url_up = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/upstreamDataflows"
     try:
-        ru = requests.get(url_up, headers=headers, timeout=20)
+        ru = _request("GET", url_up, headers=headers)
         logger.log(_api_level(), "PBI: upstreamDataflows HTTP %s (group %s/dataset %s)", ru.status_code, ds_group_id, dataset_id)
-        logger.debug("PBI: upstreamDataflows body: %s", _short(ru.text))
         if ru.ok:
             out = _extract_dataflows_from_upstream(ru.json() or {}, ds_group_id)
             if out:
@@ -792,9 +919,8 @@ def _discover_upstream_dataflows(dataset_id: str, ds_group_id: str, headers: dic
     # 2) lineage
     url_lineage = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/lineage"
     try:
-        rl = requests.get(url_lineage, headers=headers, timeout=20)
+        rl = _request("GET", url_lineage, headers=headers)
         logger.log(_api_level(), "PBI: lineage HTTP %s (workspace %s)", rl.status_code, ds_group_id)
-        logger.debug("PBI: lineage body: %s", _short(rl.text))
         if rl.ok:
             ups = _extract_dataflows_from_lineage(rl.json() or {}, dataset_id, ds_group_id)
             if ups:
@@ -805,9 +931,8 @@ def _discover_upstream_dataflows(dataset_id: str, ds_group_id: str, headers: dic
     # 3) datasources
     url_ds = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{dataset_id}/datasources"
     try:
-        rds = requests.get(url_ds, headers=headers, timeout=20)
+        rds = _request("GET", url_ds, headers=headers)
         logger.log(_api_level(), "PBI: datasources HTTP %s (group %s/dataset %s)", rds.status_code, ds_group_id, dataset_id)
-        logger.debug("PBI: datasources body: %s", _short(rds.text))
         if rds.ok:
             ups = _extract_dataflows_from_datasources(rds.json() or {}, ds_group_id)
             if ups:
@@ -821,9 +946,8 @@ def _discover_upstream_dataflows(dataset_id: str, ds_group_id: str, headers: dic
     for p in parents:
         try:
             url_p = f"https://api.powerbi.com/v1.0/myorg/groups/{ds_group_id}/datasets/{p}/datasources"
-            rp = requests.get(url_p, headers=headers, timeout=20)
+            rp = _request("GET", url_p, headers=headers)
             logger.log(_api_level(), "PBI: datasources(pai) HTTP %s (group %s/dataset %s)", rp.status_code, ds_group_id, p)
-            logger.debug("PBI: datasources(pai) body: %s", _short(rp.text))
             if rp.ok:
                 agg.extend(_extract_dataflows_from_datasources(rp.json() or {}, ds_group_id))
         except requests.RequestException as exc:
@@ -899,7 +1023,7 @@ def find_upstream_dataflows_for_report(report_id: str, report_group_id: str) -> 
     if not access_token:
         logger.error("PBI: find_upstream_dataflows – sem_access_token")
         return []
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = _auth_headers(access_token)
 
     ids = _resolve_dataset_ids(report_id, report_group_id, headers)
     if not ids:
@@ -926,17 +1050,18 @@ def trigger_dataflow_refresh(group_id: str, dataflow_id: str) -> tuple[bool, str
     access_token = get_powerbi_access_token()
     if not access_token:
         return False, "sem_access_token"
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-    }
+    headers = _auth_headers(access_token, {"Content-Type": "application/json"})
     group_id = str(group_id).lower()
     dataflow_id = str(dataflow_id).lower()
 
     url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/dataflows/{dataflow_id}/refreshes"
     logger.log(_api_level(), "PBI: POST refresh dataflow url=%s", url)
     try:
-        r = requests.post(url, headers=headers, json={}, timeout=20)
+        r = _request("POST", url, json_body={}, headers=headers)
+        if r.status_code == 401:
+            access_token2 = get_powerbi_access_token()
+            if access_token2:
+                r = _request("POST", url, json_body={}, headers=_auth_headers(access_token2, {"Content-Type": "application/json"}))
         logger.log(_api_level(), "PBI: refresh dataflow HTTP %s", r.status_code)
         if r.status_code in (200, 202):
             logger.info("PBI: refresh acionado para dataflow %s (group %s)", dataflow_id, group_id)
@@ -946,6 +1071,17 @@ def trigger_dataflow_refresh(group_id: str, dataflow_id: str) -> tuple[bool, str
         except Exception:
             j = {}
         code, msg = _parse_service_error(j)
+
+        # ➜ Melhorias:
+        # - 400 CdsaModelIsAlreadyRefreshing conta como "ok"
+        if code == "CdsaModelIsAlreadyRefreshing":
+            logger.info("PBI: dataflow %s já estava em refresh — tratando como aceito.", dataflow_id)
+            return True, "already_in_progress"
+        # - 403 CdsaWorkloadDisabled: detalhe explícito
+        if code == "CdsaWorkloadDisabled":
+            logger.error("PBI: capacity sem workload de dataflows habilitada.")
+            return False, f"http_{r.status_code}:{code} — {msg[:300] if msg else ''}"
+
         detail = f"http_{r.status_code}"
         if code:
             detail += f":{code}"
@@ -957,15 +1093,233 @@ def trigger_dataflow_refresh(group_id: str, dataflow_id: str) -> tuple[bool, str
         logger.error("PBI: erro POST refresh dataflow — %s", exc)
         return False, "request_exception"
 
-def cascade_refresh(report_id: str, report_group_id: str, refresh_type: str = "Full") -> dict:
+
+# --------- Espera por dataflows (polling) -------------
+# Estados terminais/progresso (inclui variações vistas na prática)
+_DF_TERMINAL = {"Success", "Succeeded", "Completed", "Failed", "Cancelled"}
+_DF_PROGRESS = {"InProgress", "Running", "Queued", "NotStarted", ""}
+
+def _canon_df_status(s: str) -> str:
+    """
+    Normaliza variações de status vindas da API (Gen1/Gen2):
+    Success/Succeeded/Completed → Success; Running → InProgress; etc.
+    """
+    key = (s or "").replace(" ", "").lower()
+    mapping = {
+        "success": "Success",
+        "succeeded": "Success",
+        "completed": "Success",
+        "failed": "Failed",
+        "error": "Failed",
+        "cancelled": "Cancelled",
+        "canceled": "Cancelled",
+        "inprogress": "InProgress",
+        "running": "InProgress",
+        "queued": "Queued",
+        "notstarted": "NotStarted",
+    }
+    return mapping.get(key, s or "")
+
+def _get_latest_dataflow_tx(group_id: str, dataflow_id: str, headers: dict) -> dict:
+    """
+    Lê o último transaction do dataflow e retorna {'status','startTime','endTime'} (strings).
+    """
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/dataflows/{dataflow_id}/transactions?$top=1"
+    try:
+        r = _request("GET", url, headers=headers)
+        logger.log(_api_level(), "PBI: dataflow tx HTTP %s (%s/%s)", r.status_code, group_id, dataflow_id)
+        if not r.ok:
+            return {"status": "", "startTime": "", "endTime": ""}
+        rows = (r.json() or {}).get("value") or []
+        last = rows[0] if rows else {}
+        return {
+            "status": (last.get("status") or "").strip(),
+            "startTime": (last.get("startTime") or "").strip(),
+            "endTime": (last.get("endTime") or "").strip(),
+        }
+    except requests.RequestException as exc:
+        logger.debug("PBI: dataflow tx request_exception — %s", exc)
+        return {"status": "", "startTime": "", "endTime": ""}
+
+def _to_dt(s: str) -> Optional[timezone.datetime]:
+    if not s:
+        return None
+    d = parse_datetime(s)
+    if not d:
+        return None
+    return d if timezone.is_aware(d) else d.replace(tzinfo=dt.timezone.utc)
+
+def _to_utc_naive_any(d: Optional[timezone.datetime]) -> Optional[dt.datetime]:
+    """
+    Converte qualquer datetime (aware ou naive) para UTC 'naive'.
+    - Se for aware, converte para UTC e zera tzinfo.
+    - Se for naive, assume timezone atual do Django (local) antes de converter.
+    """
+    if not d:
+        return None
+    if timezone.is_aware(d):
+        aware = d
+    else:
+        try:
+            aware = timezone.make_aware(d, timezone.get_current_timezone())
+        except Exception:
+            # Fallback extremo: trata como UTC
+            aware = d.replace(tzinfo=dt.timezone.utc)
+    return aware.astimezone(dt.timezone.utc).replace(tzinfo=None)
+
+def _wait_for_dataflows(
+    upstream: list[dict],
+    headers: dict,
+    *,
+    timeout_s: int = 1800,
+    poll_s: int = 15,
+    started_after: Optional[timezone.datetime] = None,
+    prev_tx_end: Optional[dict[tuple[str, str], timezone.datetime]] = None,
+) -> list[dict]:
+    """
+    Espera todos os dataflows alcançarem estado terminal. Retorna lista com status final por DF:
+    [{'group_id', 'dataflow_id', 'status', 'startTime', 'endTime'}]
+
+    Regras atualizadas (anti-match de execução antiga):
+      - Um transaction é considerado "nosso" somente se:
+          (start >= started_after - START_GUARD_NEG_S  OU  end >= started_after - START_GUARD_NEG_S)
+        E também (quando houver linha de base de execução anterior)
+          (start >= prev_end + END_GUARD_POS_S  OU  end >= prev_end + END_GUARD_POS_S).
+
+      - Pequeno atraso inicial para o serviço materializar o transaction:
+          settings.POWERBI_DF_CREATE_TX_DELAY_S (default 2s).
+
+    Settings opcionais:
+      POWERBI_DF_START_GUARD_NEG_S = 10   # tolera até 10s “antes” do started_after
+      POWERBI_DF_END_GUARD_POS_S   = 1    # exige > último end conhecido + 1s
+      POWERBI_DF_CREATE_TX_DELAY_S = 2    # aguarda 2s antes do primeiro GET
+    """
+    start_guard_neg_s = int(getattr(settings, "POWERBI_DF_START_GUARD_NEG_S", 10))
+    end_guard_pos_s   = int(getattr(settings, "POWERBI_DF_END_GUARD_POS_S", 1))
+    create_delay_s    = int(getattr(settings, "POWERBI_DF_CREATE_TX_DELAY_S", 2))
+
+    # Base started_after normalizada para UTC naive
+    started_after_base_utc = None
+    if started_after:
+        if timezone.is_naive(started_after):
+            try:
+                started_after = timezone.make_aware(started_after, timezone.get_current_timezone())
+            except Exception:
+                started_after = started_after.replace(tzinfo=dt.timezone.utc)
+        started_after_base_utc = _to_utc_naive_any(started_after - dt.timedelta(seconds=start_guard_neg_s))
+
+    # Mapa de último end conhecido (UTC naive) por DF
+    prev_end_map_utc: dict[tuple[str, str], Optional[dt.datetime]] = {}
+    for u in upstream:
+        k = (u["group_id"], u["dataflow_id"])
+        p = (prev_tx_end or {}).get(k)
+        prev_end_map_utc[k] = _to_utc_naive_any(p) if p else None
+
+    logger.debug(
+        "DF-WAIT: guards start_neg=%ss end_pos=%ss create_delay=%ss | started_after_base_utc=%s",
+        start_guard_neg_s, end_guard_pos_s, create_delay_s, started_after_base_utc
+    )
+
+    if create_delay_s > 0:
+        time.sleep(create_delay_s)
+
+    deadline = time.time() + int(timeout_s)
+    status_map: dict[tuple[str, str], dict] = {(u["group_id"], u["dataflow_id"]): {"status": ""} for u in upstream}
+
+    def _qualifies(tx: dict, key: tuple[str, str]) -> bool:
+        sdt = _to_dt(tx.get("startTime") or "")
+        edt = _to_dt(tx.get("endTime") or "")
+        sdt_n = _to_utc_naive_any(sdt)
+        edt_n = _to_utc_naive_any(edt)
+
+        cond_started_after = True
+        if started_after_base_utc is not None:
+            cond_started_after = (sdt_n and sdt_n >= started_after_base_utc) or (edt_n and edt_n >= started_after_base_utc)
+
+        cond_prev = True
+        base_prev = prev_end_map_utc.get(key)
+        if base_prev:
+            edge = base_prev + dt.timedelta(seconds=end_guard_pos_s)
+            cond_prev = (sdt_n and sdt_n >= edge) or (edt_n and edt_n >= edge)
+
+        return bool(cond_started_after and cond_prev)
+
+    all_done = False
+    while time.time() < deadline:
+        all_done = True
+        for u in upstream:
+            k = (u["group_id"], u["dataflow_id"])
+            tx = _get_latest_dataflow_tx(u["group_id"], u["dataflow_id"], headers)
+            st = _canon_df_status(tx.get("status") or "")
+            s_raw = tx.get("startTime") or ""
+            e_raw = tx.get("endTime") or ""
+
+            if not _qualifies(tx, k):
+                logger.debug(
+                    "DF-WAIT: ignorando tx não qualificado %s/%s status=%s start=%s end=%s "
+                    "(started_after_base=%s prev_end=%s +%ss)",
+                    u["group_id"], u["dataflow_id"], st, s_raw, e_raw,
+                    started_after_base_utc, prev_end_map_utc.get(k), end_guard_pos_s
+                )
+                all_done = False
+                continue
+
+            status_map[k] = {**u, **tx, "status": st}
+            logger.debug(
+                "DF-WAIT: tx atual %s/%s status=%s start=%s end=%s (qualificado)",
+                u["group_id"], u["dataflow_id"], st, s_raw, e_raw
+            )
+
+            if st not in _DF_TERMINAL:
+                all_done = False
+
+        if all_done:
+            logger.info("DF-WAIT: todos os dataflows atingiram estado terminal.")
+            break
+        time.sleep(int(poll_s))
+
+    if not all_done:
+        logger.warning("DF-WAIT: timeout atingido após %ss — seguindo para o dataset mesmo assim.", int(timeout_s))
+
+    # formata saída
+    out = []
+    for u in upstream:
+        k = (u["group_id"], u["dataflow_id"])
+        rec = status_map.get(k, {**u, "status": ""})
+        if {"status", "startTime", "endTime"} <= rec.keys():
+            out.append(rec)
+        else:
+            out.append({**u, "status": ""})
+    return out
+
+
+def cascade_refresh(
+    report_id: str,
+    report_group_id: str,
+    refresh_type: str = "Full",
+    *,
+    wait_for_dataflows: bool = False,
+    df_timeout_s: int = 1800,
+    poll_every_s: int = 15,
+    fail_on_dataflow_error: bool = True,
+) -> dict:
     """
     Dispara refresh dos dataflows upstream (se houver) e depois do dataset.
-    NÃO aguarda conclusão; apenas dispara e devolve um resumo do acionamento.
+    Por padrão NÃO aguarda conclusão (compatibilidade). Se wait_for_dataflows=True, só dispara
+    o dataset após todos os dataflows chegarem a estado terminal.
+
+    Retorno:
+      {
+        "ok": True|False,  # ← reflete o resultado do dataset e, se aguardado, o status dos dataflows
+        "dataflows": [{"group_id","dataflow_id","ok","detail"}],
+        "dataflows_status": [{"group_id","dataflow_id","status","startTime","endTime"}],  # vazio se não aguardou
+        "dataset": {"ok": bool, "detail": str}
+      }
     """
     access_token = get_powerbi_access_token()
     if not access_token:
         return {"ok": False, "error": "sem_access_token"}
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = _auth_headers(access_token)
 
     ids = _resolve_dataset_ids(report_id, report_group_id, headers)
     if not ids:
@@ -981,15 +1335,170 @@ def cascade_refresh(report_id: str, report_group_id: str, refresh_type: str = "F
     else:
         logger.debug("PBI: upstream via UI → %s", [f"{u['group_id']}/{u['dataflow_id']}" for u in upstream])
 
+    # 1) Dispara todos os dataflows
     results = []
+
+    # tolerância mínima para evitar race entre nosso "agora" e o carimbo do serviço
+    _start_tol = int(getattr(settings, "POWERBI_DF_START_TOLERANCE_S", 5))
+    started_after = timezone.now() - dt.timedelta(seconds=_start_tol)
+    if timezone.is_naive(started_after):
+        try:
+            started_after = timezone.make_aware(started_after, timezone.get_current_timezone())
+        except Exception:
+            started_after = started_after.replace(tzinfo=dt.timezone.utc)
+
+    # Baseline do último transaction *antes* do POST (anti-match de execuções antigas)
+    prev_tx_end: dict[tuple[str, str], timezone.datetime] = {}
+    for u in upstream:
+        prev_tx = _get_latest_dataflow_tx(u["group_id"], u["dataflow_id"], headers)
+        end_dt = _to_dt(prev_tx.get("endTime") or "") or _to_dt(prev_tx.get("startTime") or "")
+        if end_dt:
+            prev_tx_end[(u["group_id"], u["dataflow_id"])] = end_dt
+
     for u in upstream:
         ok, detail = trigger_dataflow_refresh(u["group_id"], u["dataflow_id"])
         results.append({"group_id": u["group_id"], "dataflow_id": u["dataflow_id"], "ok": ok, "detail": detail})
 
+    # 2) (Opcional) esperar os dataflows concluírem
+    df_status: list[dict] = []
+    if wait_for_dataflows and upstream:
+        # Atalho: se nenhum DF foi aceito e todos falharam por workload desabilitada, não faz sentido esperar
+        any_ok = any(r.get("ok") for r in results)
+        all_wd = (not any_ok) and all(
+            (isinstance(r.get("detail"), str) and "CdsaWorkloadDisabled" in r["detail"])
+            for r in results
+        )
+        if all_wd:
+            logger.warning("PBI: todos dataflows com workload desabilitada — pulando espera e seguindo para dataset.")
+        else:
+            df_status = _wait_for_dataflows(
+                upstream,
+                headers,
+                timeout_s=df_timeout_s,
+                poll_s=poll_every_s,
+                started_after=started_after,
+                prev_tx_end=prev_tx_end,  # ← linha de base para garantir transaction *novo*
+            )
+            if fail_on_dataflow_error and any(d.get("status") in {"Failed", "Cancelled"} for d in df_status):
+                return {
+                    "ok": False,
+                    "dataflows": results,
+                    "dataflows_status": df_status,
+                    "dataset": {"ok": False, "detail": "skipped_due_to_dataflow_error"},
+                }
+
+    # 3) Dispara o dataset
     d_ok, d_detail = trigger_dataset_refresh(report_id, report_group_id, refresh_type=refresh_type)
 
     return {
-        "ok": True,
+        "ok": bool(d_ok),  # ← importante p/ o front decidir 202/400 (views)
         "dataflows": results,
+        "dataflows_status": df_status,
         "dataset": {"ok": d_ok, "detail": d_detail},
     }
+
+
+# ════════════════════════════════════════
+# 9) Utilitários extras para o endpoint de status unificado
+# ════════════════════════════════════════
+
+def get_dataset_refreshes(*, group_id: str, dataset_id: str, after_epoch: Optional[int] = None, top: int = 5) -> list[dict]:
+    """
+    Retorna os últimos refreshes do DATASET (lista de dicts "value-like").
+    Normaliza times em epoch e inclui o label 'refresh_type'.
+    """
+    access_token = get_powerbi_access_token()
+    if not access_token:
+        return []
+    headers = _auth_headers(access_token)
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/datasets/{dataset_id}/refreshes?$top={int(top)}"
+    try:
+        r = _request("GET", url, headers=headers)
+        if not r.ok:
+            return []
+        vals = (r.json() or {}).get("value") or []
+        out: list[dict] = []
+        base = int(after_epoch or 0)
+        guard_neg = int(getattr(settings, "POWERBI_REFRESH_START_GUARD_NEG_S", 10))
+        base_cmp = max(0, base - guard_neg)
+
+        for it in vals:
+            st = (it.get("status") or "").strip()
+            sdt = _parse_pbi_dt_to_utc(it.get("startTime"))
+            edt = _parse_pbi_dt_to_utc(it.get("endTime"))
+            se = int(sdt.timestamp()) if sdt else None
+            ee = int(edt.timestamp()) if edt else None
+            if base:
+                if not ((se and se >= base_cmp) or (ee and ee >= base_cmp)):
+                    # ignora execuções antigas se after_epoch foi informado
+                    continue
+            out.append({
+                **it,
+                "status": st,
+                "start_epoch": se,
+                "end_epoch": ee,
+                "refresh_type": _infer_refresh_type(it),
+            })
+        return out
+    except requests.RequestException:
+        return []
+
+def get_dataset_last_update_epoch(*, group_id: str, dataset_id: str) -> Optional[int]:
+    """
+    Epoch do último refresh *concluído* do dataset.
+    """
+    access_token = get_powerbi_access_token()
+    if not access_token:
+        return None
+    headers = _auth_headers(access_token)
+    url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/datasets/{dataset_id}/refreshes?$top=50"
+    try:
+        r = _request("GET", url, headers=headers)
+        if not r.ok:
+            return None
+        dt_last = _pick_newest_refresh_dt((r.json() or {}).get("value", []))
+        return int(dt_last.timestamp()) if dt_last else None
+    except requests.RequestException:
+        return None
+
+def get_dataflow_refreshes(*, group_id: str, dataset_id: str, after_epoch: Optional[int] = None, report_id: str = "") -> list[dict]:
+    """
+    Descobre dataflows *upstream* do dataset e retorna um snapshot dos últimos transactions
+    (útil para exibir “in progress (via PowerBI Web)” mesmo antes do dataset).
+    """
+    access_token = get_powerbi_access_token()
+    if not access_token:
+        return []
+    headers = _auth_headers(access_token)
+
+    # Descoberta de upstreams (não depende de report_id; passamos vazio só para hints por nome)
+    ups = _discover_upstream_dataflows(dataset_id, group_id, headers, report_id=report_id)
+    if not ups:
+        return []
+
+    base = int(after_epoch or 0)
+    guard_neg = int(getattr(settings, "POWERBI_DF_START_GUARD_NEG_S", 10))
+    base_cmp = max(0, base - guard_neg)
+
+    out: list[dict] = []
+    for u in ups:
+        tx = _get_latest_dataflow_tx(u["group_id"], u["dataflow_id"], headers)
+        st = _canon_df_status(tx.get("status") or "")
+        sdt = _to_dt(tx.get("startTime") or "")
+        edt = _to_dt(tx.get("endTime") or "")
+        se = int(sdt.timestamp()) if sdt else None
+        ee = int(edt.timestamp()) if edt else None
+        if base:
+            if not ((se and se >= base_cmp) or (ee and ee >= base_cmp)):
+                # ignora execuções antigas se after_epoch foi informado
+                pass  # ainda incluiremos para sinalizar “não qualificado”, mas sem filtrar duro
+        out.append({
+            "kind": "dataflow",
+            "group_id": u["group_id"],
+            "dataflow_id": u["dataflow_id"],
+            "status": st or "",
+            "start_epoch": se,
+            "end_epoch": ee,
+            "refresh_type": "scheduled",  # DF não expõe ViaApi/Scheduled de forma consistente; tratamos como “do serviço”
+        })
+    return out
